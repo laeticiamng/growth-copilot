@@ -15,6 +15,8 @@ import { CROProvider } from "@/hooks/useCRO";
 import { LocalSEOProvider } from "@/hooks/useLocalSEO";
 import { CompetitorsProvider } from "@/hooks/useCompetitors";
 import { ApprovalsProvider } from "@/hooks/useApprovals";
+import { SocialProvider } from "@/hooks/useSocial";
+import { LifecycleProvider } from "@/hooks/useLifecycle";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -71,8 +73,10 @@ function App() {
                         <LocalSEOProvider>
                           <CompetitorsProvider>
                             <ApprovalsProvider>
-                              <TooltipProvider>
-                                <Toaster />
+                              <SocialProvider>
+                                <LifecycleProvider>
+                                  <TooltipProvider>
+                                    <Toaster />
                                 <Sonner />
                                 <BrowserRouter>
                                   <Routes>
@@ -116,10 +120,12 @@ function App() {
                                     
                                     <Route path="*" element={<NotFound />} />
                                   </Routes>
-                                </BrowserRouter>
-                              </TooltipProvider>
-                            </ApprovalsProvider>
-                          </CompetitorsProvider>
+                                  </BrowserRouter>
+                                </TooltipProvider>
+                              </LifecycleProvider>
+                            </SocialProvider>
+                          </ApprovalsProvider>
+                        </CompetitorsProvider>
                         </LocalSEOProvider>
                       </CROProvider>
                     </AdsProvider>
