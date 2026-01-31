@@ -2890,8 +2890,7 @@ export type Database = {
           max_concurrent_runs: number
           max_crawls_per_day: number
           max_pages_per_crawl: number
-          monthly_ai_budget: number
-          monthly_ai_spent: number
+          monthly_tokens_used: number | null
           plan_tier: string
           requests_this_minute: number
           updated_at: string
@@ -2908,8 +2907,7 @@ export type Database = {
           max_concurrent_runs?: number
           max_crawls_per_day?: number
           max_pages_per_crawl?: number
-          monthly_ai_budget?: number
-          monthly_ai_spent?: number
+          monthly_tokens_used?: number | null
           plan_tier?: string
           requests_this_minute?: number
           updated_at?: string
@@ -2926,8 +2924,7 @@ export type Database = {
           max_concurrent_runs?: number
           max_crawls_per_day?: number
           max_pages_per_crawl?: number
-          monthly_ai_budget?: number
-          monthly_ai_spent?: number
+          monthly_tokens_used?: number | null
           plan_tier?: string
           requests_this_minute?: number
           updated_at?: string
@@ -3003,8 +3000,7 @@ export type Database = {
           concurrent_runs: number
           current_period_start: string
           last_request_at: string
-          monthly_ai_budget: number
-          monthly_ai_spent: number
+          monthly_tokens_used: number
           plan_tier: string
           requests_this_minute: number
         }[]
@@ -3031,7 +3027,7 @@ export type Database = {
       }
       update_workspace_quota: {
         Args: {
-          p_add_cost?: number
+          p_add_tokens?: number
           p_decrement_concurrent?: boolean
           p_increment_concurrent?: boolean
           p_increment_requests?: boolean
