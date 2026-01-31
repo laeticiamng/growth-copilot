@@ -518,7 +518,13 @@ Deno.serve(async (req) => {
           passed: true,
           score: qaResult.score,
           issues: qaResult.issues,
-          iterations: currentIterations
+          iterations: currentIterations,
+          // Clear orchestration: render can now proceed
+          next_action: 'proceed_to_render',
+          orchestration: {
+            render_endpoint: 'creative-render',
+            blueprints_approved: true
+          }
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -603,16 +609,33 @@ Deno.serve(async (req) => {
 
     console.log('[creative-qa] Correction applied, iteration', currentIterations + 1);
 
+    // Determine next action based on iteration count
+    const nextIteration = currentIterations + 1;
+    const shouldAutoRerunQA = nextIteration < MAX_QA_ITERATIONS;
+    
+    // Return response with clear orchestration path
+    const response = {
+      success: true,
+      passed: false,
+      score: qaResult.score,
+      issues: qaResult.issues,
+      iterations: nextIteration,
+      corrected: true,
+      // Clear orchestration: auto re-run QA if under limit, otherwise manual review
+      next_action: shouldAutoRerunQA ? 'auto_rerun_qa' : 'manual_review_required',
+      orchestration: {
+        should_auto_rerun: shouldAutoRerunQA,
+        max_iterations: MAX_QA_ITERATIONS,
+        remaining_iterations: MAX_QA_ITERATIONS - nextIteration,
+        // If auto-rerun, provide the exact endpoint to call
+        auto_rerun_endpoint: shouldAutoRerunQA ? 'creative-qa' : null,
+        // If passed (after re-run), render can proceed
+        on_pass_endpoint: 'creative-render'
+      }
+    };
+
     return new Response(
-      JSON.stringify({
-        success: true,
-        passed: false,
-        score: qaResult.score,
-        issues: qaResult.issues,
-        iterations: currentIterations + 1,
-        corrected: true,
-        next_action: currentIterations + 1 < MAX_QA_ITERATIONS ? 're-run QA' : 'manual review required'
-      }),
+      JSON.stringify(response),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
