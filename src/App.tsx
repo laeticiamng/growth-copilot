@@ -21,7 +21,7 @@ import BrandKit from "./pages/dashboard/BrandKit";
 import Logs from "./pages/dashboard/Logs";
 import Billing from "./pages/dashboard/Billing";
 
-// Dashboard pages - Modules (placeholders)
+// Dashboard pages - Modules
 import SEOTech from "./pages/dashboard/SEOTech";
 import Content from "./pages/dashboard/Content";
 import LocalSEO from "./pages/dashboard/LocalSEO";
@@ -32,6 +32,12 @@ import Offers from "./pages/dashboard/Offers";
 import Lifecycle from "./pages/dashboard/Lifecycle";
 import Reputation from "./pages/dashboard/Reputation";
 import Reports from "./pages/dashboard/Reports";
+
+// Dashboard pages - Advanced (Livraison 4+5)
+import Approvals from "./pages/dashboard/Approvals";
+import Competitors from "./pages/dashboard/Competitors";
+import Agency from "./pages/dashboard/Agency";
+import OnboardingGuide from "./pages/dashboard/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +76,12 @@ const App = () => (
                   <Route path="/dashboard/lifecycle" element={<DashboardLayout><Lifecycle /></DashboardLayout>} />
                   <Route path="/dashboard/reputation" element={<DashboardLayout><Reputation /></DashboardLayout>} />
                   <Route path="/dashboard/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+                  
+                  {/* Dashboard - Advanced (Livraison 4+5) */}
+                  <Route path="/dashboard/approvals" element={<DashboardLayout><Approvals /></DashboardLayout>} />
+                  <Route path="/dashboard/competitors" element={<DashboardLayout><Competitors /></DashboardLayout>} />
+                  <Route path="/dashboard/agency" element={<DashboardLayout><Agency /></DashboardLayout>} />
+                  <Route path="/dashboard/guide" element={<DashboardLayout><OnboardingGuide /></DashboardLayout>} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
