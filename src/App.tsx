@@ -23,6 +23,10 @@ import { ReputationProvider } from "@/hooks/useReputation";
 import { OffersProvider } from "@/hooks/useOffers";
 import { MetaProvider } from "@/hooks/useMeta";
 import { CreativesProvider } from "@/hooks/useCreatives";
+import { PermissionsProvider } from "@/hooks/usePermissions";
+import { PoliciesProvider } from "@/hooks/usePolicies";
+import { ExperimentsProvider } from "@/hooks/useExperiments";
+import { AuditLogProvider } from "@/hooks/useAuditLog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -91,6 +95,10 @@ function App() {
                                       <OffersProvider>
                                         <MetaProvider>
                                         <CreativesProvider>
+                                        <PermissionsProvider>
+                                        <PoliciesProvider>
+                                        <ExperimentsProvider>
+                                        <AuditLogProvider>
                                         <TooltipProvider>
                                       <Toaster />
                                       <Sonner />
@@ -144,6 +152,10 @@ function App() {
                                       </Routes>
                                     </BrowserRouter>
                                         </TooltipProvider>
+                                        </AuditLogProvider>
+                                        </ExperimentsProvider>
+                                        </PoliciesProvider>
+                                        </PermissionsProvider>
                                         </CreativesProvider>
                                         </MetaProvider>
                                       </OffersProvider>
