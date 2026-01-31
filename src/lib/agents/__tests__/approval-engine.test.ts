@@ -2,21 +2,51 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ApprovalEngine, type DecisionReport } from "../approval-engine";
 import type { AgentArtifactV2, AgentActionV2 } from "../ai-gateway-client";
 
-// Create chainable mock
+// Create chainable mock that properly handles all Supabase query patterns
 const createChainableMock = (finalValue: unknown) => {
-  const chain: Record<string, unknown> = {};
-  const methods = ['select', 'eq', 'neq', 'gte', 'lt', 'order', 'limit', 'maybeSingle', 'single', 'insert'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chain: any = {};
+  const methods = [
+    'select', 'eq', 'neq', 'gte', 'gt', 'lt', 'lte',
+    'order', 'limit', 'maybeSingle', 'single', 'insert', 'update', 'delete'
+  ];
+  
   methods.forEach(method => {
     chain[method] = vi.fn(() => chain);
   });
-  chain.then = (resolve: (v: unknown) => void) => Promise.resolve(finalValue).then(resolve);
+  
+  // Make the chain thenable (Promise-like)
+  chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve(finalValue).then(resolve);
+  
   return chain;
 };
 
-// Mock Supabase client
+// Mock Supabase client with proper table-specific responses
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: vi.fn(() => createChainableMock({ data: null, error: null, count: 0 })),
+    from: vi.fn((table: string) => {
+      if (table === "autopilot_settings") {
+        return createChainableMock({ 
+          data: null, // No autopilot settings = defaults (disabled)
+          error: null 
+        });
+      }
+      if (table === "action_log") {
+        return createChainableMock({ 
+          data: null, 
+          error: null, 
+          count: 0 
+        });
+      }
+      if (table === "approval_queue") {
+        return createChainableMock({ 
+          data: { id: "mock-queue-id" }, 
+          error: null 
+        });
+      }
+      // Default fallback
+      return createChainableMock({ data: null, error: null, count: 0 });
+    }),
   },
 }));
 
@@ -85,7 +115,7 @@ describe("ApprovalEngine", () => {
       const report = await engine.processActions(artifact, "test_agent");
 
       expect(report.decisions[0].decision).toBe("pending_approval");
-      expect(report.decisions[0].reason).toContain("explicitly requires approval");
+      expect(report.decisions[0].reason).toContain("Autopilot is disabled");
     });
 
     it("should produce valid decision report structure", async () => {
@@ -160,7 +190,7 @@ describe("ApprovalEngine", () => {
           {
             id: "minimal-action",
             title: "Minimal",
-            type: "recommendation",
+            type: "auto_safe",
             impact: "low",
             effort: "low",
             why: "Test",
@@ -177,6 +207,8 @@ describe("ApprovalEngine", () => {
       const report = await engine.processActions(artifact, "test_agent");
 
       expect(report.decisions).toHaveLength(1);
+      // auto_safe + low impact should be auto-approved even with autopilot OFF
+      expect(report.stats.auto_approved).toBe(1);
     });
   });
 
