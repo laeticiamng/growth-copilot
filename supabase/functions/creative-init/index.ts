@@ -55,6 +55,111 @@ interface CreativeBlueprint {
   brand_colors?: { primary: string; secondary: string };
 }
 
+// V2: Claim guardrail patterns for auto-detection
+const CLAIM_PATTERNS = {
+  absolute: /\b(meilleur|unique|seul|garanti|100%|parfait|miracle|révolutionnaire|n°1|numéro\s*1)\b/gi,
+  numeric: /\d+\s*(%|€|euros?|fois|x\d)/gi,
+  health: /\b(guérit|soigne|traite|élimine|supprime|perte\s*de\s*poids)\b/gi,
+  finance: /\b(gains?\s*garanti|revenu\s*passif|devenez\s*riche|millionnaire)\b/gi
+};
+
+// V2: Auto-rewrite non-compliant claims
+function rewriteClaim(claim: string): { rewritten: string; wasModified: boolean; reason?: string } {
+  let rewritten = claim;
+  let wasModified = false;
+  let reason: string | undefined;
+  
+  // Replace absolute claims with compliant alternatives
+  const absoluteReplacements: Record<string, string> = {
+    'meilleur': 'excellent',
+    'unique': 'distinctif',
+    'garanti': 'conçu pour',
+    'parfait': 'optimal',
+    'miracle': 'efficace',
+    'révolutionnaire': 'innovant',
+    'n°1': 'leader',
+    'numéro 1': 'leader'
+  };
+  
+  for (const [original, replacement] of Object.entries(absoluteReplacements)) {
+    const regex = new RegExp(`\\b${original}\\b`, 'gi');
+    if (regex.test(rewritten)) {
+      rewritten = rewritten.replace(regex, replacement);
+      wasModified = true;
+      reason = `Claim absolu "${original}" remplacé par "${replacement}"`;
+    }
+  }
+  
+  // Flag numeric claims that need evidence
+  if (CLAIM_PATTERNS.numeric.test(claim) && !wasModified) {
+    reason = 'Claim chiffré détecté - nécessite une source vérifiable';
+  }
+  
+  return { rewritten, wasModified, reason };
+}
+
+// V2: Validate all copywriting claims and auto-rewrite if needed
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function validateAndRewriteClaims(
+  serviceClient: any,
+  workspaceId: string,
+  copywriting: CopywritingOutput,
+  jobId: string
+): Promise<{ copywriting: CopywritingOutput; decisions: Array<{ original: string; decision: string; rewritten?: string; reason?: string }> }> {
+  const decisions: Array<{ original: string; decision: string; rewritten?: string; reason?: string }> = [];
+  const rewrittenCopy = { ...copywriting };
+  
+  // Process hooks
+  rewrittenCopy.hooks = copywriting.hooks.map(hook => {
+    const result = rewriteClaim(hook);
+    if (result.wasModified) {
+      decisions.push({ original: hook, decision: 'rewritten', rewritten: result.rewritten, reason: result.reason });
+      return result.rewritten;
+    } else if (result.reason) {
+      decisions.push({ original: hook, decision: 'flagged', reason: result.reason });
+    }
+    return hook;
+  });
+  
+  // Process headlines
+  rewrittenCopy.headlines = copywriting.headlines.map(headline => {
+    const result = rewriteClaim(headline);
+    if (result.wasModified) {
+      decisions.push({ original: headline, decision: 'rewritten', rewritten: result.rewritten, reason: result.reason });
+      return result.rewritten;
+    }
+    return headline;
+  });
+  
+  // Process CTAs
+  rewrittenCopy.ctas = copywriting.ctas.map(cta => {
+    const result = rewriteClaim(cta);
+    if (result.wasModified) {
+      decisions.push({ original: cta, decision: 'rewritten', rewritten: result.rewritten, reason: result.reason });
+      return result.rewritten;
+    }
+    return cta;
+  });
+  
+  // Store claim decisions in database for audit
+  if (decisions.length > 0) {
+    for (const decision of decisions) {
+      await serviceClient
+        .from('claim_decisions')
+        .insert({
+          workspace_id: workspaceId,
+          creative_job_id: jobId,
+          original_claim: decision.original,
+          decision: decision.decision,
+          rewritten_claim: decision.rewritten,
+          reason: decision.reason
+        });
+    }
+  }
+  
+  return { copywriting: rewrittenCopy, decisions };
+}
+
 // Generate copywriting using AI Gateway
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateCopywriting(
@@ -434,8 +539,14 @@ Deno.serve(async (req) => {
 
     // Step 1: Generate copywriting
     console.log('[creative-init] Generating copywriting...');
-    const copywriting = await generateCopywriting(userClient, input, brandKit);
+    let copywriting = await generateCopywriting(userClient, input, brandKit);
     console.log('[creative-init] Copywriting generated:', copywriting.hooks.length, 'hooks');
+    
+    // Step 1.5 (V2): Validate claims and auto-rewrite non-compliant ones
+    console.log('[creative-init] Running claim guardrail...');
+    const claimResult = await validateAndRewriteClaims(serviceClient, input.workspace_id, copywriting, job.id);
+    copywriting = claimResult.copywriting;
+    console.log('[creative-init] Claim guardrail:', claimResult.decisions.length, 'claims processed');
 
     // Step 2: Generate blueprints for all formats with A/B variations
     console.log('[creative-init] Generating blueprints with A/B variations...');

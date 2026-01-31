@@ -273,3 +273,221 @@ describe('Edge Function Error Handling', () => {
     expect(result.data).toBe('not-an-object');
   });
 });
+
+describe('V2 Creative Factory Edge Functions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('creative-init with claim guardrail', () => {
+    it('should process claims and auto-rewrite non-compliant ones', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          job_id: 'job-123',
+          status: 'ready_for_render',
+          copywriting_preview: {
+            hooks: ['Excellent produit pour vous', 'Innovation dans votre quotidien'],
+            ctas: ['Découvrez maintenant']
+          },
+          qco: { approved: true, issues: [] }
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-init', {
+        body: {
+          workspace_id: 'ws-123',
+          site_url: 'https://example.com',
+          offer: 'Promo été',
+          objective: 'sale',
+          language: 'fr'
+        },
+      });
+
+      expect(result.data?.success).toBe(true);
+      expect(result.data?.job_id).toBeDefined();
+    });
+
+    it('should handle idempotency key to prevent duplicates', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          job_id: 'existing-job-123',
+          idempotent_hit: true,
+          message: 'Job already exists'
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-init', {
+        body: {
+          workspace_id: 'ws-123',
+          site_url: 'https://example.com',
+          offer: 'Promo',
+          objective: 'lead',
+          language: 'fr',
+          idempotency_key: 'unique-key-123'
+        },
+      });
+
+      expect(result.data?.idempotent_hit).toBe(true);
+    });
+  });
+
+  describe('creative-qa with render-based checks', () => {
+    it('should run QA and extract frames for visual checks', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          passed: true,
+          score: 92,
+          issues: [],
+          render_qa: {
+            frames_extracted: 6,
+            checks_passed: true,
+            frame_checks: [
+              { timestamp: 3.75, aspect_ratio: '9:16', cta_visible: false, text_not_cropped: true, safe_zone_respected: true, issues: [] },
+              { timestamp: 13, aspect_ratio: '9:16', cta_visible: true, text_not_cropped: true, safe_zone_respected: true, issues: [] }
+            ]
+          },
+          next_action: 'proceed_to_render'
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-qa', {
+        body: {
+          job_id: 'job-123',
+          workspace_id: 'ws-123',
+          run_render_qa: true
+        },
+      });
+
+      expect(result.data?.passed).toBe(true);
+      expect(result.data?.render_qa?.frames_extracted).toBeGreaterThan(0);
+    });
+
+    it('should fail QA and suggest correction', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          passed: false,
+          score: 65,
+          issues: [
+            { code: 'CTA_MISSING', severity: 'critical', description: 'No CTA placement' }
+          ],
+          corrected: true,
+          next_action: 'auto_rerun_qa'
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-qa', {
+        body: { job_id: 'job-456', workspace_id: 'ws-123' },
+      });
+
+      expect(result.data?.passed).toBe(false);
+      expect(result.data?.corrected).toBe(true);
+    });
+  });
+
+  describe('creative-export with experiment variants', () => {
+    it('should export with variant-specific UTM links', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          export: {
+            job_id: 'job-123',
+            experiment_id: 'exp-456',
+            variant_name: 'A',
+            videos: [
+              { format: 'video_9_16', aspect_ratio: '9:16', url: 'https://...', filename: 'video_A.mp4', variant: 'A' }
+            ],
+            utm_links: {
+              meta_reels: 'https://example.com?utm_source=instagram&utm_content=reels'
+            },
+            variant_utm_links: {
+              A: { meta_reels: 'https://example.com?utm_content=reels_a' },
+              B: { meta_reels: 'https://example.com?utm_content=reels_b' }
+            },
+            audit_manifest: {
+              exported_at: '2026-01-31T00:00:00Z',
+              variants_exported: ['A', 'B']
+            }
+          }
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-export', {
+        body: {
+          job_id: 'job-123',
+          workspace_id: 'ws-123',
+          include_utm: true,
+          experiment_id: 'exp-456'
+        },
+      });
+
+      expect(result.data?.export?.variant_utm_links).toBeDefined();
+      expect(result.data?.export?.audit_manifest).toBeDefined();
+    });
+  });
+
+  describe('creative-render idempotency', () => {
+    it('should return existing render for duplicate idempotency key', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          job_id: 'existing-job-123',
+          idempotent_hit: true,
+          message: 'Render already completed',
+          assets: [{ asset_type: 'video_9_16', url: 'https://...' }]
+        },
+        error: null,
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-render', {
+        body: {
+          job_id: 'job-123',
+          workspace_id: 'ws-123',
+          idempotency_key: 'render-key-456'
+        },
+      });
+
+      expect(result.data?.idempotent_hit).toBe(true);
+      expect(result.data?.assets).toHaveLength(1);
+    });
+
+    it('should reject concurrent render for same idempotency key', async () => {
+      const mockResponse = {
+        data: null,
+        error: { message: 'Render already in progress' },
+      };
+
+      vi.mocked(supabase.functions.invoke).mockResolvedValue(mockResponse);
+
+      const result = await supabase.functions.invoke('creative-render', {
+        body: {
+          job_id: 'job-123',
+          workspace_id: 'ws-123',
+          idempotency_key: 'render-key-789'
+        },
+      });
+
+      expect(result.error?.message).toContain('in progress');
+    });
+  });
+});
