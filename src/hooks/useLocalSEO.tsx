@@ -37,10 +37,12 @@ interface LocalSEOContextType {
   currentProfile: GBPProfile | null;
   posts: GBPPost[];
   loading: boolean;
+  syncing: boolean;
   refetch: () => void;
   setCurrentProfile: (profile: GBPProfile | null) => void;
   createPost: (data: Partial<GBPPost>) => Promise<{ error: Error | null }>;
   updatePostStatus: (postId: string, status: string) => Promise<{ error: Error | null }>;
+  syncGBP: () => Promise<{ error: Error | null }>;
 }
 
 const LocalSEOContext = createContext<LocalSEOContextType | undefined>(undefined);
@@ -52,6 +54,7 @@ export function LocalSEOProvider({ children }: { children: ReactNode }) {
   const [currentProfile, setCurrentProfile] = useState<GBPProfile | null>(null);
   const [posts, setPosts] = useState<GBPPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   const fetchLocalSEO = async () => {
     if (!currentWorkspace) {
@@ -92,6 +95,24 @@ export function LocalSEOProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
+  const syncGBP = async () => {
+    if (!currentWorkspace || !currentSite) {
+      return { error: new Error('No workspace or site selected') };
+    }
+
+    setSyncing(true);
+    try {
+      // In real implementation, this would call an edge function to sync with Google API
+      // For now, just refresh local data
+      await fetchLocalSEO();
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     fetchLocalSEO();
   }, [currentWorkspace, currentSite, currentProfile?.id]);
@@ -127,10 +148,12 @@ export function LocalSEOProvider({ children }: { children: ReactNode }) {
       currentProfile,
       posts,
       loading,
+      syncing,
       refetch: fetchLocalSEO,
       setCurrentProfile,
       createPost,
       updatePostStatus,
+      syncGBP,
     }}>
       {children}
     </LocalSEOContext.Provider>

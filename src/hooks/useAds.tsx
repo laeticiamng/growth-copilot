@@ -45,17 +45,30 @@ interface AdsKeyword {
   quality_score: number | null;
 }
 
+interface AdsNegative {
+  id: string;
+  keyword: string;
+  level: string | null;
+  match_type: string | null;
+  campaign_id: string | null;
+  adgroup_id: string | null;
+  created_at: string | null;
+}
+
 interface AdsContextType {
   accounts: AdsAccount[];
   currentAccount: AdsAccount | null;
   campaigns: Campaign[];
   adGroups: AdGroup[];
   keywords: AdsKeyword[];
+  negatives: AdsNegative[];
   loading: boolean;
   refetch: () => void;
   setCurrentAccount: (account: AdsAccount | null) => void;
+  createCampaign: (data: Partial<Campaign>) => Promise<{ error: Error | null }>;
+  updateCampaign: (campaignId: string, data: Partial<Campaign>) => Promise<{ error: Error | null }>;
   updateCampaignStatus: (campaignId: string, status: string) => Promise<{ error: Error | null }>;
-  addNegativeKeyword: (keyword: string, level: string, targetId: string) => Promise<{ error: Error | null }>;
+  addNegativeKeyword: (keyword: string, matchType: string, campaignId?: string) => Promise<{ error: Error | null }>;
 }
 
 const AdsContext = createContext<AdsContextType | undefined>(undefined);
@@ -67,6 +80,7 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [adGroups, setAdGroups] = useState<AdGroup[]>([]);
   const [keywords, setKeywords] = useState<AdsKeyword[]>([]);
+  const [negatives, setNegatives] = useState<AdsNegative[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAds = async () => {
@@ -76,19 +90,21 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       setCampaigns([]);
       setAdGroups([]);
       setKeywords([]);
+      setNegatives([]);
       setLoading(false);
       return;
     }
 
     setLoading(true);
 
-    const { data: accountsData } = await supabase
-      .from('ads_accounts')
-      .select('*')
-      .eq('workspace_id', currentWorkspace.id);
+    const [accountsRes, negativesRes] = await Promise.all([
+      supabase.from('ads_accounts').select('*').eq('workspace_id', currentWorkspace.id),
+      supabase.from('ads_negatives').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }),
+    ]);
 
-    const adsAccounts = (accountsData || []) as AdsAccount[];
+    const adsAccounts = (accountsRes.data || []) as AdsAccount[];
     setAccounts(adsAccounts);
+    setNegatives((negativesRes.data || []) as AdsNegative[]);
 
     if (adsAccounts.length > 0 && !currentAccount) {
       setCurrentAccount(adsAccounts[0]);
@@ -111,27 +127,56 @@ export function AdsProvider({ children }: { children: ReactNode }) {
     fetchAds();
   }, [currentWorkspace, currentAccount?.id]);
 
-  const updateCampaignStatus = async (campaignId: string, status: string) => {
+  const createCampaign = async (data: Partial<Campaign>) => {
+    if (!currentWorkspace || !currentAccount) {
+      return { error: new Error('No workspace or account selected') };
+    }
+
+    const insertData = {
+      name: data.name || 'New Campaign',
+      workspace_id: currentWorkspace.id,
+      ads_account_id: currentAccount.id,
+      budget_daily: data.budget_daily,
+      strategy: data.strategy,
+      campaign_type: data.campaign_type,
+      status: 'draft',
+    };
+
+    const { error } = await supabase.from('campaigns').insert(insertData);
+
+    if (!error) fetchAds();
+    return { error: error as Error | null };
+  };
+
+  const updateCampaign = async (campaignId: string, data: Partial<Campaign>) => {
     const { error } = await supabase
       .from('campaigns')
-      .update({ status })
+      .update(data)
       .eq('id', campaignId);
 
     if (!error) fetchAds();
     return { error: error as Error | null };
   };
 
-  const addNegativeKeyword = async (keyword: string, level: 'campaign' | 'adgroup', targetId: string) => {
+  useEffect(() => {
+    fetchAds();
+  }, [currentWorkspace, currentAccount?.id]);
+
+  const updateCampaignStatus = async (campaignId: string, status: string) => {
+    return updateCampaign(campaignId, { status });
+  };
+
+  const addNegativeKeyword = async (keyword: string, matchType: string = 'exact', campaignId?: string) => {
     if (!currentWorkspace) {
       return { error: new Error('No workspace selected') };
     }
 
     const { error } = await supabase.from('ads_negatives').insert({
       keyword,
-      level,
+      match_type: matchType,
+      level: campaignId ? 'campaign' : 'account',
       workspace_id: currentWorkspace.id,
-      campaign_id: level === 'campaign' ? targetId : undefined,
-      adgroup_id: level === 'adgroup' ? targetId : undefined,
+      campaign_id: campaignId || null,
     });
 
     if (!error) fetchAds();
@@ -145,9 +190,12 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       campaigns,
       adGroups,
       keywords,
+      negatives,
       loading,
       refetch: fetchAds,
       setCurrentAccount,
+      createCampaign,
+      updateCampaign,
       updateCampaignStatus,
       addNegativeKeyword,
     }}>

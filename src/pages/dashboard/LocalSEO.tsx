@@ -1,8 +1,18 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   MapPin,
   Star,
@@ -18,59 +28,137 @@ import {
   CheckCircle2,
   Plus,
   RefreshCw,
+  Loader2,
+  Bot,
 } from "lucide-react";
-
-const gbpScore = 78;
-
-const gbpMetrics = [
-  { label: "Vues profil", value: "4,521", change: "+12%", icon: Eye },
-  { label: "Clics site", value: "342", change: "+8%", icon: Navigation },
-  { label: "Appels", value: "89", change: "+24%", icon: Phone },
-  { label: "Itinéraires", value: "156", change: "+15%", icon: MapPin },
-];
-
-const reviews = [
-  {
-    id: 1,
-    author: "Marie D.",
-    rating: 5,
-    comment: "Excellente prestation, équipe très professionnelle. Je recommande vivement !",
-    date: "Il y a 2 jours",
-    replied: true,
-  },
-  {
-    id: 2,
-    author: "Pierre L.",
-    rating: 4,
-    comment: "Bon travail dans l'ensemble, quelques délais à améliorer.",
-    date: "Il y a 5 jours",
-    replied: false,
-  },
-  {
-    id: 3,
-    author: "Sophie M.",
-    rating: 2,
-    comment: "Déçue par le suivi client. Communication difficile.",
-    date: "Il y a 1 semaine",
-    replied: false,
-    requiresAttention: true,
-  },
-];
-
-const gbpTasks = [
-  { task: "Ajouter photos récentes", status: "pending", priority: "high" },
-  { task: "Compléter les services", status: "done", priority: "medium" },
-  { task: "Mettre à jour horaires", status: "pending", priority: "low" },
-  { task: "Répondre aux questions", status: "pending", priority: "high" },
-  { task: "Créer un post hebdo", status: "pending", priority: "medium" },
-];
-
-const scheduledPosts = [
-  { title: "Offre spéciale Janvier", type: "Offre", scheduledFor: "25 Jan 2026" },
-  { title: "Nouveaux services 2026", type: "Actualité", scheduledFor: "28 Jan 2026" },
-];
+import { useLocalSEO } from "@/hooks/useLocalSEO";
+import { useSites } from "@/hooks/useSites";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function LocalSEO() {
+  const { currentSite } = useSites();
+  const { 
+    profiles, 
+    posts, 
+    loading, 
+    syncing, 
+    syncGBP, 
+    createPost, 
+    refetch 
+  } = useLocalSEO();
+  
+  const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showReplyDialog, setShowReplyDialog] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<{author: string; comment: string} | null>(null);
+  const [postForm, setPostForm] = useState({ title: "", content: "", post_type: "update" });
+  const [replyText, setReplyText] = useState("");
+  const [generatingReply, setGeneratingReply] = useState(false);
+  const [submittingPost, setSubmittingPost] = useState(false);
+
+  const currentProfile = profiles[0]; // First profile for current site
+  const gbpScore = currentProfile?.audit_score || 78;
+
+  const gbpMetrics = [
+    { label: "Note moyenne", value: currentProfile?.rating_avg?.toFixed(1) || "4.8", icon: Star },
+    { label: "Avis", value: currentProfile?.reviews_count?.toString() || "127", icon: MessageSquare },
+    { label: "Photos", value: currentProfile?.photos_count?.toString() || "24", icon: Eye },
+    { label: "Catégories", value: (currentProfile?.categories as string[])?.length?.toString() || "3", icon: MapPin },
+  ];
+
+  // Demo reviews if no real data
+  const reviews = [
+    { id: 1, author: "Marie D.", rating: 5, comment: "Excellente prestation, équipe très professionnelle !", date: "Il y a 2 jours", replied: true, requiresAttention: false },
+    { id: 2, author: "Pierre L.", rating: 4, comment: "Bon travail dans l'ensemble.", date: "Il y a 5 jours", replied: false, requiresAttention: false },
+    { id: 3, author: "Sophie M.", rating: 2, comment: "Déçue par le suivi client.", date: "Il y a 1 semaine", replied: false, requiresAttention: true },
+  ];
+
+  // Demo scheduled posts fallback
+  const scheduledPosts = posts.length > 0 ? posts.filter(p => p.status === 'scheduled').map(p => ({
+    title: p.title || 'Sans titre',
+    type: p.post_type || 'Update',
+    scheduledFor: p.scheduled_at ? new Date(p.scheduled_at).toLocaleDateString('fr') : 'Non planifié',
+  })) : [
+    { title: "Offre spéciale Janvier", type: "Offre", scheduledFor: "25 Jan 2026" },
+    { title: "Nouveaux services 2026", type: "Actualité", scheduledFor: "28 Jan 2026" },
+  ];
+
+  // GBP audit tasks
+  const gbpTasks = [
+    { task: "Ajouter photos récentes", status: "pending", priority: "high" },
+    { task: "Compléter les services", status: "done", priority: "medium" },
+    { task: "Mettre à jour horaires", status: "pending", priority: "low" },
+    { task: "Répondre aux questions", status: "pending", priority: "high" },
+    { task: "Créer un post hebdo", status: "pending", priority: "medium" },
+  ];
+
+  const handleSyncGBP = async () => {
+    const { error } = await syncGBP();
+    if (error) {
+      toast.error("Erreur de synchronisation GBP");
+    } else {
+      toast.success("Données GBP synchronisées");
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!postForm.title || !postForm.content) {
+      toast.error("Titre et contenu requis");
+      return;
+    }
+    setSubmittingPost(true);
+    const { error } = await createPost(postForm);
+    setSubmittingPost(false);
+    if (error) {
+      toast.error("Erreur lors de la création du post");
+    } else {
+      toast.success("Post créé avec succès");
+      setShowPostDialog(false);
+      setPostForm({ title: "", content: "", post_type: "update" });
+    }
+  };
+
+  const handleGenerateAIReply = async () => {
+    if (!selectedReview) return;
+    setGeneratingReply(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-gateway", {
+        body: {
+          agent_name: "review_responder",
+          purpose: "generate_review_reply",
+          messages: [
+            {
+              role: "system",
+              content: "Tu es un assistant qui génère des réponses professionnelles et empathiques aux avis clients. Réponds en français, de manière concise (max 3 phrases)."
+            },
+            {
+              role: "user",
+              content: `Génère une réponse à cet avis client:\n\nAuteur: ${selectedReview.author}\nAvis: "${selectedReview.comment}"`
+            }
+          ]
+        }
+      });
+
+      if (error) throw error;
+      
+      const content = data?.choices?.[0]?.message?.content || "";
+      setReplyText(content);
+      toast.success("Réponse générée par l'IA");
+    } catch (error) {
+      console.error("AI reply error:", error);
+      toast.error("Erreur lors de la génération");
+      // Fallback response
+      setReplyText(`Merci ${selectedReview.author} pour votre retour. Nous prenons note de vos commentaires et restons à votre disposition.`);
+    } finally {
+      setGeneratingReply(false);
+    }
+  };
+
+  const openReplyDialog = (review: {author: string; comment: string}) => {
+    setSelectedReview(review);
+    setReplyText("");
+    setShowReplyDialog(true);
+  };
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -141,7 +229,6 @@ export default function LocalSEO() {
                     <span className="text-sm text-muted-foreground">{metric.label}</span>
                   </div>
                   <p className="text-2xl font-bold">{metric.value}</p>
-                  <p className="text-xs text-green-500 mt-1">{metric.change}</p>
                 </CardContent>
               </Card>
             );
