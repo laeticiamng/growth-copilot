@@ -1,1 +1,4 @@
 project_id = "goiklfzouhshghsvpxjo"
+
+[functions.seo-crawler]
+verify_jwt = false
