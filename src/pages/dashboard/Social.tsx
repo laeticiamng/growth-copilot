@@ -50,8 +50,53 @@ export default function Social() {
   const { accounts, posts, loading, createPost, updatePost, deletePost, publishPost, refetch } = useSocial();
   
   const [showPostDialog, setShowPostDialog] = useState(false);
+  const [showAIDialog, setShowAIDialog] = useState(false);
   const [postForm, setPostForm] = useState({ content: "", platforms: [] as string[], type: "Post", scheduled_for: "" });
+  const [aiPrompt, setAIPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
+
+  const handleGenerateAI = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Décrivez le type de contenu souhaité");
+      return;
+    }
+    setGeneratingAI(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-gateway`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          purpose: "copywriting",
+          agent_name: "social-generator",
+          input: {
+            task: "generate_social_post",
+            prompt: aiPrompt,
+            platforms: postForm.platforms.length > 0 ? postForm.platforms : ["Instagram", "LinkedIn"],
+          },
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const generatedContent = data.output?.content || data.output?.text || "";
+        setPostForm(prev => ({ ...prev, content: generatedContent }));
+        setShowAIDialog(false);
+        setShowPostDialog(true);
+        toast.success("Contenu généré avec succès");
+      } else {
+        toast.error("Erreur lors de la génération");
+      }
+    } catch (err) {
+      console.error("AI generation error:", err);
+      toast.error("Erreur de connexion");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
 
   const handleCreatePost = async () => {
     if (!postForm.content) {
@@ -221,7 +266,7 @@ export default function Social() {
                     {posts.filter(p => p.status === 'scheduled').length} posts planifiés
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowPostDialog(true)}>
+                <Button variant="outline" size="sm" onClick={() => setShowAIDialog(true)}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Générer avec IA
                 </Button>
@@ -444,6 +489,53 @@ export default function Social() {
             <Button type="button" onClick={handleCreatePost} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Generation Dialog */}
+      <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Générer avec IA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Décrivez votre post</label>
+              <Textarea
+                placeholder="Ex: Un post inspirant sur les tendances SEO 2026, ton professionnel mais accessible..."
+                value={aiPrompt}
+                onChange={(e) => setAIPrompt(e.target.value)}
+                className="mt-1"
+                rows={4}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Plateformes cibles</label>
+              <div className="flex gap-2 mt-2">
+                {["Instagram", "Facebook", "LinkedIn", "Twitter"].map((platform) => (
+                  <Button
+                    key={platform}
+                    type="button"
+                    variant={postForm.platforms.includes(platform) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePlatform(platform)}
+                  >
+                    {platform}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowAIDialog(false)}>Annuler</Button>
+            <Button onClick={handleGenerateAI} disabled={generatingAI}>
+              {generatingAI && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Générer
             </Button>
           </DialogFooter>
         </DialogContent>

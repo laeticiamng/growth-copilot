@@ -48,7 +48,9 @@ export default function Offers() {
     objections_answers: {},
   });
   const [featureInput, setFeatureInput] = useState("");
+  const [objectionInput, setObjectionInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [generatingObjections, setGeneratingObjections] = useState(false);
 
   // Demo fallback if no offers exist
   const displayOffers = offers.length > 0 ? offers : [
@@ -140,6 +142,50 @@ export default function Offers() {
       ...offerForm,
       features: offerForm.features.filter((_, i) => i !== index),
     });
+  };
+
+  const handleGenerateObjections = async () => {
+    if (!objectionInput.trim()) {
+      toast.error("Décrivez votre offre ou service pour générer les objections");
+      return;
+    }
+    setGeneratingObjections(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-gateway`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          purpose: "copywriting",
+          agent_name: "objection-handler",
+          input: {
+            task: "generate_objection_responses",
+            service_description: objectionInput,
+            existing_objections: objections.map(o => o.objection),
+          },
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const generated = data.output?.objections || [];
+        if (generated.length > 0) {
+          toast.success(`${generated.length} objections générées`);
+          // Would update in DB via updateOffer if we had a selected offer
+        } else {
+          toast.info("Aucune nouvelle objection générée");
+        }
+      } else {
+        toast.error("Erreur lors de la génération");
+      }
+    } catch (err) {
+      console.error("AI generation error:", err);
+      toast.error("Erreur de connexion");
+    } finally {
+      setGeneratingObjections(false);
+    }
   };
 
   const handleCreateOffer = async () => {
@@ -361,10 +407,26 @@ export default function Offers() {
                   </p>
                 </div>
               ))}
-              <Button variant="outline" className="w-full">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Générer des réponses IA
-              </Button>
+              <div className="pt-4 border-t border-border space-y-3">
+                <Input
+                  placeholder="Décrivez votre service (ex: agence SEO premium...)"
+                  value={objectionInput}
+                  onChange={(e) => setObjectionInput(e.target.value)}
+                />
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleGenerateObjections}
+                  disabled={generatingObjections}
+                >
+                  {generatingObjections ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 mr-2" />
+                  )}
+                  Générer des réponses IA
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
