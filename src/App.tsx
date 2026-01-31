@@ -21,6 +21,7 @@ import { LifecycleProvider } from "@/hooks/useLifecycle";
 import { AgencyProvider } from "@/hooks/useAgency";
 import { ReputationProvider } from "@/hooks/useReputation";
 import { OffersProvider } from "@/hooks/useOffers";
+import { MetaProvider } from "@/hooks/useMeta";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -85,6 +86,7 @@ function App() {
                                   <AgencyProvider>
                                     <ReputationProvider>
                                       <OffersProvider>
+                                        <MetaProvider>
                                         <TooltipProvider>
                                       <Toaster />
                                       <Sonner />
@@ -136,6 +138,7 @@ function App() {
                                       </Routes>
                                     </BrowserRouter>
                                         </TooltipProvider>
+                                        </MetaProvider>
                                       </OffersProvider>
                                     </ReputationProvider>
                                   </AgencyProvider>

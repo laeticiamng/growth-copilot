@@ -8,7 +8,6 @@ import {
   BarChart3, 
   Megaphone, 
   MapPin,
-  Instagram,
   Mail,
   Calendar,
   ShoppingCart,
@@ -21,12 +20,12 @@ import {
   AlertCircle,
   Clock,
   Info,
-  CheckCircle2,
 } from "lucide-react";
 import { useSites } from "@/hooks/useSites";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MetaSuperConnector } from "@/components/integrations/MetaSuperConnector";
 
 interface Integration {
   id: string;
@@ -98,15 +97,7 @@ const integrations: Integration[] = [
     required: true,
     provider: "youtube",
   },
-  { 
-    id: "meta", 
-    name: "Meta (Facebook/Instagram)", 
-    description: "Social media et publicités", 
-    icon: Instagram, 
-    status: "coming_soon", 
-    category: "social",
-    comingSoonNote: "⚠️ Instagram direct publishing dépend des permissions (Business vs Creator). Export mode disponible.",
-  },
+  // Meta is now handled by MetaSuperConnector component
   
   // CMS
   { 
@@ -420,7 +411,10 @@ const Integrations = () => {
         </Card>
       )}
 
-      {/* Integration Categories */}
+      {/* Meta Super-Connecteur - Featured */}
+      <MetaSuperConnector />
+
+      {/* Other Integration Categories */}
       <div className="space-y-8">
         {Object.entries(groupedIntegrations).map(([category, items]) => (
           <div key={category}>
