@@ -1,7 +1,17 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Instagram,
   Facebook,
@@ -16,54 +26,129 @@ import {
   RefreshCw,
   Download,
   Sparkles,
+  Loader2,
 } from "lucide-react";
+import { useSocial } from "@/hooks/useSocial";
+import { useSites } from "@/hooks/useSites";
+import { toast } from "sonner";
+import { LoadingState } from "@/components/ui/loading-state";
 
-const socialAccounts = [
-  { platform: "Instagram", connected: true, followers: "12.4K", icon: Instagram },
-  { platform: "Facebook", connected: true, followers: "8.2K", icon: Facebook },
-  { platform: "LinkedIn", connected: false, followers: "-", icon: Linkedin },
-  { platform: "Twitter/X", connected: false, followers: "-", icon: Twitter },
-];
-
-const scheduledPosts = [
-  {
-    id: 1,
-    content: "🚀 Nouveau guide SEO 2026 disponible ! Découvrez les 10 tendances...",
-    platforms: ["Instagram", "Facebook"],
-    scheduledFor: "26 Jan, 10:00",
-    type: "Carrousel",
-    status: "scheduled",
-  },
-  {
-    id: 2,
-    content: "💡 Astuce du jour : Comment optimiser votre fiche Google Business...",
-    platforms: ["Instagram"],
-    scheduledFor: "27 Jan, 14:00",
-    type: "Reel",
-    status: "scheduled",
-  },
-  {
-    id: 3,
-    content: "🎯 Case study : +150% de trafic organique en 6 mois pour notre client...",
-    platforms: ["LinkedIn", "Facebook"],
-    scheduledFor: "28 Jan, 09:00",
-    type: "Post",
-    status: "draft",
-  },
-];
+const platformIcons: Record<string, React.ElementType> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  linkedin: Linkedin,
+  twitter: Twitter,
+};
 
 const repurposeIdeas = [
   { source: "Guide SEO 2026 (blog)", outputs: ["5 carrousels IG", "3 reels", "10 tweets", "1 LinkedIn long"] },
   { source: "Webinar CRO (vidéo)", outputs: ["8 shorts", "2 carrousels", "15 citations"] },
 ];
 
-const recentPerformance = [
-  { post: "10 erreurs SEO à éviter", reach: "4.5K", likes: 234, comments: 18, shares: 42 },
-  { post: "Avant/Après audit technique", reach: "6.2K", likes: 456, comments: 34, shares: 89 },
-  { post: "Tips Google Ads", reach: "3.1K", likes: 123, comments: 8, shares: 21 },
-];
-
 export default function Social() {
+  const { currentSite } = useSites();
+  const { accounts, posts, loading, createPost, updatePost, deletePost, publishPost, refetch } = useSocial();
+  
+  const [showPostDialog, setShowPostDialog] = useState(false);
+  const [postForm, setPostForm] = useState({ content: "", platforms: [] as string[], type: "Post", scheduled_for: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreatePost = async () => {
+    if (!postForm.content) {
+      toast.error("Contenu requis");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await createPost({
+      content: postForm.content,
+      platforms: postForm.platforms,
+      type: postForm.type,
+      scheduled_for: postForm.scheduled_for || null,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error("Erreur lors de la création");
+    } else {
+      toast.success("Post créé");
+      setShowPostDialog(false);
+      setPostForm({ content: "", platforms: [], type: "Post", scheduled_for: "" });
+    }
+  };
+
+  const handlePublish = async (postId: string) => {
+    const { error } = await publishPost(postId);
+    if (error) {
+      toast.error("Erreur lors de la publication");
+    } else {
+      toast.success("Post publié");
+    }
+  };
+
+  const handleExportCalendar = () => {
+    const icalContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Growth OS//Social Calendar//FR",
+      ...posts
+        .filter(p => p.scheduled_for)
+        .map(p => {
+          const date = new Date(p.scheduled_for!);
+          const dateStr = date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+          return [
+            "BEGIN:VEVENT",
+            `DTSTART:${dateStr}`,
+            `SUMMARY:${p.content.slice(0, 50)}...`,
+            `DESCRIPTION:${p.content}`,
+            "END:VEVENT",
+          ].join("\n");
+        }),
+      "END:VCALENDAR",
+    ].join("\n");
+
+    const blob = new Blob([icalContent], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "social-calendar.ics";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Calendrier exporté");
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Contenu", "Plateformes", "Date planifiée", "Statut", "Type"];
+    const rows = posts.map(p => [
+      `"${p.content.replace(/"/g, '""')}"`,
+      p.platforms.join(";"),
+      p.scheduled_for || "",
+      p.status,
+      p.type,
+    ]);
+    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "social-posts.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exporté");
+  };
+
+  const togglePlatform = (platform: string) => {
+    setPostForm(prev => ({
+      ...prev,
+      platforms: prev.platforms.includes(platform)
+        ? prev.platforms.filter(p => p !== platform)
+        : [...prev.platforms, platform],
+    }));
+  };
+
+  if (loading) {
+    return <LoadingState message="Chargement des données sociales..." />;
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -73,13 +158,14 @@ export default function Social() {
           <p className="text-muted-foreground">
             Calendrier social et distribution de contenu
           </p>
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Mode démo</p>}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportCalendar}>
             <Download className="w-4 h-4 mr-2" />
-            Exporter calendrier
+            Exporter iCal
           </Button>
-          <Button variant="hero">
+          <Button variant="hero" onClick={() => setShowPostDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nouveau post
           </Button>
@@ -88,8 +174,8 @@ export default function Social() {
 
       {/* Connected accounts */}
       <div className="grid sm:grid-cols-4 gap-4">
-        {socialAccounts.map((account, i) => {
-          const Icon = account.icon;
+        {accounts.map((account, i) => {
+          const Icon = platformIcons[account.platform.toLowerCase()] || Instagram;
           return (
             <Card key={i} variant={account.connected ? "feature" : "default"} className={!account.connected ? "opacity-60" : ""}>
               <CardContent className="pt-6">
@@ -100,7 +186,9 @@ export default function Social() {
                   <div>
                     <p className="font-medium">{account.platform}</p>
                     {account.connected ? (
-                      <p className="text-sm text-muted-foreground">{account.followers} followers</p>
+                      <p className="text-sm text-muted-foreground">
+                        {account.handle || account.followers?.toLocaleString() + " followers"}
+                      </p>
                     ) : (
                       <Button variant="link" className="p-0 h-auto text-sm">Connecter</Button>
                     )}
@@ -129,41 +217,62 @@ export default function Social() {
                     <Calendar className="w-5 h-5" />
                     Posts planifiés
                   </CardTitle>
-                  <CardDescription>Cette semaine</CardDescription>
+                  <CardDescription>
+                    {posts.filter(p => p.status === 'scheduled').length} posts planifiés
+                  </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowPostDialog(true)}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Générer avec IA
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {scheduledPosts.map((post) => (
-                <div key={post.id} className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50">
-                  <div className="flex-shrink-0 mt-1">
-                    {post.status === "scheduled" ? (
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                    ) : (
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm line-clamp-2">{post.content}</p>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      {post.platforms.map((p) => (
-                        <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
-                      ))}
-                      <Badge variant="secondary" className="text-xs">{post.type}</Badge>
+              {posts.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Aucun post planifié</p>
+                  <p className="text-sm mt-1">Créez votre premier post</p>
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <div key={post.id} className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50">
+                    <div className="flex-shrink-0 mt-1">
+                      {post.status === "scheduled" ? (
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
+                      ) : post.status === "published" ? (
+                        <div className="w-3 h-3 rounded-full bg-primary" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm line-clamp-2">{post.content}</p>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        {post.platforms.map((p) => (
+                          <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
+                        ))}
+                        <Badge variant="secondary" className="text-xs">{post.type}</Badge>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      {post.scheduled_for && (
+                        <p className="text-sm font-medium">
+                          {new Date(post.scheduled_for).toLocaleDateString('fr', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      )}
+                      <Badge variant={post.status === "scheduled" ? "gradient" : post.status === "published" ? "success" : "outline"} className="mt-1">
+                        {post.status === "scheduled" ? "Planifié" : post.status === "published" ? "Publié" : "Brouillon"}
+                      </Badge>
+                      {post.status === "draft" && (
+                        <Button variant="ghost" size="sm" className="mt-2" onClick={() => handlePublish(post.id)}>
+                          Publier
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-medium">{post.scheduledFor}</p>
-                    <Badge variant={post.status === "scheduled" ? "gradient" : "outline"} className="mt-1">
-                      {post.status === "scheduled" ? "Planifié" : "Brouillon"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -210,31 +319,39 @@ export default function Social() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentPerformance.map((post, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{post.post}</p>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4 text-muted-foreground" />
-                        {post.reach}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-4 h-4 text-pink-500" />
-                        {post.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-4 h-4 text-primary" />
-                        {post.comments}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Share2 className="w-4 h-4 text-green-500" />
-                        {post.shares}
-                      </span>
-                    </div>
+                {posts.filter(p => p.status === 'published').length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">Aucun post publié</p>
+                    <p className="text-sm mt-1">Les statistiques apparaîtront après publication</p>
                   </div>
-                ))}
+                ) : (
+                  posts.filter(p => p.status === 'published').map((post) => (
+                    <div key={post.id} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{post.content.slice(0, 50)}...</p>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4 text-muted-foreground" />
+                          {post.reach?.toLocaleString() || '—'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-4 h-4 text-pink-500" />
+                          {post.likes || '—'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="w-4 h-4 text-primary" />
+                          {post.comments || '—'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Share2 className="w-4 h-4 text-green-500" />
+                          {post.shares || '—'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -249,11 +366,11 @@ export default function Social() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" onClick={handleExportCSV}>
                 <Download className="w-4 h-4 mr-2" />
                 Exporter en CSV
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" onClick={handleExportCalendar}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Exporter en iCal
               </Button>
@@ -265,6 +382,72 @@ export default function Social() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Post Dialog */}
+      <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Nouveau post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Contenu</label>
+              <Textarea
+                placeholder="Votre contenu..."
+                value={postForm.content}
+                onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
+                className="mt-1"
+                rows={4}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Plateformes</label>
+              <div className="flex gap-2 mt-2">
+                {["Instagram", "Facebook", "LinkedIn", "Twitter"].map((platform) => (
+                  <Button
+                    key={platform}
+                    type="button"
+                    variant={postForm.platforms.includes(platform) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePlatform(platform)}
+                  >
+                    {platform}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Type</label>
+                <Input
+                  placeholder="Post, Carrousel, Reel..."
+                  value={postForm.type}
+                  onChange={(e) => setPostForm({ ...postForm, type: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date planifiée</label>
+                <Input
+                  type="datetime-local"
+                  value={postForm.scheduled_for}
+                  onChange={(e) => setPostForm({ ...postForm, scheduled_for: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => setShowPostDialog(false)}>
+              Annuler
+            </Button>
+            <Button type="button" onClick={handleCreatePost} disabled={submitting}>
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -240,9 +240,9 @@ const Sites = () => {
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Annuler</Button>
-              <Button onClick={handleCreate} disabled={isSubmitting}>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Annuler</Button>
+              <Button type="button" onClick={handleCreate} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Créer
               </Button>
@@ -418,9 +418,9 @@ const Sites = () => {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Annuler</Button>
-            <Button onClick={handleEdit} disabled={isSubmitting}>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Annuler</Button>
+            <Button type="button" onClick={handleEdit} disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Enregistrer
             </Button>
