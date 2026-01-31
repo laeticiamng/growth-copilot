@@ -10,8 +10,9 @@ interface Lead {
   phone: string | null;
   source: string | null;
   status: string;
-  value: number | null;
-  last_activity: string | null;
+  score: number | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 interface Deal {
@@ -23,6 +24,7 @@ interface Deal {
   probability: number | null;
   expected_close_date: string | null;
   won: boolean | null;
+  currency: string | null;
 }
 
 interface PipelineStage {
@@ -35,10 +37,7 @@ interface PipelineStage {
 interface Workflow {
   id: string;
   name: string;
-  trigger: string;
-  emails_count: number;
-  open_rate: number | null;
-  click_rate: number | null;
+  trigger_type: string;
   status: string;
 }
 
@@ -51,6 +50,7 @@ interface LifecycleContextType {
   refetch: () => void;
   createLead: (data: Partial<Lead>) => Promise<{ error: Error | null; lead: Lead | null }>;
   updateLead: (leadId: string, data: Partial<Lead>) => Promise<{ error: Error | null }>;
+  deleteLead: (leadId: string) => Promise<{ error: Error | null }>;
   createDeal: (data: Partial<Deal>) => Promise<{ error: Error | null; deal: Deal | null }>;
   updateDealStage: (dealId: string, stageId: string) => Promise<{ error: Error | null }>;
 }
@@ -91,8 +91,9 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
       phone: l.phone,
       source: l.source,
       status: l.status || 'new',
-      value: null,
-      last_activity: l.updated_at,
+      score: l.score,
+      created_at: l.created_at,
+      updated_at: l.updated_at,
     })));
 
     setDeals((dealsRes.data || []).map(d => ({
@@ -104,6 +105,7 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
       probability: d.probability,
       expected_close_date: d.expected_close_date,
       won: d.won,
+      currency: d.currency,
     })));
 
     setStages((stagesRes.data || []).map(s => ({
@@ -113,12 +115,8 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
       color: s.color || 'bg-primary',
     })));
 
-    // Demo workflows
-    setWorkflows([
-      { id: '1', name: 'Welcome Sequence', trigger: 'Nouveau lead', emails_count: 5, open_rate: 45, click_rate: 12, status: 'active' },
-      { id: '2', name: 'Nurture - Non qualifiés', trigger: 'Lead froid 7j', emails_count: 8, open_rate: 32, click_rate: 8, status: 'active' },
-      { id: '3', name: 'Follow-up RDV', trigger: 'Après RDV', emails_count: 3, open_rate: 58, click_rate: 22, status: 'active' },
-    ]);
+    // Workflows are not in DB yet, use empty array
+    setWorkflows([]);
 
     setLoading(false);
   };
@@ -137,8 +135,8 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
       .insert({
         name: data.name || '',
         email: data.email || '',
-        company: data.company || '',
-        phone: data.phone || '',
+        company: data.company || null,
+        phone: data.phone || null,
         source: data.source || 'direct',
         status: 'new' as const,
         workspace_id: currentWorkspace.id,
@@ -158,22 +156,34 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
         phone: lead.phone,
         source: lead.source,
         status: lead.status || 'new',
-        value: null,
-        last_activity: lead.updated_at,
+        score: lead.score,
+        created_at: lead.created_at,
+        updated_at: lead.updated_at,
       } : null 
     };
   };
 
   const updateLead = async (leadId: string, data: Partial<Lead>) => {
     const updateData: Record<string, unknown> = {};
-    if (data.name) updateData.name = data.name;
-    if (data.email) updateData.email = data.email;
-    if (data.company) updateData.company = data.company;
-    if (data.phone) updateData.phone = data.phone;
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.company !== undefined) updateData.company = data.company;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.status !== undefined) updateData.status = data.status;
 
     const { error } = await supabase
       .from('leads')
       .update(updateData)
+      .eq('id', leadId);
+
+    if (!error) fetchLifecycle();
+    return { error: error as Error | null };
+  };
+
+  const deleteLead = async (leadId: string) => {
+    const { error } = await supabase
+      .from('leads')
+      .delete()
       .eq('id', leadId);
 
     if (!error) fetchLifecycle();
@@ -188,11 +198,11 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
     const { data: deal, error } = await supabase
       .from('deals')
       .insert({
-        title: data.title,
+        title: data.title || 'Untitled Deal',
         lead_id: data.lead_id,
         stage_id: data.stage_id,
         value: data.value,
-        probability: data.probability,
+        probability: data.probability || 50,
         workspace_id: currentWorkspace.id,
       })
       .select()
@@ -211,6 +221,7 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
         probability: deal.probability,
         expected_close_date: deal.expected_close_date,
         won: deal.won,
+        currency: deal.currency,
       } : null 
     };
   };
@@ -235,6 +246,7 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
       refetch: fetchLifecycle,
       createLead,
       updateLead,
+      deleteLead,
       createDeal,
       updateDealStage,
     }}>
