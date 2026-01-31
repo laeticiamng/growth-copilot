@@ -1,0 +1,44 @@
+{
+  "name": "Growth OS - Autopilot Marketing IA",
+  "short_name": "Growth OS",
+  "description": "Plateforme marketing IA tout-en-one avec 12 agents spécialisés",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "fr",
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Accéder au tableau de bord"
+    },
+    {
+      "name": "Approbations",
+      "url": "/dashboard/approvals",
+      "description": "Voir les actions en attente"
+    }
+  ]
+}

@@ -1,26 +1,51 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Growth OS - Autopilot Marketing IA</title>
+    <meta name="description" content="Plateforme marketing IA tout-en-un avec 12 agents spécialisés pour automatiser SEO, Ads, CRM, Social et CRO." />
+    <meta name="author" content="Growth OS" />
+    <meta name="keywords" content="marketing automation, IA, SEO, Google Ads, CRM, growth hacking, France" />
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Growth OS" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="Growth OS - Autopilot Marketing IA" />
+    <meta property="og:description" content="12 agents IA spécialisés pour automatiser toute votre croissance : SEO, Ads, Social, CRM, CRO." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:locale" content="fr_FR" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:title" content="Growth OS - Autopilot Marketing IA" />
+    <meta name="twitter:description" content="12 agents IA spécialisés pour automatiser toute votre croissance." />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://goiklfzouhshghsvpxjo.supabase.co" />
+    <link rel="dns-prefetch" href="https://goiklfzouhshghsvpxjo.supabase.co" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
+            .catch((err) => console.warn('[PWA] SW registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
