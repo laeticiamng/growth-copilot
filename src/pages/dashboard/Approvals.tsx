@@ -204,28 +204,28 @@ export default function Approvals() {
               <CardContent className="py-4">
                 <div className="flex items-start gap-4">
                   <div className={`p-2 rounded-lg ${
-                    item.riskLevel === "low" ? "bg-green-500/10" :
-                    item.riskLevel === "medium" ? "bg-yellow-500/10" :
+                    item.risk_level === "low" ? "bg-green-500/10" :
+                    item.risk_level === "medium" ? "bg-yellow-500/10" :
                     "bg-orange-500/10"
                   }`}>
                     <Bot className={`w-5 h-5 ${
-                      item.riskLevel === "low" ? "text-green-500" :
-                      item.riskLevel === "medium" ? "text-yellow-500" :
+                      item.risk_level === "low" ? "text-green-500" :
+                      item.risk_level === "medium" ? "text-yellow-500" :
                       "text-orange-500"
                     }`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">{item.action}</span>
-                      {getRiskBadge(item.riskLevel)}
+                      <span className="font-medium">{item.action_type}</span>
+                      {getRiskBadge(item.risk_level)}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Par {item.agent} • {item.createdAt} • Expire dans {item.expiresIn}
+                      Par {item.agent_type} • {item.created_at ? new Date(item.created_at).toLocaleDateString('fr') : 'Récent'} • Expire dans {item.expires_at ? `${Math.max(0, Math.ceil((new Date(item.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} jours` : '7 jours'}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {Object.entries(item.details).map(([key, value]) => (
+                      {Object.entries(item.action_data || {}).map(([key, value]) => (
                         <Badge key={key} variant="outline" className="text-xs">
-                          {key}: {value}
+                          {key}: {String(value)}
                         </Badge>
                       ))}
                     </div>
@@ -258,23 +258,23 @@ export default function Approvals() {
             <CardContent className="space-y-3">
               {recentDecisions.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
-                  {item.decision === "approved" ? (
+                  {item.status === "approved" ? (
                     <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                   ) : (
                     <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium">{item.action}</p>
-                    <p className="text-sm text-muted-foreground">{item.agent}</p>
+                    <p className="font-medium">{item.action_type}</p>
+                    <p className="text-sm text-muted-foreground">{item.agent_type}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.autoApproved && (
+                    {item.auto_approved && (
                       <Badge variant="secondary" className="text-xs">
                         <Zap className="w-3 h-3 mr-1" />
                         Auto
                       </Badge>
                     )}
-                    <span className="text-xs text-muted-foreground">{item.decidedAt}</span>
+                    <span className="text-xs text-muted-foreground">{item.reviewed_at ? new Date(item.reviewed_at).toLocaleDateString('fr') : 'Récent'}</span>
                   </div>
                 </div>
               ))}
