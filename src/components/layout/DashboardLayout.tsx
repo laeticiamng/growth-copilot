@@ -54,7 +54,7 @@ interface DashboardLayoutProps {
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/dashboard/sites", label: "Sites", icon: Building2 },
-  { path: "/dashboard/integrations", label: "Intégrations", icon: Search },
+  // Intégrations masquée - Mode Agence Full-Service (géré en coulisse)
   // Media Launch OS
   { path: "/dashboard/media", label: "Media Assets", icon: Youtube },
   { path: "/dashboard/media/launch", label: "Launch Plan", icon: Play },
