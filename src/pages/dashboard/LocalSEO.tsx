@@ -1,0 +1,374 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  MapPin,
+  Star,
+  Phone,
+  Navigation,
+  Eye,
+  MessageSquare,
+  Calendar,
+  Send,
+  ThumbsUp,
+  ThumbsDown,
+  AlertTriangle,
+  CheckCircle2,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
+
+const gbpScore = 78;
+
+const gbpMetrics = [
+  { label: "Vues profil", value: "4,521", change: "+12%", icon: Eye },
+  { label: "Clics site", value: "342", change: "+8%", icon: Navigation },
+  { label: "Appels", value: "89", change: "+24%", icon: Phone },
+  { label: "Itinéraires", value: "156", change: "+15%", icon: MapPin },
+];
+
+const reviews = [
+  {
+    id: 1,
+    author: "Marie D.",
+    rating: 5,
+    comment: "Excellente prestation, équipe très professionnelle. Je recommande vivement !",
+    date: "Il y a 2 jours",
+    replied: true,
+  },
+  {
+    id: 2,
+    author: "Pierre L.",
+    rating: 4,
+    comment: "Bon travail dans l'ensemble, quelques délais à améliorer.",
+    date: "Il y a 5 jours",
+    replied: false,
+  },
+  {
+    id: 3,
+    author: "Sophie M.",
+    rating: 2,
+    comment: "Déçue par le suivi client. Communication difficile.",
+    date: "Il y a 1 semaine",
+    replied: false,
+    requiresAttention: true,
+  },
+];
+
+const gbpTasks = [
+  { task: "Ajouter photos récentes", status: "pending", priority: "high" },
+  { task: "Compléter les services", status: "done", priority: "medium" },
+  { task: "Mettre à jour horaires", status: "pending", priority: "low" },
+  { task: "Répondre aux questions", status: "pending", priority: "high" },
+  { task: "Créer un post hebdo", status: "pending", priority: "medium" },
+];
+
+const scheduledPosts = [
+  { title: "Offre spéciale Janvier", type: "Offre", scheduledFor: "25 Jan 2026" },
+  { title: "Nouveaux services 2026", type: "Actualité", scheduledFor: "28 Jan 2026" },
+];
+
+export default function LocalSEO() {
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Local SEO</h1>
+          <p className="text-muted-foreground">
+            Google Business Profile & présence locale
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Sync GBP
+          </Button>
+          <Button variant="hero">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau post
+          </Button>
+        </div>
+      </div>
+
+      {/* Score + Metrics */}
+      <div className="grid lg:grid-cols-5 gap-6">
+        <Card variant="gradient" className="lg:col-span-1">
+          <CardContent className="pt-6 text-center">
+            <div className="relative w-24 h-24 mx-auto mb-4">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  strokeWidth="8"
+                  fill="none"
+                  className="stroke-background/30"
+                />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={`${gbpScore * 2.51} 251`}
+                  className="stroke-primary-foreground"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-3xl font-bold">{gbpScore}</span>
+              </div>
+            </div>
+            <p className="font-medium">Score GBP</p>
+            <div className="flex items-center justify-center gap-1 mt-1">
+              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+              <span className="text-sm">4.8 (127 avis)</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="lg:col-span-4 grid sm:grid-cols-4 gap-4">
+          {gbpMetrics.map((metric, i) => {
+            const Icon = metric.icon;
+            return (
+              <Card key={i} variant="kpi">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-muted-foreground">{metric.label}</span>
+                  </div>
+                  <p className="text-2xl font-bold">{metric.value}</p>
+                  <p className="text-xs text-green-500 mt-1">{metric.change}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      <Tabs defaultValue="reviews" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="reviews">Avis</TabsTrigger>
+          <TabsTrigger value="posts">Posts GBP</TabsTrigger>
+          <TabsTrigger value="audit">Audit fiche</TabsTrigger>
+          <TabsTrigger value="faq">FAQ Engine</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="reviews" className="space-y-6">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card variant="feature">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Avis récents</CardTitle>
+                      <CardDescription>Gérer et répondre aux avis clients</CardDescription>
+                    </div>
+                    <Badge variant="destructive">1 à traiter</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className={`p-4 rounded-lg ${
+                        review.requiresAttention ? "bg-destructive/10 border border-destructive/30" : "bg-secondary/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{review.author}</span>
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < review.rating
+                                      ? "fill-yellow-500 text-yellow-500"
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{review.date}</p>
+                        </div>
+                        {review.replied ? (
+                          <Badge variant="secondary">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            Répondu
+                          </Badge>
+                        ) : review.requiresAttention ? (
+                          <Badge variant="destructive">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Urgent
+                          </Badge>
+                        ) : null}
+                      </div>
+                      <p className="text-sm">{review.comment}</p>
+                      {!review.replied && (
+                        <div className="flex gap-2 mt-3">
+                          <Button variant="outline" size="sm">
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            Répondre avec IA
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card variant="feature">
+                <CardHeader>
+                  <CardTitle className="text-base">Demander un avis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Send className="w-4 h-4 mr-2" />
+                    Envoyer par email
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Envoyer par SMS
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    QR Code avis
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card variant="feature">
+                <CardHeader>
+                  <CardTitle className="text-base">Stats avis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Taux de réponse</span>
+                    <span className="font-medium">92%</span>
+                  </div>
+                  <Progress value={92} className="h-2" />
+                  <div className="flex items-center justify-between text-sm mt-4">
+                    <span className="flex items-center gap-1">
+                      <ThumbsUp className="w-4 h-4 text-green-500" />
+                      Positifs
+                    </span>
+                    <span>89%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-1">
+                      <ThumbsDown className="w-4 h-4 text-destructive" />
+                      Négatifs
+                    </span>
+                    <span>11%</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Posts planifiés</CardTitle>
+                  <CardDescription>Publications Google Business Profile</CardDescription>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouveau
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {scheduledPosts.map((post, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-medium">{post.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {post.type} • {post.scheduledFor}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm">Modifier</Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="audit" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle>Audit de la fiche</CardTitle>
+              <CardDescription>Optimisations recommandées pour votre fiche GBP</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {gbpTasks.map((task, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
+                >
+                  <div className="flex items-center gap-3">
+                    {task.status === "done" ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-muted-foreground" />
+                    )}
+                    <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>
+                      {task.task}
+                    </span>
+                  </div>
+                  <Badge
+                    variant={
+                      task.priority === "high"
+                        ? "destructive"
+                        : task.priority === "medium"
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
+                    {task.priority === "high" ? "Prioritaire" : task.priority === "medium" ? "Moyen" : "Faible"}
+                  </Badge>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="faq" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle>FAQ Engine</CardTitle>
+              <CardDescription>
+                Gérez vos FAQ site + suggestions de posts GBP pour répondre aux questions fréquentes
+                <br />
+                <span className="text-xs text-muted-foreground mt-1 block">
+                  Note : L'API Q&A Google Business Profile est discontinuée depuis Nov 2025
+                </span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Ajoutez vos FAQ pour générer du contenu optimisé</p>
+                <Button variant="outline" className="mt-4">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une FAQ
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
