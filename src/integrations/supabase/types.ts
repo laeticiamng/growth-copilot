@@ -2645,6 +2645,979 @@ export type Database = {
           },
         ]
       }
+      meta_ad_accounts: {
+        Row: {
+          account_id: string
+          account_name: string | null
+          account_status: number | null
+          amount_spent: number | null
+          business_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          integration_id: string | null
+          is_active: boolean | null
+          last_sync_at: string | null
+          spend_cap: number | null
+          timezone: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          account_id: string
+          account_name?: string | null
+          account_status?: number | null
+          amount_spent?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          integration_id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          spend_cap?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          account_id?: string
+          account_name?: string | null
+          account_status?: number | null
+          amount_spent?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          integration_id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          spend_cap?: number | null
+          timezone?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ad_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ad_accounts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ads: {
+        Row: {
+          ad_id: string
+          adset_id: string
+          created_at: string | null
+          creative: Json | null
+          creative_id: string | null
+          effective_status: string | null
+          id: string
+          name: string
+          preview_url: string | null
+          status: string | null
+          tracking_specs: Json | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ad_id: string
+          adset_id: string
+          created_at?: string | null
+          creative?: Json | null
+          creative_id?: string | null
+          effective_status?: string | null
+          id?: string
+          name: string
+          preview_url?: string | null
+          status?: string | null
+          tracking_specs?: Json | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ad_id?: string
+          adset_id?: string
+          created_at?: string | null
+          creative?: Json | null
+          creative_id?: string | null
+          effective_status?: string | null
+          id?: string
+          name?: string
+          preview_url?: string | null
+          status?: string | null
+          tracking_specs?: Json | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ads_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "meta_adsets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_adsets: {
+        Row: {
+          adset_id: string
+          bid_amount: number | null
+          billing_event: string | null
+          campaign_id: string
+          created_at: string | null
+          daily_budget: number | null
+          effective_status: string | null
+          end_time: string | null
+          id: string
+          lifetime_budget: number | null
+          name: string
+          optimization_goal: string | null
+          start_time: string | null
+          status: string | null
+          targeting: Json | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          adset_id: string
+          bid_amount?: number | null
+          billing_event?: string | null
+          campaign_id: string
+          created_at?: string | null
+          daily_budget?: number | null
+          effective_status?: string | null
+          end_time?: string | null
+          id?: string
+          lifetime_budget?: number | null
+          name: string
+          optimization_goal?: string | null
+          start_time?: string | null
+          status?: string | null
+          targeting?: Json | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          adset_id?: string
+          bid_amount?: number | null
+          billing_event?: string | null
+          campaign_id?: string
+          created_at?: string | null
+          daily_budget?: number | null
+          effective_status?: string | null
+          end_time?: string | null
+          id?: string
+          lifetime_budget?: number | null
+          name?: string
+          optimization_goal?: string | null
+          start_time?: string | null
+          status?: string | null
+          targeting?: Json | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_adsets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "meta_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_adsets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_campaigns: {
+        Row: {
+          ad_account_id: string
+          bid_strategy: string | null
+          campaign_id: string
+          created_at: string | null
+          daily_budget: number | null
+          effective_status: string | null
+          id: string
+          lifetime_budget: number | null
+          name: string
+          objective: string | null
+          start_time: string | null
+          status: string | null
+          stop_time: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ad_account_id: string
+          bid_strategy?: string | null
+          campaign_id: string
+          created_at?: string | null
+          daily_budget?: number | null
+          effective_status?: string | null
+          id?: string
+          lifetime_budget?: number | null
+          name: string
+          objective?: string | null
+          start_time?: string | null
+          status?: string | null
+          stop_time?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ad_account_id?: string
+          bid_strategy?: string | null
+          campaign_id?: string
+          created_at?: string | null
+          daily_budget?: number | null
+          effective_status?: string | null
+          id?: string
+          lifetime_budget?: number | null
+          name?: string
+          objective?: string | null
+          start_time?: string | null
+          status?: string | null
+          stop_time?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_campaigns_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_capi_events: {
+        Row: {
+          action_source: string | null
+          created_at: string | null
+          custom_data: Json | null
+          error_message: string | null
+          event_id: string | null
+          event_name: string
+          event_source_url: string | null
+          event_time: string
+          fb_response: Json | null
+          id: string
+          opt_out: boolean | null
+          pixel_id: string
+          sent_at: string | null
+          site_id: string | null
+          status: string | null
+          user_data: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          action_source?: string | null
+          created_at?: string | null
+          custom_data?: Json | null
+          error_message?: string | null
+          event_id?: string | null
+          event_name: string
+          event_source_url?: string | null
+          event_time: string
+          fb_response?: Json | null
+          id?: string
+          opt_out?: boolean | null
+          pixel_id: string
+          sent_at?: string | null
+          site_id?: string | null
+          status?: string | null
+          user_data?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          action_source?: string | null
+          created_at?: string | null
+          custom_data?: Json | null
+          error_message?: string | null
+          event_id?: string | null
+          event_name?: string
+          event_source_url?: string | null
+          event_time?: string
+          fb_response?: Json | null
+          id?: string
+          opt_out?: boolean | null
+          pixel_id?: string
+          sent_at?: string | null
+          site_id?: string | null
+          status?: string | null
+          user_data?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_capi_events_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_capi_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_conversations: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          lead_id: string | null
+          page_id: string | null
+          participant_id: string
+          participant_name: string | null
+          participant_profile_pic: string | null
+          phone_number_id: string | null
+          platform: string
+          status: string | null
+          unread_count: number | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id?: string | null
+          participant_id: string
+          participant_name?: string | null
+          participant_profile_pic?: string | null
+          phone_number_id?: string | null
+          platform: string
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          lead_id?: string | null
+          page_id?: string | null
+          participant_id?: string
+          participant_name?: string | null
+          participant_profile_pic?: string | null
+          phone_number_id?: string | null
+          platform?: string
+          status?: string | null
+          unread_count?: number | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ig_accounts: {
+        Row: {
+          biography: string | null
+          connected_fb_page_id: string | null
+          created_at: string | null
+          followers_count: number | null
+          follows_count: number | null
+          id: string
+          ig_user_id: string
+          integration_id: string | null
+          is_business_account: boolean | null
+          last_sync_at: string | null
+          media_count: number | null
+          name: string | null
+          profile_picture_url: string | null
+          updated_at: string | null
+          username: string
+          website: string | null
+          workspace_id: string
+        }
+        Insert: {
+          biography?: string | null
+          connected_fb_page_id?: string | null
+          created_at?: string | null
+          followers_count?: number | null
+          follows_count?: number | null
+          id?: string
+          ig_user_id: string
+          integration_id?: string | null
+          is_business_account?: boolean | null
+          last_sync_at?: string | null
+          media_count?: number | null
+          name?: string | null
+          profile_picture_url?: string | null
+          updated_at?: string | null
+          username: string
+          website?: string | null
+          workspace_id: string
+        }
+        Update: {
+          biography?: string | null
+          connected_fb_page_id?: string | null
+          created_at?: string | null
+          followers_count?: number | null
+          follows_count?: number | null
+          id?: string
+          ig_user_id?: string
+          integration_id?: string | null
+          is_business_account?: boolean | null
+          last_sync_at?: string | null
+          media_count?: number | null
+          name?: string | null
+          profile_picture_url?: string | null
+          updated_at?: string | null
+          username?: string
+          website?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ig_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ig_accounts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ig_media: {
+        Row: {
+          caption: string | null
+          comments_count: number | null
+          created_at: string | null
+          engagement: number | null
+          id: string
+          ig_account_id: string
+          impressions: number | null
+          is_published: boolean | null
+          like_count: number | null
+          media_id: string
+          media_type: string | null
+          media_url: string | null
+          permalink: string | null
+          plays: number | null
+          reach: number | null
+          saved: number | null
+          shares: number | null
+          thumbnail_url: string | null
+          timestamp: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string | null
+          engagement?: number | null
+          id?: string
+          ig_account_id: string
+          impressions?: number | null
+          is_published?: boolean | null
+          like_count?: number | null
+          media_id: string
+          media_type?: string | null
+          media_url?: string | null
+          permalink?: string | null
+          plays?: number | null
+          reach?: number | null
+          saved?: number | null
+          shares?: number | null
+          thumbnail_url?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string | null
+          engagement?: number | null
+          id?: string
+          ig_account_id?: string
+          impressions?: number | null
+          is_published?: boolean | null
+          like_count?: number | null
+          media_id?: string
+          media_type?: string | null
+          media_url?: string | null
+          permalink?: string | null
+          plays?: number | null
+          reach?: number | null
+          saved?: number | null
+          shares?: number | null
+          thumbnail_url?: string | null
+          timestamp?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ig_media_ig_account_id_fkey"
+            columns: ["ig_account_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ig_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ig_media_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_ig_scheduled: {
+        Row: {
+          approval_id: string | null
+          caption: string | null
+          container_id: string | null
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          hashtags: Json | null
+          id: string
+          ig_account_id: string
+          location_id: string | null
+          media_id: string | null
+          media_type: string
+          media_urls: Json | null
+          published_at: string | null
+          scheduled_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_tags: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          approval_id?: string | null
+          caption?: string | null
+          container_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          hashtags?: Json | null
+          id?: string
+          ig_account_id: string
+          location_id?: string | null
+          media_id?: string | null
+          media_type: string
+          media_urls?: Json | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_tags?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          approval_id?: string | null
+          caption?: string | null
+          container_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          hashtags?: Json | null
+          id?: string
+          ig_account_id?: string
+          location_id?: string | null
+          media_id?: string | null
+          media_type?: string
+          media_urls?: Json | null
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_tags?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_ig_scheduled_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "approval_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ig_scheduled_ig_account_id_fkey"
+            columns: ["ig_account_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ig_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_ig_scheduled_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_insights: {
+        Row: {
+          actions: Json | null
+          ad_account_id: string | null
+          ad_id: string | null
+          adset_id: string | null
+          campaign_id: string | null
+          clicks: number | null
+          conversion_value: number | null
+          conversions: number | null
+          cost_per_conversion: number | null
+          cpc: number | null
+          cpm: number | null
+          created_at: string | null
+          ctr: number | null
+          date: string
+          frequency: number | null
+          id: string
+          impressions: number | null
+          level: string
+          reach: number | null
+          roas: number | null
+          spend: number | null
+          workspace_id: string
+        }
+        Insert: {
+          actions?: Json | null
+          ad_account_id?: string | null
+          ad_id?: string | null
+          adset_id?: string | null
+          campaign_id?: string | null
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cost_per_conversion?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          date: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          level: string
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+          workspace_id: string
+        }
+        Update: {
+          actions?: Json | null
+          ad_account_id?: string | null
+          ad_id?: string | null
+          adset_id?: string | null
+          campaign_id?: string | null
+          clicks?: number | null
+          conversion_value?: number | null
+          conversions?: number | null
+          cost_per_conversion?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          date?: string
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          level?: string
+          reach?: number | null
+          roas?: number | null
+          spend?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_insights_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ad_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_insights_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "meta_ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_insights_adset_id_fkey"
+            columns: ["adset_id"]
+            isOneToOne: false
+            referencedRelation: "meta_adsets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_insights_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "meta_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_insights_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string | null
+          delivered_at: string | null
+          direction: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          media_url: string | null
+          message_id: string
+          message_type: string | null
+          read_at: string | null
+          sent_at: string | null
+          status: string | null
+          template_name: string | null
+          template_params: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string | null
+          delivered_at?: string | null
+          direction: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          message_id: string
+          message_type?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          template_name?: string | null
+          template_params?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string | null
+          delivered_at?: string | null
+          direction?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          media_url?: string | null
+          message_id?: string
+          message_type?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          template_name?: string | null
+          template_params?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "meta_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_webhook_configs: {
+        Row: {
+          created_at: string | null
+          id: string
+          integration_id: string | null
+          is_active: boolean | null
+          last_event_at: string | null
+          object_id: string
+          object_type: string
+          subscribed_fields: Json | null
+          updated_at: string | null
+          verify_token: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          integration_id?: string | null
+          is_active?: boolean | null
+          last_event_at?: string | null
+          object_id: string
+          object_type: string
+          subscribed_fields?: Json | null
+          updated_at?: string | null
+          verify_token: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          integration_id?: string | null
+          is_active?: boolean | null
+          last_event_at?: string | null
+          object_id?: string
+          object_type?: string
+          subscribed_fields?: Json | null
+          updated_at?: string | null
+          verify_token?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_webhook_configs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_webhook_configs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meta_webhook_events: {
+        Row: {
+          error_message: string | null
+          event_type: string | null
+          field: string
+          id: string
+          object_id: string
+          object_type: string
+          payload: Json
+          processed: boolean | null
+          processed_at: string | null
+          received_at: string | null
+          webhook_config_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          error_message?: string | null
+          event_type?: string | null
+          field: string
+          id?: string
+          object_id: string
+          object_type: string
+          payload: Json
+          processed?: boolean | null
+          processed_at?: string | null
+          received_at?: string | null
+          webhook_config_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          error_message?: string | null
+          event_type?: string | null
+          field?: string
+          id?: string
+          object_id?: string
+          object_type?: string
+          payload?: Json
+          processed?: boolean | null
+          processed_at?: string | null
+          received_at?: string | null
+          webhook_config_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meta_webhook_events_webhook_config_id_fkey"
+            columns: ["webhook_config_id"]
+            isOneToOne: false
+            referencedRelation: "meta_webhook_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meta_webhook_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_reports: {
         Row: {
           actions_completed: Json | null
