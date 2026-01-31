@@ -311,7 +311,25 @@ export default function Approvals() {
                 {autopilotRules.map((rule, i) => (
                   <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-3">
-                      <Switch checked={rule.enabled} />
+                      <Switch 
+                        checked={rule.enabled} 
+                        onCheckedChange={async (checked) => {
+                          const currentActions = autopilotSettings?.allowed_actions || [];
+                          const newActions = checked 
+                            ? [...currentActions, rule.actionKey]
+                            : currentActions.filter(a => a !== rule.actionKey);
+                          
+                          const { error } = await updateAutopilotSettings({ 
+                            allowed_actions: newActions 
+                          });
+                          
+                          if (error) {
+                            toast.error("Erreur lors de la mise à jour");
+                          } else {
+                            toast.success(`${rule.name} ${checked ? 'activé' : 'désactivé'}`);
+                          }
+                        }}
+                      />
                       <div>
                         <p className="font-medium">{rule.name}</p>
                         <div className="flex items-center gap-2 mt-1">

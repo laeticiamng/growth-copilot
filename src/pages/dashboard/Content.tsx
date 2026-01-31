@@ -17,6 +17,8 @@ import {
 import { useContent } from "@/hooks/useContent";
 import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Content() {
   const { currentSite } = useSites();
@@ -79,7 +81,34 @@ export default function Content() {
             <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
             Sync GSC
           </Button>
-          <Button variant="hero">
+          <Button 
+            variant="hero"
+            onClick={async () => {
+              if (!currentSite) {
+                return;
+              }
+              setSyncing(true);
+              try {
+                const { data, error } = await supabase.functions.invoke("ai-gateway", {
+                  body: {
+                    agent_name: "content_strategist",
+                    purpose: "generate_brief",
+                    messages: [
+                      { role: "system", content: "Tu es un stratège de contenu SEO. Génère un brief de contenu détaillé en français." },
+                      { role: "user", content: `Génère un brief pour un article optimisé SEO pour le site ${currentSite.url}. Inclus: titre, H2s, mots-clés cibles, longueur recommandée.` }
+                    ]
+                  }
+                });
+                if (error) throw error;
+                toast.success("Brief généré avec succès");
+              } catch (err) {
+                toast.error("Erreur lors de la génération du brief");
+              } finally {
+                setSyncing(false);
+              }
+            }}
+            disabled={syncing || !currentSite}
+          >
             <Sparkles className="w-4 h-4 mr-2" />
             Générer brief
           </Button>

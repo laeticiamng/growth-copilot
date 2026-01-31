@@ -170,11 +170,11 @@ export default function LocalSEO() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Sync GBP
+          <Button variant="outline" onClick={handleSyncGBP} disabled={syncing}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Sync...' : 'Sync GBP'}
           </Button>
-          <Button variant="hero">
+          <Button variant="hero" onClick={() => setShowPostDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nouveau post
           </Button>
@@ -299,7 +299,11 @@ export default function LocalSEO() {
                       <p className="text-sm">{review.comment}</p>
                       {!review.replied && (
                         <div className="flex gap-2 mt-3">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openReplyDialog({ author: review.author, comment: review.comment })}
+                          >
                             <MessageSquare className="w-4 h-4 mr-2" />
                             Répondre avec IA
                           </Button>
