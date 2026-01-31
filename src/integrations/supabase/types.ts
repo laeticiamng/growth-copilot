@@ -2878,6 +2878,71 @@ export type Database = {
           },
         ]
       }
+      workspace_quotas: {
+        Row: {
+          ai_requests_per_minute: number
+          concurrent_runs: number
+          crawls_today: number
+          created_at: string
+          current_period_start: string
+          id: string
+          last_request_at: string | null
+          max_concurrent_runs: number
+          max_crawls_per_day: number
+          max_pages_per_crawl: number
+          monthly_ai_budget: number
+          monthly_ai_spent: number
+          plan_tier: string
+          requests_this_minute: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          ai_requests_per_minute?: number
+          concurrent_runs?: number
+          crawls_today?: number
+          created_at?: string
+          current_period_start?: string
+          id?: string
+          last_request_at?: string | null
+          max_concurrent_runs?: number
+          max_crawls_per_day?: number
+          max_pages_per_crawl?: number
+          monthly_ai_budget?: number
+          monthly_ai_spent?: number
+          plan_tier?: string
+          requests_this_minute?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          ai_requests_per_minute?: number
+          concurrent_runs?: number
+          crawls_today?: number
+          created_at?: string
+          current_period_start?: string
+          id?: string
+          last_request_at?: string | null
+          max_concurrent_runs?: number
+          max_crawls_per_day?: number
+          max_pages_per_crawl?: number
+          monthly_ai_budget?: number
+          monthly_ai_spent?: number
+          plan_tier?: string
+          requests_this_minute?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_quotas_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           created_at: string | null
@@ -2932,6 +2997,18 @@ export type Database = {
     }
     Functions: {
       get_user_workspace_ids: { Args: { _user_id: string }; Returns: string[] }
+      get_workspace_quota: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          concurrent_runs: number
+          current_period_start: string
+          last_request_at: string
+          monthly_ai_budget: number
+          monthly_ai_spent: number
+          plan_tier: string
+          requests_this_minute: number
+        }[]
+      }
       has_agency_access: {
         Args: { _client_workspace_id: string; _user_id: string }
         Returns: boolean
@@ -2951,6 +3028,16 @@ export type Database = {
       is_workspace_owner: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
+      }
+      update_workspace_quota: {
+        Args: {
+          p_add_cost?: number
+          p_decrement_concurrent?: boolean
+          p_increment_concurrent?: boolean
+          p_increment_requests?: boolean
+          p_workspace_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
