@@ -1,63 +1,108 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
-const tools = [
-  {
-    name: "Google Search Console",
-    description: "Données SEO officielles et performance organique",
-    category: "SEO",
-    required: true,
-  },
-  {
-    name: "Google Analytics 4",
-    description: "Tracking comportement et conversions",
-    category: "Analytics",
-    required: true,
-  },
-  {
-    name: "Google Ads",
-    description: "Campagnes publicitaires Search et Display",
-    category: "Ads",
-    required: false,
-  },
-  {
-    name: "Google Business Profile",
-    description: "Fiche établissement et avis locaux",
-    category: "Local",
-    required: false,
-  },
-  {
-    name: "Meta Business Suite",
-    description: "Instagram, Facebook, et publicités sociales",
-    category: "Social",
-    required: false,
-  },
-  {
-    name: "WordPress / Shopify",
-    description: "CMS connecté pour corrections automatiques",
-    category: "CMS",
-    required: false,
-  },
-];
-
 export function Tools() {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
+
+  const toolsFr = [
+    {
+      name: "Google Search Console",
+      description: "Données SEO officielles et performance organique",
+      category: "SEO",
+      required: true,
+    },
+    {
+      name: "Google Analytics 4",
+      description: "Tracking comportement et conversions",
+      category: "Analytics",
+      required: true,
+    },
+    {
+      name: "Google Ads",
+      description: "Campagnes publicitaires Search et Display",
+      category: "Ads",
+      required: false,
+    },
+    {
+      name: "Google Business Profile",
+      description: "Fiche établissement et avis locaux",
+      category: "Local",
+      required: false,
+    },
+    {
+      name: "Meta Business Suite",
+      description: "Instagram, Facebook, et publicités sociales",
+      category: "Social",
+      required: false,
+    },
+    {
+      name: "WordPress / Shopify",
+      description: "CMS connecté pour corrections automatiques",
+      category: "CMS",
+      required: false,
+    },
+  ];
+
+  const toolsEn = [
+    {
+      name: "Google Search Console",
+      description: "Official SEO data and organic performance",
+      category: "SEO",
+      required: true,
+    },
+    {
+      name: "Google Analytics 4",
+      description: "Behavior tracking and conversions",
+      category: "Analytics",
+      required: true,
+    },
+    {
+      name: "Google Ads",
+      description: "Search and Display advertising campaigns",
+      category: "Ads",
+      required: false,
+    },
+    {
+      name: "Google Business Profile",
+      description: "Business listing and local reviews",
+      category: "Local",
+      required: false,
+    },
+    {
+      name: "Meta Business Suite",
+      description: "Instagram, Facebook, and social ads",
+      category: "Social",
+      required: false,
+    },
+    {
+      name: "WordPress / Shopify",
+      description: "Connected CMS for automatic fixes",
+      category: "CMS",
+      required: false,
+    },
+  ];
+
+  const tools = isEn ? toolsEn : toolsFr;
+  const recommendedLabel = isEn ? "Recommended" : "Recommandé";
+  const seeAllLabel = isEn ? "See all integrations" : "Voir toutes les intégrations";
+
   return (
     <section id="tools" className="py-24 bg-secondary/30 relative">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">
-            Intégrations
+            {t("landing.footer.integrations")}
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Connecte tes outils,{" "}
-            <span className="gradient-text">on fait le reste</span>
+            {t("landing.tools.title")}
           </h2>
           <p className="text-lg text-muted-foreground">
-            OAuth sécurisé. Tes données restent les tiennes. 
-            On se connecte juste pour analyser et optimiser.
+            {t("landing.tools.subtitle")}
           </p>
         </div>
 
@@ -78,7 +123,7 @@ export function Tools() {
                   <div className="flex items-center gap-2">
                     {tool.required && (
                       <Badge variant="success" className="text-xs">
-                        Recommandé
+                        {recommendedLabel}
                       </Badge>
                     )}
                     <Badge variant="secondary" className="text-xs">
@@ -100,7 +145,7 @@ export function Tools() {
         {/* CTA */}
         <div className="text-center mt-12">
           <Button variant="outline" size="lg">
-            Voir toutes les intégrations
+            {seeAllLabel}
             <ExternalLink className="w-4 h-4 ml-2" />
           </Button>
         </div>

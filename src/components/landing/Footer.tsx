@@ -1,31 +1,34 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Zap } from "lucide-react";
 
 export function Footer() {
+  const { t } = useTranslation();
+
   const footerLinks = {
-    Produit: [
-      { label: "Fonctionnalités", href: "#features" },
-      { label: "Tarifs", href: "#pricing" },
-      { label: "Intégrations", href: "#tools" },
-      { label: "Changelog", href: "#" },
+    [t("landing.footer.product")]: [
+      { label: t("landing.footer.features"), href: "#features" },
+      { label: t("landing.footer.pricing"), href: "#pricing" },
+      { label: t("landing.footer.integrations"), href: "#tools" },
+      { label: t("landing.footer.changelog"), href: "#" },
     ],
-    Ressources: [
-      { label: "Documentation", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Études de cas", href: "#" },
+    [t("landing.footer.resources")]: [
+      { label: t("landing.footer.documentation"), href: "#" },
+      { label: t("landing.footer.blog"), href: "#" },
+      { label: t("landing.footer.community"), href: "#" },
       { label: "API", href: "#" },
     ],
-    Entreprise: [
-      { label: "À propos", href: "#" },
-      { label: "Contact", href: "#" },
-      { label: "Carrières", href: "#" },
-      { label: "Partenaires", href: "#" },
+    [t("landing.footer.company")]: [
+      { label: t("landing.footer.about"), href: "#" },
+      { label: t("landing.footer.contact"), href: "#" },
+      { label: t("landing.footer.careers"), href: "#" },
+      { label: t("landing.footer.partners"), href: "#" },
     ],
-    Légal: [
-      { label: "Confidentialité", href: "#" },
-      { label: "CGU", href: "#" },
-      { label: "RGPD", href: "#" },
-      { label: "Sécurité", href: "#" },
+    [t("landing.footer.legal")]: [
+      { label: t("landing.footer.privacy"), href: "#" },
+      { label: t("landing.footer.terms"), href: "#" },
+      { label: t("landing.footer.cookies"), href: "#" },
+      { label: "GDPR", href: "#" },
     ],
   };
 
@@ -42,7 +45,7 @@ export function Footer() {
               <span className="font-bold text-lg">Growth OS</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Automatise ta croissance avec des agents IA. SEO, Ads, CRO, Local — tout en un.
+              {t("landing.footer.description")}
             </p>
           </div>
 
@@ -69,7 +72,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 Growth OS. Tous droits réservés.
+            © 2026 Growth OS. {t("landing.footer.rights")}.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

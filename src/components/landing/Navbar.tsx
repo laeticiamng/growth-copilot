@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { 
   Zap, 
@@ -6,15 +7,17 @@ import {
   X 
 } from "lucide-react";
 import { useState } from "react";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 export function Navbar() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { href: "#features", label: "Fonctionnalités" },
-    { href: "#tools", label: "Outils" },
-    { href: "#how-it-works", label: "Comment ça marche" },
-    { href: "#pricing", label: "Tarifs" },
+    { href: "#features", label: t("landing.navbar.features") },
+    { href: "#tools", label: t("landing.tools.title") },
+    { href: "#how-it-works", label: t("landing.navbar.howItWorks") },
+    { href: "#pricing", label: t("landing.navbar.pricing") },
   ];
 
   return (
@@ -43,27 +46,31 @@ export function Navbar() {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle />
             <Link to="/dashboard">
               <Button variant="ghost" size="sm">
-                Connexion
+                {t("landing.navbar.login")}
               </Button>
             </Link>
             <Link to="/onboarding">
               <Button variant="gradient" size="sm">
-                Audit gratuit
+                {t("landing.navbar.getStarted")}
               </Button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <LanguageToggle />
+            <button
+              className="p-2"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -83,12 +90,12 @@ export function Navbar() {
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
                 <Link to="/dashboard">
                   <Button variant="ghost" className="w-full">
-                    Connexion
+                    {t("landing.navbar.login")}
                   </Button>
                 </Link>
                 <Link to="/onboarding">
                   <Button variant="gradient" className="w-full">
-                    Audit gratuit
+                    {t("landing.navbar.getStarted")}
                   </Button>
                 </Link>
               </div>

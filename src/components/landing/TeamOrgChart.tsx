@@ -1,127 +1,243 @@
+import { useTranslation } from "react-i18next";
 import { Bot, Brain, Search, FileText, BarChart3, Megaphone, Shield, Zap, PenTool, Target, Share2, Music, Eye, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const agents = [
-  // Level 0 - Leadership
-  {
-    id: "cgo",
-    name: "Sophie Marchand",
-    role: "Chief Growth Officer",
-    description: "Orchestre tous les agents et priorise les actions selon l'impact business (ICE)",
-    icon: Brain,
-    color: "from-primary to-primary/60",
-    level: 0,
-  },
-  // Level 1 - Core Operations
-  {
-    id: "analytics",
-    name: "Lucas Bernier",
-    role: "Analytics Guardian",
-    description: "Synchronise GSC/GA4, surveille les KPIs et génère les rapports mensuels",
-    icon: BarChart3,
-    color: "from-blue-500 to-blue-400",
-    level: 1,
-  },
-  {
-    id: "seo-tech",
-    name: "Emma Lefebvre",
-    role: "SEO Tech Auditor",
-    description: "Crawle le site, identifie les erreurs techniques et génère les correctifs",
-    icon: Search,
-    color: "from-green-500 to-green-400",
-    level: 1,
-  },
-  {
-    id: "content",
-    name: "Thomas Duval",
-    role: "Content Strategist",
-    description: "Analyse les mots-clés, crée les clusters et planifie le calendrier éditorial",
-    icon: FileText,
-    color: "from-purple-500 to-purple-400",
-    level: 1,
-  },
-  {
-    id: "copywriting",
-    name: "Léa Fontaine",
-    role: "Copywriting Agent",
-    description: "Rédige les textes conversion-first avec frameworks AIDA/PAS",
-    icon: PenTool,
-    color: "from-pink-500 to-pink-400",
-    level: 1,
-  },
-  // Level 2 - Acquisition & Distribution
-  {
-    id: "ads",
-    name: "Marc Rousseau",
-    role: "Ads Optimizer",
-    description: "Optimise les campagnes SEA/YouTube avec contrôle budget et tracking",
-    icon: Target,
-    color: "from-amber-500 to-amber-400",
-    level: 2,
-  },
-  {
-    id: "social",
-    name: "Chloé Martin",
-    role: "Social Distribution",
-    description: "Repurpose le contenu et planifie la distribution multi-plateforme",
-    icon: Share2,
-    color: "from-cyan-500 to-cyan-400",
-    level: 2,
-  },
-  {
-    id: "media",
-    name: "Antoine Girard",
-    role: "Media Promotion",
-    description: "Orchestre les lancements YouTube/Spotify avec smart links",
-    icon: Music,
-    color: "from-orange-500 to-orange-400",
-    level: 2,
-  },
-  {
-    id: "competitive",
-    name: "Julie Moreau",
-    role: "Competitive Intel",
-    description: "Analyse les concurrents et détecte les opportunités de gaps",
-    icon: Eye,
-    color: "from-indigo-500 to-indigo-400",
-    level: 2,
-  },
-  // Level 3 - Quality & Control
-  {
-    id: "qco",
-    name: "Pierre Lambert",
-    role: "Quality Control",
-    description: "Valide les outputs, vérifie la conformité brand et éthique",
-    icon: Shield,
-    color: "from-red-500 to-red-400",
-    level: 3,
-  },
-  {
-    id: "approval",
-    name: "Claire Dubois",
-    role: "Approval Engine",
-    description: "Classe les actions : auto-safe, approval-required ou blocked",
-    icon: CheckCircle,
-    color: "from-emerald-500 to-emerald-400",
-    level: 3,
-  },
-  {
-    id: "supervisor",
-    name: "Nicolas Bernard",
-    role: "Meta-Supervisor",
-    description: "Supervise les coûts, quotas et la santé système des agents",
-    icon: Zap,
-    color: "from-yellow-500 to-yellow-400",
-    level: 3,
-  },
-];
-
 export function TeamOrgChart() {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
+
+  const agentsFr = [
+    {
+      id: "cgo",
+      name: "Sophie Marchand",
+      role: "Chief Growth Officer",
+      description: "Orchestre tous les agents et priorise les actions selon l'impact business (ICE)",
+      icon: Brain,
+      color: "from-primary to-primary/60",
+      level: 0,
+    },
+    {
+      id: "analytics",
+      name: "Lucas Bernier",
+      role: "Analytics Guardian",
+      description: "Synchronise GSC/GA4, surveille les KPIs et génère les rapports mensuels",
+      icon: BarChart3,
+      color: "from-blue-500 to-blue-400",
+      level: 1,
+    },
+    {
+      id: "seo-tech",
+      name: "Emma Lefebvre",
+      role: "SEO Tech Auditor",
+      description: "Crawle le site, identifie les erreurs techniques et génère les correctifs",
+      icon: Search,
+      color: "from-green-500 to-green-400",
+      level: 1,
+    },
+    {
+      id: "content",
+      name: "Thomas Duval",
+      role: "Content Strategist",
+      description: "Analyse les mots-clés, crée les clusters et planifie le calendrier éditorial",
+      icon: FileText,
+      color: "from-purple-500 to-purple-400",
+      level: 1,
+    },
+    {
+      id: "copywriting",
+      name: "Léa Fontaine",
+      role: "Copywriting Agent",
+      description: "Rédige les textes conversion-first avec frameworks AIDA/PAS",
+      icon: PenTool,
+      color: "from-pink-500 to-pink-400",
+      level: 1,
+    },
+    {
+      id: "ads",
+      name: "Marc Rousseau",
+      role: "Ads Optimizer",
+      description: "Optimise les campagnes SEA/YouTube avec contrôle budget et tracking",
+      icon: Target,
+      color: "from-amber-500 to-amber-400",
+      level: 2,
+    },
+    {
+      id: "social",
+      name: "Chloé Martin",
+      role: "Social Distribution",
+      description: "Repurpose le contenu et planifie la distribution multi-plateforme",
+      icon: Share2,
+      color: "from-cyan-500 to-cyan-400",
+      level: 2,
+    },
+    {
+      id: "media",
+      name: "Antoine Girard",
+      role: "Media Promotion",
+      description: "Orchestre les lancements YouTube/Spotify avec smart links",
+      icon: Music,
+      color: "from-orange-500 to-orange-400",
+      level: 2,
+    },
+    {
+      id: "competitive",
+      name: "Julie Moreau",
+      role: "Competitive Intel",
+      description: "Analyse les concurrents et détecte les opportunités de gaps",
+      icon: Eye,
+      color: "from-indigo-500 to-indigo-400",
+      level: 2,
+    },
+    {
+      id: "qco",
+      name: "Pierre Lambert",
+      role: "Quality Control",
+      description: "Valide les outputs, vérifie la conformité brand et éthique",
+      icon: Shield,
+      color: "from-red-500 to-red-400",
+      level: 3,
+    },
+    {
+      id: "approval",
+      name: "Claire Dubois",
+      role: "Approval Engine",
+      description: "Classe les actions : auto-safe, approval-required ou blocked",
+      icon: CheckCircle,
+      color: "from-emerald-500 to-emerald-400",
+      level: 3,
+    },
+    {
+      id: "supervisor",
+      name: "Nicolas Bernard",
+      role: "Meta-Supervisor",
+      description: "Supervise les coûts, quotas et la santé système des agents",
+      icon: Zap,
+      color: "from-yellow-500 to-yellow-400",
+      level: 3,
+    },
+  ];
+
+  const agentsEn = [
+    {
+      id: "cgo",
+      name: "Sophie Marchand",
+      role: "Chief Growth Officer",
+      description: "Orchestrates all agents and prioritizes actions based on business impact (ICE)",
+      icon: Brain,
+      color: "from-primary to-primary/60",
+      level: 0,
+    },
+    {
+      id: "analytics",
+      name: "Lucas Bernier",
+      role: "Analytics Guardian",
+      description: "Syncs GSC/GA4, monitors KPIs and generates monthly reports",
+      icon: BarChart3,
+      color: "from-blue-500 to-blue-400",
+      level: 1,
+    },
+    {
+      id: "seo-tech",
+      name: "Emma Lefebvre",
+      role: "SEO Tech Auditor",
+      description: "Crawls the site, identifies technical errors and generates fixes",
+      icon: Search,
+      color: "from-green-500 to-green-400",
+      level: 1,
+    },
+    {
+      id: "content",
+      name: "Thomas Duval",
+      role: "Content Strategist",
+      description: "Analyzes keywords, creates clusters and plans editorial calendar",
+      icon: FileText,
+      color: "from-purple-500 to-purple-400",
+      level: 1,
+    },
+    {
+      id: "copywriting",
+      name: "Léa Fontaine",
+      role: "Copywriting Agent",
+      description: "Writes conversion-first copy with AIDA/PAS frameworks",
+      icon: PenTool,
+      color: "from-pink-500 to-pink-400",
+      level: 1,
+    },
+    {
+      id: "ads",
+      name: "Marc Rousseau",
+      role: "Ads Optimizer",
+      description: "Optimizes SEA/YouTube campaigns with budget control and tracking",
+      icon: Target,
+      color: "from-amber-500 to-amber-400",
+      level: 2,
+    },
+    {
+      id: "social",
+      name: "Chloé Martin",
+      role: "Social Distribution",
+      description: "Repurposes content and plans multi-platform distribution",
+      icon: Share2,
+      color: "from-cyan-500 to-cyan-400",
+      level: 2,
+    },
+    {
+      id: "media",
+      name: "Antoine Girard",
+      role: "Media Promotion",
+      description: "Orchestrates YouTube/Spotify launches with smart links",
+      icon: Music,
+      color: "from-orange-500 to-orange-400",
+      level: 2,
+    },
+    {
+      id: "competitive",
+      name: "Julie Moreau",
+      role: "Competitive Intel",
+      description: "Analyzes competitors and detects gap opportunities",
+      icon: Eye,
+      color: "from-indigo-500 to-indigo-400",
+      level: 2,
+    },
+    {
+      id: "qco",
+      name: "Pierre Lambert",
+      role: "Quality Control",
+      description: "Validates outputs, verifies brand and ethical compliance",
+      icon: Shield,
+      color: "from-red-500 to-red-400",
+      level: 3,
+    },
+    {
+      id: "approval",
+      name: "Claire Dubois",
+      role: "Approval Engine",
+      description: "Classifies actions: auto-safe, approval-required or blocked",
+      icon: CheckCircle,
+      color: "from-emerald-500 to-emerald-400",
+      level: 3,
+    },
+    {
+      id: "supervisor",
+      name: "Nicolas Bernard",
+      role: "Meta-Supervisor",
+      description: "Monitors costs, quotas and agent system health",
+      icon: Zap,
+      color: "from-yellow-500 to-yellow-400",
+      level: 3,
+    },
+  ];
+
+  const agents = isEn ? agentsEn : agentsFr;
   const level0 = agents.filter((a) => a.level === 0);
   const level1 = agents.filter((a) => a.level === 1);
   const level2 = agents.filter((a) => a.level === 2);
   const level3 = agents.filter((a) => a.level === 3);
+
+  const labels = isEn 
+    ? { team: "AI Team", title: "Your 100% automated marketing team", subtitle: "12 specialized AI agents work in synergy to optimize your growth, 24/7", coreOps: "Core Operations", acquisition: "Acquisition & Distribution", quality: "Quality & Control", availability: "Availability", agents: "Specialized agents", responseTime: "Response time", scalability: "Scalability" }
+    : { team: "Équipe IA", title: "Votre équipe marketing 100% automatisée", subtitle: "12 agents IA spécialisés travaillent en synergie pour optimiser votre croissance, 24h/24", coreOps: "Opérations Core", acquisition: "Acquisition & Distribution", quality: "Qualité & Contrôle", availability: "Disponibilité", agents: "Agents spécialisés", responseTime: "Temps de réponse", scalability: "Scalabilité" };
 
   return (
     <section className="py-20 px-4 bg-secondary/30">
@@ -130,15 +246,13 @@ export function TeamOrgChart() {
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4">
             <Bot className="w-3 h-3 mr-1" />
-            Équipe IA
+            {labels.team}
           </Badge>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Votre équipe marketing{" "}
-            <span className="text-gradient">100% automatisée</span>
+            {labels.title}
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            12 agents IA spécialisés travaillent en synergie pour optimiser votre
-            croissance, 24h/24
+            {labels.subtitle}
           </p>
         </div>
 
@@ -158,7 +272,7 @@ export function TeamOrgChart() {
           <div>
             <div className="text-center mb-4">
               <Badge variant="secondary" className="text-xs">
-                Opérations Core
+                {labels.coreOps}
               </Badge>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -175,7 +289,7 @@ export function TeamOrgChart() {
           <div>
             <div className="text-center mb-4">
               <Badge variant="secondary" className="text-xs">
-                Acquisition & Distribution
+                {labels.acquisition}
               </Badge>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -192,7 +306,7 @@ export function TeamOrgChart() {
           <div>
             <div className="text-center mb-4">
               <Badge variant="secondary" className="text-xs">
-                Qualité & Contrôle
+                {labels.quality}
               </Badge>
             </div>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -206,10 +320,10 @@ export function TeamOrgChart() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
           {[
-            { value: "24/7", label: "Disponibilité" },
-            { value: "12", label: "Agents spécialisés" },
-            { value: "<1s", label: "Temps de réponse" },
-            { value: "∞", label: "Scalabilité" },
+            { value: "24/7", label: labels.availability },
+            { value: "12", label: labels.agents },
+            { value: "<1s", label: labels.responseTime },
+            { value: "∞", label: labels.scalability },
           ].map((stat, i) => (
             <div
               key={i}
@@ -228,7 +342,15 @@ export function TeamOrgChart() {
 }
 
 interface AgentCardProps {
-  agent: (typeof agents)[0];
+  agent: {
+    id: string;
+    name: string;
+    role: string;
+    description: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    level: number;
+  };
   isLeader?: boolean;
   isSupport?: boolean;
 }

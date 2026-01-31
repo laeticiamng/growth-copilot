@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -49,6 +50,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -98,6 +100,7 @@ const allNavItems: NavItem[] = [
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { t } = useTranslation();
   const { user, signOut, loading: authLoading } = useAuth();
   const { workspaces, currentWorkspace, setCurrentWorkspace, loading: wsLoading } = useWorkspace();
   const { isAtLeastRole, loading: permLoading } = usePermissions();
@@ -243,15 +246,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("auth.login")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
                   <Settings className="w-4 h-4 mr-2" />
-                  Paramètres
+                  {t("common.configure")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Déconnexion
+                  {t("auth.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -270,7 +273,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         {/* Desktop notification bar */}
-        <div className="hidden lg:flex h-14 items-center justify-end px-6 border-b border-border bg-card/50">
+        <div className="hidden lg:flex h-14 items-center justify-end gap-2 px-6 border-b border-border bg-card/50">
+          <LanguageToggle />
           <NotificationCenter />
         </div>
         <div className="p-6 lg:p-8">

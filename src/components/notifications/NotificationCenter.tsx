@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,7 +22,7 @@ import {
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, type Locale } from "date-fns/locale";
 
 const typeIcons = {
   info: Info,
@@ -40,6 +41,7 @@ const typeColors = {
 };
 
 export function NotificationCenter() {
+  const { t, i18n } = useTranslation();
   const {
     notifications,
     unreadCount,
@@ -49,6 +51,8 @@ export function NotificationCenter() {
     deleteNotification,
   } = useNotifications();
   const [open, setOpen] = useState(false);
+
+  const dateLocale = i18n.language === "fr" ? fr : enUS;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,7 +72,7 @@ export function NotificationCenter() {
       <PopoverContent className="w-80 p-0" align="end">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-3">
-          <h4 className="font-semibold">Notifications</h4>
+          <h4 className="font-semibold">{t("notifications.title")}</h4>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -77,7 +81,7 @@ export function NotificationCenter() {
               className="h-8 text-xs"
             >
               <CheckCheck className="mr-1 h-3 w-3" />
-              Tout lire
+              {t("common.markAllRead")}
             </Button>
           )}
         </div>
@@ -86,12 +90,12 @@ export function NotificationCenter() {
         <ScrollArea className="h-80">
           {loading ? (
             <div className="flex h-full items-center justify-center p-4 text-muted-foreground">
-              Chargement...
+              {t("common.loading")}
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center p-4 text-center text-muted-foreground">
               <Bell className="mb-2 h-8 w-8 opacity-50" />
-              <p className="text-sm">Aucune notification</p>
+              <p className="text-sm">{t("common.noNotifications")}</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -101,6 +105,7 @@ export function NotificationCenter() {
                   notification={notif}
                   onRead={() => markAsRead(notif.id)}
                   onDelete={() => deleteNotification(notif.id)}
+                  dateLocale={dateLocale}
                 />
               ))}
             </div>
@@ -115,9 +120,10 @@ interface NotificationItemProps {
   notification: Notification;
   onRead: () => void;
   onDelete: () => void;
+  dateLocale: Locale;
 }
 
-function NotificationItem({ notification, onRead, onDelete }: NotificationItemProps) {
+function NotificationItem({ notification, onRead, onDelete, dateLocale }: NotificationItemProps) {
   const Icon = typeIcons[notification.type] || Info;
   const colorClass = typeColors[notification.type] || "text-muted-foreground";
 
@@ -146,7 +152,7 @@ function NotificationItem({ notification, onRead, onDelete }: NotificationItemPr
         <p className="mt-1 text-xs text-muted-foreground/70">
           {formatDistanceToNow(new Date(notification.created_at), {
             addSuffix: true,
-            locale: fr,
+            locale: dateLocale,
           })}
         </p>
       </div>
