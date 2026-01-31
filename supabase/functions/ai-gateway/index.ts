@@ -142,46 +142,39 @@ function hashInput(input: unknown): string {
   return Math.abs(hash).toString(16);
 }
 
-// Model mapping by agent/purpose - optimized for cost
-// CGO: orchestrator (needs reasoning) → gemini-2.5-flash
-// QCO: validator (needs precision) → gemini-2.5-flash (low temp)
-// SEO Auditor: worker (bulk analysis) → gemini-2.5-flash-lite (cheaper)
-// Copywriting: creative → gemini-2.5-flash-lite (higher temp)
+// Model mapping by agent/purpose - OpenAI GPT-5 series by default
+// CGO: orchestrator (needs deep reasoning) → gpt-5.2
+// QCO: validator (needs precision) → gpt-5.2 (low temp)
+// SEO Auditor: worker (bulk analysis) → gpt-5-mini (cheaper)
+// Copywriting: creative → gpt-5.2 (quality matters)
+// Cheap tasks: gemini-2.5-flash-lite when budget is tight
 function getModelConfig(purpose: string): { model: string; temperature: number; max_tokens: number } {
   const configs: Record<string, { model: string; temperature: number; max_tokens: number }> = {
-    cgo_plan: { model: "google/gemini-2.5-flash", temperature: 0.3, max_tokens: 8192 },
-    qa_review: { model: "google/gemini-2.5-flash", temperature: 0.1, max_tokens: 4096 },
-    seo_audit: { model: "google/gemini-2.5-flash-lite", temperature: 0.2, max_tokens: 4096 },
-    copywriting: { model: "google/gemini-2.5-flash-lite", temperature: 0.7, max_tokens: 4096 },
-    analysis: { model: "google/gemini-2.5-flash", temperature: 0.3, max_tokens: 4096 },
+    cgo_plan: { model: "openai/gpt-5.2", temperature: 0.3, max_tokens: 8192 },
+    qa_review: { model: "openai/gpt-5.2", temperature: 0.1, max_tokens: 4096 },
+    seo_audit: { model: "openai/gpt-5-mini", temperature: 0.2, max_tokens: 4096 },
+    copywriting: { model: "openai/gpt-5.2", temperature: 0.7, max_tokens: 4096 },
+    analysis: { model: "openai/gpt-5-mini", temperature: 0.3, max_tokens: 4096 },
+    // Cheap fallback for high-volume/low-priority tasks
+    bulk_cheap: { model: "google/gemini-2.5-flash-lite", temperature: 0.2, max_tokens: 2048 },
   };
   return configs[purpose] || configs.analysis;
 }
 
-// Estimate cost based on tokens (rough estimates)
-function estimateCost(tokensIn: number, tokensOut: number, model: string): number {
-  const pricing: Record<string, { input: number; output: number }> = {
-    "google/gemini-2.5-flash": { input: 0.075, output: 0.30 },
-    "google/gemini-2.5-flash-lite": { input: 0.0375, output: 0.15 },
-  };
-  const modelPricing = pricing[model] || pricing["google/gemini-2.5-flash"];
-  return (tokensIn * modelPricing.input + tokensOut * modelPricing.output) / 1_000_000;
-}
-
-// Plan tier limits
-const PLAN_LIMITS: Record<string, { requests_per_minute: number; max_concurrent: number; monthly_budget: number }> = {
-  free: { requests_per_minute: 10, max_concurrent: 2, monthly_budget: 5.00 },
-  starter: { requests_per_minute: 30, max_concurrent: 5, monthly_budget: 25.00 },
-  growth: { requests_per_minute: 60, max_concurrent: 10, monthly_budget: 100.00 },
-  agency: { requests_per_minute: 120, max_concurrent: 20, monthly_budget: 500.00 },
+// Plan tier limits - budget based on tokens (not cost, since pricing varies)
+// monthly_token_budget = max tokens (in+out) per month
+const PLAN_LIMITS: Record<string, { requests_per_minute: number; max_concurrent: number; monthly_token_budget: number }> = {
+  free: { requests_per_minute: 10, max_concurrent: 2, monthly_token_budget: 100_000 },
+  starter: { requests_per_minute: 30, max_concurrent: 5, monthly_token_budget: 500_000 },
+  growth: { requests_per_minute: 60, max_concurrent: 10, monthly_token_budget: 2_000_000 },
+  agency: { requests_per_minute: 120, max_concurrent: 20, monthly_token_budget: 10_000_000 },
 };
 
 interface QuotaRecord {
   plan_tier: string;
   requests_this_minute: number;
   concurrent_runs: number;
-  monthly_ai_spent: number;
-  monthly_ai_budget: number;
+  monthly_tokens_used: number;
   last_request_at: string | null;
   current_period_start: string;
 }
@@ -197,26 +190,33 @@ interface QuotaCheck {
 async function checkAndUpdateQuota(
   supabase: any,
   workspaceId: string,
-  action: "check" | "increment" | "decrement" | "add_cost",
-  costToAdd?: number
+  action: "check" | "increment" | "decrement" | "add_tokens",
+  tokensToAdd?: number
 ): Promise<QuotaCheck> {
+  const client = supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> };
+  
   try {
-    // Use RPC for type safety with new tables
-    // Cast to any to bypass TypeScript type checking for new RPCs
-    const client = supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> };
-    
     const { data, error } = await client.rpc("get_workspace_quota", { p_workspace_id: workspaceId });
 
-    // If RPC doesn't exist yet or error, fail open
+    // FAIL-CLOSED: If we can't verify quota, block the request
     if (error) {
-      console.warn("Quota check skipped:", (error as { message?: string }).message);
-      return { allowed: true };
+      console.error("Quota check failed (blocking request):", (error as { message?: string }).message);
+      return { 
+        allowed: false, 
+        reason: "Unable to verify quota - request blocked for safety. Please try again." 
+      };
     }
 
     const quotaArray = data as QuotaRecord[] | null;
     const quota = quotaArray?.[0];
+    
+    // FAIL-CLOSED: No quota record means workspace not properly set up
     if (!quota) {
-      return { allowed: true }; // No quota record, allow
+      console.error("No quota record found for workspace:", workspaceId);
+      return { 
+        allowed: false, 
+        reason: "Workspace quota not configured. Please contact support." 
+      };
     }
 
     const limits = PLAN_LIMITS[quota.plan_tier] || PLAN_LIMITS.free;
@@ -246,11 +246,11 @@ async function checkAndUpdateQuota(
           quota,
         };
       }
-      // Check budget
-      if (Number(quota.monthly_ai_spent || 0) >= limits.monthly_budget) {
+      // Check token budget (not cost-based)
+      if ((quota.monthly_tokens_used || 0) >= limits.monthly_token_budget) {
         return {
           allowed: false,
-          reason: `Monthly AI budget exhausted: $${limits.monthly_budget} for ${quota.plan_tier} plan`,
+          reason: `Monthly token budget exhausted: ${limits.monthly_token_budget.toLocaleString()} tokens for ${quota.plan_tier} plan`,
           quota,
         };
       }
@@ -259,11 +259,15 @@ async function checkAndUpdateQuota(
 
     // For mutations, use update_workspace_quota RPC
     if (action === "increment") {
-      await client.rpc("update_workspace_quota", {
+      const { error: updateError } = await client.rpc("update_workspace_quota", {
         p_workspace_id: workspaceId,
         p_increment_requests: true,
         p_increment_concurrent: true,
       });
+      if (updateError) {
+        console.error("Failed to increment quota:", updateError);
+        return { allowed: false, reason: "Failed to update quota tracking" };
+      }
     }
 
     if (action === "decrement") {
@@ -273,17 +277,21 @@ async function checkAndUpdateQuota(
       });
     }
 
-    if (action === "add_cost" && costToAdd) {
+    if (action === "add_tokens" && tokensToAdd) {
       await client.rpc("update_workspace_quota", {
         p_workspace_id: workspaceId,
-        p_add_cost: costToAdd,
+        p_add_tokens: tokensToAdd,
       });
     }
 
     return { allowed: true, quota };
   } catch (err) {
-    console.warn("Quota check error, allowing request:", err);
-    return { allowed: true }; // Fail open
+    // FAIL-CLOSED: Any unexpected error blocks the request
+    console.error("Quota check exception (blocking request):", err);
+    return { 
+      allowed: false, 
+      reason: "Quota verification error - request blocked. Please try again." 
+    };
   }
 }
 
@@ -482,15 +490,16 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
     }
 
     const durationMs = Date.now() - startTime;
-    const costEstimate = estimateCost(tokensIn, tokensOut, modelConfig.model);
+    const totalTokens = tokensIn + tokensOut;
 
-    // Decrement concurrent runs and add cost to quota
+    // Decrement concurrent runs and add tokens to quota
     await checkAndUpdateQuota(supabase, workspace_id, "decrement");
-    if (costEstimate > 0) {
-      await checkAndUpdateQuota(supabase, workspace_id, "add_cost", costEstimate);
+    if (totalTokens > 0) {
+      await checkAndUpdateQuota(supabase, workspace_id, "add_tokens", totalTokens);
     }
 
-    // Update ai_request with results
+    // Update ai_request with results (service-role only, one-shot pending → final)
+    // This is the ONLY update allowed on ai_requests - transitions from pending to final status
     if (requestId) {
       await supabase
         .from("ai_requests")
@@ -500,7 +509,6 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
           error_message: errorMessage,
           tokens_in: tokensIn,
           tokens_out: tokensOut,
-          cost_estimate: costEstimate,
           duration_ms: durationMs,
         })
         .eq("id", requestId);
@@ -522,7 +530,7 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
         status,
         tokens_in: tokensIn,
         tokens_out: tokensOut,
-        cost_estimate: costEstimate,
+        tokens_total: totalTokens,
         duration_ms: durationMs,
       },
       is_automated: true,
@@ -538,7 +546,7 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
         usage: {
           tokens_in: tokensIn,
           tokens_out: tokensOut,
-          cost_estimate: costEstimate,
+          tokens_total: totalTokens,
           duration_ms: durationMs,
         },
       }),
