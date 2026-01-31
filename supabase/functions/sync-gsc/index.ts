@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { validateWorkspaceAccess, unauthorizedResponse, forbiddenResponse } from "../_shared/auth.ts";
+import { getOAuthTokens, getIntegration } from "../_shared/oauth-tokens.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +17,7 @@ interface GSCRequest {
 }
 
 // Google Search Console API sync
-// Requires GSC_ACCESS_TOKEN and GSC_REFRESH_TOKEN stored in integrations table
+// Uses encrypted OAuth tokens from oauth_tokens table
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,6 +26,7 @@ serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY");
 
   try {
     const body: GSCRequest = await req.json();
@@ -53,16 +55,15 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get integration credentials
-    const { data: integration, error: intError } = await supabase
-      .from("integrations")
-      .select("*")
-      .eq("workspace_id", workspace_id)
-      .eq("provider", "google_search_console")
-      .eq("status", "active")
-      .single();
+    // Get integration
+    const integration = await getIntegration(
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
+      workspace_id,
+      "google_search_console"
+    );
 
-    if (intError || !integration) {
+    if (!integration) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -72,14 +73,36 @@ serve(async (req) => {
       );
     }
 
-    // In production, we would:
-    // 1. Get access token from Vault using integration.access_token_ref
-    // 2. Refresh if expired using integration.refresh_token_ref
-    // 3. Call GSC API
-    
-    // For now, we simulate the sync with demo data structure
-    // Real implementation would use: https://www.googleapis.com/webmasters/v3/sites/{siteUrl}/searchAnalytics/query
-    
+    // Check if encryption key is configured
+    if (!TOKEN_ENCRYPTION_KEY) {
+      console.error("TOKEN_ENCRYPTION_KEY not configured");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Token encryption not configured. Contact administrator.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Get decrypted OAuth tokens
+    const tokens = await getOAuthTokens(
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
+      TOKEN_ENCRYPTION_KEY,
+      integration.id
+    );
+
+    if (!tokens) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "OAuth tokens not found or expired. Please reconnect Google Search Console.",
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const syncId = crypto.randomUUID();
     const today = new Date();
     const defaultEndDate = new Date(today.setDate(today.getDate() - 2)); // GSC has 2-day lag
@@ -105,24 +128,119 @@ serve(async (req) => {
       result: "pending",
     });
 
-    // In production, we'd call the GSC API here
-    // For MVP, we prepare the structure for when tokens are configured
+    // Format site URL for GSC API (needs to be URL-encoded)
+    const encodedSiteUrl = encodeURIComponent(site_url);
+    const gscApiUrl = `https://www.googleapis.com/webmasters/v3/sites/${encodedSiteUrl}/searchAnalytics/query`;
+
+    // Call GSC API with real token
     const gscApiPayload = {
       startDate: dateStart,
       endDate: dateEnd,
       dimensions: ["date"],
       rowLimit: 1000,
-      aggregationType: "byPage",
     };
 
-    // Simulate successful sync structure (replace with real API call)
-    // This shows the expected data format
-    const mockResponse = {
-      rows: [
-        // Each row would contain: keys (date), clicks, impressions, ctr, position
-        // Real data would come from GSC API response
-      ],
+    const gscResponse = await fetch(gscApiUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(gscApiPayload),
+    });
+
+    if (!gscResponse.ok) {
+      const errorText = await gscResponse.text();
+      console.error("GSC API error:", gscResponse.status, errorText);
+      
+      // Update action_log with error
+      await supabase
+        .from("action_log")
+        .update({ result: "error", details: { error: errorText } })
+        .eq("workspace_id", workspace_id)
+        .eq("details->>sync_id", syncId);
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `GSC API error: ${gscResponse.status}`,
+          details: errorText,
+        }),
+        { status: gscResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const gscData = await gscResponse.json();
+
+    // Parse and store data in kpis_daily
+    const rows = gscData.rows || [];
+    let insertedCount = 0;
+
+    for (const row of rows) {
+      const date = row.keys?.[0]; // Date dimension
+      const clicks = row.clicks || 0;
+      const impressions = row.impressions || 0;
+      const ctr = row.ctr || 0;
+      const position = row.position || 0;
+
+      if (date) {
+        await supabase.from("kpis_daily").upsert({
+          workspace_id,
+          site_id,
+          date,
+          organic_clicks: clicks,
+          organic_impressions: impressions,
+          avg_position: position,
+          source: "gsc",
+          sync_id: syncId,
+          metrics_json: { clicks, impressions, ctr, position },
+        }, {
+          onConflict: "site_id,date",
+        });
+        insertedCount++;
+      }
+    }
+
+    // Also fetch keywords data
+    const keywordsPayload = {
+      startDate: dateStart,
+      endDate: dateEnd,
+      dimensions: ["query"],
+      rowLimit: 500,
     };
+
+    const keywordsResponse = await fetch(gscApiUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(keywordsPayload),
+    });
+
+    if (keywordsResponse.ok) {
+      const keywordsData = await keywordsResponse.json();
+      const keywordRows = keywordsData.rows || [];
+
+      for (const row of keywordRows) {
+        const keyword = row.keys?.[0];
+        if (keyword) {
+          await supabase.from("keywords").upsert({
+            workspace_id,
+            site_id,
+            keyword,
+            clicks_30d: row.clicks || 0,
+            impressions_30d: row.impressions || 0,
+            ctr_30d: row.ctr || 0,
+            position_avg: row.position || 0,
+            is_tracked: true,
+            source: "gsc",
+          }, {
+            onConflict: "site_id,keyword",
+          });
+        }
+      }
+    }
 
     // Update integration last_sync_at
     await supabase
@@ -133,21 +251,20 @@ serve(async (req) => {
     // Update action_log with success
     await supabase
       .from("action_log")
-      .update({ result: "success" })
+      .update({ 
+        result: "success",
+        details: { sync_id: syncId, rows_synced: insertedCount }
+      })
       .eq("workspace_id", workspace_id)
-      .eq("details->sync_id", syncId);
+      .eq("details->>sync_id", syncId);
 
     return new Response(
       JSON.stringify({
         success: true,
         sync_id: syncId,
-        message: "GSC sync completed. Configure OAuth tokens for live data.",
-        data_structure: {
-          note: "Once OAuth is configured, this endpoint will return real GSC data",
-          expected_fields: ["date", "clicks", "impressions", "ctr", "position"],
-          api_endpoint: "https://www.googleapis.com/webmasters/v3/sites/{siteUrl}/searchAnalytics/query",
-          payload_example: gscApiPayload,
-        },
+        message: `GSC sync completed. ${insertedCount} days of data synced.`,
+        rows_synced: insertedCount,
+        date_range: { start: dateStart, end: dateEnd },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
