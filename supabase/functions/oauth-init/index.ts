@@ -39,7 +39,6 @@ const PROVIDER_SCOPES: Record<string, string[]> = {
     "email",
     "profile",
   ],
-  // Combined scope for GA4 + GSC together
   google_combined: [
     "https://www.googleapis.com/auth/analytics.readonly",
     "https://www.googleapis.com/auth/webmasters.readonly",
@@ -48,6 +47,62 @@ const PROVIDER_SCOPES: Record<string, string[]> = {
     "profile",
   ],
 };
+
+// Whitelist of allowed redirect URL origins
+const ALLOWED_REDIRECT_ORIGINS = [
+  "https://id-preview--c548a033-0937-4830-bc84-bb2548968cd3.lovable.app",
+  "https://lovable.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+/**
+ * Validates that redirect_url is from an allowed origin
+ */
+function isValidRedirectUrl(redirectUrl: string): boolean {
+  try {
+    const url = new URL(redirectUrl);
+    const origin = url.origin;
+    return ALLOWED_REDIRECT_ORIGINS.some(allowed => 
+      origin === allowed || origin.endsWith('.lovable.app')
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generate HMAC signature for state verification
+ */
+async function generateHmac(data: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(data);
+  
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  
+  const signature = await crypto.subtle.sign("HMAC", key, messageData);
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * Generate cryptographically secure nonce
+ */
+function generateNonce(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 /**
  * Initiates OAuth flow for Google APIs
@@ -60,7 +115,9 @@ serve(async (req) => {
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+  const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
 
   try {
     // Validate auth
@@ -72,12 +129,12 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: authError } = await supabase.auth.getClaims(token);
+    const { data: claims, error: authError } = await supabaseClient.auth.getClaims(token);
     
     if (authError || !claims?.claims) {
       return new Response(
@@ -86,11 +143,23 @@ serve(async (req) => {
       );
     }
 
+    const userId = claims.claims.sub as string;
+
     if (!GOOGLE_CLIENT_ID) {
       return new Response(
         JSON.stringify({ 
           error: "Google OAuth not configured",
           message: "GOOGLE_CLIENT_ID secret is missing. Please configure it in Lovable Cloud.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!OAUTH_STATE_SECRET) {
+      return new Response(
+        JSON.stringify({ 
+          error: "OAuth security not configured",
+          message: "OAUTH_STATE_SECRET is missing. Please configure it in Lovable Cloud.",
         }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -106,6 +175,15 @@ serve(async (req) => {
       );
     }
 
+    // Validate redirect URL against whitelist
+    if (!isValidRedirectUrl(redirect_url)) {
+      console.error(`Invalid redirect URL attempted: ${redirect_url}`);
+      return new Response(
+        JSON.stringify({ error: "Invalid redirect_url: not in allowed origins" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Get scopes for provider
     const scopes = PROVIDER_SCOPES[provider];
     if (!scopes) {
@@ -115,14 +193,50 @@ serve(async (req) => {
       );
     }
 
-    // Create state parameter (contains info for callback)
-    const state = btoa(JSON.stringify({
+    // Generate secure nonce for state
+    const nonce = generateNonce();
+    const timestamp = Date.now();
+    const expiresAt = new Date(timestamp + 10 * 60 * 1000); // 10 minutes TTL
+
+    // Create state data to sign
+    const stateData = {
+      nonce,
       workspace_id,
       provider,
       redirect_url,
-      user_id: claims.claims.sub,
-      timestamp: Date.now(),
-    }));
+      user_id: userId,
+      timestamp,
+    };
+
+    // Generate HMAC signature for state integrity
+    const dataToSign = JSON.stringify(stateData);
+    const hmacSignature = await generateHmac(dataToSign, OAUTH_STATE_SECRET);
+
+    // Store nonce in database for verification (using service role)
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    const { error: insertError } = await supabaseAdmin
+      .from("oauth_state_nonces")
+      .insert({
+        nonce,
+        workspace_id,
+        provider,
+        redirect_url,
+        user_id: userId,
+        hmac_signature: hmacSignature,
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (insertError) {
+      console.error("Failed to store OAuth nonce:", insertError);
+      return new Response(
+        JSON.stringify({ error: "Failed to initialize OAuth flow" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // State only contains nonce - all sensitive data stored server-side
+    const state = btoa(JSON.stringify({ nonce, sig: hmacSignature }));
 
     // Build OAuth authorization URL
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -131,10 +245,10 @@ serve(async (req) => {
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("scope", scopes.join(" "));
     authUrl.searchParams.set("state", state);
-    authUrl.searchParams.set("access_type", "offline"); // Get refresh token
-    authUrl.searchParams.set("prompt", "consent"); // Force consent to get refresh token
+    authUrl.searchParams.set("access_type", "offline");
+    authUrl.searchParams.set("prompt", "consent");
 
-    console.log(`OAuth init for ${provider}, workspace ${workspace_id}`);
+    console.log(`OAuth init for ${provider}, workspace ${workspace_id}, nonce ${nonce.substring(0, 8)}...`);
 
     return new Response(
       JSON.stringify({

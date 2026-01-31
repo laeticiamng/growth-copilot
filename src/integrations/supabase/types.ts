@@ -2708,6 +2708,91 @@ export type Database = {
           },
         ]
       }
+      oauth_state_nonces: {
+        Row: {
+          created_at: string
+          expires_at: string
+          hmac_signature: string
+          id: string
+          nonce: string
+          provider: string
+          redirect_url: string
+          used_at: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          hmac_signature: string
+          id?: string
+          nonce: string
+          provider: string
+          redirect_url: string
+          used_at?: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          hmac_signature?: string
+          id?: string
+          nonce?: string
+          provider?: string
+          redirect_url?: string
+          used_at?: string | null
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_state_nonces_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oauth_tokens: {
+        Row: {
+          access_token_encrypted: string
+          created_at: string
+          id: string
+          integration_id: string
+          iv: string
+          refresh_token_encrypted: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_encrypted: string
+          created_at?: string
+          id?: string
+          integration_id: string
+          iv: string
+          refresh_token_encrypted?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_encrypted?: string
+          created_at?: string
+          id?: string
+          integration_id?: string
+          iv?: string
+          refresh_token_encrypted?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_tokens_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offers: {
         Row: {
           benefits: Json | null
@@ -3826,6 +3911,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_oauth_nonces: { Args: never; Returns: undefined }
       get_user_workspace_ids: { Args: { _user_id: string }; Returns: string[] }
       get_workspace_quota: {
         Args: { p_workspace_id: string }
