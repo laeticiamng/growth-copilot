@@ -87,12 +87,59 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
   meta: {
     type: "meta",
     scopes: [
+      // Core
+      "public_profile",
+      "email",
+      // Marketing API (Ads)
+      "ads_read",
+      "ads_management",
+      "business_management",
+      // Pages & Instagram
+      "pages_show_list",
+      "pages_read_engagement",
+      "pages_manage_posts",
+      "pages_messaging",
+      "instagram_basic",
+      "instagram_content_publish",
+      "instagram_manage_insights",
+      "instagram_manage_comments",
+      // WhatsApp (requires Business verification)
+      "whatsapp_business_messaging",
+      "whatsapp_business_management",
+    ],
+    authUrl: "https://www.facebook.com/v19.0/dialog/oauth",
+  },
+  // Separate configs for granular permission requests
+  meta_ads: {
+    type: "meta",
+    scopes: [
+      "public_profile",
+      "email",
+      "ads_read",
+      "business_management",
+    ],
+    authUrl: "https://www.facebook.com/v19.0/dialog/oauth",
+  },
+  meta_instagram: {
+    type: "meta",
+    scopes: [
       "public_profile",
       "email",
       "pages_show_list",
-      "pages_read_engagement",
       "instagram_basic",
+      "instagram_content_publish",
       "instagram_manage_insights",
+    ],
+    authUrl: "https://www.facebook.com/v19.0/dialog/oauth",
+  },
+  meta_messaging: {
+    type: "meta",
+    scopes: [
+      "public_profile",
+      "email",
+      "pages_show_list",
+      "pages_messaging",
+      "whatsapp_business_messaging",
     ],
     authUrl: "https://www.facebook.com/v19.0/dialog/oauth",
   },
