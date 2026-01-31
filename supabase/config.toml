@@ -47,3 +47,21 @@ verify_jwt = false
 
 [functions.sync-youtube-analytics]
 verify_jwt = false
+
+[functions.sync-meta-ads]
+verify_jwt = false
+
+[functions.meta-ig-sync]
+verify_jwt = false
+
+[functions.meta-capi]
+verify_jwt = false
+
+[functions.meta-webhooks]
+verify_jwt = false
+
+[functions.webhooks]
+verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false

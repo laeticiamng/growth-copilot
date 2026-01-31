@@ -54,6 +54,7 @@ import Approvals from "./pages/dashboard/Approvals";
 import Competitors from "./pages/dashboard/Competitors";
 import Agency from "./pages/dashboard/Agency";
 import OnboardingGuide from "./pages/dashboard/Onboarding";
+import Automations from "./pages/dashboard/Automations";
 
 // Dashboard pages - Media Launch (Livraison 6)
 import MediaAssets from "./pages/dashboard/MediaAssets";
@@ -124,6 +125,7 @@ function App() {
                                         <Route path="/dashboard/competitors" element={<DashboardLayout><Competitors /></DashboardLayout>} />
                                         <Route path="/dashboard/agency" element={<DashboardLayout><Agency /></DashboardLayout>} />
                                         <Route path="/dashboard/guide" element={<DashboardLayout><OnboardingGuide /></DashboardLayout>} />
+                                        <Route path="/dashboard/automations" element={<DashboardLayout><Automations /></DashboardLayout>} />
                                         
                                         {/* Dashboard - Media Launch (Livraison 6) */}
                                         <Route path="/dashboard/media" element={<DashboardLayout><MediaAssets /></DashboardLayout>} />

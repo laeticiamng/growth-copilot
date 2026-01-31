@@ -39,9 +39,13 @@ import {
   Play,
   Sparkles,
   TrendingUp,
+  Webhook,
+  Bot,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { AIAssistant } from "@/components/ai/AIAssistant";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -69,10 +73,12 @@ const navItems = [
   { path: "/dashboard/competitors", label: "Concurrents", icon: Users },
   { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
   { path: "/dashboard/approvals", label: "Approbations", icon: Shield },
+  { path: "/dashboard/automations", label: "Automations", icon: Webhook },
   { path: "/dashboard/agency", label: "Mode Agence", icon: Building2 },
   { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
   { path: "/dashboard/guide", label: "Guide", icon: Rocket },
   { path: "/dashboard/logs", label: "Logs", icon: BarChart3 },
+  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: Bot },
   { path: "/dashboard/billing", label: "Billing", icon: Settings },
 ];
 
@@ -107,14 +113,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border h-16 flex items-center px-4">
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
-          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-        <div className="flex items-center gap-2 ml-4">
-          <Zap className="w-5 h-5 text-primary" />
-          <span className="font-bold">Growth OS</span>
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border h-16 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
+            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          <div className="flex items-center gap-2 ml-4">
+            <Zap className="w-5 h-5 text-primary" />
+            <span className="font-bold">Growth OS</span>
+          </div>
         </div>
+        <NotificationCenter />
       </header>
 
       {/* Sidebar */}
@@ -234,10 +243,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+        {/* Desktop notification bar */}
+        <div className="hidden lg:flex h-14 items-center justify-end px-6 border-b border-border bg-card/50">
+          <NotificationCenter />
+        </div>
         <div className="p-6 lg:p-8">
           {children}
         </div>
       </main>
+      
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 }
