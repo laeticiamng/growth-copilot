@@ -17,6 +17,7 @@ import { CompetitorsProvider } from "@/hooks/useCompetitors";
 import { ApprovalsProvider } from "@/hooks/useApprovals";
 import { SocialProvider } from "@/hooks/useSocial";
 import { LifecycleProvider } from "@/hooks/useLifecycle";
+import { AgencyProvider } from "@/hooks/useAgency";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -78,9 +79,10 @@ function App() {
                             <ApprovalsProvider>
                               <SocialProvider>
                                 <LifecycleProvider>
-                                  <TooltipProvider>
-                                    <Toaster />
-                                    <Sonner />
+                                  <AgencyProvider>
+                                    <TooltipProvider>
+                                      <Toaster />
+                                      <Sonner />
                                     <BrowserRouter>
                                       <Routes>
                                         {/* Public routes */}
@@ -127,7 +129,8 @@ function App() {
                                         <Route path="*" element={<NotFound />} />
                                       </Routes>
                                     </BrowserRouter>
-                                  </TooltipProvider>
+                                    </TooltipProvider>
+                                  </AgencyProvider>
                                 </LifecycleProvider>
                               </SocialProvider>
                             </ApprovalsProvider>
