@@ -19,6 +19,8 @@ import { ApprovalsProvider } from "@/hooks/useApprovals";
 import { SocialProvider } from "@/hooks/useSocial";
 import { LifecycleProvider } from "@/hooks/useLifecycle";
 import { AgencyProvider } from "@/hooks/useAgency";
+import { ReputationProvider } from "@/hooks/useReputation";
+import { OffersProvider } from "@/hooks/useOffers";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -81,7 +83,9 @@ function App() {
                               <SocialProvider>
                                 <LifecycleProvider>
                                   <AgencyProvider>
-                                    <TooltipProvider>
+                                    <ReputationProvider>
+                                      <OffersProvider>
+                                        <TooltipProvider>
                                       <Toaster />
                                       <Sonner />
                                       <OfflineBanner />
@@ -131,7 +135,9 @@ function App() {
                                         <Route path="*" element={<NotFound />} />
                                       </Routes>
                                     </BrowserRouter>
-                                    </TooltipProvider>
+                                        </TooltipProvider>
+                                      </OffersProvider>
+                                    </ReputationProvider>
                                   </AgencyProvider>
                                 </LifecycleProvider>
                               </SocialProvider>

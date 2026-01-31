@@ -3347,8 +3347,10 @@ export type Database = {
           created_at: string | null
           device: string | null
           id: string
+          ip_hash: string | null
           media_asset_id: string
           platform: string
+          rate_limited: boolean | null
           referrer: string | null
           utm_campaign: string | null
           utm_medium: string | null
@@ -3359,8 +3361,10 @@ export type Database = {
           created_at?: string | null
           device?: string | null
           id?: string
+          ip_hash?: string | null
           media_asset_id: string
           platform: string
+          rate_limited?: boolean | null
           referrer?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
@@ -3371,8 +3375,10 @@ export type Database = {
           created_at?: string | null
           device?: string | null
           id?: string
+          ip_hash?: string | null
           media_asset_id?: string
           platform?: string
+          rate_limited?: boolean | null
           referrer?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
