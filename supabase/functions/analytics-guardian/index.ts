@@ -25,16 +25,60 @@ interface DataQualityAlert {
   date_range_end?: string;
 }
 
-// Analytics Guardian Agent
-// Detects data gaps, anomalies, and tracking issues
+/**
+ * Validates auth and workspace access
+ */
+// deno-lint-ignore no-explicit-any
+async function validateRequest(req: Request, workspaceId: string): Promise<{ 
+  valid: boolean; 
+  userId: string | null; 
+  error: string | null;
+  serviceClient: any;
+}> {
+  const authHeader = req.headers.get('authorization');
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  try {
+    const { data, error } = await userClient.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
+    }
+
+    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
+      _user_id: data.user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (accessError || !hasAccess) {
+      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
+    }
+
+    return { valid: true, userId: data.user.id, error: null, serviceClient };
+  } catch (err) {
+    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
+  }
+}
+
+// Analytics Guardian Agent - Detects data gaps, anomalies, and tracking issues
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const body: GuardianRequest = await req.json();
@@ -44,7 +88,33 @@ serve(async (req) => {
       throw new Error("Missing required fields: workspace_id, site_id");
     }
 
-    console.log(`Running Analytics Guardian for site ${site_id}`);
+    // Validate authentication and workspace access
+    const authResult = await validateRequest(req, workspace_id);
+    if (!authResult.valid || !authResult.serviceClient) {
+      return new Response(
+        JSON.stringify({ success: false, error: authResult.error || 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = authResult.serviceClient;
+
+    // Validate site belongs to workspace
+    const { data: site, error: siteError } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("id", site_id)
+      .eq("workspace_id", workspace_id)
+      .single();
+
+    if (siteError || !site) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Site not found or access denied" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Running Analytics Guardian for site ${site_id}, user: ${authResult.userId}`);
 
     const alerts: DataQualityAlert[] = [];
     const today = new Date();
