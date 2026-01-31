@@ -65,3 +65,15 @@ verify_jwt = false
 
 [functions.ai-assistant]
 verify_jwt = false
+
+[functions.creative-init]
+verify_jwt = false
+
+[functions.creative-render]
+verify_jwt = false
+
+[functions.creative-qa]
+verify_jwt = false
+
+[functions.creative-export]
+verify_jwt = false
