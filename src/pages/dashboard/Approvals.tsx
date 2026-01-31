@@ -21,49 +21,7 @@ import { useApprovals } from "@/hooks/useApprovals";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 
-const pendingApprovals = [
-  {
-    id: "1",
-    agent: "Content Builder",
-    action: "Publier article 'Guide SEO 2026'",
-    riskLevel: "low",
-    createdAt: "Il y a 2h",
-    expiresIn: "5 jours",
-    details: { wordCount: 2800, targetKeyword: "guide seo" },
-  },
-  {
-    id: "2",
-    agent: "Ads Manager",
-    action: "Augmenter budget campagne 'Brand' +20%",
-    riskLevel: "medium",
-    createdAt: "Il y a 1h",
-    expiresIn: "6 jours",
-    details: { currentBudget: "€500", newBudget: "€600" },
-  },
-  {
-    id: "3",
-    agent: "CRO Optimizer",
-    action: "Modifier CTA homepage",
-    riskLevel: "high",
-    createdAt: "Il y a 30min",
-    expiresIn: "7 jours",
-    details: { element: "Hero CTA", change: "Couleur + Texte" },
-  },
-];
-
-const recentDecisions = [
-  { id: "1", agent: "SEO Auditor", action: "Corriger balises H1", decision: "approved", decidedAt: "Hier" },
-  { id: "2", agent: "Review Responder", action: "Répondre avis 5★", decision: "approved", decidedAt: "Il y a 2j", autoApproved: true },
-  { id: "3", agent: "Ads Manager", action: "Pause campagne CPA > 50€", decision: "rejected", decidedAt: "Il y a 3j" },
-];
-
-const autopilotRules = [
-  { name: "Corrections SEO mineures", enabled: true, riskLevel: "low" },
-  { name: "Réponses avis positifs", enabled: true, riskLevel: "low" },
-  { name: "Suggestions contenu", enabled: true, riskLevel: "medium" },
-  { name: "Optimisations Ads", enabled: false, riskLevel: "high" },
-  { name: "Publications sociales", enabled: false, riskLevel: "medium" },
-];
+// No mock data - all data comes from database via useApprovals hook
 
 export default function Approvals() {
   const { pendingApprovals, recentDecisions, autopilotSettings, loading, approveAction, rejectAction, updateAutopilotSettings } = useApprovals();
@@ -94,8 +52,8 @@ export default function Approvals() {
     }
   };
 
-  // Use demo data if no real data
-  const displayPending = pendingApprovals.length > 0 ? pendingApprovals.map(a => ({
+  // Map DB data to display format - no demo fallback
+  const displayPending = pendingApprovals.map(a => ({
     id: a.id,
     agent: a.agent_type,
     action: a.action_type,
@@ -103,31 +61,23 @@ export default function Approvals() {
     createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString('fr') : 'Récent',
     expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} jours` : '7 jours',
     details: a.action_data as Record<string, unknown>,
-  })) : [
-    { id: "1", agent: "Content Builder", action: "Publier article 'Guide SEO 2026'", riskLevel: "low", createdAt: "Il y a 2h", expiresIn: "5 jours", details: { wordCount: 2800, targetKeyword: "guide seo" } },
-    { id: "2", agent: "Ads Manager", action: "Augmenter budget campagne 'Brand' +20%", riskLevel: "medium", createdAt: "Il y a 1h", expiresIn: "6 jours", details: { currentBudget: "€500", newBudget: "€600" } },
-    { id: "3", agent: "CRO Optimizer", action: "Modifier CTA homepage", riskLevel: "high", createdAt: "Il y a 30min", expiresIn: "7 jours", details: { element: "Hero CTA", change: "Couleur + Texte" } },
-  ];
+  }));
 
-  const displayRecent = recentDecisions.length > 0 ? recentDecisions.map(d => ({
+  const displayRecent = recentDecisions.map(d => ({
     id: d.id,
     agent: d.agent_type,
     action: d.action_type,
     decision: d.status === 'approved' ? 'approved' : 'rejected',
     decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString('fr') : 'Récent',
     autoApproved: d.auto_approved || false,
-  })) : [
-    { id: "1", agent: "SEO Auditor", action: "Corriger balises H1", decision: "approved", decidedAt: "Hier", autoApproved: false },
-    { id: "2", agent: "Review Responder", action: "Répondre avis 5★", decision: "approved", decidedAt: "Il y a 2j", autoApproved: true },
-    { id: "3", agent: "Ads Manager", action: "Pause campagne CPA > 50€", decision: "rejected", decidedAt: "Il y a 3j", autoApproved: false },
-  ];
+  }));
 
   const autopilotRules = [
-    { name: "Corrections SEO mineures", enabled: autopilotSettings?.allowed_actions?.includes('seo_fix') || false, riskLevel: "low" },
-    { name: "Réponses avis positifs", enabled: autopilotSettings?.allowed_actions?.includes('review_response') || false, riskLevel: "low" },
-    { name: "Suggestions contenu", enabled: autopilotSettings?.allowed_actions?.includes('content_suggestion') || false, riskLevel: "medium" },
-    { name: "Optimisations Ads", enabled: false, riskLevel: "high" },
-    { name: "Publications sociales", enabled: false, riskLevel: "medium" },
+    { name: "Corrections SEO mineures", enabled: autopilotSettings?.allowed_actions?.includes('seo_fix') || false, riskLevel: "low", actionKey: "seo_fix" },
+    { name: "Réponses avis positifs", enabled: autopilotSettings?.allowed_actions?.includes('review_response') || false, riskLevel: "low", actionKey: "review_response" },
+    { name: "Suggestions contenu", enabled: autopilotSettings?.allowed_actions?.includes('content_suggestion') || false, riskLevel: "medium", actionKey: "content_suggestion" },
+    { name: "Optimisations Ads", enabled: autopilotSettings?.allowed_actions?.includes('ads_optimization') || false, riskLevel: "high", actionKey: "ads_optimization" },
+    { name: "Publications sociales", enabled: autopilotSettings?.allowed_actions?.includes('social_publish') || false, riskLevel: "medium", actionKey: "social_publish" },
   ];
 
   const getRiskBadge = (level: string) => {
@@ -199,54 +149,91 @@ export default function Approvals() {
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
-          {pendingApprovals.map((item) => (
-            <Card key={item.id} variant="feature">
-              <CardContent className="py-4">
-                <div className="flex items-start gap-4">
-                  <div className={`p-2 rounded-lg ${
-                    item.risk_level === "low" ? "bg-green-500/10" :
-                    item.risk_level === "medium" ? "bg-yellow-500/10" :
-                    "bg-orange-500/10"
-                  }`}>
-                    <Bot className={`w-5 h-5 ${
-                      item.risk_level === "low" ? "text-green-500" :
-                      item.risk_level === "medium" ? "text-yellow-500" :
-                      "text-orange-500"
-                    }`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">{item.action_type}</span>
-                      {getRiskBadge(item.risk_level)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Par {item.agent_type} • {item.created_at ? new Date(item.created_at).toLocaleDateString('fr') : 'Récent'} • Expire dans {item.expires_at ? `${Math.max(0, Math.ceil((new Date(item.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} jours` : '7 jours'}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {Object.entries(item.action_data || {}).map(([key, value]) => (
-                        <Badge key={key} variant="outline" className="text-xs">
-                          {key}: {String(value)}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <XCircle className="w-4 h-4 mr-1" />
-                      Refuser
-                    </Button>
-                    <Button variant="hero" size="sm">
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                      Approuver
-                    </Button>
-                  </div>
-                </div>
+          {loading ? (
+            <LoadingState message="Chargement des approbations..." />
+          ) : displayPending.length === 0 ? (
+            <Card variant="feature">
+              <CardContent className="py-12 text-center">
+                <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-green-500/50" />
+                <h3 className="font-medium mb-2">Aucune action en attente</h3>
+                <p className="text-sm text-muted-foreground">
+                  Les agents n'ont pas encore proposé d'actions nécessitant votre approbation.
+                </p>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            displayPending.map((item) => (
+              <Card key={item.id} variant="feature">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-2 rounded-lg ${
+                      item.riskLevel === "low" ? "bg-green-500/10" :
+                      item.riskLevel === "medium" ? "bg-yellow-500/10" :
+                      "bg-orange-500/10"
+                    }`}>
+                      <Bot className={`w-5 h-5 ${
+                        item.riskLevel === "low" ? "text-green-500" :
+                        item.riskLevel === "medium" ? "text-yellow-500" :
+                        "text-orange-500"
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium">{item.action}</span>
+                        {getRiskBadge(item.riskLevel)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Par {item.agent} • {item.createdAt} • Expire dans {item.expiresIn}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {Object.entries(item.details || {}).map(([key, value]) => (
+                          <Badge key={key} variant="outline" className="text-xs">
+                            {key}: {String(value)}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleReject(item.id)}
+                        disabled={processingId === item.id}
+                      >
+                        {processingId === item.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Refuser
+                          </>
+                        )}
+                      </Button>
+                      <Button 
+                        variant="hero" 
+                        size="sm"
+                        onClick={() => handleApprove(item.id)}
+                        disabled={processingId === item.id}
+                      >
+                        {processingId === item.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Approuver
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
@@ -256,28 +243,35 @@ export default function Approvals() {
               <CardDescription>Historique des approbations et refus</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recentDecisions.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
-                  {item.status === "approved" ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">{item.action_type}</p>
-                    <p className="text-sm text-muted-foreground">{item.agent_type}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {item.auto_approved && (
-                      <Badge variant="secondary" className="text-xs">
-                        <Zap className="w-3 h-3 mr-1" />
-                        Auto
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">{item.reviewed_at ? new Date(item.reviewed_at).toLocaleDateString('fr') : 'Récent'}</span>
-                  </div>
+              {displayRecent.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <History className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>Aucune décision enregistrée</p>
                 </div>
-              ))}
+              ) : (
+                displayRecent.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
+                    {item.decision === "approved" ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">{item.action}</p>
+                      <p className="text-sm text-muted-foreground">{item.agent}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.autoApproved && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Zap className="w-3 h-3 mr-1" />
+                          Auto
+                        </Badge>
+                      )}
+                      <span className="text-xs text-muted-foreground">{item.decidedAt}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -337,11 +331,15 @@ export default function Approvals() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="p-3 rounded-lg bg-secondary/50">
                     <p className="text-sm text-muted-foreground">Actions max / semaine</p>
-                    <p className="font-bold text-lg">10</p>
+                    <p className="font-bold text-lg">{autopilotSettings?.max_actions_per_week || 10}</p>
                   </div>
                   <div className="p-3 rounded-lg bg-secondary/50">
                     <p className="text-sm text-muted-foreground">Budget max / jour</p>
-                    <p className="font-bold text-lg">€0 (désactivé)</p>
+                    <p className="font-bold text-lg">
+                      {autopilotSettings?.max_daily_budget && autopilotSettings.max_daily_budget > 0 
+                        ? `€${autopilotSettings.max_daily_budget}` 
+                        : '€0 (désactivé)'}
+                    </p>
                   </div>
                 </div>
               </div>
