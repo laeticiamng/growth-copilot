@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { usePagination } from "@/hooks/usePagination";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -206,6 +208,11 @@ const Logs = () => {
   const displayAgentRuns = agentRuns.length > 0 ? filteredAgentRuns : demoAgentRuns;
   const displayAiRequests = aiRequests.length > 0 ? filteredAiRequests : demoAiRequests;
 
+  // Pagination for each tab
+  const aiPagination = usePagination(displayAiRequests, { initialPageSize: 10 });
+  const agentPagination = usePagination(displayAgentRuns, { initialPageSize: 10 });
+  const actionPagination = usePagination(displayActionLogs, { initialPageSize: 10 });
+
   // Calculate totals for AI requests
   const totalTokens = displayAiRequests.reduce((sum, r) => sum + (r.tokens_in || 0) + (r.tokens_out || 0), 0);
   const totalCost = displayAiRequests.reduce((sum, r) => sum + (r.cost_estimate || 0), 0);
@@ -357,7 +364,7 @@ const Logs = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {displayAiRequests.map((req) => (
+                  {aiPagination.paginatedData.map((req) => (
                     <div 
                       key={req.id} 
                       className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
@@ -480,6 +487,23 @@ const Logs = () => {
                   ))}
                 </div>
               )}
+              {!loading && aiPagination.totalPages > 1 && (
+                <div className="mt-4">
+                  <DataTablePagination
+                    currentPage={aiPagination.currentPage}
+                    totalPages={aiPagination.totalPages}
+                    onPageChange={aiPagination.goToPage}
+                    hasNextPage={aiPagination.hasNextPage}
+                    hasPreviousPage={aiPagination.hasPreviousPage}
+                    pageSize={aiPagination.pageSize}
+                    onPageSizeChange={aiPagination.setPageSize}
+                    pageSizeOptions={aiPagination.pageSizeOptions}
+                    totalItems={aiPagination.totalItems}
+                    startIndex={aiPagination.startIndex}
+                    endIndex={aiPagination.endIndex}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -500,7 +524,7 @@ const Logs = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {displayAgentRuns.map((run) => (
+                  {agentPagination.paginatedData.map((run) => (
                     <div 
                       key={run.id} 
                       className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
@@ -547,6 +571,23 @@ const Logs = () => {
                   ))}
                 </div>
               )}
+              {!loading && agentPagination.totalPages > 1 && (
+                <div className="mt-4">
+                  <DataTablePagination
+                    currentPage={agentPagination.currentPage}
+                    totalPages={agentPagination.totalPages}
+                    onPageChange={agentPagination.goToPage}
+                    hasNextPage={agentPagination.hasNextPage}
+                    hasPreviousPage={agentPagination.hasPreviousPage}
+                    pageSize={agentPagination.pageSize}
+                    onPageSizeChange={agentPagination.setPageSize}
+                    pageSizeOptions={agentPagination.pageSizeOptions}
+                    totalItems={agentPagination.totalItems}
+                    startIndex={agentPagination.startIndex}
+                    endIndex={agentPagination.endIndex}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -567,7 +608,7 @@ const Logs = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {displayActionLogs.map((log) => (
+                  {actionPagination.paginatedData.map((log) => (
                     <div 
                       key={log.id} 
                       className="flex items-start gap-4 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
@@ -611,6 +652,23 @@ const Logs = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              {!loading && actionPagination.totalPages > 1 && (
+                <div className="mt-4">
+                  <DataTablePagination
+                    currentPage={actionPagination.currentPage}
+                    totalPages={actionPagination.totalPages}
+                    onPageChange={actionPagination.goToPage}
+                    hasNextPage={actionPagination.hasNextPage}
+                    hasPreviousPage={actionPagination.hasPreviousPage}
+                    pageSize={actionPagination.pageSize}
+                    onPageSizeChange={actionPagination.setPageSize}
+                    pageSizeOptions={actionPagination.pageSizeOptions}
+                    totalItems={actionPagination.totalItems}
+                    startIndex={actionPagination.startIndex}
+                    endIndex={actionPagination.endIndex}
+                  />
                 </div>
               )}
             </CardContent>
