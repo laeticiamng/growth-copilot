@@ -7,11 +7,13 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { SitesProvider } from "@/hooks/useSites";
 import { FeatureFlagsProvider } from "@/hooks/useFeatureFlags";
+import { MediaProvider } from "@/hooks/useMedia";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
+import SmartLink from "./pages/SmartLink";
 
 // Dashboard pages - Foundation
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -39,6 +41,12 @@ import Competitors from "./pages/dashboard/Competitors";
 import Agency from "./pages/dashboard/Agency";
 import OnboardingGuide from "./pages/dashboard/Onboarding";
 
+// Dashboard pages - Media Launch (Livraison 6)
+import MediaAssets from "./pages/dashboard/MediaAssets";
+import LaunchPlan from "./pages/dashboard/LaunchPlan";
+import CreativesStudio from "./pages/dashboard/CreativesStudio";
+import MediaKPIs from "./pages/dashboard/MediaKPIs";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -47,46 +55,55 @@ const App = () => (
       <WorkspaceProvider>
         <SitesProvider>
           <FeatureFlagsProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/onboarding" element={<Onboarding />} />
-                  
-                  {/* Dashboard - Foundation */}
-                  <Route path="/dashboard" element={<DashboardLayout><DashboardHome /></DashboardLayout>} />
-                  <Route path="/dashboard/sites" element={<DashboardLayout><Sites /></DashboardLayout>} />
-                  <Route path="/dashboard/integrations" element={<DashboardLayout><Integrations /></DashboardLayout>} />
-                  <Route path="/dashboard/brand-kit" element={<DashboardLayout><BrandKit /></DashboardLayout>} />
-                  <Route path="/dashboard/logs" element={<DashboardLayout><Logs /></DashboardLayout>} />
-                  <Route path="/dashboard/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
-                  
-                  {/* Dashboard - Modules */}
-                  <Route path="/dashboard/seo" element={<DashboardLayout><SEOTech /></DashboardLayout>} />
-                  <Route path="/dashboard/content" element={<DashboardLayout><Content /></DashboardLayout>} />
-                  <Route path="/dashboard/local" element={<DashboardLayout><LocalSEO /></DashboardLayout>} />
-                  <Route path="/dashboard/ads" element={<DashboardLayout><Ads /></DashboardLayout>} />
-                  <Route path="/dashboard/social" element={<DashboardLayout><Social /></DashboardLayout>} />
-                  <Route path="/dashboard/cro" element={<DashboardLayout><CRO /></DashboardLayout>} />
-                  <Route path="/dashboard/offers" element={<DashboardLayout><Offers /></DashboardLayout>} />
-                  <Route path="/dashboard/lifecycle" element={<DashboardLayout><Lifecycle /></DashboardLayout>} />
-                  <Route path="/dashboard/reputation" element={<DashboardLayout><Reputation /></DashboardLayout>} />
-                  <Route path="/dashboard/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
-                  
-                  {/* Dashboard - Advanced (Livraison 4+5) */}
-                  <Route path="/dashboard/approvals" element={<DashboardLayout><Approvals /></DashboardLayout>} />
-                  <Route path="/dashboard/competitors" element={<DashboardLayout><Competitors /></DashboardLayout>} />
-                  <Route path="/dashboard/agency" element={<DashboardLayout><Agency /></DashboardLayout>} />
-                  <Route path="/dashboard/guide" element={<DashboardLayout><OnboardingGuide /></DashboardLayout>} />
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
+            <MediaProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/link/:slug" element={<SmartLink />} />
+                    
+                    {/* Dashboard - Foundation */}
+                    <Route path="/dashboard" element={<DashboardLayout><DashboardHome /></DashboardLayout>} />
+                    <Route path="/dashboard/sites" element={<DashboardLayout><Sites /></DashboardLayout>} />
+                    <Route path="/dashboard/integrations" element={<DashboardLayout><Integrations /></DashboardLayout>} />
+                    <Route path="/dashboard/brand-kit" element={<DashboardLayout><BrandKit /></DashboardLayout>} />
+                    <Route path="/dashboard/logs" element={<DashboardLayout><Logs /></DashboardLayout>} />
+                    <Route path="/dashboard/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
+                    
+                    {/* Dashboard - Modules */}
+                    <Route path="/dashboard/seo" element={<DashboardLayout><SEOTech /></DashboardLayout>} />
+                    <Route path="/dashboard/content" element={<DashboardLayout><Content /></DashboardLayout>} />
+                    <Route path="/dashboard/local" element={<DashboardLayout><LocalSEO /></DashboardLayout>} />
+                    <Route path="/dashboard/ads" element={<DashboardLayout><Ads /></DashboardLayout>} />
+                    <Route path="/dashboard/social" element={<DashboardLayout><Social /></DashboardLayout>} />
+                    <Route path="/dashboard/cro" element={<DashboardLayout><CRO /></DashboardLayout>} />
+                    <Route path="/dashboard/offers" element={<DashboardLayout><Offers /></DashboardLayout>} />
+                    <Route path="/dashboard/lifecycle" element={<DashboardLayout><Lifecycle /></DashboardLayout>} />
+                    <Route path="/dashboard/reputation" element={<DashboardLayout><Reputation /></DashboardLayout>} />
+                    <Route path="/dashboard/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+                    
+                    {/* Dashboard - Advanced (Livraison 4+5) */}
+                    <Route path="/dashboard/approvals" element={<DashboardLayout><Approvals /></DashboardLayout>} />
+                    <Route path="/dashboard/competitors" element={<DashboardLayout><Competitors /></DashboardLayout>} />
+                    <Route path="/dashboard/agency" element={<DashboardLayout><Agency /></DashboardLayout>} />
+                    <Route path="/dashboard/guide" element={<DashboardLayout><OnboardingGuide /></DashboardLayout>} />
+                    
+                    {/* Dashboard - Media Launch (Livraison 6) */}
+                    <Route path="/dashboard/media" element={<DashboardLayout><MediaAssets /></DashboardLayout>} />
+                    <Route path="/dashboard/media/launch" element={<DashboardLayout><LaunchPlan /></DashboardLayout>} />
+                    <Route path="/dashboard/media/creatives" element={<DashboardLayout><CreativesStudio /></DashboardLayout>} />
+                    <Route path="/dashboard/media/kpis" element={<DashboardLayout><MediaKPIs /></DashboardLayout>} />
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </MediaProvider>
           </FeatureFlagsProvider>
         </SitesProvider>
       </WorkspaceProvider>

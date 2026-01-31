@@ -2195,6 +2195,456 @@ export type Database = {
           },
         ]
       }
+      media_assets: {
+        Row: {
+          artist_name: string | null
+          created_at: string | null
+          description: string | null
+          embed_html: string | null
+          genre: string | null
+          id: string
+          language: string | null
+          metadata_json: Json | null
+          platform: Database["public"]["Enums"]["media_platform"]
+          platform_id: string | null
+          release_date: string | null
+          site_id: string | null
+          smart_link_config: Json | null
+          smart_link_slug: string | null
+          status: Database["public"]["Enums"]["media_asset_status"] | null
+          target_markets: Json | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string | null
+          url: string
+          workspace_id: string
+        }
+        Insert: {
+          artist_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          embed_html?: string | null
+          genre?: string | null
+          id?: string
+          language?: string | null
+          metadata_json?: Json | null
+          platform: Database["public"]["Enums"]["media_platform"]
+          platform_id?: string | null
+          release_date?: string | null
+          site_id?: string | null
+          smart_link_config?: Json | null
+          smart_link_slug?: string | null
+          status?: Database["public"]["Enums"]["media_asset_status"] | null
+          target_markets?: Json | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+          url: string
+          workspace_id: string
+        }
+        Update: {
+          artist_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          embed_html?: string | null
+          genre?: string | null
+          id?: string
+          language?: string | null
+          metadata_json?: Json | null
+          platform?: Database["public"]["Enums"]["media_platform"]
+          platform_id?: string | null
+          release_date?: string | null
+          site_id?: string | null
+          smart_link_config?: Json | null
+          smart_link_slug?: string | null
+          status?: Database["public"]["Enums"]["media_asset_status"] | null
+          target_markets?: Json | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_assets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_campaigns: {
+        Row: {
+          budget: number | null
+          created_at: string | null
+          end_at: string | null
+          id: string
+          media_asset_id: string
+          name: string
+          objective: string | null
+          results_json: Json | null
+          spent: number | null
+          start_at: string | null
+          status: string | null
+          targeting_json: Json | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string | null
+          end_at?: string | null
+          id?: string
+          media_asset_id: string
+          name: string
+          objective?: string | null
+          results_json?: Json | null
+          spent?: number | null
+          start_at?: string | null
+          status?: string | null
+          targeting_json?: Json | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string | null
+          end_at?: string | null
+          id?: string
+          media_asset_id?: string
+          name?: string
+          objective?: string | null
+          results_json?: Json | null
+          spent?: number | null
+          start_at?: string | null
+          status?: string | null
+          targeting_json?: Json | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_campaigns_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_competitors: {
+        Row: {
+          competitor_name: string | null
+          competitor_url: string
+          created_at: string | null
+          id: string
+          insights_json: Json | null
+          last_analyzed_at: string | null
+          media_asset_id: string
+          metrics_json: Json | null
+          platform: Database["public"]["Enums"]["media_platform"] | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          competitor_name?: string | null
+          competitor_url: string
+          created_at?: string | null
+          id?: string
+          insights_json?: Json | null
+          last_analyzed_at?: string | null
+          media_asset_id: string
+          metrics_json?: Json | null
+          platform?: Database["public"]["Enums"]["media_platform"] | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          competitor_name?: string | null
+          competitor_url?: string
+          created_at?: string | null
+          id?: string
+          insights_json?: Json | null
+          last_analyzed_at?: string | null
+          media_asset_id?: string
+          metrics_json?: Json | null
+          platform?: Database["public"]["Enums"]["media_platform"] | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_competitors_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_competitors_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_creatives: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          copy_json: Json | null
+          created_at: string | null
+          file_refs: Json | null
+          format: string
+          id: string
+          media_asset_id: string
+          name: string | null
+          platform_target: string | null
+          status: Database["public"]["Enums"]["media_creative_status"] | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          copy_json?: Json | null
+          created_at?: string | null
+          file_refs?: Json | null
+          format: string
+          id?: string
+          media_asset_id: string
+          name?: string | null
+          platform_target?: string | null
+          status?: Database["public"]["Enums"]["media_creative_status"] | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          copy_json?: Json | null
+          created_at?: string | null
+          file_refs?: Json | null
+          format?: string
+          id?: string
+          media_asset_id?: string
+          name?: string | null
+          platform_target?: string | null
+          status?: Database["public"]["Enums"]["media_creative_status"] | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_creatives_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_creatives_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_distribution_plan: {
+        Row: {
+          calendar_json: Json | null
+          created_at: string | null
+          id: string
+          media_asset_id: string
+          phases: Json | null
+          plan_json: Json | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          calendar_json?: Json | null
+          created_at?: string | null
+          id?: string
+          media_asset_id: string
+          phases?: Json | null
+          plan_json?: Json | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          calendar_json?: Json | null
+          created_at?: string | null
+          id?: string
+          media_asset_id?: string
+          phases?: Json | null
+          plan_json?: Json | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_distribution_plan_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_distribution_plan_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_kpis_daily: {
+        Row: {
+          avg_view_duration: number | null
+          comments: number | null
+          created_at: string | null
+          ctr: number | null
+          date: string
+          email_signups: number | null
+          id: string
+          likes: number | null
+          media_asset_id: string
+          metrics_json: Json | null
+          playlist_adds: number | null
+          retention_rate: number | null
+          saves: number | null
+          shares: number | null
+          smart_link_clicks: number | null
+          source: string
+          streams: number | null
+          subscribers_gained: number | null
+          views: number | null
+          watch_time_minutes: number | null
+          workspace_id: string
+        }
+        Insert: {
+          avg_view_duration?: number | null
+          comments?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          date: string
+          email_signups?: number | null
+          id?: string
+          likes?: number | null
+          media_asset_id: string
+          metrics_json?: Json | null
+          playlist_adds?: number | null
+          retention_rate?: number | null
+          saves?: number | null
+          shares?: number | null
+          smart_link_clicks?: number | null
+          source: string
+          streams?: number | null
+          subscribers_gained?: number | null
+          views?: number | null
+          watch_time_minutes?: number | null
+          workspace_id: string
+        }
+        Update: {
+          avg_view_duration?: number | null
+          comments?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          date?: string
+          email_signups?: number | null
+          id?: string
+          likes?: number | null
+          media_asset_id?: string
+          metrics_json?: Json | null
+          playlist_adds?: number | null
+          retention_rate?: number | null
+          saves?: number | null
+          shares?: number | null
+          smart_link_clicks?: number | null
+          source?: string
+          streams?: number | null
+          subscribers_gained?: number | null
+          views?: number | null
+          watch_time_minutes?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_kpis_daily_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_kpis_daily_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_metadata_snapshots: {
+        Row: {
+          captured_at: string | null
+          id: string
+          media_asset_id: string
+          snapshot_json: Json
+          source: string
+          workspace_id: string
+        }
+        Insert: {
+          captured_at?: string | null
+          id?: string
+          media_asset_id: string
+          snapshot_json?: Json
+          source: string
+          workspace_id: string
+        }
+        Update: {
+          captured_at?: string | null
+          id?: string
+          media_asset_id?: string
+          snapshot_json?: Json
+          source?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_metadata_snapshots_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_metadata_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_reports: {
         Row: {
           actions_completed: Json | null
@@ -2891,6 +3341,104 @@ export type Database = {
           },
         ]
       }
+      smart_link_clicks: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          device: string | null
+          id: string
+          media_asset_id: string
+          platform: string
+          referrer: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          id?: string
+          media_asset_id: string
+          platform: string
+          referrer?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          device?: string | null
+          id?: string
+          media_asset_id?: string
+          platform?: string
+          referrer?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_link_clicks_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      smart_link_emails: {
+        Row: {
+          consent_given: boolean | null
+          created_at: string | null
+          email: string
+          id: string
+          media_asset_id: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          workspace_id: string
+        }
+        Insert: {
+          consent_given?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: string
+          media_asset_id: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          workspace_id: string
+        }
+        Update: {
+          consent_given?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          media_asset_id?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_link_emails_media_asset_id_fkey"
+            columns: ["media_asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smart_link_emails_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_accounts: {
         Row: {
           account_id: string | null
@@ -3338,6 +3886,13 @@ export type Database = {
         | "competitive_analyst"
         | "chief_growth_officer"
         | "quality_compliance"
+        | "media_strategy"
+        | "youtube_optimizer"
+        | "streaming_packager"
+        | "shortform_repurposer"
+        | "ads_creative"
+        | "media_competitive_analyst"
+        | "media_analytics_guardian"
       app_role: "owner" | "admin" | "member"
       content_status: "draft" | "review" | "approved" | "published" | "archived"
       integration_provider:
@@ -3364,6 +3919,30 @@ export type Database = {
         | "negotiation"
         | "won"
         | "lost"
+      media_asset_status:
+        | "draft"
+        | "planning"
+        | "pre_launch"
+        | "launching"
+        | "post_launch"
+        | "evergreen"
+        | "archived"
+      media_creative_status:
+        | "draft"
+        | "pending_review"
+        | "approved"
+        | "published"
+        | "rejected"
+      media_platform:
+        | "youtube_video"
+        | "youtube_channel"
+        | "spotify_track"
+        | "spotify_album"
+        | "spotify_artist"
+        | "apple_music"
+        | "soundcloud"
+        | "tiktok"
+        | "other"
       subscription_plan: "free" | "starter" | "growth" | "agency"
     }
     CompositeTypes: {
@@ -3515,6 +4094,13 @@ export const Constants = {
         "competitive_analyst",
         "chief_growth_officer",
         "quality_compliance",
+        "media_strategy",
+        "youtube_optimizer",
+        "streaming_packager",
+        "shortform_repurposer",
+        "ads_creative",
+        "media_competitive_analyst",
+        "media_analytics_guardian",
       ],
       app_role: ["owner", "admin", "member"],
       content_status: ["draft", "review", "approved", "published", "archived"],
@@ -3543,6 +4129,33 @@ export const Constants = {
         "negotiation",
         "won",
         "lost",
+      ],
+      media_asset_status: [
+        "draft",
+        "planning",
+        "pre_launch",
+        "launching",
+        "post_launch",
+        "evergreen",
+        "archived",
+      ],
+      media_creative_status: [
+        "draft",
+        "pending_review",
+        "approved",
+        "published",
+        "rejected",
+      ],
+      media_platform: [
+        "youtube_video",
+        "youtube_channel",
+        "spotify_track",
+        "spotify_album",
+        "spotify_artist",
+        "apple_music",
+        "soundcloud",
+        "tiktok",
+        "other",
       ],
       subscription_plan: ["free", "starter", "growth", "agency"],
     },

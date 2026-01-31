@@ -17,3 +17,15 @@ verify_jwt = false
 
 [functions.generate-report]
 verify_jwt = false
+
+[functions.media-detect]
+verify_jwt = false
+
+[functions.media-agents]
+verify_jwt = false
+
+[functions.smart-link]
+verify_jwt = false
+
+[functions.youtube-sync]
+verify_jwt = false
