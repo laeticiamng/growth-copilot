@@ -33,6 +33,7 @@ interface SocialContextType {
   updatePost: (postId: string, data: Partial<SocialPost>) => Promise<{ error: Error | null }>;
   deletePost: (postId: string) => Promise<{ error: Error | null }>;
   publishPost: (postId: string) => Promise<{ error: Error | null }>;
+  connectAccount: (platform: string, handle: string) => Promise<{ error: Error | null }>;
 }
 
 const SocialContext = createContext<SocialContextType | undefined>(undefined);
@@ -53,20 +54,57 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
-    // For now, use demo data as social tables don't exist yet
-    // In production, these would be fetched from social_accounts and social_posts tables
-    setAccounts([
-      { id: '1', platform: 'instagram', connected: true, handle: '@mycompany', followers: 12400 },
-      { id: '2', platform: 'facebook', connected: true, handle: 'My Company', followers: 8200 },
-      { id: '3', platform: 'linkedin', connected: false, handle: null, followers: null },
-      { id: '4', platform: 'twitter', connected: false, handle: null, followers: null },
+    const [accountsRes, postsRes] = await Promise.all([
+      supabase
+        .from('social_accounts')
+        .select('*')
+        .eq('workspace_id', currentWorkspace.id)
+        .order('platform', { ascending: true }),
+      supabase
+        .from('social_posts')
+        .select('*')
+        .eq('workspace_id', currentWorkspace.id)
+        .order('created_at', { ascending: false }),
     ]);
 
-    setPosts([
-      { id: '1', content: '🚀 Nouveau guide SEO 2026 disponible !', platforms: ['instagram', 'facebook'], scheduled_for: '2026-01-26T10:00:00Z', published_at: null, status: 'scheduled', type: 'Carrousel', reach: null, likes: null, comments: null, shares: null },
-      { id: '2', content: '💡 Astuce du jour : Comment optimiser...', platforms: ['instagram'], scheduled_for: '2026-01-27T14:00:00Z', published_at: null, status: 'scheduled', type: 'Reel', reach: null, likes: null, comments: null, shares: null },
-      { id: '3', content: '🎯 Case study : +150% de trafic', platforms: ['linkedin', 'facebook'], scheduled_for: null, published_at: null, status: 'draft', type: 'Post', reach: null, likes: null, comments: null, shares: null },
-    ]);
+    // Map accounts from DB using actual schema columns
+    const dbAccounts = (accountsRes.data || []).map(a => ({
+      id: a.id,
+      platform: a.platform,
+      connected: a.is_active || false,
+      handle: a.account_name,
+      followers: a.followers_count,
+    }));
+
+    // Ensure all 4 platforms are represented (show disconnected if not in DB)
+    const platformList = ['instagram', 'facebook', 'linkedin', 'twitter'];
+    const allAccounts = platformList.map(platform => {
+      const existing = dbAccounts.find(a => a.platform.toLowerCase() === platform);
+      return existing || { 
+        id: platform, 
+        platform, 
+        connected: false, 
+        handle: null, 
+        followers: null 
+      };
+    });
+
+    setAccounts(allAccounts);
+
+    // Map posts from DB using actual schema columns
+    setPosts((postsRes.data || []).map(p => ({
+      id: p.id,
+      content: p.content,
+      platforms: [], // Single account per post in this schema
+      scheduled_for: null, // Not in current schema
+      published_at: p.published_at,
+      status: (p.status as 'draft' | 'scheduled' | 'published') || 'draft',
+      type: 'Post',
+      reach: p.reach,
+      likes: p.engagement_likes,
+      comments: p.engagement_comments,
+      shares: p.engagement_shares,
+    })));
 
     setLoading(false);
   };
@@ -80,42 +118,89 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       return { error: new Error('No workspace selected') };
     }
 
-    // In production, this would insert into social_posts table
-    const newPost: SocialPost = {
-      id: Date.now().toString(),
+    const insertData = {
+      workspace_id: currentWorkspace.id,
       content: data.content || '',
-      platforms: data.platforms || [],
-      scheduled_for: data.scheduled_for || null,
-      published_at: null,
-      status: data.scheduled_for ? 'scheduled' : 'draft',
-      type: data.type || 'Post',
-      reach: null,
-      likes: null,
-      comments: null,
-      shares: null,
+      status: 'draft',
     };
 
-    setPosts(prev => [newPost, ...prev]);
-    return { error: null };
+    const { error } = await supabase.from('social_posts').insert(insertData as any);
+
+    if (!error) fetchSocial();
+    return { error: error as Error | null };
   };
 
   const updatePost = async (postId: string, data: Partial<SocialPost>) => {
-    setPosts(prev => prev.map(p => p.id === postId ? { ...p, ...data } : p));
-    return { error: null };
+    const updateData: Record<string, unknown> = {};
+    if (data.content !== undefined) updateData.content = data.content;
+    if (data.status !== undefined) updateData.status = data.status;
+
+    const { error } = await supabase
+      .from('social_posts')
+      .update(updateData)
+      .eq('id', postId);
+
+    if (!error) fetchSocial();
+    return { error: error as Error | null };
   };
 
   const deletePost = async (postId: string) => {
-    setPosts(prev => prev.filter(p => p.id !== postId));
-    return { error: null };
+    const { error } = await supabase
+      .from('social_posts')
+      .delete()
+      .eq('id', postId);
+
+    if (!error) fetchSocial();
+    return { error: error as Error | null };
   };
 
   const publishPost = async (postId: string) => {
-    setPosts(prev => prev.map(p => 
-      p.id === postId 
-        ? { ...p, status: 'published' as const, published_at: new Date().toISOString() }
-        : p
-    ));
-    return { error: null };
+    const { error } = await supabase
+      .from('social_posts')
+      .update({ 
+        status: 'published', 
+        published_at: new Date().toISOString() 
+      })
+      .eq('id', postId);
+
+    if (!error) fetchSocial();
+    return { error: error as Error | null };
+  };
+
+  const connectAccount = async (platform: string, handle: string) => {
+    if (!currentWorkspace) {
+      return { error: new Error('No workspace selected') };
+    }
+
+    // Check if account exists
+    const { data: existing } = await supabase
+      .from('social_accounts')
+      .select('id')
+      .eq('workspace_id', currentWorkspace.id)
+      .eq('platform', platform)
+      .single();
+
+    if (existing) {
+      // Update existing
+      const { error } = await supabase
+        .from('social_accounts')
+        .update({ account_name: handle, is_active: true })
+        .eq('id', existing.id);
+      
+      if (!error) fetchSocial();
+      return { error: error as Error | null };
+    } else {
+      // Create new
+      const { error } = await supabase.from('social_accounts').insert({
+        workspace_id: currentWorkspace.id,
+        platform,
+        account_name: handle,
+        is_active: true,
+      });
+
+      if (!error) fetchSocial();
+      return { error: error as Error | null };
+    }
   };
 
   return (
@@ -128,6 +213,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       updatePost,
       deletePost,
       publishPost,
+      connectAccount,
     }}>
       {children}
     </SocialContext.Provider>
