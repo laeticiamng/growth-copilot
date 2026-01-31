@@ -1,30 +1,32 @@
-import { Bot, Brain, Search, FileText, BarChart3, Megaphone, Shield, Zap } from "lucide-react";
+import { Bot, Brain, Search, FileText, BarChart3, Megaphone, Shield, Zap, PenTool, Target, Share2, Music, Eye, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const agents = [
+  // Level 0 - Leadership
   {
     id: "cgo",
-    name: "Chief Growth Officer",
-    role: "Orchestrateur Principal",
-    description: "Coordonne tous les agents et priorise les actions selon l'impact business",
+    name: "Sophie Marchand",
+    role: "Chief Growth Officer",
+    description: "Orchestre tous les agents et priorise les actions selon l'impact business (ICE)",
     icon: Brain,
     color: "from-primary to-primary/60",
     level: 0,
   },
+  // Level 1 - Core Operations
   {
     id: "analytics",
-    name: "Analytics Guardian",
-    role: "Data & KPIs",
-    description: "Surveille les métriques, détecte les anomalies et assure la qualité des données",
+    name: "Lucas Bernier",
+    role: "Analytics Guardian",
+    description: "Synchronise GSC/GA4, surveille les KPIs et génère les rapports mensuels",
     icon: BarChart3,
     color: "from-blue-500 to-blue-400",
     level: 1,
   },
   {
     id: "seo-tech",
-    name: "SEO Tech Auditor",
-    role: "Audit Technique",
+    name: "Emma Lefebvre",
+    role: "SEO Tech Auditor",
     description: "Crawle le site, identifie les erreurs techniques et génère les correctifs",
     icon: Search,
     color: "from-green-500 to-green-400",
@@ -32,50 +34,98 @@ const agents = [
   },
   {
     id: "content",
-    name: "Content Strategist",
-    role: "Stratégie Contenu",
-    description: "Analyse les mots-clés, planifie le calendrier éditorial et détecte les opportunités",
+    name: "Thomas Duval",
+    role: "Content Strategist",
+    description: "Analyse les mots-clés, crée les clusters et planifie le calendrier éditorial",
     icon: FileText,
     color: "from-purple-500 to-purple-400",
     level: 1,
   },
   {
-    id: "media",
-    name: "Media Promotion",
-    role: "Lancement Média",
-    description: "Orchestre les campagnes YouTube, Spotify et réseaux sociaux",
-    icon: Megaphone,
-    color: "from-orange-500 to-orange-400",
+    id: "copywriting",
+    name: "Léa Fontaine",
+    role: "Copywriting Agent",
+    description: "Rédige les textes conversion-first avec frameworks AIDA/PAS",
+    icon: PenTool,
+    color: "from-pink-500 to-pink-400",
     level: 1,
   },
+  // Level 2 - Acquisition & Distribution
   {
-    id: "qco",
-    name: "Quality Control",
-    role: "Contrôle Qualité",
-    description: "Valide les outputs, vérifie la conformité brand et assure la cohérence",
-    icon: Shield,
-    color: "from-red-500 to-red-400",
+    id: "ads",
+    name: "Marc Rousseau",
+    role: "Ads Optimizer",
+    description: "Optimise les campagnes SEA/YouTube avec contrôle budget et tracking",
+    icon: Target,
+    color: "from-amber-500 to-amber-400",
     level: 2,
   },
   {
-    id: "autopilot",
-    name: "Autopilot Engine",
-    role: "Exécution Auto",
-    description: "Exécute les actions approuvées et gère le workflow d'approbation",
+    id: "social",
+    name: "Chloé Martin",
+    role: "Social Distribution",
+    description: "Repurpose le contenu et planifie la distribution multi-plateforme",
+    icon: Share2,
+    color: "from-cyan-500 to-cyan-400",
+    level: 2,
+  },
+  {
+    id: "media",
+    name: "Antoine Girard",
+    role: "Media Promotion",
+    description: "Orchestre les lancements YouTube/Spotify avec smart links",
+    icon: Music,
+    color: "from-orange-500 to-orange-400",
+    level: 2,
+  },
+  {
+    id: "competitive",
+    name: "Julie Moreau",
+    role: "Competitive Intel",
+    description: "Analyse les concurrents et détecte les opportunités de gaps",
+    icon: Eye,
+    color: "from-indigo-500 to-indigo-400",
+    level: 2,
+  },
+  // Level 3 - Quality & Control
+  {
+    id: "qco",
+    name: "Pierre Lambert",
+    role: "Quality Control",
+    description: "Valide les outputs, vérifie la conformité brand et éthique",
+    icon: Shield,
+    color: "from-red-500 to-red-400",
+    level: 3,
+  },
+  {
+    id: "approval",
+    name: "Claire Dubois",
+    role: "Approval Engine",
+    description: "Classe les actions : auto-safe, approval-required ou blocked",
+    icon: CheckCircle,
+    color: "from-emerald-500 to-emerald-400",
+    level: 3,
+  },
+  {
+    id: "supervisor",
+    name: "Nicolas Bernard",
+    role: "Meta-Supervisor",
+    description: "Supervise les coûts, quotas et la santé système des agents",
     icon: Zap,
     color: "from-yellow-500 to-yellow-400",
-    level: 2,
+    level: 3,
   },
 ];
 
 export function TeamOrgChart() {
-  const cgo = agents.find((a) => a.level === 0)!;
+  const level0 = agents.filter((a) => a.level === 0);
   const level1 = agents.filter((a) => a.level === 1);
   const level2 = agents.filter((a) => a.level === 2);
+  const level3 = agents.filter((a) => a.level === 3);
 
   return (
     <section className="py-20 px-4 bg-secondary/30">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4">
@@ -87,41 +137,69 @@ export function TeamOrgChart() {
             <span className="text-gradient">100% automatisée</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            7 agents IA spécialisés travaillent en synergie pour optimiser votre
+            12 agents IA spécialisés travaillent en synergie pour optimiser votre
             croissance, 24h/24
           </p>
         </div>
 
         {/* Org Chart */}
-        <div className="relative">
+        <div className="relative space-y-8">
           {/* Level 0 - CGO */}
-          <div className="flex justify-center mb-8">
-            <AgentCard agent={cgo} isLeader />
-          </div>
-
-          {/* Connection lines from CGO to Level 1 */}
-          <div className="hidden md:block absolute top-[140px] left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-          <div className="hidden md:flex justify-around absolute top-[140px] left-[10%] right-[10%]">
-            {level1.map((_, i) => (
-              <div key={i} className="w-px h-8 bg-border" />
+          <div className="flex justify-center">
+            {level0.map((agent) => (
+              <AgentCard key={agent.id} agent={agent} isLeader />
             ))}
           </div>
 
-          {/* Level 1 - Main Agents */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 mt-8 md:mt-16">
-            {level1.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} />
-            ))}
+          {/* Connection line */}
+          <div className="hidden md:block w-px h-8 bg-border mx-auto" />
+
+          {/* Level 1 - Core Operations */}
+          <div>
+            <div className="text-center mb-4">
+              <Badge variant="secondary" className="text-xs">
+                Opérations Core
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {level1.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} />
+              ))}
+            </div>
           </div>
 
-          {/* Connection lines from Level 1 to Level 2 */}
-          <div className="hidden md:block absolute bottom-[200px] left-1/2 -translate-x-1/2 w-[40%] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          {/* Connection line */}
+          <div className="hidden md:block w-px h-8 bg-border mx-auto" />
 
-          {/* Level 2 - Support Agents */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-            {level2.map((agent) => (
-              <AgentCard key={agent.id} agent={agent} isSupport />
-            ))}
+          {/* Level 2 - Acquisition & Distribution */}
+          <div>
+            <div className="text-center mb-4">
+              <Badge variant="secondary" className="text-xs">
+                Acquisition & Distribution
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {level2.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} />
+              ))}
+            </div>
+          </div>
+
+          {/* Connection line */}
+          <div className="hidden md:block w-px h-8 bg-border mx-auto" />
+
+          {/* Level 3 - Quality & Control */}
+          <div>
+            <div className="text-center mb-4">
+              <Badge variant="secondary" className="text-xs">
+                Qualité & Contrôle
+              </Badge>
+            </div>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              {level3.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} isSupport />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -129,7 +207,7 @@ export function TeamOrgChart() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
           {[
             { value: "24/7", label: "Disponibilité" },
-            { value: "7", label: "Agents spécialisés" },
+            { value: "12", label: "Agents spécialisés" },
             { value: "<1s", label: "Temps de réponse" },
             { value: "∞", label: "Scalabilité" },
           ].map((stat, i) => (
@@ -161,7 +239,7 @@ function AgentCard({ agent, isLeader, isSupport }: AgentCardProps) {
   return (
     <Card
       className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-        isLeader ? "max-w-sm mx-auto" : isSupport ? "max-w-xs" : ""
+        isLeader ? "max-w-md mx-auto" : isSupport ? "max-w-xs flex-1" : ""
       }`}
     >
       <CardContent className={`p-4 ${isLeader ? "p-6" : ""}`}>
