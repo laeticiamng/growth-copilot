@@ -41,6 +41,8 @@ interface DashboardLayoutProps {
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/dashboard/sites", label: "Sites", icon: Building2 },
+  { path: "/dashboard/integrations", label: "Intégrations", icon: Search },
   { path: "/dashboard/seo", label: "SEO Tech", icon: Search },
   { path: "/dashboard/content", label: "Contenu", icon: FileText },
   { path: "/dashboard/local", label: "Local SEO", icon: MapPin },
@@ -51,6 +53,9 @@ const navItems = [
   { path: "/dashboard/lifecycle", label: "Lifecycle", icon: Mail },
   { path: "/dashboard/reputation", label: "Réputation", icon: Star },
   { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
+  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Settings },
+  { path: "/dashboard/logs", label: "Logs", icon: BarChart3 },
+  { path: "/dashboard/billing", label: "Billing", icon: Settings },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
