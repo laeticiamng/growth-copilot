@@ -4,6 +4,15 @@ import { AIGatewayClient, AGENT_PROMPTS, type AgentArtifactV2 } from "./ai-gatew
 import type { Database } from "@/integrations/supabase/types";
 import type { Json } from "@/integrations/supabase/types";
 
+// Re-export Meta orchestrator for convenience
+export { 
+  transformToMetaAdsInput, 
+  transformToInstagramInput, 
+  runMetaAdsAgent, 
+  runInstagramAgent, 
+  runAllMetaAgents 
+} from "./meta-orchestrator";
+
 type DbAgentType = Database['public']['Enums']['agent_type'];
 type DbAgentRunStatus = Database['public']['Enums']['agent_run_status'];
 
