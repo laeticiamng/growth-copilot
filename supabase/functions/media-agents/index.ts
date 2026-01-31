@@ -7,61 +7,14 @@ const corsHeaders = {
 };
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 interface AgentRequest {
   agent_type: string;
   media_asset_id: string;
   workspace_id: string;
   options?: Record<string, unknown>;
-}
-
-/**
- * Validates auth and workspace access
- */
-// deno-lint-ignore no-explicit-any
-async function validateRequest(req: Request, workspaceId: string): Promise<{ 
-  valid: boolean; 
-  userId: string | null; 
-  error: string | null;
-  serviceClient: any;
-}> {
-  const authHeader = req.headers.get('authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } }
-  });
-
-  try {
-    const { data, error } = await userClient.auth.getUser(token);
-    
-    if (error || !data.user) {
-      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
-    }
-
-    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
-    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
-      _user_id: data.user.id,
-      _workspace_id: workspaceId,
-    });
-
-    if (accessError || !hasAccess) {
-      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
-    }
-
-    return { valid: true, userId: data.user.id, error: null, serviceClient };
-  } catch (err) {
-    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
-  }
 }
 
 // Agent system prompts
@@ -180,6 +133,7 @@ Key metrics to watch:
 Output as structured JSON with alerts, insights, and actions.`
 };
 
+// Model configuration for different agent types
 function getModelConfig(agentType: string): { model: string; temperature: number } {
   switch (agentType) {
     case 'media_strategy':
@@ -209,6 +163,7 @@ async function runAgent(
 
   const { model, temperature } = getModelConfig(agentType);
   
+  // Build context based on agent type
   let userPrompt = `Analyze and generate recommendations for this media asset:
 
 Asset Information:
@@ -225,20 +180,24 @@ Additional metadata:
 ${JSON.stringify(mediaAsset.metadata_json || {}, null, 2)}
 `;
 
+  // Add competitor data for competitive analyst
   if (agentType === 'media_competitive_analyst' && options.competitors) {
     userPrompt += `\n\nCompetitor URLs to analyze:\n${JSON.stringify(options.competitors, null, 2)}`;
   }
 
+  // Add KPI data for analytics guardian
   if (agentType === 'media_analytics_guardian' && options.kpis) {
     userPrompt += `\n\nRecent KPIs:\n${JSON.stringify(options.kpis, null, 2)}`;
   }
 
+  // Add brand kit context if available
   if (options.brand_kit) {
     userPrompt += `\n\nBrand Guidelines:\n${JSON.stringify(options.brand_kit, null, 2)}`;
   }
 
   userPrompt += `\n\nProvide your analysis and recommendations in structured JSON format.`;
 
+  // Call AI Gateway
   const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -272,6 +231,7 @@ ${JSON.stringify(mediaAsset.metadata_json || {}, null, 2)}
   try {
     return JSON.parse(content);
   } catch {
+    // If not valid JSON, wrap in object
     return { raw_response: content };
   }
 }
@@ -291,15 +251,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate authentication and workspace access
-    const authResult = await validateRequest(req, workspace_id);
-    if (!authResult.valid || !authResult.serviceClient) {
-      return new Response(
-        JSON.stringify({ error: authResult.error || 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     if (!LOVABLE_API_KEY) {
       return new Response(
         JSON.stringify({ error: 'LOVABLE_API_KEY not configured' }),
@@ -307,9 +258,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = authResult.serviceClient;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-    // Fetch media asset and verify workspace access
+    // Fetch media asset
     const { data: mediaAsset, error: assetError } = await supabase
       .from('media_assets')
       .select('*')

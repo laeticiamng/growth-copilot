@@ -7,8 +7,7 @@ const corsHeaders = {
 };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY');
 
 interface YouTubeVideoStats {
@@ -26,52 +25,6 @@ interface YouTubeVideoSnippet {
   categoryId: string;
 }
 
-/**
- * Validates auth and workspace access
- */
-// deno-lint-ignore no-explicit-any
-async function validateRequest(req: Request, workspaceId: string): Promise<{ 
-  valid: boolean; 
-  userId: string | null; 
-  error: string | null;
-  serviceClient: any;
-}> {
-  const authHeader = req.headers.get('authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } }
-  });
-
-  try {
-    const { data, error } = await userClient.auth.getUser(token);
-    
-    if (error || !data.user) {
-      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
-    }
-
-    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
-    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
-      _user_id: data.user.id,
-      _workspace_id: workspaceId,
-    });
-
-    if (accessError || !hasAccess) {
-      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
-    }
-
-    return { valid: true, userId: data.user.id, error: null, serviceClient };
-  } catch (err) {
-    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
-  }
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -85,34 +38,6 @@ serve(async (req) => {
         JSON.stringify({ error: 'video_id is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    }
-
-    // If updating database, require authentication
-    if (media_asset_id && workspace_id) {
-      const authResult = await validateRequest(req, workspace_id);
-      if (!authResult.valid || !authResult.serviceClient) {
-        return new Response(
-          JSON.stringify({ error: authResult.error || 'Unauthorized' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const supabase = authResult.serviceClient;
-
-      // Verify media asset belongs to workspace
-      const { data: asset, error: assetError } = await supabase
-        .from('media_assets')
-        .select('id')
-        .eq('id', media_asset_id)
-        .eq('workspace_id', workspace_id)
-        .single();
-
-      if (assetError || !asset) {
-        return new Response(
-          JSON.stringify({ error: 'Media asset not found or access denied' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
     }
 
     // Check if API key is configured
@@ -147,7 +72,7 @@ serve(async (req) => {
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
-      } catch {
+      } catch (e) {
         return new Response(
           JSON.stringify({ error: 'YouTube API key not configured', mode: 'no_api_key' }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -164,6 +89,7 @@ serve(async (req) => {
       const error = await response.text();
       console.error('YouTube API error:', response.status, error);
       
+      // Check for quota exceeded
       if (response.status === 403) {
         return new Response(
           JSON.stringify({ 
@@ -214,9 +140,9 @@ serve(async (req) => {
       }
     };
 
-    // Save to database if asset ID provided and auth was validated
+    // Save to database if asset ID provided
     if (media_asset_id && workspace_id) {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
       // Update media asset
       await supabase

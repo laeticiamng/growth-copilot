@@ -17,93 +17,52 @@ interface DetectionResult {
   metadata_json: Record<string, unknown>;
 }
 
-/**
- * Validates auth and workspace access
- */
-// deno-lint-ignore no-explicit-any
-async function validateRequest(req: Request, workspaceId: string): Promise<{ 
-  valid: boolean; 
-  userId: string | null; 
-  error: string | null;
-  serviceClient: any;
-}> {
-  const authHeader = req.headers.get('authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } }
-  });
-
-  try {
-    const { data, error } = await userClient.auth.getUser(token);
-    
-    if (error || !data.user) {
-      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
-    }
-
-    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
-    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
-      _user_id: data.user.id,
-      _workspace_id: workspaceId,
-    });
-
-    if (accessError || !hasAccess) {
-      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
-    }
-
-    return { valid: true, userId: data.user.id, error: null, serviceClient };
-  } catch (err) {
-    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
-  }
-}
-
 // URL Pattern detection
 function detectPlatform(url: string): { platform: string; id: string | null } {
   const urlLower = url.toLowerCase();
   
+  // YouTube Video
   const ytVideoMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   if (ytVideoMatch) {
     return { platform: 'youtube_video', id: ytVideoMatch[1] };
   }
   
+  // YouTube Channel
   const ytChannelMatch = url.match(/youtube\.com\/(?:channel\/|c\/|@)([a-zA-Z0-9_-]+)/);
   if (ytChannelMatch) {
     return { platform: 'youtube_channel', id: ytChannelMatch[1] };
   }
   
+  // Spotify Track
   const spotifyTrackMatch = url.match(/(?:open\.spotify\.com|spotify\.link)\/track\/([a-zA-Z0-9]+)/);
   if (spotifyTrackMatch) {
     return { platform: 'spotify_track', id: spotifyTrackMatch[1] };
   }
   
+  // Spotify Album
   const spotifyAlbumMatch = url.match(/(?:open\.spotify\.com|spotify\.link)\/album\/([a-zA-Z0-9]+)/);
   if (spotifyAlbumMatch) {
     return { platform: 'spotify_album', id: spotifyAlbumMatch[1] };
   }
   
+  // Spotify Artist
   const spotifyArtistMatch = url.match(/(?:open\.spotify\.com|spotify\.link)\/artist\/([a-zA-Z0-9]+)/);
   if (spotifyArtistMatch) {
     return { platform: 'spotify_artist', id: spotifyArtistMatch[1] };
   }
   
+  // Apple Music
   if (urlLower.includes('music.apple.com')) {
     const appleMatch = url.match(/music\.apple\.com\/[a-z]{2}\/(?:album|song)\/[^\/]+\/(\d+)/);
     return { platform: 'apple_music', id: appleMatch ? appleMatch[1] : null };
   }
   
+  // SoundCloud
   if (urlLower.includes('soundcloud.com')) {
     return { platform: 'soundcloud', id: null };
   }
   
+  // TikTok
   if (urlLower.includes('tiktok.com')) {
     const tiktokMatch = url.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
     return { platform: 'tiktok', id: tiktokMatch ? tiktokMatch[1] : null };
@@ -112,6 +71,7 @@ function detectPlatform(url: string): { platform: string; id: string | null } {
   return { platform: 'other', id: null };
 }
 
+// Fetch YouTube metadata via oEmbed (no API key needed for basic info)
 async function fetchYouTubeMetadata(url: string, videoId: string): Promise<Partial<DetectionResult>> {
   try {
     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
@@ -142,6 +102,7 @@ async function fetchYouTubeMetadata(url: string, videoId: string): Promise<Parti
   }
 }
 
+// Fetch Spotify metadata via oEmbed (no auth needed)
 async function fetchSpotifyMetadata(url: string): Promise<Partial<DetectionResult>> {
   try {
     const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`;
@@ -154,6 +115,7 @@ async function fetchSpotifyMetadata(url: string): Promise<Partial<DetectionResul
     
     const data = await response.json();
     
+    // Parse title - format is usually "Track Name - Artist Name" or just title
     let title = data.title;
     let artist_name = null;
     
@@ -198,41 +160,35 @@ serve(async (req) => {
       );
     }
 
-    // If saving, require authentication
+    // Detect platform
+    const { platform, id: platform_id } = detectPlatform(url);
+    
+    // Fetch metadata based on platform
+    let metadata: Partial<DetectionResult> = {};
+    
+    if (platform === 'youtube_video' && platform_id) {
+      metadata = await fetchYouTubeMetadata(url, platform_id);
+    } else if (platform.startsWith('spotify_')) {
+      metadata = await fetchSpotifyMetadata(url);
+    }
+    
+    const result: DetectionResult = {
+      platform,
+      platform_id,
+      title: metadata.title || null,
+      description: metadata.description || null,
+      thumbnail_url: metadata.thumbnail_url || null,
+      embed_html: metadata.embed_html || null,
+      artist_name: metadata.artist_name || null,
+      metadata_json: metadata.metadata_json || {},
+    };
+
+    // Optionally save to database
     if (save && workspace_id) {
-      const authResult = await validateRequest(req, workspace_id);
-      if (!authResult.valid || !authResult.serviceClient) {
-        return new Response(
-          JSON.stringify({ error: authResult.error || 'Unauthorized' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const supabase = authResult.serviceClient;
-
-      // Detect platform
-      const { platform, id: platform_id } = detectPlatform(url);
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
-      // Fetch metadata based on platform
-      let metadata: Partial<DetectionResult> = {};
-      
-      if (platform === 'youtube_video' && platform_id) {
-        metadata = await fetchYouTubeMetadata(url, platform_id);
-      } else if (platform.startsWith('spotify_')) {
-        metadata = await fetchSpotifyMetadata(url);
-      }
-      
-      const result: DetectionResult = {
-        platform,
-        platform_id,
-        title: metadata.title || null,
-        description: metadata.description || null,
-        thumbnail_url: metadata.thumbnail_url || null,
-        embed_html: metadata.embed_html || null,
-        artist_name: metadata.artist_name || null,
-        metadata_json: metadata.metadata_json || {},
-      };
-
       // Generate smart link slug
       const slug = `${platform_id || Date.now()}-${Math.random().toString(36).substring(7)}`;
       
@@ -276,28 +232,6 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Detection only (no save) - still allowed without auth for URL preview
-    const { platform, id: platform_id } = detectPlatform(url);
-    
-    let metadata: Partial<DetectionResult> = {};
-    
-    if (platform === 'youtube_video' && platform_id) {
-      metadata = await fetchYouTubeMetadata(url, platform_id);
-    } else if (platform.startsWith('spotify_')) {
-      metadata = await fetchSpotifyMetadata(url);
-    }
-    
-    const result: DetectionResult = {
-      platform,
-      platform_id,
-      title: metadata.title || null,
-      description: metadata.description || null,
-      thumbnail_url: metadata.thumbnail_url || null,
-      embed_html: metadata.embed_html || null,
-      artist_name: metadata.artist_name || null,
-      metadata_json: metadata.metadata_json || {},
-    };
 
     return new Response(
       JSON.stringify(result),

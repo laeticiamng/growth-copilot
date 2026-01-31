@@ -1,5 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -34,13 +32,14 @@ function isBlockedUrl(urlString: string): boolean {
       }
     }
     
+    // Block non-HTTP(S) protocols
     if (!['http:', 'https:'].includes(url.protocol)) {
       return true;
     }
     
     return false;
   } catch {
-    return true;
+    return true; // Block malformed URLs
   }
 }
 
@@ -83,73 +82,6 @@ interface CrawlResult {
   duration_ms: number;
 }
 
-/**
- * Validates auth and workspace access for the crawler
- */
-// deno-lint-ignore no-explicit-any
-async function validateRequest(req: Request, workspaceId: string, siteId?: string): Promise<{ 
-  valid: boolean; 
-  userId: string | null; 
-  error: string | null;
-  serviceClient: any;
-  siteUrl?: string;
-}> {
-  const authHeader = req.headers.get('authorization');
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } }
-  });
-
-  try {
-    const { data, error } = await userClient.auth.getUser(token);
-    
-    if (error || !data.user) {
-      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
-    }
-
-    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
-    // Verify workspace access
-    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
-      _user_id: data.user.id,
-      _workspace_id: workspaceId,
-    });
-
-    if (accessError || !hasAccess) {
-      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
-    }
-
-    // If site_id provided, validate it belongs to the workspace and get its URL
-    let siteUrl: string | undefined;
-    if (siteId) {
-      const { data: site, error: siteError } = await serviceClient
-        .from('sites')
-        .select('domain')
-        .eq('id', siteId)
-        .eq('workspace_id', workspaceId)
-        .single();
-
-      if (siteError || !site) {
-        return { valid: false, userId: data.user.id, error: 'Site not found or access denied', serviceClient: null };
-      }
-      siteUrl = site.domain;
-    }
-
-    return { valid: true, userId: data.user.id, error: null, serviceClient, siteUrl };
-  } catch (err) {
-    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
-  }
-}
-
 // Parse HTML to extract SEO data
 function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData> {
   const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
@@ -159,6 +91,7 @@ function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData
   const canonicalMatch = html.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["']/i);
   const robotsMatch = html.match(/<meta[^>]*name=["']robots["'][^>]*content=["']([^"']*)["']/i);
   
+  // Schema detection
   const schemaMatches = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([^<]*)<\/script>/gi) || [];
   const schemaTypes: string[] = [];
   for (const schema of schemaMatches) {
@@ -168,6 +101,7 @@ function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData
     }
   }
   
+  // Links extraction
   const linkMatches = html.matchAll(/<a[^>]*href=["']([^"'#]+)["']/gi);
   const internalLinks: string[] = [];
   const externalLinks: string[] = [];
@@ -185,6 +119,7 @@ function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData
     }
   }
   
+  // Word count (rough estimate)
   const textContent = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
   const wordCount = textContent.split(' ').filter(w => w.length > 0).length;
   
@@ -210,6 +145,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
   const metas = new Map<string, string[]>();
   const allLinkedUrls = new Set<string>();
   
+  // Collect all linked URLs for orphan detection
   for (const page of pages) {
     for (const link of page.internal_links) {
       allLinkedUrls.add(link);
@@ -217,6 +153,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
   }
   
   for (const page of pages) {
+    // HTTP errors
     if (page.status_code >= 400) {
       issues.push({
         id: `http-error-${page.url}`,
@@ -234,6 +171,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
       continue;
     }
     
+    // Missing title
     if (!page.title) {
       issues.push({
         id: `missing-title-${page.url}`,
@@ -247,11 +185,13 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
         auto_fixable: false,
       });
     } else {
+      // Track for duplicate detection
       const existing = titles.get(page.title) || [];
       existing.push(page.url);
       titles.set(page.title, existing);
     }
     
+    // Missing meta description
     if (!page.meta_description) {
       issues.push({
         id: `missing-meta-${page.url}`,
@@ -270,6 +210,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
       metas.set(page.meta_description, existing);
     }
     
+    // Missing H1
     if (page.h1_count === 0) {
       issues.push({
         id: `missing-h1-${page.url}`,
@@ -296,6 +237,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
       });
     }
     
+    // Missing schema
     if (!page.has_schema) {
       issues.push({
         id: `missing-schema-${page.url}`,
@@ -310,6 +252,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
       });
     }
     
+    // Noindex check
     if (page.robots_meta?.toLowerCase().includes('noindex')) {
       issues.push({
         id: `noindex-${page.url}`,
@@ -324,6 +267,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
       });
     }
     
+    // Orphan page detection (simplified)
     const pageUrlNormalized = page.url.replace(/\/$/, '');
     const isLinked = allLinkedUrls.has(page.url) || 
                      allLinkedUrls.has(pageUrlNormalized) ||
@@ -344,6 +288,7 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
     }
   }
   
+  // Check for duplicates
   for (const [title, urls] of titles) {
     if (urls.length > 1) {
       issues.push({
@@ -376,11 +321,13 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
     }
   }
   
+  // Sort by ICE score descending
   issues.sort((a, b) => b.ice_score - a.ice_score);
   
   return issues;
 }
 
+// Fetch sitemap URLs
 async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
   const sitemapUrls = [
     `${baseUrl}/sitemap.xml`,
@@ -402,6 +349,7 @@ async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
         for (const match of urlMatches) {
           const url = match[1].trim();
           if (url.endsWith('.xml')) {
+            // Nested sitemap - fetch it too
             const nestedUrls = await fetchSitemapUrls(url.replace(/\/[^/]+$/, ''));
             urls.push(...nestedUrls);
           } else {
@@ -419,6 +367,7 @@ async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
   return [];
 }
 
+// Check robots.txt
 async function checkRobotsTxt(baseUrl: string): Promise<{ allowed: boolean; crawlDelay?: number }> {
   try {
     const response = await fetch(`${baseUrl}/robots.txt`, {
@@ -426,7 +375,7 @@ async function checkRobotsTxt(baseUrl: string): Promise<{ allowed: boolean; craw
     });
     
     if (!response.ok) {
-      return { allowed: true };
+      return { allowed: true }; // No robots.txt = allowed
     }
     
     const text = await response.text();
@@ -459,6 +408,7 @@ async function checkRobotsTxt(baseUrl: string): Promise<{ allowed: boolean; craw
   }
 }
 
+// Main crawl function
 async function crawlSite(
   baseUrl: string,
   maxPages: number,
@@ -470,11 +420,13 @@ async function crawlSite(
   const visited = new Set<string>();
   const toVisit: string[] = [];
   
+  // Normalize base URL
   const url = new URL(baseUrl);
   const normalizedBase = `${url.protocol}//${url.hostname}`;
   
+  // Check robots.txt
   if (respectRobots) {
-    const { allowed } = await checkRobotsTxt(normalizedBase);
+    const { allowed, crawlDelay } = await checkRobotsTxt(normalizedBase);
     if (!allowed) {
       return {
         pages_crawled: 0,
@@ -486,19 +438,23 @@ async function crawlSite(
     }
   }
   
+  // Try sitemap first
   const sitemapUrls = await fetchSitemapUrls(normalizedBase);
   if (sitemapUrls.length > 0) {
     toVisit.push(...sitemapUrls.slice(0, maxPages));
   } else {
+    // Start with homepage
     toVisit.push(normalizedBase);
   }
   
+  // Crawl pages
   while (toVisit.length > 0 && pages.length < maxPages) {
     const currentUrl = toVisit.shift()!;
     
     if (visited.has(currentUrl)) continue;
     visited.add(currentUrl);
     
+    // Security check
     if (isBlockedUrl(currentUrl)) {
       errors.push(`Blocked URL (security): ${currentUrl}`);
       continue;
@@ -535,6 +491,7 @@ async function crawlSite(
           const parsed = parseHtml(html, currentUrl, normalizedBase);
           Object.assign(pageData, parsed);
           
+          // Add internal links to crawl queue
           if (sitemapUrls.length === 0) {
             for (const link of pageData.internal_links) {
               if (!visited.has(link) && !toVisit.includes(link)) {
@@ -547,6 +504,7 @@ async function crawlSite(
       
       pages.push(pageData);
       
+      // Rate limiting
       await new Promise(resolve => setTimeout(resolve, 200));
       
     } catch (err) {
@@ -555,6 +513,7 @@ async function crawlSite(
     }
   }
   
+  // Analyze and generate issues
   const issues = analyzePages(pages, normalizedBase);
   
   return {
@@ -574,36 +533,11 @@ Deno.serve(async (req) => {
   try {
     const { url, max_pages = 50, respect_robots = true, workspace_id, site_id } = await req.json();
 
-    if (!url || !workspace_id) {
+    if (!url) {
       return new Response(
-        JSON.stringify({ success: false, error: 'URL and workspace_id are required' }),
+        JSON.stringify({ success: false, error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    }
-
-    // Validate authentication and workspace access
-    const authResult = await validateRequest(req, workspace_id, site_id);
-    if (!authResult.valid || !authResult.serviceClient) {
-      return new Response(
-        JSON.stringify({ success: false, error: authResult.error || 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // If site_id provided, validate URL matches the site's domain
-    if (site_id && authResult.siteUrl) {
-      const requestedDomain = new URL(url).hostname.toLowerCase();
-      const siteDomain = authResult.siteUrl.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-      
-      if (!requestedDomain.includes(siteDomain) && !siteDomain.includes(requestedDomain)) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'URL does not match the site domain' 
-          }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
     }
 
     // Security: Block dangerous URLs
@@ -618,10 +552,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Starting crawl for ${url}, max ${max_pages} pages, workspace: ${workspace_id}, user: ${authResult.userId}`);
+    console.log(`Starting crawl for ${url}, max ${max_pages} pages, workspace: ${workspace_id}`);
 
-    // Apply quota limits based on plan
-    const effectiveMaxPages = Math.min(max_pages, 100);
+    // Apply quota limits based on plan (simplified - would check DB in production)
+    const effectiveMaxPages = Math.min(max_pages, 100); // Hard limit for safety
 
     const result = await crawlSite(url, effectiveMaxPages, respect_robots);
 
