@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,11 @@ import {
   Eye,
   Bot,
   History,
+  Loader2,
 } from "lucide-react";
+import { useApprovals } from "@/hooks/useApprovals";
+import { LoadingState } from "@/components/ui/loading-state";
+import { toast } from "sonner";
 
 const pendingApprovals = [
   {
@@ -61,6 +66,70 @@ const autopilotRules = [
 ];
 
 export default function Approvals() {
+  const { pendingApprovals, recentDecisions, autopilotSettings, loading, approveAction, rejectAction, updateAutopilotSettings } = useApprovals();
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const handleApprove = async (id: string) => {
+    setProcessingId(id);
+    const { error } = await approveAction(id);
+    setProcessingId(null);
+    if (error) {
+      toast.error("Erreur lors de l'approbation");
+    } else {
+      toast.success("Action approuvée");
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    const reason = window.prompt("Raison du refus :");
+    if (!reason) return;
+    
+    setProcessingId(id);
+    const { error } = await rejectAction(id, reason);
+    setProcessingId(null);
+    if (error) {
+      toast.error("Erreur lors du refus");
+    } else {
+      toast.success("Action refusée");
+    }
+  };
+
+  // Use demo data if no real data
+  const displayPending = pendingApprovals.length > 0 ? pendingApprovals.map(a => ({
+    id: a.id,
+    agent: a.agent_type,
+    action: a.action_type,
+    riskLevel: a.risk_level,
+    createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString('fr') : 'Récent',
+    expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} jours` : '7 jours',
+    details: a.action_data as Record<string, unknown>,
+  })) : [
+    { id: "1", agent: "Content Builder", action: "Publier article 'Guide SEO 2026'", riskLevel: "low", createdAt: "Il y a 2h", expiresIn: "5 jours", details: { wordCount: 2800, targetKeyword: "guide seo" } },
+    { id: "2", agent: "Ads Manager", action: "Augmenter budget campagne 'Brand' +20%", riskLevel: "medium", createdAt: "Il y a 1h", expiresIn: "6 jours", details: { currentBudget: "€500", newBudget: "€600" } },
+    { id: "3", agent: "CRO Optimizer", action: "Modifier CTA homepage", riskLevel: "high", createdAt: "Il y a 30min", expiresIn: "7 jours", details: { element: "Hero CTA", change: "Couleur + Texte" } },
+  ];
+
+  const displayRecent = recentDecisions.length > 0 ? recentDecisions.map(d => ({
+    id: d.id,
+    agent: d.agent_type,
+    action: d.action_type,
+    decision: d.status === 'approved' ? 'approved' : 'rejected',
+    decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString('fr') : 'Récent',
+    autoApproved: d.auto_approved || false,
+  })) : [
+    { id: "1", agent: "SEO Auditor", action: "Corriger balises H1", decision: "approved", decidedAt: "Hier", autoApproved: false },
+    { id: "2", agent: "Review Responder", action: "Répondre avis 5★", decision: "approved", decidedAt: "Il y a 2j", autoApproved: true },
+    { id: "3", agent: "Ads Manager", action: "Pause campagne CPA > 50€", decision: "rejected", decidedAt: "Il y a 3j", autoApproved: false },
+  ];
+
+  const autopilotRules = [
+    { name: "Corrections SEO mineures", enabled: autopilotSettings?.allowed_actions?.includes('seo_fix') || false, riskLevel: "low" },
+    { name: "Réponses avis positifs", enabled: autopilotSettings?.allowed_actions?.includes('review_response') || false, riskLevel: "low" },
+    { name: "Suggestions contenu", enabled: autopilotSettings?.allowed_actions?.includes('content_suggestion') || false, riskLevel: "medium" },
+    { name: "Optimisations Ads", enabled: false, riskLevel: "high" },
+    { name: "Publications sociales", enabled: false, riskLevel: "medium" },
+  ];
+
   const getRiskBadge = (level: string) => {
     switch (level) {
       case "low":

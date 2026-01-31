@@ -35,6 +35,7 @@ interface FeatureFlagsContextType {
   loading: boolean;
   isEnabled: (flag: keyof FeatureFlags) => boolean;
   updateFlags: (newFlags: Partial<FeatureFlags>) => Promise<{ error: Error | null }>;
+  refetch: () => void;
 }
 
 const FeatureFlagsContext = createContext<FeatureFlagsContextType | undefined>(undefined);
@@ -44,31 +45,31 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   const [flags, setFlags] = useState<FeatureFlags>(defaultFlags);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFlags = async () => {
-      if (!currentWorkspace) {
-        setFlags(defaultFlags);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('feature_flags')
-        .select('flags')
-        .eq('workspace_id', currentWorkspace.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching feature flags:', error);
-        setFlags(defaultFlags);
-      } else if (data?.flags) {
-        setFlags({ ...defaultFlags, ...(data.flags as Partial<FeatureFlags>) });
-      }
-      
+  const fetchFlags = async () => {
+    if (!currentWorkspace) {
+      setFlags(defaultFlags);
       setLoading(false);
-    };
+      return;
+    }
 
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('feature_flags')
+      .select('flags')
+      .eq('workspace_id', currentWorkspace.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching feature flags:', error);
+      setFlags(defaultFlags);
+    } else if (data?.flags) {
+      setFlags({ ...defaultFlags, ...(data.flags as Partial<FeatureFlags>) });
+    }
+    
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchFlags();
   }, [currentWorkspace]);
 
@@ -93,7 +94,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <FeatureFlagsContext.Provider value={{ flags, loading, isEnabled, updateFlags }}>
+    <FeatureFlagsContext.Provider value={{ flags, loading, isEnabled, updateFlags, refetch: fetchFlags }}>
       {children}
     </FeatureFlagsContext.Provider>
   );
