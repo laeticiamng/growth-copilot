@@ -1,0 +1,377 @@
+import { useState } from "react";
+import { useMedia } from "@/hooks/useMedia";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Plus, 
+  Youtube, 
+  Music, 
+  Link2, 
+  ExternalLink, 
+  Play, 
+  MoreVertical,
+  Loader2,
+  Trash2,
+  Eye,
+  Sparkles,
+  AlertCircle
+} from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+const platformIcons: Record<string, typeof Youtube> = {
+  youtube_video: Youtube,
+  youtube_channel: Youtube,
+  spotify_track: Music,
+  spotify_album: Music,
+  spotify_artist: Music,
+  apple_music: Music,
+  soundcloud: Music,
+  tiktok: Play,
+  other: Link2,
+};
+
+const platformColors: Record<string, string> = {
+  youtube_video: 'bg-red-500/10 text-red-500 border-red-500/20',
+  youtube_channel: 'bg-red-500/10 text-red-500 border-red-500/20',
+  spotify_track: 'bg-green-500/10 text-green-500 border-green-500/20',
+  spotify_album: 'bg-green-500/10 text-green-500 border-green-500/20',
+  spotify_artist: 'bg-green-500/10 text-green-500 border-green-500/20',
+  apple_music: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
+  soundcloud: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+  tiktok: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+  other: 'bg-muted text-muted-foreground',
+};
+
+const statusColors: Record<string, string> = {
+  draft: 'bg-muted text-muted-foreground',
+  planning: 'bg-blue-500/10 text-blue-500',
+  pre_launch: 'bg-yellow-500/10 text-yellow-500',
+  launching: 'bg-primary/10 text-primary',
+  post_launch: 'bg-green-500/10 text-green-500',
+  evergreen: 'bg-emerald-500/10 text-emerald-500',
+  archived: 'bg-muted text-muted-foreground',
+};
+
+export default function MediaAssets() {
+  const { assets, loading, createAsset, deleteAsset, runAgent, setSelectedAsset } = useMedia();
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newUrl, setNewUrl] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [runningAgents, setRunningAgents] = useState<Set<string>>(new Set());
+
+  const handleAddAsset = async () => {
+    if (!newUrl.trim()) return;
+    
+    setIsCreating(true);
+    try {
+      const asset = await createAsset(newUrl);
+      if (asset) {
+        setIsAddOpen(false);
+        setNewUrl("");
+      }
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleRunAgent = async (assetId: string, agentType: string) => {
+    setRunningAgents(prev => new Set([...prev, `${assetId}-${agentType}`]));
+    try {
+      await runAgent(agentType, assetId);
+    } finally {
+      setRunningAgents(prev => {
+        const next = new Set(prev);
+        next.delete(`${assetId}-${agentType}`);
+        return next;
+      });
+    }
+  };
+
+  const youtubeAssets = assets.filter(a => a.platform.startsWith('youtube_'));
+  const spotifyAssets = assets.filter(a => a.platform.startsWith('spotify_'));
+  const otherAssets = assets.filter(a => !a.platform.startsWith('youtube_') && !a.platform.startsWith('spotify_'));
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Media Assets</h1>
+          <p className="text-muted-foreground">
+            Manage your videos, tracks, and media content
+          </p>
+        </div>
+        
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogTrigger asChild>
+            <Button variant="gradient">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Media
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Media Asset</DialogTitle>
+              <DialogDescription>
+                Paste a YouTube or Spotify URL to auto-detect and import media details.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <Input
+                placeholder="https://youtube.com/watch?v=... or https://open.spotify.com/track/..."
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddAsset()}
+              />
+              
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+                <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-medium mb-1">Supported platforms:</p>
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>YouTube (videos & channels)</li>
+                    <li>Spotify (tracks, albums, artists)</li>
+                    <li>Apple Music, SoundCloud, TikTok (basic support)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddAsset} disabled={!newUrl.trim() || isCreating}>
+                {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Import Media
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Content */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : assets.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="p-4 rounded-full bg-primary/10 mb-4">
+              <Music className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No media assets yet</h3>
+            <p className="text-muted-foreground text-center mb-4 max-w-md">
+              Add your first YouTube video or Spotify track to start creating launch plans and optimizing your content.
+            </p>
+            <Button variant="gradient" onClick={() => setIsAddOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Your First Media
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Tabs defaultValue="all" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="all">All ({assets.length})</TabsTrigger>
+            <TabsTrigger value="youtube">YouTube ({youtubeAssets.length})</TabsTrigger>
+            <TabsTrigger value="spotify">Spotify ({spotifyAssets.length})</TabsTrigger>
+            {otherAssets.length > 0 && (
+              <TabsTrigger value="other">Other ({otherAssets.length})</TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-4">
+            <AssetGrid 
+              assets={assets} 
+              onDelete={deleteAsset}
+              onRunAgent={handleRunAgent}
+              runningAgents={runningAgents}
+              onSelect={setSelectedAsset}
+            />
+          </TabsContent>
+
+          <TabsContent value="youtube" className="space-y-4">
+            <AssetGrid 
+              assets={youtubeAssets} 
+              onDelete={deleteAsset}
+              onRunAgent={handleRunAgent}
+              runningAgents={runningAgents}
+              onSelect={setSelectedAsset}
+            />
+          </TabsContent>
+
+          <TabsContent value="spotify" className="space-y-4">
+            <AssetGrid 
+              assets={spotifyAssets} 
+              onDelete={deleteAsset}
+              onRunAgent={handleRunAgent}
+              runningAgents={runningAgents}
+              onSelect={setSelectedAsset}
+            />
+          </TabsContent>
+
+          {otherAssets.length > 0 && (
+            <TabsContent value="other" className="space-y-4">
+              <AssetGrid 
+                assets={otherAssets} 
+                onDelete={deleteAsset}
+                onRunAgent={handleRunAgent}
+                runningAgents={runningAgents}
+                onSelect={setSelectedAsset}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
+      )}
+
+      {/* Limitations Notice */}
+      <Card className="bg-muted/30 border-muted">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            Platform Limitations
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground space-y-1">
+          <p>• <strong>Virality not guaranteed</strong> - We provide optimization & strategy, not magic</p>
+          <p>• <strong>Spotify for Artists</strong> data not accessible via public API (private stats limited)</p>
+          <p>• <strong>YouTube API quotas</strong> (10,000 units/day) limit volume of actions</p>
+          <p>• Some social publishing requires pro account permissions</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+interface AssetGridProps {
+  assets: Array<{
+    id: string;
+    platform: string;
+    title: string | null;
+    artist_name: string | null;
+    thumbnail_url: string | null;
+    status: string;
+    url: string;
+    smart_link_slug: string | null;
+  }>;
+  onDelete: (id: string) => void;
+  onRunAgent: (assetId: string, agentType: string) => void;
+  runningAgents: Set<string>;
+  onSelect: (asset: any) => void;
+}
+
+function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect }: AssetGridProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {assets.map((asset) => {
+        const Icon = platformIcons[asset.platform] || Link2;
+        const platformColor = platformColors[asset.platform] || platformColors.other;
+        const statusColor = statusColors[asset.status] || statusColors.draft;
+
+        return (
+          <Card key={asset.id} className="group overflow-hidden hover:border-primary/50 transition-colors">
+            {/* Thumbnail */}
+            <div className="relative aspect-video bg-muted">
+              {asset.thumbnail_url ? (
+                <img 
+                  src={asset.thumbnail_url} 
+                  alt={asset.title || 'Media thumbnail'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Icon className="w-12 h-12 text-muted-foreground/50" />
+                </div>
+              )}
+              
+              {/* Platform badge */}
+              <Badge 
+                variant="outline" 
+                className={`absolute top-2 left-2 ${platformColor}`}
+              >
+                <Icon className="w-3 h-3 mr-1" />
+                {asset.platform.replace('_', ' ')}
+              </Badge>
+
+              {/* Actions overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3">
+                <Button size="sm" variant="secondary" asChild>
+                  <a href={asset.url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    View
+                  </a>
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="secondary">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onSelect(asset)}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                    {asset.smart_link_slug && (
+                      <DropdownMenuItem asChild>
+                        <a href={`/link/${asset.smart_link_slug}`} target="_blank">
+                          <Link2 className="w-4 h-4 mr-2" />
+                          Smart Link
+                        </a>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={() => onRunAgent(asset.id, 'media_strategy')}
+                      disabled={runningAgents.has(`${asset.id}-media_strategy`)}
+                    >
+                      {runningAgents.has(`${asset.id}-media_strategy`) ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 mr-2" />
+                      )}
+                      Generate Strategy
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(asset.id)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Content */}
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">
+                    {asset.title || 'Untitled'}
+                  </h3>
+                  {asset.artist_name && (
+                    <p className="text-sm text-muted-foreground truncate">
+                      {asset.artist_name}
+                    </p>
+                  )}
+                </div>
+                <Badge variant="outline" className={statusColor}>
+                  {asset.status.replace('_', ' ')}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}

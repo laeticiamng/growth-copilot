@@ -35,6 +35,10 @@ import {
   Users,
   Rocket,
   Palette,
+  Youtube,
+  Play,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -47,6 +51,12 @@ const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/dashboard/sites", label: "Sites", icon: Building2 },
   { path: "/dashboard/integrations", label: "Intégrations", icon: Search },
+  // Media Launch OS
+  { path: "/dashboard/media", label: "Media Assets", icon: Youtube },
+  { path: "/dashboard/media/launch", label: "Launch Plan", icon: Play },
+  { path: "/dashboard/media/creatives", label: "Creatives", icon: Sparkles },
+  { path: "/dashboard/media/kpis", label: "Media KPIs", icon: TrendingUp },
+  // Core modules
   { path: "/dashboard/seo", label: "SEO Tech", icon: Search },
   { path: "/dashboard/content", label: "Contenu", icon: FileText },
   { path: "/dashboard/local", label: "Local SEO", icon: MapPin },
