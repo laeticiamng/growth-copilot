@@ -72,13 +72,13 @@ interface RunLLMRequest {
   workspace_id: string;
   user_id?: string;
   agent_name: string;
-  purpose: "cgo_plan" | "qa_review" | "seo_audit" | "copywriting" | "analysis";
-  input: {
+  purpose: "cgo_plan" | "qa_review" | "seo_audit" | "copywriting" | "analysis" | "generate_review_reply";
+  input?: {
     system_prompt: string;
     user_prompt: string;
     context?: Record<string, unknown>;
   };
-  provider_preference?: string;
+  messages?: Array<{ role: string; content: string }>;
 }
 
 // Validate JSON against expected artifact schema
@@ -142,12 +142,7 @@ function hashInput(input: unknown): string {
   return Math.abs(hash).toString(16);
 }
 
-// Model mapping by agent/purpose - OpenAI GPT-5 series by default
-// CGO: orchestrator (needs deep reasoning) → gpt-5.2
-// QCO: validator (needs precision) → gpt-5.2 (low temp)
-// SEO Auditor: worker (bulk analysis) → gpt-5-mini (cheaper)
-// Copywriting: creative → gpt-5.2 (quality matters)
-// Cheap tasks: gemini-2.5-flash-lite when budget is tight
+// Model mapping by agent/purpose
 function getModelConfig(purpose: string): { model: string; temperature: number; max_tokens: number } {
   const configs: Record<string, { model: string; temperature: number; max_tokens: number }> = {
     cgo_plan: { model: "openai/gpt-5.2", temperature: 0.3, max_tokens: 8192 },
@@ -155,14 +150,13 @@ function getModelConfig(purpose: string): { model: string; temperature: number; 
     seo_audit: { model: "openai/gpt-5-mini", temperature: 0.2, max_tokens: 4096 },
     copywriting: { model: "openai/gpt-5.2", temperature: 0.7, max_tokens: 4096 },
     analysis: { model: "openai/gpt-5-mini", temperature: 0.3, max_tokens: 4096 },
-    // Cheap fallback for high-volume/low-priority tasks
+    generate_review_reply: { model: "google/gemini-3-flash-preview", temperature: 0.6, max_tokens: 1024 },
     bulk_cheap: { model: "google/gemini-2.5-flash-lite", temperature: 0.2, max_tokens: 2048 },
   };
   return configs[purpose] || configs.analysis;
 }
 
-// Plan tier limits - budget based on tokens (not cost, since pricing varies)
-// monthly_token_budget = max tokens (in+out) per month
+// Plan tier limits
 const PLAN_LIMITS: Record<string, { requests_per_minute: number; max_concurrent: number; monthly_token_budget: number }> = {
   free: { requests_per_minute: 10, max_concurrent: 2, monthly_token_budget: 100_000 },
   starter: { requests_per_minute: 30, max_concurrent: 5, monthly_token_budget: 500_000 },
@@ -198,7 +192,6 @@ async function checkAndUpdateQuota(
   try {
     const { data, error } = await client.rpc("get_workspace_quota", { p_workspace_id: workspaceId });
 
-    // FAIL-CLOSED: If we can't verify quota, block the request
     if (error) {
       console.error("Quota check failed (blocking request):", (error as { message?: string }).message);
       return { 
@@ -210,7 +203,6 @@ async function checkAndUpdateQuota(
     const quotaArray = data as QuotaRecord[] | null;
     const quota = quotaArray?.[0];
     
-    // FAIL-CLOSED: No quota record means workspace not properly set up
     if (!quota) {
       console.error("No quota record found for workspace:", workspaceId);
       return { 
@@ -223,14 +215,12 @@ async function checkAndUpdateQuota(
     const now = new Date();
     const lastRequest = quota.last_request_at ? new Date(quota.last_request_at) : null;
 
-    // Reset minute counter if more than 60s since last request
     let requestsThisMinute = quota.requests_this_minute || 0;
     if (!lastRequest || (now.getTime() - lastRequest.getTime()) > 60000) {
       requestsThisMinute = 0;
     }
 
     if (action === "check") {
-      // Check rate limit
       if (requestsThisMinute >= limits.requests_per_minute) {
         return {
           allowed: false,
@@ -238,7 +228,6 @@ async function checkAndUpdateQuota(
           quota,
         };
       }
-      // Check concurrent runs
       if ((quota.concurrent_runs || 0) >= limits.max_concurrent) {
         return {
           allowed: false,
@@ -246,7 +235,6 @@ async function checkAndUpdateQuota(
           quota,
         };
       }
-      // Check token budget (not cost-based)
       if ((quota.monthly_tokens_used || 0) >= limits.monthly_token_budget) {
         return {
           allowed: false,
@@ -257,7 +245,6 @@ async function checkAndUpdateQuota(
       return { allowed: true, quota };
     }
 
-    // For mutations, use update_workspace_quota RPC
     if (action === "increment") {
       const { error: updateError } = await client.rpc("update_workspace_quota", {
         p_workspace_id: workspaceId,
@@ -286,12 +273,61 @@ async function checkAndUpdateQuota(
 
     return { allowed: true, quota };
   } catch (err) {
-    // FAIL-CLOSED: Any unexpected error blocks the request
     console.error("Quota check exception (blocking request):", err);
     return { 
       allowed: false, 
       reason: "Quota verification error - request blocked. Please try again." 
     };
+  }
+}
+
+/**
+ * Validates auth and workspace access
+ */
+// deno-lint-ignore no-explicit-any
+async function validateRequest(req: Request, workspaceId: string): Promise<{ 
+  valid: boolean; 
+  userId: string | null; 
+  error: string | null;
+  serviceClient: any;
+}> {
+  const authHeader = req.headers.get('authorization');
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  try {
+    const { data, error } = await userClient.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
+    }
+
+    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    // Verify workspace access
+    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
+      _user_id: data.user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (accessError || !hasAccess) {
+      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
+    }
+
+    return { valid: true, userId: data.user.id, error: null, serviceClient };
+  } catch (err) {
+    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
   }
 }
 
@@ -304,21 +340,29 @@ serve(async (req) => {
   
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
     const body: RunLLMRequest = await req.json();
-    const { workspace_id, user_id, agent_name, purpose, input } = body;
+    const { workspace_id, agent_name, purpose, input, messages } = body;
 
-    if (!workspace_id || !agent_name || !purpose || !input) {
-      throw new Error("Missing required fields: workspace_id, agent_name, purpose, input");
+    if (!workspace_id || !agent_name || !purpose) {
+      throw new Error("Missing required fields: workspace_id, agent_name, purpose");
     }
+
+    // Validate authentication and workspace access
+    const authResult = await validateRequest(req, workspace_id);
+    if (!authResult.valid || !authResult.serviceClient) {
+      return new Response(
+        JSON.stringify({ success: false, error: authResult.error || 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = authResult.serviceClient;
+    const user_id = authResult.userId;
 
     // Check quota before processing
     const quotaCheck = await checkAndUpdateQuota(supabase, workspace_id, "check");
@@ -341,7 +385,7 @@ serve(async (req) => {
     await checkAndUpdateQuota(supabase, workspace_id, "increment");
 
     const modelConfig = getModelConfig(purpose);
-    const inputHash = hashInput(input);
+    const inputHash = hashInput(input || messages);
     
     // Create initial ai_request record
     const { data: aiRequest, error: insertError } = await supabase
@@ -354,7 +398,7 @@ serve(async (req) => {
         provider_name: "lovable",
         model_name: modelConfig.model,
         input_hash: inputHash,
-        input_json: input,
+        input_json: input || { messages },
         status: "pending",
       })
       .select()
@@ -365,6 +409,64 @@ serve(async (req) => {
     }
 
     const requestId = aiRequest?.id;
+
+    // Handle simple message-based requests (like generate_review_reply)
+    if (messages && !input) {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: modelConfig.model,
+          messages,
+          temperature: modelConfig.temperature,
+          max_tokens: modelConfig.max_tokens,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AI gateway error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      const tokensIn = data.usage?.prompt_tokens || 0;
+      const tokensOut = data.usage?.completion_tokens || 0;
+      const durationMs = Date.now() - startTime;
+
+      await checkAndUpdateQuota(supabase, workspace_id, "decrement");
+      await checkAndUpdateQuota(supabase, workspace_id, "add_tokens", tokensIn + tokensOut);
+
+      if (requestId) {
+        await supabase
+          .from("ai_requests")
+          .update({
+            status: "success",
+            output_json: { content },
+            tokens_in: tokensIn,
+            tokens_out: tokensOut,
+            duration_ms: durationMs,
+          })
+          .eq("id", requestId);
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          content,
+          tokens: { in: tokensIn, out: tokensOut },
+          duration_ms: durationMs,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!input) {
+      throw new Error("Missing required field: input");
+    }
 
     // Build the prompt with strict JSON output instructions
     const systemPrompt = `${input.system_prompt}
@@ -386,6 +488,7 @@ RULES:
     let tokensOut = 0;
     let attempts = 0;
     const maxAttempts = 2;
+    let currentInput = { ...input };
 
     while (attempts < maxAttempts && !result) {
       attempts++;
@@ -401,7 +504,7 @@ RULES:
             model: modelConfig.model,
             messages: [
               { role: "system", content: systemPrompt },
-              { role: "user", content: input.user_prompt + (input.context ? `\n\nContext: ${JSON.stringify(input.context)}` : "") },
+              { role: "user", content: currentInput.user_prompt + (currentInput.context ? `\n\nContext: ${JSON.stringify(currentInput.context)}` : "") },
             ],
             temperature: modelConfig.temperature,
             max_tokens: modelConfig.max_tokens,
@@ -422,7 +525,6 @@ RULES:
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content;
         
-        // Extract token usage
         tokensIn = data.usage?.prompt_tokens || 0;
         tokensOut = data.usage?.completion_tokens || 0;
 
@@ -430,10 +532,8 @@ RULES:
           throw new Error("Empty response from AI");
         }
 
-        // Try to parse JSON from response
         let parsed: unknown;
         try {
-          // Handle potential markdown code blocks
           let jsonStr = content.trim();
           if (jsonStr.startsWith("```json")) {
             jsonStr = jsonStr.slice(7);
@@ -449,26 +549,30 @@ RULES:
           if (attempts < maxAttempts) {
             status = "retry";
             console.log(`Attempt ${attempts}: JSON parse failed, retrying with repair prompt`);
-            // Add repair instruction for retry
-            input.user_prompt = `Your previous response was not valid JSON. Please try again.
+            currentInput = {
+              ...currentInput,
+              user_prompt: `Your previous response was not valid JSON. Please try again.
 
-Original request: ${input.user_prompt}
+Original request: ${currentInput.user_prompt}
 
-Remember: Output ONLY a valid JSON object, no markdown, no explanations.`;
+Remember: Output ONLY a valid JSON object, no markdown, no explanations.`
+            };
             continue;
           }
           throw new Error("Failed to parse AI response as JSON");
         }
 
-        // Validate the artifact structure
         const validation = validateArtifact(parsed);
         if (!validation.valid) {
           if (attempts < maxAttempts) {
             status = "retry";
             console.log(`Attempt ${attempts}: Validation failed (${validation.errors.join(", ")}), retrying`);
-            input.user_prompt = `Your previous response had schema errors: ${validation.errors.join(", ")}
+            currentInput = {
+              ...currentInput,
+              user_prompt: `Your previous response had schema errors: ${validation.errors.join(", ")}
 
-Please fix these issues and try again. Original request: ${input.user_prompt}`;
+Please fix these issues and try again. Original request: ${currentInput.user_prompt}`
+            };
             continue;
           }
           throw new Error(`Invalid artifact schema: ${validation.errors.join(", ")}`);
@@ -492,50 +596,22 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
     const durationMs = Date.now() - startTime;
     const totalTokens = tokensIn + tokensOut;
 
-    // Decrement concurrent runs and add tokens to quota
     await checkAndUpdateQuota(supabase, workspace_id, "decrement");
-    if (totalTokens > 0) {
-      await checkAndUpdateQuota(supabase, workspace_id, "add_tokens", totalTokens);
-    }
+    await checkAndUpdateQuota(supabase, workspace_id, "add_tokens", totalTokens);
 
-    // Update ai_request with results (service-role only, one-shot pending → final)
-    // This is the ONLY update allowed on ai_requests - transitions from pending to final status
     if (requestId) {
       await supabase
         .from("ai_requests")
         .update({
+          status: status === "fallback" ? "error" : "success",
           output_json: result,
-          status,
-          error_message: errorMessage,
           tokens_in: tokensIn,
           tokens_out: tokensOut,
           duration_ms: durationMs,
+          error_message: errorMessage,
         })
         .eq("id", requestId);
     }
-
-    // Log to action_log
-    await supabase.from("action_log").insert({
-      workspace_id,
-      actor_type: "agent",
-      actor_id: agent_name,
-      action_type: "AI_RUN",
-      action_category: "ai_gateway",
-      description: `AI run for ${purpose} by ${agent_name}`,
-      details: {
-        request_id: requestId,
-        purpose,
-        provider: "lovable",
-        model: modelConfig.model,
-        status,
-        tokens_in: tokensIn,
-        tokens_out: tokensOut,
-        tokens_total: totalTokens,
-        duration_ms: durationMs,
-      },
-      is_automated: true,
-      result: status === "success" || status === "retry" ? "success" : "warning",
-    });
 
     return new Response(
       JSON.stringify({
@@ -543,33 +619,20 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
         status,
         request_id: requestId,
         artifact: result,
-        usage: {
-          tokens_in: tokensIn,
-          tokens_out: tokensOut,
-          tokens_total: totalTokens,
-          duration_ms: durationMs,
-        },
+        tokens: { in: tokensIn, out: tokensOut },
+        duration_ms: durationMs,
+        attempts,
+        error: errorMessage,
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error) {
     console.error("AI Gateway error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    
     return new Response(
-      JSON.stringify({
-        success: false,
-        status: "error",
-        error: message,
-        artifact: createFallbackArtifact(message),
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ success: false, error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

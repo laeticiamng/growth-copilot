@@ -14,16 +14,60 @@ interface GSCRequest {
   end_date?: string;
 }
 
+/**
+ * Validates auth and workspace access
+ */
+// deno-lint-ignore no-explicit-any
+async function validateRequest(req: Request, workspaceId: string): Promise<{ 
+  valid: boolean; 
+  userId: string | null; 
+  error: string | null;
+  serviceClient: any;
+}> {
+  const authHeader = req.headers.get('authorization');
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  try {
+    const { data, error } = await userClient.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
+    }
+
+    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
+      _user_id: data.user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (accessError || !hasAccess) {
+      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
+    }
+
+    return { valid: true, userId: data.user.id, error: null, serviceClient };
+  } catch (err) {
+    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
+  }
+}
+
 // Google Search Console API sync
-// Requires GSC_ACCESS_TOKEN and GSC_REFRESH_TOKEN stored in integrations table
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const body: GSCRequest = await req.json();
@@ -31,6 +75,32 @@ serve(async (req) => {
 
     if (!workspace_id || !site_id || !site_url) {
       throw new Error("Missing required fields: workspace_id, site_id, site_url");
+    }
+
+    // Validate authentication and workspace access
+    const authResult = await validateRequest(req, workspace_id);
+    if (!authResult.valid || !authResult.serviceClient) {
+      return new Response(
+        JSON.stringify({ success: false, error: authResult.error || 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = authResult.serviceClient;
+
+    // Validate site belongs to workspace
+    const { data: site, error: siteError } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("id", site_id)
+      .eq("workspace_id", workspace_id)
+      .single();
+
+    if (siteError || !site) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Site not found or access denied" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Get integration credentials
@@ -52,24 +122,16 @@ serve(async (req) => {
       );
     }
 
-    // In production, we would:
-    // 1. Get access token from Vault using integration.access_token_ref
-    // 2. Refresh if expired using integration.refresh_token_ref
-    // 3. Call GSC API
-    
-    // For now, we simulate the sync with demo data structure
-    // Real implementation would use: https://www.googleapis.com/webmasters/v3/sites/{siteUrl}/searchAnalytics/query
-    
     const syncId = crypto.randomUUID();
     const today = new Date();
-    const defaultEndDate = new Date(today.setDate(today.getDate() - 2)); // GSC has 2-day lag
+    const defaultEndDate = new Date(today.setDate(today.getDate() - 2));
     const defaultStartDate = new Date(defaultEndDate);
     defaultStartDate.setDate(defaultStartDate.getDate() - 30);
 
     const dateStart = start_date || defaultStartDate.toISOString().split("T")[0];
     const dateEnd = end_date || defaultEndDate.toISOString().split("T")[0];
 
-    console.log(`Syncing GSC data for ${site_url} from ${dateStart} to ${dateEnd}`);
+    console.log(`Syncing GSC data for ${site_url} from ${dateStart} to ${dateEnd}, user: ${authResult.userId}`);
 
     // Log the sync attempt
     await supabase.from("action_log").insert({
@@ -85,23 +147,13 @@ serve(async (req) => {
       result: "pending",
     });
 
-    // In production, we'd call the GSC API here
-    // For MVP, we prepare the structure for when tokens are configured
+    // GSC API request structure (for when OAuth is configured)
     const gscApiPayload = {
       startDate: dateStart,
       endDate: dateEnd,
       dimensions: ["date"],
       rowLimit: 1000,
       aggregationType: "byPage",
-    };
-
-    // Simulate successful sync structure (replace with real API call)
-    // This shows the expected data format
-    const mockResponse = {
-      rows: [
-        // Each row would contain: keys (date), clicks, impressions, ctr, position
-        // Real data would come from GSC API response
-      ],
     };
 
     // Update integration last_sync_at

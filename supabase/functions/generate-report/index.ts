@@ -9,7 +9,56 @@ const corsHeaders = {
 interface ReportRequest {
   workspace_id: string;
   site_id: string;
-  month?: string; // YYYY-MM format, defaults to previous month
+  month?: string;
+}
+
+/**
+ * Validates auth and workspace access
+ */
+// deno-lint-ignore no-explicit-any
+async function validateRequest(req: Request, workspaceId: string): Promise<{ 
+  valid: boolean; 
+  userId: string | null; 
+  error: string | null;
+  serviceClient: any;
+}> {
+  const authHeader = req.headers.get('authorization');
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { valid: false, userId: null, error: 'Missing Authorization header', serviceClient: null };
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  try {
+    const { data, error } = await userClient.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return { valid: false, userId: null, error: 'Invalid or expired token', serviceClient: null };
+    }
+
+    const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    const { data: hasAccess, error: accessError } = await serviceClient.rpc('has_workspace_access', {
+      _user_id: data.user.id,
+      _workspace_id: workspaceId,
+    });
+
+    if (accessError || !hasAccess) {
+      return { valid: false, userId: data.user.id, error: 'Access denied to workspace', serviceClient: null };
+    }
+
+    return { valid: true, userId: data.user.id, error: null, serviceClient };
+  } catch (err) {
+    return { valid: false, userId: null, error: 'Authentication failed', serviceClient: null };
+  }
 }
 
 // Generate Monthly PDF Report
@@ -18,16 +67,38 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
   try {
     const body: ReportRequest = await req.json();
     const { workspace_id, site_id } = body;
 
     if (!workspace_id || !site_id) {
       throw new Error("Missing required fields: workspace_id, site_id");
+    }
+
+    // Validate authentication and workspace access
+    const authResult = await validateRequest(req, workspace_id);
+    if (!authResult.valid || !authResult.serviceClient) {
+      return new Response(
+        JSON.stringify({ success: false, error: authResult.error || 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = authResult.serviceClient;
+
+    // Validate site belongs to workspace
+    const { data: site, error: siteError } = await supabase
+      .from("sites")
+      .select("id, name, domain")
+      .eq("id", site_id)
+      .eq("workspace_id", workspace_id)
+      .single();
+
+    if (siteError || !site) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Site not found or access denied" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Calculate month range
@@ -42,14 +113,7 @@ serve(async (req) => {
     const prevMonthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 0);
 
     const monthStr = monthStart.toISOString().slice(0, 7);
-    console.log(`Generating report for ${monthStr}`);
-
-    // Get site info
-    const { data: site } = await supabase
-      .from("sites")
-      .select("name, domain")
-      .eq("id", site_id)
-      .single();
+    console.log(`Generating report for ${monthStr}, user: ${authResult.userId}`);
 
     // Get KPI data for current month
     const { data: currentKpis } = await supabase
@@ -123,7 +187,7 @@ serve(async (req) => {
       organic_sessions: { current: current.organic_sessions, previous: previous.organic_sessions, change: calcChange(current.organic_sessions, previous.organic_sessions) },
       total_conversions: { current: current.total_conversions, previous: previous.total_conversions, change: calcChange(current.total_conversions, previous.total_conversions) },
       revenue: { current: current.revenue, previous: previous.revenue, change: calcChange(current.revenue, previous.revenue) },
-      avg_position: { current: current.avg_position?.toFixed(1), previous: previous.avg_position?.toFixed(1), change: calcChange(previous.avg_position, current.avg_position) }, // inverted - lower is better
+      avg_position: { current: current.avg_position?.toFixed(1), previous: previous.avg_position?.toFixed(1), change: calcChange(previous.avg_position, current.avg_position) },
     } : {};
 
     // Build report JSON structure
@@ -154,7 +218,7 @@ serve(async (req) => {
       })),
     };
 
-    // Generate simple HTML report (can be converted to PDF via external service)
+    // Generate simple HTML report
     const htmlReport = generateHTMLReport(reportData);
 
     // Store report in storage
@@ -233,9 +297,19 @@ serve(async (req) => {
   }
 });
 
+interface KPISummary {
+  organic_clicks: number;
+  organic_impressions: number;
+  organic_sessions: number;
+  total_conversions: number;
+  total_leads: number;
+  revenue: number;
+  avg_position: number;
+}
+
 function generateExecutiveSummary(
-  current: ReturnType<typeof sumKpis> | null,
-  previous: ReturnType<typeof sumKpis> | null,
+  current: KPISummary | null,
+  previous: KPISummary | null,
   actionsCount: number,
   issuesCount: number,
   alertsCount: number
@@ -273,28 +347,6 @@ function generateExecutiveSummary(
   }
 
   return parts.join(". ") + ".";
-}
-
-function sumKpis(kpis: unknown[] | null) {
-  if (!kpis || kpis.length === 0) return null;
-  const typedKpis = kpis as Array<{
-    organic_clicks?: number;
-    organic_impressions?: number;
-    organic_sessions?: number;
-    total_conversions?: number;
-    total_leads?: number;
-    revenue?: number;
-    avg_position?: number;
-  }>;
-  return {
-    organic_clicks: typedKpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0),
-    organic_impressions: typedKpis.reduce((sum, k) => sum + (k.organic_impressions || 0), 0),
-    organic_sessions: typedKpis.reduce((sum, k) => sum + (k.organic_sessions || 0), 0),
-    total_conversions: typedKpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0),
-    total_leads: typedKpis.reduce((sum, k) => sum + (k.total_leads || 0), 0),
-    revenue: typedKpis.reduce((sum, k) => sum + Number(k.revenue || 0), 0),
-    avg_position: typedKpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / typedKpis.length,
-  };
 }
 
 function generateHTMLReport(data: Record<string, unknown>): string {
