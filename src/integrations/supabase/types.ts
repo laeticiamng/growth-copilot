@@ -776,48 +776,69 @@ export type Database = {
           action_data: Json
           action_type: string
           agent_type: string
+          approval_scope: string | null
           auto_approved: boolean | null
           created_at: string | null
+          diff_summary: Json | null
           expires_at: string | null
           id: string
+          partial_decisions: Json | null
+          preview_urls: Json | null
           rejection_reason: string | null
+          reminder_sent_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           risk_level: string
           site_id: string | null
+          sla_hours: number | null
           status: string
+          variant_id: string | null
           workspace_id: string
         }
         Insert: {
           action_data?: Json
           action_type: string
           agent_type: string
+          approval_scope?: string | null
           auto_approved?: boolean | null
           created_at?: string | null
+          diff_summary?: Json | null
           expires_at?: string | null
           id?: string
+          partial_decisions?: Json | null
+          preview_urls?: Json | null
           rejection_reason?: string | null
+          reminder_sent_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           risk_level?: string
           site_id?: string | null
+          sla_hours?: number | null
           status?: string
+          variant_id?: string | null
           workspace_id: string
         }
         Update: {
           action_data?: Json
           action_type?: string
           agent_type?: string
+          approval_scope?: string | null
           auto_approved?: boolean | null
           created_at?: string | null
+          diff_summary?: Json | null
           expires_at?: string | null
           id?: string
+          partial_decisions?: Json | null
+          preview_urls?: Json | null
           rejection_reason?: string | null
+          reminder_sent_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           risk_level?: string
           site_id?: string | null
+          sla_hours?: number | null
           status?: string
+          variant_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -829,7 +850,67 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "approval_queue_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "approval_queue_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_type: string
+          changes: Json | null
+          context: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_type?: string
+          changes?: Json | null
+          context?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_type?: string
+          changes?: Json | null
+          context?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1154,6 +1235,57 @@ export type Database = {
           },
           {
             foreignKeyName: "campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claim_decisions: {
+        Row: {
+          created_at: string
+          creative_job_id: string | null
+          decision: string
+          evidence_source: string | null
+          id: string
+          original_claim: string
+          reason: string | null
+          rewritten_claim: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          creative_job_id?: string | null
+          decision: string
+          evidence_source?: string | null
+          id?: string
+          original_claim: string
+          reason?: string | null
+          rewritten_claim?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          creative_job_id?: string | null
+          decision?: string
+          evidence_source?: string | null
+          id?: string
+          original_claim?: string
+          reason?: string | null
+          rewritten_claim?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_decisions_creative_job_id_fkey"
+            columns: ["creative_job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_decisions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1520,65 +1652,83 @@ export type Database = {
       creative_jobs: {
         Row: {
           approval_id: string | null
+          audit_manifest: Json | null
           cost_estimate: number | null
           created_at: string
           duration_ms: number | null
           duration_seconds: number | null
           error_message: string | null
+          experiment_id: string | null
           geo: string | null
           id: string
+          idempotency_key: string | null
           input_json: Json
           language: string
           objective: string
           output_json: Json | null
           provider: string
           qa_iterations: number | null
+          render_completed_at: string | null
+          render_started_at: string | null
           site_id: string | null
           status: string
           style: string | null
           updated_at: string
+          variant_name: string | null
           workspace_id: string
         }
         Insert: {
           approval_id?: string | null
+          audit_manifest?: Json | null
           cost_estimate?: number | null
           created_at?: string
           duration_ms?: number | null
           duration_seconds?: number | null
           error_message?: string | null
+          experiment_id?: string | null
           geo?: string | null
           id?: string
+          idempotency_key?: string | null
           input_json?: Json
           language?: string
           objective: string
           output_json?: Json | null
           provider?: string
           qa_iterations?: number | null
+          render_completed_at?: string | null
+          render_started_at?: string | null
           site_id?: string | null
           status?: string
           style?: string | null
           updated_at?: string
+          variant_name?: string | null
           workspace_id: string
         }
         Update: {
           approval_id?: string | null
+          audit_manifest?: Json | null
           cost_estimate?: number | null
           created_at?: string
           duration_ms?: number | null
           duration_seconds?: number | null
           error_message?: string | null
+          experiment_id?: string | null
           geo?: string | null
           id?: string
+          idempotency_key?: string | null
           input_json?: Json
           language?: string
           objective?: string
           output_json?: Json | null
           provider?: string
           qa_iterations?: number | null
+          render_completed_at?: string | null
+          render_started_at?: string | null
           site_id?: string | null
           status?: string
           style?: string | null
           updated_at?: string
+          variant_name?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -1587,6 +1737,13 @@ export type Database = {
             columns: ["approval_id"]
             isOneToOne: false
             referencedRelation: "approval_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_jobs_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
             referencedColumns: ["id"]
           },
           {
@@ -1994,6 +2151,218 @@ export type Database = {
           },
         ]
       }
+      experiment_results: {
+        Row: {
+          clicks: number | null
+          confidence_level: number | null
+          conversions: number | null
+          cost: number | null
+          cpa: number | null
+          created_at: string
+          ctr: number | null
+          cvr: number | null
+          data_source: string | null
+          experiment_id: string
+          id: string
+          impressions: number | null
+          is_significant: boolean | null
+          revenue: number | null
+          roas: number | null
+          snapshot_date: string
+          variant_id: string
+          workspace_id: string
+        }
+        Insert: {
+          clicks?: number | null
+          confidence_level?: number | null
+          conversions?: number | null
+          cost?: number | null
+          cpa?: number | null
+          created_at?: string
+          ctr?: number | null
+          cvr?: number | null
+          data_source?: string | null
+          experiment_id: string
+          id?: string
+          impressions?: number | null
+          is_significant?: boolean | null
+          revenue?: number | null
+          roas?: number | null
+          snapshot_date?: string
+          variant_id: string
+          workspace_id: string
+        }
+        Update: {
+          clicks?: number | null
+          confidence_level?: number | null
+          conversions?: number | null
+          cost?: number | null
+          cpa?: number | null
+          created_at?: string
+          ctr?: number | null
+          cvr?: number | null
+          data_source?: string | null
+          experiment_id?: string
+          id?: string
+          impressions?: number | null
+          is_significant?: boolean | null
+          revenue?: number | null
+          roas?: number | null
+          snapshot_date?: string
+          variant_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_results_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_results_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_results_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_variants: {
+        Row: {
+          asset_ids: string[] | null
+          created_at: string
+          creative_job_id: string | null
+          experiment_id: string
+          id: string
+          is_control: boolean
+          name: string
+          traffic_allocation: number
+          utm_params: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          asset_ids?: string[] | null
+          created_at?: string
+          creative_job_id?: string | null
+          experiment_id: string
+          id?: string
+          is_control?: boolean
+          name?: string
+          traffic_allocation?: number
+          utm_params?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          asset_ids?: string[] | null
+          created_at?: string
+          creative_job_id?: string | null
+          experiment_id?: string
+          id?: string
+          is_control?: boolean
+          name?: string
+          traffic_allocation?: number
+          utm_params?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_variants_creative_job_id_fkey"
+            columns: ["creative_job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_variants_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_variants_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          hypothesis: string | null
+          id: string
+          name: string
+          objective: string
+          primary_metric: string
+          site_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["experiment_status"]
+          updated_at: string
+          winner_variant_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          hypothesis?: string | null
+          id?: string
+          name: string
+          objective: string
+          primary_metric?: string
+          site_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          updated_at?: string
+          winner_variant_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          hypothesis?: string | null
+          id?: string
+          name?: string
+          objective?: string
+          primary_metric?: string
+          site_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          updated_at?: string
+          winner_variant_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flags: {
         Row: {
           created_at: string
@@ -2176,6 +2545,139 @@ export type Database = {
           },
           {
             foreignKeyName: "gbp_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_reports: {
+        Row: {
+          agent_run_id: string | null
+          created_at: string
+          id: string
+          is_resolved: boolean
+          job_id: string | null
+          reason: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          step: string
+          suggested_fix: string | null
+          workspace_id: string
+        }
+        Insert: {
+          agent_run_id?: string | null
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          job_id?: string | null
+          reason: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          step: string
+          suggested_fix?: string | null
+          workspace_id: string
+        }
+        Update: {
+          agent_run_id?: string | null
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          job_id?: string | null
+          reason?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          step?: string
+          suggested_fix?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_reports_agent_run_id_fkey"
+            columns: ["agent_run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          integration_id: string | null
+          is_revoked: boolean
+          last_refreshed_at: string | null
+          last_used_at: string | null
+          provider: string
+          refresh_failures: number
+          revoked_at: string | null
+          revoked_reason: string | null
+          scopes: string[] | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          is_revoked?: boolean
+          last_refreshed_at?: string | null
+          last_used_at?: string | null
+          provider: string
+          refresh_failures?: number
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scopes?: string[] | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          is_revoked?: boolean
+          last_refreshed_at?: string | null
+          last_used_at?: string | null
+          provider?: string
+          refresh_failures?: number
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scopes?: string[] | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_tokens_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_tokens_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -4531,6 +5033,153 @@ export type Database = {
           },
         ]
       }
+      platform_policies: {
+        Row: {
+          created_at: string
+          frequency_caps: Json | null
+          id: string
+          industry: string | null
+          is_active: boolean
+          platform: string
+          policy_name: string
+          required_approvals: string[] | null
+          rules: Json
+          warnings: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          frequency_caps?: Json | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean
+          platform: string
+          policy_name: string
+          required_approvals?: string[] | null
+          rules?: Json
+          warnings?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          frequency_caps?: Json | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean
+          platform?: string
+          policy_name?: string
+          required_approvals?: string[] | null
+          rules?: Json
+          warnings?: string[] | null
+        }
+        Relationships: []
+      }
+      policies: {
+        Row: {
+          action_type: string
+          autopilot_allowed: boolean
+          constraints: Json | null
+          created_at: string
+          created_by: string | null
+          id: string
+          requires_approval: boolean
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          site_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          action_type: string
+          autopilot_allowed?: boolean
+          constraints?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          requires_approval?: boolean
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          site_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          action_type?: string
+          autopilot_allowed?: boolean
+          constraints?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          requires_approval?: boolean
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          site_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policies_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policies_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_events: {
+        Row: {
+          action_type: string
+          context: Json | null
+          created_at: string
+          decision: string
+          id: string
+          policy_id: string | null
+          reason: string | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action_type: string
+          context?: Json | null
+          created_at?: string
+          decision: string
+          id?: string
+          policy_id?: string | null
+          reason?: string | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action_type?: string
+          context?: Json | null
+          created_at?: string
+          decision?: string
+          id?: string
+          policy_id?: string | null
+          reason?: string | null
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_events_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_versions: {
         Row: {
           created_at: string | null
@@ -4719,6 +5368,67 @@ export type Database = {
           },
         ]
       }
+      render_qa_frames: {
+        Row: {
+          asset_id: string | null
+          checks: Json | null
+          created_at: string
+          frame_position: string
+          frame_url: string | null
+          id: string
+          issues: string[] | null
+          job_id: string
+          passed: boolean | null
+          workspace_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          checks?: Json | null
+          created_at?: string
+          frame_position: string
+          frame_url?: string | null
+          id?: string
+          issues?: string[] | null
+          job_id: string
+          passed?: boolean | null
+          workspace_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          checks?: Json | null
+          created_at?: string
+          frame_position?: string
+          frame_url?: string | null
+          id?: string
+          issues?: string[] | null
+          job_id?: string
+          passed?: boolean | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_qa_frames_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "creative_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_qa_frames_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_qa_frames_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_requests: {
         Row: {
           channel: string | null
@@ -4838,6 +5548,110 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: Database["public"]["Enums"]["permission_action"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: Database["public"]["Enums"]["permission_action"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: Database["public"]["Enums"]["permission_action"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      safe_zone_configs: {
+        Row: {
+          bottom_percent: number
+          bottom_px: number
+          created_at: string
+          format: string
+          height: number
+          id: string
+          left_percent: number
+          left_px: number
+          notes: string | null
+          right_percent: number
+          right_px: number
+          top_percent: number
+          top_px: number
+          width: number
+        }
+        Insert: {
+          bottom_percent?: number
+          bottom_px?: number
+          created_at?: string
+          format: string
+          height: number
+          id?: string
+          left_percent?: number
+          left_px?: number
+          notes?: string | null
+          right_percent?: number
+          right_px?: number
+          top_percent?: number
+          top_px?: number
+          width: number
+        }
+        Update: {
+          bottom_percent?: number
+          bottom_px?: number
+          created_at?: string
+          format?: string
+          height?: number
+          id?: string
+          left_percent?: number
+          left_px?: number
+          notes?: string | null
+          right_percent?: number
+          right_px?: number
+          top_percent?: number
+          top_px?: number
+          width?: number
+        }
+        Relationships: []
+      }
+      site_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          site_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          site_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          site_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_roles_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
         ]
@@ -5552,7 +6366,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_idempotency_key: {
+        Args: { _key: string }
+        Returns: {
+          exists_already: boolean
+          job_id: string
+          status: string
+        }[]
+      }
+      check_policy: {
+        Args: { _action_type: string; _site_id?: string; _workspace_id: string }
+        Returns: {
+          autopilot_allowed: boolean
+          constraints: Json
+          requires_approval: boolean
+          risk_level: Database["public"]["Enums"]["risk_level"]
+        }[]
+      }
       cleanup_expired_oauth_nonces: { Args: never; Returns: undefined }
+      get_effective_role: {
+        Args: { _site_id?: string; _user_id: string; _workspace_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_user_permissions: {
+        Args: { _site_id?: string; _user_id: string; _workspace_id: string }
+        Returns: {
+          permission: Database["public"]["Enums"]["permission_action"]
+        }[]
+      }
       get_user_workspace_ids: { Args: { _user_id: string }; Returns: string[] }
       get_workspace_quota: {
         Args: { p_workspace_id: string }
@@ -5567,6 +6408,15 @@ export type Database = {
       }
       has_agency_access: {
         Args: { _client_workspace_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_permission: {
+        Args: {
+          _permission: Database["public"]["Enums"]["permission_action"]
+          _site_id?: string
+          _user_id: string
+          _workspace_id: string
+        }
         Returns: boolean
       }
       has_workspace_access: {
@@ -5584,6 +6434,31 @@ export type Database = {
       is_workspace_owner: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
+      }
+      log_audit_event: {
+        Args: {
+          _action: string
+          _actor_id: string
+          _actor_type?: string
+          _changes?: Json
+          _context?: Json
+          _entity_id: string
+          _entity_type: string
+          _workspace_id: string
+        }
+        Returns: string
+      }
+      log_policy_event: {
+        Args: {
+          _action_type: string
+          _context?: Json
+          _decision: string
+          _policy_id: string
+          _reason?: string
+          _user_id?: string
+          _workspace_id: string
+        }
+        Returns: string
       }
       update_workspace_quota: {
         Args: {
@@ -5626,8 +6501,14 @@ export type Database = {
         | "ads_creative"
         | "media_competitive_analyst"
         | "media_analytics_guardian"
-      app_role: "owner" | "admin" | "member"
+      app_role: "owner" | "admin" | "member" | "manager" | "analyst" | "viewer"
       content_status: "draft" | "review" | "approved" | "published" | "archived"
+      experiment_status:
+        | "draft"
+        | "running"
+        | "paused"
+        | "completed"
+        | "archived"
       integration_provider:
         | "google_search_console"
         | "google_analytics"
@@ -5676,6 +6557,18 @@ export type Database = {
         | "soundcloud"
         | "tiktok"
         | "other"
+      permission_action:
+        | "run_agents"
+        | "approve_actions"
+        | "connect_integrations"
+        | "export_assets"
+        | "manage_billing"
+        | "manage_team"
+        | "view_analytics"
+        | "manage_policies"
+        | "manage_experiments"
+        | "view_audit"
+      risk_level: "low" | "medium" | "high" | "critical"
       subscription_plan: "free" | "starter" | "growth" | "agency"
     }
     CompositeTypes: {
@@ -5835,8 +6728,15 @@ export const Constants = {
         "media_competitive_analyst",
         "media_analytics_guardian",
       ],
-      app_role: ["owner", "admin", "member"],
+      app_role: ["owner", "admin", "member", "manager", "analyst", "viewer"],
       content_status: ["draft", "review", "approved", "published", "archived"],
+      experiment_status: [
+        "draft",
+        "running",
+        "paused",
+        "completed",
+        "archived",
+      ],
       integration_provider: [
         "google_search_console",
         "google_analytics",
@@ -5890,6 +6790,19 @@ export const Constants = {
         "tiktok",
         "other",
       ],
+      permission_action: [
+        "run_agents",
+        "approve_actions",
+        "connect_integrations",
+        "export_assets",
+        "manage_billing",
+        "manage_team",
+        "view_analytics",
+        "manage_policies",
+        "manage_experiments",
+        "view_audit",
+      ],
+      risk_level: ["low", "medium", "high", "critical"],
       subscription_plan: ["free", "starter", "growth", "agency"],
     },
   },
