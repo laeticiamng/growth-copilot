@@ -2,3 +2,6 @@ project_id = "goiklfzouhshghsvpxjo"
 
 [functions.seo-crawler]
 verify_jwt = false
+
+[functions.ai-gateway]
+verify_jwt = false

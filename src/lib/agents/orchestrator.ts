@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentArtifact, AgentType, AgentRunInput, AgentRunOutput, AgentStatus } from "./types";
+import { AIGatewayClient, AGENT_PROMPTS, type AgentArtifactV2 } from "./ai-gateway-client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -127,6 +128,42 @@ export class ChiefGrowthOfficer {
     return Math.round((impact * confidence * ease) / 10);
   }
 
+  /**
+   * Generate a strategic growth plan using AI
+   */
+  async generateGrowthPlan(context: {
+    siteUrl: string;
+    currentIssues: unknown[];
+    integrations: string[];
+    goals: string[];
+  }): Promise<AgentArtifactV2> {
+    const response = await AIGatewayClient.runLLM({
+      workspaceId: this.workspaceId,
+      agentName: 'chief_growth_officer',
+      purpose: 'cgo_plan',
+      systemPrompt: AGENT_PROMPTS.CGO,
+      userPrompt: `Analyze the following context and create a prioritized growth plan:
+
+Site: ${context.siteUrl}
+Current Issues Found: ${context.currentIssues.length}
+Active Integrations: ${context.integrations.join(', ') || 'None'}
+Business Goals: ${context.goals.join(', ') || 'Not specified'}
+
+Please prioritize actions using ICE scoring and follow the Foundations → Scale methodology.
+Focus on the most impactful quick wins first.`,
+      context: context as Record<string, unknown>,
+    });
+
+    await this.logAction('growth_plan_generated', {
+      success: response.success,
+      status: response.status,
+      request_id: response.request_id,
+      actions_count: response.artifact.actions.length,
+    });
+
+    return response.artifact;
+  }
+
   private requiresApproval(agentType: AgentType): boolean {
     const approvalRequired: AgentType[] = ['ads_optimizer', 'content_builder', 'lifecycle_manager'];
     return approvalRequired.includes(agentType);
@@ -196,12 +233,57 @@ export class QualityComplianceOfficer {
     return { valid: issues.length === 0, issues, warnings };
   }
 
+  /**
+   * Validate artifact using AI for deeper compliance check
+   */
+  async validateWithAI(
+    artifact: AgentArtifact | AgentArtifactV2,
+    agentType: AgentType,
+    originalContext?: string
+  ): Promise<AgentArtifactV2> {
+    const response = await AIGatewayClient.runLLM({
+      workspaceId: this.workspaceId,
+      agentName: 'quality_compliance',
+      purpose: 'qa_review',
+      systemPrompt: AGENT_PROMPTS.QCO,
+      userPrompt: `Review the following agent output for quality and compliance:
+
+Agent Type: ${agentType}
+Original Context: ${originalContext || 'Not provided'}
+
+Agent Output:
+${JSON.stringify(artifact, null, 2)}
+
+Please validate:
+1. Are all recommendations ethical and compliant?
+2. Are there any forbidden actions (fake reviews, plagiarism, black-hat SEO)?
+3. Is the output actionable and realistic?
+4. Are there hidden dependencies or risks?
+
+Provide your assessment with any issues found.`,
+    });
+
+    await this.logValidation(
+      agentType,
+      response.success && response.artifact.risks.length === 0,
+      response.artifact.risks,
+      []
+    );
+
+    return response.artifact;
+  }
+
   private checkCompliance(artifact: AgentArtifact): string[] {
     const issues: string[] = [];
     const forbiddenPatterns = [
       { pattern: /fake.*review/i, message: 'Fake reviews are forbidden' },
       { pattern: /buy.*backlink/i, message: 'Buying backlinks is forbidden' },
       { pattern: /plagiari/i, message: 'Plagiarism is forbidden' },
+      { pattern: /keyword\s*stuff/i, message: 'Keyword stuffing is forbidden' },
+      { pattern: /hidden\s*text/i, message: 'Hidden text is forbidden' },
+      { pattern: /cloaking/i, message: 'Cloaking is forbidden' },
+      { pattern: /link\s*farm/i, message: 'Link farms are forbidden' },
+      { pattern: /spam/i, message: 'Spam tactics are forbidden' },
     ];
 
     const artifactText = JSON.stringify(artifact);

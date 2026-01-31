@@ -11,6 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Activity, 
   Bot, 
@@ -21,9 +29,13 @@ import {
   Zap,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Loader2,
   Filter,
+  Brain,
+  DollarSign,
+  Timer,
+  Hash,
+  Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -37,6 +49,7 @@ interface ActionLog {
   action_type: string;
   action_category: string | null;
   description: string;
+  details: Record<string, unknown> | null;
   result: string | null;
   is_automated: boolean | null;
   created_at: string;
@@ -53,6 +66,26 @@ interface AgentRun {
   duration_ms: number | null;
   cost_estimate: number | null;
   error_message: string | null;
+  provider_name: string | null;
+  model_name: string | null;
+  ai_request_id: string | null;
+  created_at: string;
+}
+
+interface AIRequest {
+  id: string;
+  agent_name: string;
+  purpose: string;
+  provider_name: string;
+  model_name: string;
+  input_json: Record<string, unknown>;
+  output_json: Record<string, unknown> | null;
+  status: string;
+  error_message: string | null;
+  tokens_in: number | null;
+  tokens_out: number | null;
+  cost_estimate: number | null;
+  duration_ms: number | null;
   created_at: string;
 }
 
@@ -60,16 +93,18 @@ const Logs = () => {
   const { currentWorkspace } = useWorkspace();
   const [actionLogs, setActionLogs] = useState<ActionLog[]>([]);
   const [agentRuns, setAgentRuns] = useState<AgentRun[]>([]);
+  const [aiRequests, setAiRequests] = useState<AIRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedRequest, setSelectedRequest] = useState<AIRequest | null>(null);
 
   const fetchLogs = async () => {
     if (!currentWorkspace) return;
     
     setLoading(true);
     
-    const [actionLogsRes, agentRunsRes] = await Promise.all([
+    const [actionLogsRes, agentRunsRes, aiRequestsRes] = await Promise.all([
       supabase
         .from('action_log')
         .select('*')
@@ -82,10 +117,17 @@ const Logs = () => {
         .eq('workspace_id', currentWorkspace.id)
         .order('created_at', { ascending: false })
         .limit(100),
+      supabase
+        .from('ai_requests')
+        .select('*')
+        .eq('workspace_id', currentWorkspace.id)
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
 
     if (actionLogsRes.data) setActionLogs(actionLogsRes.data as ActionLog[]);
     if (agentRunsRes.data) setAgentRuns(agentRunsRes.data as AgentRun[]);
+    if (aiRequestsRes.data) setAiRequests(aiRequestsRes.data as AIRequest[]);
     
     setLoading(false);
   };
@@ -105,16 +147,31 @@ const Logs = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const filteredAiRequests = aiRequests.filter(req => {
+    const matchesSearch = 
+      req.agent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.model_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || req.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />Terminé</Badge>;
+      case "success":
+        return <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" />Succès</Badge>;
       case "failed":
-        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Échec</Badge>;
+      case "error":
+        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Erreur</Badge>;
       case "running":
         return <Badge variant="agent"><Loader2 className="w-3 h-3 mr-1 animate-spin" />En cours</Badge>;
       case "pending":
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />En attente</Badge>;
+      case "retry":
+        return <Badge variant="warning"><RefreshCcw className="w-3 h-3 mr-1" />Retry</Badge>;
+      case "fallback":
+        return <Badge variant="outline"><Zap className="w-3 h-3 mr-1" />Fallback</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -127,21 +184,34 @@ const Logs = () => {
     return <User className="w-4 h-4 text-muted-foreground" />;
   };
 
-  // Demo data if empty
+  // Demo data
   const demoActionLogs: ActionLog[] = [
-    { id: "1", actor_type: "agent", actor_id: "tech_auditor", action_type: "crawl_complete", action_category: "seo", description: "Crawl terminé : 145 pages analysées, 23 issues détectées", result: "success", is_automated: true, created_at: new Date().toISOString() },
-    { id: "2", actor_type: "user", actor_id: "user_123", action_type: "site_created", action_category: "config", description: "Nouveau site ajouté : example.com", result: "success", is_automated: false, created_at: new Date(Date.now() - 3600000).toISOString() },
-    { id: "3", actor_type: "agent", actor_id: "content_builder", action_type: "brief_generated", action_category: "content", description: "Brief contenu généré pour 'Guide SEO 2024'", result: "success", is_automated: true, created_at: new Date(Date.now() - 7200000).toISOString() },
+    { id: "1", actor_type: "agent", actor_id: "tech_auditor", action_type: "AI_RUN", action_category: "ai_gateway", description: "AI run for seo_audit by seo_tech_auditor", details: { provider: "lovable", model: "google/gemini-2.5-flash", tokens_in: 1250, tokens_out: 890, cost_estimate: 0.00015 }, result: "success", is_automated: true, created_at: new Date().toISOString() },
+    { id: "2", actor_type: "agent", actor_id: "tech_auditor", action_type: "crawl_complete", action_category: "seo", description: "Crawl terminé : 145 pages analysées, 23 issues détectées", details: null, result: "success", is_automated: true, created_at: new Date(Date.now() - 60000).toISOString() },
+    { id: "3", actor_type: "user", actor_id: "user_123", action_type: "site_created", action_category: "config", description: "Nouveau site ajouté : example.com", details: null, result: "success", is_automated: false, created_at: new Date(Date.now() - 3600000).toISOString() },
   ];
 
   const demoAgentRuns: AgentRun[] = [
-    { id: "1", agent_type: "tech_auditor", status: "completed", inputs: { url: "https://example.com" }, outputs: { issues: 23, pages: 145 }, started_at: new Date(Date.now() - 60000).toISOString(), completed_at: new Date().toISOString(), duration_ms: 45000, cost_estimate: 0.02, error_message: null, created_at: new Date().toISOString() },
-    { id: "2", agent_type: "keyword_strategist", status: "running", inputs: { site_id: "abc" }, outputs: null, started_at: new Date().toISOString(), completed_at: null, duration_ms: null, cost_estimate: null, error_message: null, created_at: new Date().toISOString() },
-    { id: "3", agent_type: "content_builder", status: "pending", inputs: { keyword: "seo local" }, outputs: null, started_at: null, completed_at: null, duration_ms: null, cost_estimate: null, error_message: null, created_at: new Date(Date.now() - 1800000).toISOString() },
+    { id: "1", agent_type: "tech_auditor", status: "completed", inputs: { url: "https://example.com" }, outputs: { issues: 23, pages: 145 }, started_at: new Date(Date.now() - 60000).toISOString(), completed_at: new Date().toISOString(), duration_ms: 45000, cost_estimate: 0.02, error_message: null, provider_name: "lovable", model_name: "google/gemini-2.5-flash", ai_request_id: "req_1", created_at: new Date().toISOString() },
+    { id: "2", agent_type: "keyword_strategist", status: "running", inputs: { site_id: "abc" }, outputs: null, started_at: new Date().toISOString(), completed_at: null, duration_ms: null, cost_estimate: null, error_message: null, provider_name: null, model_name: null, ai_request_id: null, created_at: new Date().toISOString() },
+  ];
+
+  const demoAiRequests: AIRequest[] = [
+    { id: "req_1", agent_name: "seo_tech_auditor", purpose: "seo_audit", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: { system_prompt: "You are the SEO Tech Auditor...", user_prompt: "Analyze the following..." }, output_json: { summary: "Analysis complete", actions: [], risks: [], dependencies: [], metrics_to_watch: [], requires_approval: false }, status: "success", error_message: null, tokens_in: 1250, tokens_out: 890, cost_estimate: 0.00015, duration_ms: 2340, created_at: new Date().toISOString() },
+    { id: "req_2", agent_name: "quality_compliance", purpose: "qa_review", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: { system_prompt: "You are the QCO..." }, output_json: { summary: "Review complete", actions: [], risks: [], dependencies: [], metrics_to_watch: [], requires_approval: true }, status: "success", error_message: null, tokens_in: 980, tokens_out: 650, cost_estimate: 0.00012, duration_ms: 1890, created_at: new Date(Date.now() - 120000).toISOString() },
+    { id: "req_3", agent_name: "chief_growth_officer", purpose: "cgo_plan", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: {}, output_json: null, status: "fallback", error_message: "Failed to parse JSON after retry", tokens_in: 1500, tokens_out: 200, cost_estimate: 0.0002, duration_ms: 5200, created_at: new Date(Date.now() - 300000).toISOString() },
   ];
 
   const displayActionLogs = actionLogs.length > 0 ? filteredActionLogs : demoActionLogs;
   const displayAgentRuns = agentRuns.length > 0 ? filteredAgentRuns : demoAgentRuns;
+  const displayAiRequests = aiRequests.length > 0 ? filteredAiRequests : demoAiRequests;
+
+  // Calculate totals for AI requests
+  const totalTokens = displayAiRequests.reduce((sum, r) => sum + (r.tokens_in || 0) + (r.tokens_out || 0), 0);
+  const totalCost = displayAiRequests.reduce((sum, r) => sum + (r.cost_estimate || 0), 0);
+  const successRate = displayAiRequests.length > 0 
+    ? (displayAiRequests.filter(r => r.status === 'success').length / displayAiRequests.length * 100).toFixed(0)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -150,13 +220,69 @@ const Logs = () => {
         <div>
           <h1 className="text-3xl font-bold">Logs & Activité</h1>
           <p className="text-muted-foreground">
-            Audit trail complet : actions utilisateurs et runs agents IA.
+            Audit trail complet : actions utilisateurs, runs agents et requêtes IA.
           </p>
         </div>
         <Button variant="outline" onClick={fetchLogs} disabled={loading}>
           <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Actualiser
         </Button>
+      </div>
+
+      {/* AI Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{displayAiRequests.length}</p>
+                <p className="text-xs text-muted-foreground">Requêtes IA</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-success/10">
+                <Hash className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{totalTokens.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Tokens utilisés</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-warning/10">
+                <DollarSign className="w-5 h-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">${totalCost.toFixed(4)}</p>
+                <p className="text-xs text-muted-foreground">Coût estimé</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-info/10">
+                <CheckCircle className="w-5 h-5 text-info" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{successRate}%</p>
+                <p className="text-xs text-muted-foreground">Taux de succès</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -181,10 +307,14 @@ const Logs = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="success">Succès</SelectItem>
                 <SelectItem value="completed">Terminé</SelectItem>
                 <SelectItem value="running">En cours</SelectItem>
                 <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="error">Erreur</SelectItem>
                 <SelectItem value="failed">Échec</SelectItem>
+                <SelectItem value="retry">Retry</SelectItem>
+                <SelectItem value="fallback">Fallback</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -192,26 +322,32 @@ const Logs = () => {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="actions" className="w-full">
+      <Tabs defaultValue="ai" className="w-full">
         <TabsList>
-          <TabsTrigger value="actions" className="gap-2">
-            <Activity className="w-4 h-4" />
-            Action Log
-            <Badge variant="secondary" className="ml-1">{displayActionLogs.length}</Badge>
+          <TabsTrigger value="ai" className="gap-2">
+            <Brain className="w-4 h-4" />
+            AI Requests
+            <Badge variant="secondary" className="ml-1">{displayAiRequests.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="agents" className="gap-2">
             <Bot className="w-4 h-4" />
             Agent Runs
             <Badge variant="secondary" className="ml-1">{displayAgentRuns.length}</Badge>
           </TabsTrigger>
+          <TabsTrigger value="actions" className="gap-2">
+            <Activity className="w-4 h-4" />
+            Action Log
+            <Badge variant="secondary" className="ml-1">{displayActionLogs.length}</Badge>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="actions" className="mt-4">
+        {/* AI Requests Tab */}
+        <TabsContent value="ai" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Historique des actions
+                <Brain className="w-5 h-5" />
+                Requêtes AI Gateway
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -221,37 +357,124 @@ const Logs = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {displayActionLogs.map((log) => (
+                  {displayAiRequests.map((req) => (
                     <div 
-                      key={log.id} 
-                      className="flex items-start gap-4 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                      key={req.id} 
+                      className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                     >
-                      <div className="p-2 rounded-full bg-background">
-                        {getActorIcon(log.actor_type, log.is_automated)}
+                      <div className="p-2 rounded-lg gradient-bg">
+                        <Brain className="w-5 h-5 text-primary-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{log.action_type}</span>
-                          {log.action_category && (
-                            <Badge variant="outline" className="text-xs">{log.action_category}</Badge>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-semibold">{req.agent_name}</span>
+                          <Badge variant="outline" className="text-xs">{req.purpose}</Badge>
+                          {getStatusBadge(req.status)}
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Bot className="w-3 h-3" />
+                            {req.model_name}
+                          </span>
+                          {req.tokens_in && req.tokens_out && (
+                            <span className="flex items-center gap-1">
+                              <Hash className="w-3 h-3" />
+                              {req.tokens_in} → {req.tokens_out} tokens
+                            </span>
                           )}
-                          {log.is_automated && (
-                            <Badge variant="agent" className="text-xs">
-                              <Zap className="w-3 h-3 mr-1" />Auto
-                            </Badge>
+                          {req.duration_ms && (
+                            <span className="flex items-center gap-1">
+                              <Timer className="w-3 h-3" />
+                              {(req.duration_ms / 1000).toFixed(2)}s
+                            </span>
+                          )}
+                          {req.cost_estimate && (
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              ${req.cost_estimate.toFixed(6)}
+                            </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{log.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(log.created_at), "dd MMM HH:mm", { locale: fr })}
-                        </p>
-                        {log.result && (
-                          <Badge variant={log.result === "success" ? "success" : "destructive"} className="mt-1">
-                            {log.result}
-                          </Badge>
+                        {req.error_message && (
+                          <p className="text-sm text-destructive mt-1">{req.error_message}</p>
                         )}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(req.created_at), "dd MMM HH:mm", { locale: fr })}
+                        </p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedRequest(req)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[80vh]">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Brain className="w-5 h-5" />
+                                Détails requête: {req.agent_name}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <ScrollArea className="max-h-[60vh]">
+                              <div className="space-y-4 p-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Provider</p>
+                                    <p>{req.provider_name}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Modèle</p>
+                                    <p>{req.model_name}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Purpose</p>
+                                    <p>{req.purpose}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                                    {getStatusBadge(req.status)}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Tokens In/Out</p>
+                                    <p>{req.tokens_in} / {req.tokens_out}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Coût</p>
+                                    <p>${(req.cost_estimate || 0).toFixed(6)}</p>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <p className="text-sm font-medium text-muted-foreground mb-2">Input</p>
+                                  <pre className="bg-muted p-3 rounded-lg text-xs overflow-auto max-h-[200px]">
+                                    {JSON.stringify(req.input_json, null, 2)}
+                                  </pre>
+                                </div>
+                                
+                                {req.output_json && (
+                                  <div>
+                                    <p className="text-sm font-medium text-muted-foreground mb-2">Output</p>
+                                    <pre className="bg-muted p-3 rounded-lg text-xs overflow-auto max-h-[200px]">
+                                      {JSON.stringify(req.output_json, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                                
+                                {req.error_message && (
+                                  <div>
+                                    <p className="text-sm font-medium text-destructive mb-2">Error</p>
+                                    <p className="text-destructive">{req.error_message}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </ScrollArea>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   ))}
@@ -261,6 +484,7 @@ const Logs = () => {
           </Card>
         </TabsContent>
 
+        {/* Agent Runs Tab */}
         <TabsContent value="agents" className="mt-4">
           <Card>
             <CardHeader>
@@ -285,18 +509,31 @@ const Logs = () => {
                         <Bot className="w-5 h-5 text-primary-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span className="font-semibold capitalize">
                             {run.agent_type.replace(/_/g, ' ')}
                           </span>
                           {getStatusBadge(run.status)}
+                          {run.provider_name && (
+                            <Badge variant="outline" className="text-xs">
+                              {run.provider_name}/{run.model_name?.split('/').pop()}
+                            </Badge>
+                          )}
                         </div>
-                        {run.duration_ms && (
-                          <p className="text-sm text-muted-foreground">
-                            Durée: {(run.duration_ms / 1000).toFixed(1)}s
-                            {run.cost_estimate && ` • Coût estimé: $${run.cost_estimate.toFixed(4)}`}
-                          </p>
-                        )}
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          {run.duration_ms && (
+                            <span className="flex items-center gap-1">
+                              <Timer className="w-3 h-3" />
+                              {(run.duration_ms / 1000).toFixed(1)}s
+                            </span>
+                          )}
+                          {run.cost_estimate && (
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              ${run.cost_estimate.toFixed(4)}
+                            </span>
+                          )}
+                        </div>
                         {run.error_message && (
                           <p className="text-sm text-destructive mt-1">{run.error_message}</p>
                         )}
@@ -305,6 +542,72 @@ const Logs = () => {
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(run.created_at), "dd MMM HH:mm", { locale: fr })}
                         </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Action Log Tab */}
+        <TabsContent value="actions" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Historique des actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {displayActionLogs.map((log) => (
+                    <div 
+                      key={log.id} 
+                      className="flex items-start gap-4 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <div className="p-2 rounded-full bg-background">
+                        {getActorIcon(log.actor_type, log.is_automated)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-medium">{log.action_type}</span>
+                          {log.action_category && (
+                            <Badge variant="outline" className="text-xs">{log.action_category}</Badge>
+                          )}
+                          {log.is_automated && (
+                            <Badge variant="agent" className="text-xs">
+                              <Zap className="w-3 h-3 mr-1" />Auto
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{log.description}</p>
+                        {log.details && log.action_type === 'AI_RUN' && (
+                          <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
+                            {(log.details as Record<string, unknown>).model && (
+                              <span>Model: {String((log.details as Record<string, unknown>).model)}</span>
+                            )}
+                            {(log.details as Record<string, unknown>).tokens_in && (
+                              <span>Tokens: {String((log.details as Record<string, unknown>).tokens_in)}/{String((log.details as Record<string, unknown>).tokens_out)}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(log.created_at), "dd MMM HH:mm", { locale: fr })}
+                        </p>
+                        {log.result && (
+                          <Badge variant={log.result === "success" ? "success" : "destructive"} className="mt-1">
+                            {log.result}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   ))}
