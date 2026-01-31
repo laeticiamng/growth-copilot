@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ import {
   AlertCircle,
   Clock,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import { useSites } from "@/hooks/useSites";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -151,9 +153,67 @@ const categoryLabels: Record<string, string> = {
 const Integrations = () => {
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [localIntegrations, setLocalIntegrations] = useState(integrations);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const oauthStatus = searchParams.get("oauth");
+    const provider = searchParams.get("provider");
+    const errorType = searchParams.get("error_type");
+
+    if (oauthStatus === "success" && provider) {
+      toast.success("Connexion réussie !", {
+        description: `${provider === "google_analytics" ? "Google Analytics" : "Search Console"} est maintenant connecté.`,
+      });
+      // Clear URL params
+      setSearchParams({});
+      // Refresh integration status
+      loadIntegrationStatus();
+    } else if (oauthStatus === "error") {
+      toast.error("Erreur de connexion OAuth", {
+        description: errorType || "Une erreur s'est produite lors de la connexion.",
+      });
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Load actual integration status from DB
+  const loadIntegrationStatus = async () => {
+    if (!currentWorkspace) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("integrations")
+        .select("*")
+        .eq("workspace_id", currentWorkspace.id);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setLocalIntegrations(prev => prev.map(integration => {
+          // Find DB record matching this integration's provider and with active status
+          const dbIntegration = data.find(d => 
+            d.provider === integration.provider && 
+            (d.status as string) === "active"
+          );
+          if (dbIntegration) {
+            return { ...integration, status: "connected" as const };
+          }
+          return integration;
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load integration status:", error);
+    }
+  };
+
+  // Load integration status on mount
+  useEffect(() => {
+    loadIntegrationStatus();
+  }, [currentWorkspace?.id]);
 
   const handleConnect = async (integration: Integration) => {
     if (!currentSite || !currentWorkspace) {
@@ -166,24 +226,70 @@ const Integrations = () => {
       return;
     }
 
+    // If already connected, disconnect
+    if (integration.status === "connected") {
+      setConnecting(integration.id);
+      try {
+        // Delete integration record (or set to pending for reconnection)
+        const { error } = await supabase
+          .from("integrations")
+          .delete()
+          .eq("workspace_id", currentWorkspace.id)
+          .eq("provider", integration.provider as any);
+        
+        if (error) throw error;
+        
+        setLocalIntegrations(prev => prev.map(i => 
+          i.id === integration.id ? { ...i, status: "disconnected" as const } : i
+        ));
+        toast.success("Intégration désactivée");
+      } catch (error) {
+        console.error("Disconnect error:", error);
+        toast.error("Erreur lors de la déconnexion");
+      } finally {
+        setConnecting(null);
+      }
+      return;
+    }
+
+    // For Google integrations, use OAuth flow
+    if (integration.provider && ["google_analytics", "google_search_console"].includes(integration.provider)) {
+      setConnecting(integration.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("oauth-init", {
+          body: {
+            workspace_id: currentWorkspace.id,
+            provider: integration.provider,
+            redirect_url: window.location.href,
+          },
+        });
+
+        if (error) throw error;
+
+        if (data.auth_url) {
+          // Redirect to Google OAuth
+          window.location.href = data.auth_url;
+        } else {
+          toast.error(data.error || "Erreur OAuth");
+        }
+      } catch (error) {
+        console.error("OAuth init error:", error);
+        toast.error("Erreur lors de l'initialisation OAuth. Vérifiez la configuration Google Cloud.");
+      } finally {
+        setConnecting(null);
+      }
+      return;
+    }
+
+    // For other integrations, show configuration message
     setConnecting(integration.id);
-    
     try {
-      // For demo, just toggle local state
-      // Real implementation would use OAuth flow
       setLocalIntegrations(prev => prev.map(i => 
-        i.id === integration.id 
-          ? { ...i, status: i.status === "connected" ? "disconnected" : "connected" as const }
-          : i
+        i.id === integration.id ? { ...i, status: "pending" as const } : i
       ));
-      
-      toast.success(
-        integration.status === "connected" ? "Intégration désactivée" : "Configuration requise",
-        { description: integration.status !== "connected" ? "Configurez les tokens OAuth pour finaliser." : undefined }
-      );
-    } catch (error) {
-      console.error("Connection error:", error);
-      toast.error("Erreur lors de la connexion");
+      toast.success("Configuration requise", { 
+        description: "Cette intégration nécessite une configuration manuelle." 
+      });
     } finally {
       setConnecting(null);
     }
