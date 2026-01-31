@@ -41,13 +41,14 @@ describe('Agent Artifacts', () => {
     });
 
     it('should calculate ICE score correctly', () => {
+      // ICE = (Impact * Confidence * Ease) / 10000 to normalize to 0-100 scale
       const calculateICE = (impact: number, confidence: number, ease: number) => {
-        return Math.round((impact * confidence * ease) / 100);
+        return Math.round((impact * confidence * ease) / 10000);
       };
 
-      expect(calculateICE(80, 90, 70)).toBe(50); // (80 * 90 * 70) / 10000 rounded
-      expect(calculateICE(100, 100, 100)).toBe(100);
-      expect(calculateICE(50, 50, 50)).toBe(13); // (125000) / 10000 = 12.5 rounded
+      expect(calculateICE(80, 90, 70)).toBe(50); // (80 * 90 * 70) / 10000 = 504000/10000 = 50.4 ≈ 50
+      expect(calculateICE(100, 100, 100)).toBe(100); // 1000000 / 10000 = 100
+      expect(calculateICE(50, 50, 50)).toBe(13); // 125000 / 10000 = 12.5 ≈ 13
     });
   });
 
