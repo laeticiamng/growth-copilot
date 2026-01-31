@@ -14,16 +14,20 @@ interface ExportRequest {
     medium?: string;
     campaign?: string;
   };
+  experiment_id?: string; // V2: Link to experiment for variant-specific UTMs
 }
 
 interface AdPackExport {
   job_id: string;
+  experiment_id?: string;
+  variant_name?: string;
   generated_at: string;
   videos: Array<{
     format: string;
     aspect_ratio: string;
     url: string;
     filename: string;
+    variant?: string; // V2: A/B variant tag
   }>;
   thumbnails: Array<{
     variant: number;
@@ -43,12 +47,14 @@ interface AdPackExport {
     scripts: Array<{ duration: number; script: string }>;
   };
   utm_links: Record<string, string>;
+  variant_utm_links?: Record<string, Record<string, string>>; // V2: Per-variant UTM links
   launch_checklist: Array<{
     platform: string;
     format: string;
     specs: string;
     ready: boolean;
   }>;
+  audit_manifest?: Record<string, unknown>; // V2: Audit trail
 }
 
 // Generate UTM link
@@ -198,7 +204,7 @@ Deno.serve(async (req) => {
     }
 
     const userId = claims.claims.sub;
-    const { job_id, workspace_id, include_utm, utm_params }: ExportRequest = await req.json();
+    const { job_id, workspace_id, include_utm, utm_params, experiment_id }: ExportRequest = await req.json();
 
     console.log('[creative-export] Exporting job:', job_id);
 
@@ -230,6 +236,24 @@ Deno.serve(async (req) => {
       );
     }
 
+    // V2: Fetch experiment info if linked
+    let experimentInfo: { id: string; hypothesis: string; variants: string[] } | null = null;
+    const jobExperimentId = experiment_id || job.experiment_id;
+    if (jobExperimentId) {
+      const { data: exp } = await serviceClient
+        .from('experiments')
+        .select('id, hypothesis, variants')
+        .eq('id', jobExperimentId)
+        .single();
+      if (exp) {
+        experimentInfo = {
+          id: exp.id,
+          hypothesis: exp.hypothesis || '',
+          variants: (exp.variants as string[]) || ['A', 'B']
+        };
+      }
+    }
+
     // Fetch assets
     const { data: assets } = await serviceClient
       .from('creative_assets')
@@ -259,18 +283,22 @@ Deno.serve(async (req) => {
     const inputJson = job.input_json as Record<string, unknown>;
     const offer = (inputJson?.offer as string) || 'promo';
     const siteUrl = (inputJson?.site_url as string) || '';
+    const variantName = job.variant_name || 'A';
 
-    // Organize videos
+    // Organize videos with variant tags
     const videos = assets
       .filter(a => a.asset_type.startsWith('video_'))
       .map(a => {
+        const meta = a.meta_json as Record<string, unknown>;
         const ratio = a.asset_type === 'video_9_16' ? '9:16' :
                       a.asset_type === 'video_1_1' ? '1:1' : '16:9';
+        const variant = (meta?.variant as string) || variantName;
         return {
           format: a.asset_type,
           aspect_ratio: ratio,
           url: a.url || '',
-          filename: generateFilename(brandName, offer, ratio, 'video') + '.mp4'
+          filename: generateFilename(brandName, offer, ratio, `video_${variant}`) + '.mp4',
+          variant
         };
       });
 
@@ -318,6 +346,8 @@ Deno.serve(async (req) => {
 
     // Generate UTM links
     const utmLinks: Record<string, string> = {};
+    const variantUtmLinks: Record<string, Record<string, string>> = {};
+    
     if (include_utm && siteUrl) {
       const baseParams = {
         source: utm_params?.source || 'paid_social',
@@ -329,13 +359,41 @@ Deno.serve(async (req) => {
       utmLinks['meta_feed'] = generateUTMLink(siteUrl, { ...baseParams, source: 'facebook', content: 'feed' });
       utmLinks['youtube_ads'] = generateUTMLink(siteUrl, { ...baseParams, source: 'youtube', content: 'trueview' });
       utmLinks['tiktok'] = generateUTMLink(siteUrl, { ...baseParams, source: 'tiktok', content: 'infeed' });
+      
+      // V2: Generate variant-specific UTM links for A/B experiments
+      if (experimentInfo) {
+        for (const variant of experimentInfo.variants) {
+          variantUtmLinks[variant] = {
+            meta_reels: generateUTMLink(siteUrl, { ...baseParams, source: 'instagram', content: `reels_${variant.toLowerCase()}` }),
+            meta_feed: generateUTMLink(siteUrl, { ...baseParams, source: 'facebook', content: `feed_${variant.toLowerCase()}` }),
+            youtube_ads: generateUTMLink(siteUrl, { ...baseParams, source: 'youtube', content: `trueview_${variant.toLowerCase()}` }),
+            tiktok: generateUTMLink(siteUrl, { ...baseParams, source: 'tiktok', content: `infeed_${variant.toLowerCase()}` })
+          };
+        }
+      }
     }
 
     // Generate launch checklist
     const launchChecklist = generateLaunchChecklist(videos);
+    
+    // V2: Build audit manifest for compliance
+    const auditManifest = {
+      exported_at: new Date().toISOString(),
+      exported_by: userId,
+      job_id,
+      experiment_id: experimentInfo?.id,
+      variants_exported: [...new Set(videos.map(v => v.variant))],
+      asset_counts: {
+        videos: videos.length,
+        thumbnails: thumbnails.length,
+        subtitles: subtitles.length
+      }
+    };
 
     const exportData: AdPackExport = {
       job_id,
+      experiment_id: experimentInfo?.id,
+      variant_name: variantName,
       generated_at: new Date().toISOString(),
       videos,
       thumbnails,
@@ -348,7 +406,9 @@ Deno.serve(async (req) => {
         scripts: (copyPack.scripts as Array<{ duration: number; script: string }>) || []
       },
       utm_links: utmLinks,
-      launch_checklist: launchChecklist
+      variant_utm_links: Object.keys(variantUtmLinks).length > 0 ? variantUtmLinks : undefined,
+      launch_checklist: launchChecklist,
+      audit_manifest: auditManifest
     };
 
     // Log export action
