@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMedia } from "@/hooks/useMedia";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  TrendingUp, 
-  TrendingDown,
   Eye,
   Clock,
   ThumbsUp,
   MessageSquare,
-  Share2,
   Users,
   MousePointer,
   Mail,
@@ -21,8 +17,8 @@ import {
   BarChart3,
   AlertCircle
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { format, subDays } from "date-fns";
+import { KPICard, KPIChart, ExportButton, calculateTrend, formatDuration } from "@/components/kpi";
 
 interface KPI {
   id: string;
@@ -75,31 +71,69 @@ export default function MediaKPIs() {
     fetchKPIs();
   }, [selectedAsset, currentWorkspace, dateRange]);
 
-  // Calculate totals and trends
-  const totals = kpis.reduce((acc, kpi) => ({
-    views: acc.views + (kpi.views || 0),
-    watchTime: acc.watchTime + (kpi.watch_time_minutes || 0),
-    likes: acc.likes + (kpi.likes || 0),
-    comments: acc.comments + (kpi.comments || 0),
-    shares: acc.shares + (kpi.shares || 0),
-    subscribers: acc.subscribers + (kpi.subscribers_gained || 0),
-    streams: acc.streams + (kpi.streams || 0),
-    clicks: acc.clicks + (kpi.smart_link_clicks || 0),
-    emails: acc.emails + (kpi.email_signups || 0),
-  }), { views: 0, watchTime: 0, likes: 0, comments: 0, shares: 0, subscribers: 0, streams: 0, clicks: 0, emails: 0 });
+  // Calculate totals and real trends
+  const { totals, trends, avgCtr } = useMemo(() => {
+    const currentPeriod = kpis;
+    const midpoint = Math.floor(currentPeriod.length / 2);
+    const firstHalf = currentPeriod.slice(0, midpoint);
+    const secondHalf = currentPeriod.slice(midpoint);
 
-  // Calculate CTR average
-  const ctrValues = kpis.filter(k => k.ctr !== null).map(k => k.ctr as number);
-  const avgCtr = ctrValues.length > 0 ? ctrValues.reduce((a, b) => a + b, 0) / ctrValues.length : 0;
+    const sumMetric = (arr: KPI[], key: keyof KPI) => 
+      arr.reduce((acc, k) => acc + (Number(k[key]) || 0), 0);
+
+    const calcTotals = {
+      views: sumMetric(currentPeriod, 'views'),
+      watchTime: sumMetric(currentPeriod, 'watch_time_minutes'),
+      likes: sumMetric(currentPeriod, 'likes'),
+      comments: sumMetric(currentPeriod, 'comments'),
+      shares: sumMetric(currentPeriod, 'shares'),
+      subscribers: sumMetric(currentPeriod, 'subscribers_gained'),
+      streams: sumMetric(currentPeriod, 'streams'),
+      clicks: sumMetric(currentPeriod, 'smart_link_clicks'),
+      emails: sumMetric(currentPeriod, 'email_signups'),
+    };
+
+    const calcTrends = {
+      views: calculateTrend(sumMetric(secondHalf, 'views'), sumMetric(firstHalf, 'views')),
+      watchTime: calculateTrend(sumMetric(secondHalf, 'watch_time_minutes'), sumMetric(firstHalf, 'watch_time_minutes')),
+      likes: calculateTrend(sumMetric(secondHalf, 'likes'), sumMetric(firstHalf, 'likes')),
+      comments: calculateTrend(sumMetric(secondHalf, 'comments'), sumMetric(firstHalf, 'comments')),
+      subscribers: calculateTrend(sumMetric(secondHalf, 'subscribers_gained'), sumMetric(firstHalf, 'subscribers_gained')),
+      streams: calculateTrend(sumMetric(secondHalf, 'streams'), sumMetric(firstHalf, 'streams')),
+      clicks: calculateTrend(sumMetric(secondHalf, 'smart_link_clicks'), sumMetric(firstHalf, 'smart_link_clicks')),
+      emails: calculateTrend(sumMetric(secondHalf, 'email_signups'), sumMetric(firstHalf, 'email_signups')),
+    };
+
+    const ctrValues = currentPeriod.filter(k => k.ctr !== null).map(k => k.ctr as number);
+    const ctrAvg = ctrValues.length > 0 ? ctrValues.reduce((a, b) => a + b, 0) / ctrValues.length : 0;
+
+    return { totals: calcTotals, trends: calcTrends, avgCtr: ctrAvg };
+  }, [kpis]);
 
   // Chart data
-  const chartData = kpis.map(kpi => ({
+  const chartData = useMemo(() => kpis.map(kpi => ({
     date: format(new Date(kpi.date), 'MMM d'),
     views: kpi.views || 0,
     watchTime: kpi.watch_time_minutes || 0,
     likes: kpi.likes || 0,
     clicks: kpi.smart_link_clicks || 0,
-  }));
+    comments: kpi.comments || 0,
+  })), [kpis]);
+
+  // Export data
+  const exportData = useMemo(() => kpis.map(kpi => ({
+    date: kpi.date,
+    views: kpi.views,
+    watch_time_minutes: kpi.watch_time_minutes,
+    likes: kpi.likes,
+    comments: kpi.comments,
+    shares: kpi.shares,
+    subscribers_gained: kpi.subscribers_gained,
+    ctr: kpi.ctr,
+    streams: kpi.streams,
+    smart_link_clicks: kpi.smart_link_clicks,
+    email_signups: kpi.email_signups,
+  })), [kpis]);
 
   const isYouTube = selectedAsset?.platform.startsWith('youtube_');
   const isSpotify = selectedAsset?.platform.startsWith('spotify_');
@@ -116,6 +150,13 @@ export default function MediaKPIs() {
         </div>
 
         <div className="flex items-center gap-3">
+          {kpis.length > 0 && (
+            <ExportButton 
+              data={exportData} 
+              filename={`kpis-${selectedAsset?.title || 'media'}-${dateRange}`} 
+            />
+          )}
+          
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-[120px]">
               <SelectValue />
@@ -179,56 +220,56 @@ export default function MediaKPIs() {
             <KPICard 
               icon={Eye} 
               label="Views" 
-              value={totals.views.toLocaleString()} 
-              trend={10}
+              value={totals.views} 
+              trend={trends.views}
             />
             {isYouTube && (
               <KPICard 
                 icon={Clock} 
                 label="Watch Time" 
-                value={`${Math.round(totals.watchTime / 60)}h`}
-                trend={5}
+                value={formatDuration(totals.watchTime)}
+                trend={trends.watchTime}
               />
             )}
             <KPICard 
               icon={ThumbsUp} 
               label="Likes" 
-              value={totals.likes.toLocaleString()}
-              trend={15}
+              value={totals.likes}
+              trend={trends.likes}
             />
             <KPICard 
               icon={MessageSquare} 
               label="Comments" 
-              value={totals.comments.toLocaleString()}
-              trend={-2}
+              value={totals.comments}
+              trend={trends.comments}
             />
             {isYouTube && (
               <KPICard 
                 icon={Users} 
                 label="Subscribers" 
                 value={`+${totals.subscribers}`}
-                trend={8}
+                trend={trends.subscribers}
               />
             )}
             {isSpotify && (
               <KPICard 
                 icon={Eye} 
                 label="Streams" 
-                value={totals.streams.toLocaleString()}
-                trend={12}
+                value={totals.streams}
+                trend={trends.streams}
               />
             )}
             <KPICard 
               icon={MousePointer} 
               label="Smart Link Clicks" 
-              value={totals.clicks.toLocaleString()}
-              trend={20}
+              value={totals.clicks}
+              trend={trends.clicks}
             />
             <KPICard 
               icon={Mail} 
               label="Email Signups" 
-              value={totals.emails.toLocaleString()}
-              trend={25}
+              value={totals.emails}
+              trend={trends.emails}
             />
             {isYouTube && avgCtr > 0 && (
               <KPICard 
@@ -249,142 +290,38 @@ export default function MediaKPIs() {
             </TabsList>
 
             <TabsContent value="views">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Views Over Time</CardTitle>
-                  <CardDescription>
-                    Daily view count for the selected period
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="date" className="text-xs" />
-                        <YAxis className="text-xs" />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--card))', 
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }} 
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="views" 
-                          stroke="hsl(var(--primary))" 
-                          fill="hsl(var(--primary)/0.2)"
-                          strokeWidth={2}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+              <KPIChart
+                title="Views Over Time"
+                description="Daily view count for the selected period"
+                data={chartData}
+                dataKey="views"
+                type="area"
+              />
             </TabsContent>
 
             <TabsContent value="engagement">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Engagement Metrics</CardTitle>
-                  <CardDescription>
-                    Likes over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="date" className="text-xs" />
-                        <YAxis className="text-xs" />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--card))', 
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }} 
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="likes" 
-                          stroke="hsl(var(--primary))" 
-                          strokeWidth={2}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+              <KPIChart
+                title="Engagement Metrics"
+                description="Likes over time"
+                data={chartData}
+                dataKey="likes"
+                type="line"
+              />
             </TabsContent>
 
             <TabsContent value="conversions">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Smart Link Performance</CardTitle>
-                  <CardDescription>
-                    Clicks on your smart link page
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="date" className="text-xs" />
-                        <YAxis className="text-xs" />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--card))', 
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }} 
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="clicks" 
-                          stroke="hsl(var(--accent))" 
-                          fill="hsl(var(--accent)/0.2)"
-                          strokeWidth={2}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+              <KPIChart
+                title="Smart Link Performance"
+                description="Clicks on your smart link page"
+                data={chartData}
+                dataKey="clicks"
+                type="area"
+                color="hsl(var(--accent))"
+              />
             </TabsContent>
           </Tabs>
         </div>
       )}
     </div>
-  );
-}
-
-interface KPICardProps {
-  icon: typeof Eye;
-  label: string;
-  value: string;
-  trend?: number;
-}
-
-function KPICard({ icon: Icon, label, value, trend }: KPICardProps) {
-  return (
-    <Card>
-      <CardContent className="pt-4">
-        <div className="flex items-center justify-between mb-2">
-          <Icon className="w-4 h-4 text-muted-foreground" />
-          {trend !== undefined && (
-            <Badge variant="outline" className={trend >= 0 ? 'text-primary' : 'text-destructive'}>
-              {trend >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-              {Math.abs(trend)}%
-            </Badge>
-          )}
-        </div>
-        <p className="text-2xl font-bold">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </CardContent>
-    </Card>
   );
 }
