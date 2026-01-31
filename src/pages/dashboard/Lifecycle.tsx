@@ -12,23 +12,36 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Mail,
   Phone,
   Plus,
   Sparkles,
-  Send,
   Loader2,
   Trash2,
+  Kanban,
+  List,
 } from "lucide-react";
 import { useLifecycle } from "@/hooks/useLifecycle";
 import { LoadingState } from "@/components/ui/loading-state";
+import { PipelineKanban } from "@/components/lifecycle/PipelineKanban";
 import { toast } from "sonner";
 
 export default function Lifecycle() {
-  const { leads, deals, stages, loading, createLead, deleteLead, updateLead, refetch } = useLifecycle();
+  const { leads, deals, stages, loading, createLead, deleteLead, updateLead, updateDealStage, createDeal, refetch } = useLifecycle();
   
   const [showLeadDialog, setShowLeadDialog] = useState(false);
+  const [showDealDialog, setShowDealDialog] = useState(false);
+  const [selectedStageId, setSelectedStageId] = useState<string | null>(null);
+  const [pipelineView, setPipelineView] = useState<"kanban" | "grid">("kanban");
   const [leadForm, setLeadForm] = useState({ name: "", email: "", company: "", phone: "", source: "direct" });
+  const [dealForm, setDealForm] = useState({ title: "", lead_id: "", value: 0 });
   const [submitting, setSubmitting] = useState(false);
 
   // Calculate pipeline stages from deals
@@ -86,6 +99,42 @@ export default function Lifecycle() {
     }
   };
 
+  const handleMoveDeal = async (dealId: string, newStageId: string) => {
+    const { error } = await updateDealStage(dealId, newStageId);
+    if (error) {
+      toast.error("Erreur lors du déplacement");
+    }
+  };
+
+  const handleAddDeal = (stageId: string) => {
+    setSelectedStageId(stageId);
+    setDealForm({ title: "", lead_id: "", value: 0 });
+    setShowDealDialog(true);
+  };
+
+  const handleCreateDeal = async () => {
+    if (!dealForm.title || !dealForm.lead_id) {
+      toast.error("Titre et lead requis");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await createDeal({
+      title: dealForm.title,
+      lead_id: dealForm.lead_id,
+      stage_id: selectedStageId,
+      value: dealForm.value || null,
+      probability: 50,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error("Erreur lors de la création");
+    } else {
+      toast.success("Deal créé");
+      setShowDealDialog(false);
+      setDealForm({ title: "", lead_id: "", value: 0 });
+    }
+  };
+
   if (loading) {
     return <LoadingState message="Chargement des données CRM..." />;
   }
@@ -134,16 +183,62 @@ export default function Lifecycle() {
         <TabsContent value="pipeline" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Pipeline de vente</CardTitle>
-              <CardDescription>
-                {pipelineData.reduce((a, b) => a + b.count, 0)} opportunités
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Pipeline de vente</CardTitle>
+                  <CardDescription>
+                    {deals.length} opportunités • Drag & drop pour déplacer
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant={pipelineView === "kanban" ? "secondary" : "ghost"} 
+                    size="sm"
+                    onClick={() => setPipelineView("kanban")}
+                  >
+                    <Kanban className="w-4 h-4 mr-1" />
+                    Kanban
+                  </Button>
+                  <Button 
+                    variant={pipelineView === "grid" ? "secondary" : "ghost"} 
+                    size="sm"
+                    onClick={() => setPipelineView("grid")}
+                  >
+                    <List className="w-4 h-4 mr-1" />
+                    Grille
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              {pipelineData.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  Configurez vos étapes de pipeline dans les paramètres
-                </p>
+              {pipelineView === "kanban" ? (
+                <PipelineKanban
+                  stages={stages.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    position: s.position,
+                    color: s.color,
+                  }))}
+                  deals={deals.map(d => ({
+                    id: d.id,
+                    title: d.title,
+                    lead_id: d.lead_id,
+                    stage_id: d.stage_id,
+                    value: d.value,
+                    probability: d.probability,
+                  }))}
+                  leads={leads.map(l => ({
+                    id: l.id,
+                    name: l.name,
+                    company: l.company,
+                    email: l.email,
+                    phone: l.phone,
+                    status: l.status,
+                    score: l.score,
+                  }))}
+                  onMoveCard={handleMoveDeal}
+                  onAddDeal={handleAddDeal}
+                />
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {pipelineData.map((stage, i) => (
@@ -320,6 +415,59 @@ export default function Lifecycle() {
             <Button onClick={handleCreateLead} disabled={submitting}>
               {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Deal Dialog */}
+      <Dialog open={showDealDialog} onOpenChange={setShowDealDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau deal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Titre *</label>
+              <Input 
+                placeholder="Contrat annuel..."
+                value={dealForm.title}
+                onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Lead associé *</label>
+              <Select 
+                value={dealForm.lead_id} 
+                onValueChange={(value) => setDealForm({ ...dealForm, lead_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leads.map(lead => (
+                    <SelectItem key={lead.id} value={lead.id}>
+                      {lead.name} {lead.company ? `(${lead.company})` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Valeur estimée (€)</label>
+              <Input 
+                type="number"
+                placeholder="10000"
+                value={dealForm.value || ""}
+                onChange={(e) => setDealForm({ ...dealForm, value: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowDealDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateDeal} disabled={submitting || leads.length === 0}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Créer le deal
             </Button>
           </DialogFooter>
         </DialogContent>

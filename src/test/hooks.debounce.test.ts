@@ -192,15 +192,14 @@ describe('retryAsync utility', () => {
   });
 
   it('should throw after max retries', async () => {
+    vi.useRealTimers(); // Use real timers for this test to avoid timing issues
+    
     const failingFn = vi.fn().mockRejectedValue(new Error('Always fails'));
 
-    const promise = retryAsync(failingFn, { maxRetries: 2, delayMs: 100 });
+    await expect(
+      retryAsync(failingFn, { maxRetries: 2, delayMs: 10 })
+    ).rejects.toThrow('Always fails');
     
-    // Advance through retries
-    await vi.advanceTimersByTimeAsync(100);
-    await vi.advanceTimersByTimeAsync(200);
-    
-    await expect(promise).rejects.toThrow('Always fails');
     expect(failingFn).toHaveBeenCalledTimes(3); // Initial + 2 retries
   });
 });
