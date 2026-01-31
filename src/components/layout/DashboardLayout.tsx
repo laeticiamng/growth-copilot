@@ -78,6 +78,7 @@ const navItems = [
   { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
   { path: "/dashboard/guide", label: "Guide", icon: Rocket },
   { path: "/dashboard/logs", label: "Logs", icon: BarChart3 },
+  { path: "/dashboard/ops", label: "Ops", icon: TrendingUp },
   { path: "/dashboard/diagnostics", label: "Diagnostics", icon: Bot },
   { path: "/dashboard/billing", label: "Billing", icon: Settings },
 ];

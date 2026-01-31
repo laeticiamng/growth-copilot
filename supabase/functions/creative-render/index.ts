@@ -12,6 +12,7 @@ const POLL_INTERVAL_MS = 5000;
 interface RenderRequest {
   job_id: string;
   workspace_id: string;
+  idempotency_key?: string;
 }
 
 interface CreatomateRender {
@@ -237,10 +238,50 @@ Deno.serve(async (req) => {
 
     // Service client for writes (untyped for Deno compatibility)
     serviceClient = createClient(supabaseUrl, supabaseServiceKey);
-    const { job_id, workspace_id }: RenderRequest = await req.json();
+    const { job_id, workspace_id, idempotency_key }: RenderRequest = await req.json();
     workspaceId = workspace_id;
 
     console.log('[creative-render] Starting render for job:', job_id);
+
+    // IDEMPOTENCY CHECK: If idempotency_key provided, check for existing completed render
+    if (idempotency_key) {
+      const { data: existing } = await serviceClient.rpc('check_idempotency_key', {
+        _key: idempotency_key
+      });
+      
+      if (existing && existing.length > 0 && existing[0].exists_already) {
+        const existingJob = existing[0];
+        if (existingJob.status === 'done') {
+          console.log('[creative-render] Idempotent hit - returning existing job:', existingJob.job_id);
+          
+          // Fetch existing assets
+          const { data: existingAssets } = await serviceClient
+            .from('creative_assets')
+            .select('*')
+            .eq('job_id', existingJob.job_id);
+          
+          return new Response(
+            JSON.stringify({
+              success: true,
+              job_id: existingJob.job_id,
+              idempotent_hit: true,
+              message: 'Render already completed',
+              assets: existingAssets || []
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } else if (existingJob.status === 'running') {
+          return new Response(
+            JSON.stringify({
+              error: 'render_in_progress',
+              job_id: existingJob.job_id,
+              message: 'Render already in progress for this idempotency key'
+            }),
+            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
 
     // Fetch job
     const { data: job, error: jobError } = await serviceClient
