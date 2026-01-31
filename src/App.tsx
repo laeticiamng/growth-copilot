@@ -22,6 +22,7 @@ import { AgencyProvider } from "@/hooks/useAgency";
 import { ReputationProvider } from "@/hooks/useReputation";
 import { OffersProvider } from "@/hooks/useOffers";
 import { MetaProvider } from "@/hooks/useMeta";
+import { CreativesProvider } from "@/hooks/useCreatives";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -61,6 +62,7 @@ import MediaAssets from "./pages/dashboard/MediaAssets";
 import LaunchPlan from "./pages/dashboard/LaunchPlan";
 import CreativesStudio from "./pages/dashboard/CreativesStudio";
 import MediaKPIs from "./pages/dashboard/MediaKPIs";
+import TemplateAdsFactory from "./pages/dashboard/TemplateAdsFactory";
 
 // Dashboard pages - Diagnostics
 import Diagnostics from "./pages/dashboard/Diagnostics";
@@ -88,6 +90,7 @@ function App() {
                                     <ReputationProvider>
                                       <OffersProvider>
                                         <MetaProvider>
+                                        <CreativesProvider>
                                         <TooltipProvider>
                                       <Toaster />
                                       <Sonner />
@@ -132,6 +135,7 @@ function App() {
                                         <Route path="/dashboard/media/launch" element={<DashboardLayout><LaunchPlan /></DashboardLayout>} />
                                         <Route path="/dashboard/media/creatives" element={<DashboardLayout><CreativesStudio /></DashboardLayout>} />
                                         <Route path="/dashboard/media/kpis" element={<DashboardLayout><MediaKPIs /></DashboardLayout>} />
+                                        <Route path="/dashboard/media/ads-factory" element={<DashboardLayout><TemplateAdsFactory /></DashboardLayout>} />
                                         
                                         {/* Dashboard - Debug & Diagnostics */}
                                         <Route path="/dashboard/diagnostics" element={<DashboardLayout><Diagnostics /></DashboardLayout>} />
@@ -140,6 +144,7 @@ function App() {
                                       </Routes>
                                     </BrowserRouter>
                                         </TooltipProvider>
+                                        </CreativesProvider>
                                         </MetaProvider>
                                       </OffersProvider>
                                     </ReputationProvider>

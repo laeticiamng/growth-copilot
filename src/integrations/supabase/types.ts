@@ -1421,6 +1421,190 @@ export type Database = {
           },
         ]
       }
+      creative_assets: {
+        Row: {
+          asset_type: string
+          created_at: string
+          id: string
+          job_id: string
+          meta_json: Json | null
+          storage_path: string | null
+          url: string | null
+          workspace_id: string
+        }
+        Insert: {
+          asset_type: string
+          created_at?: string
+          id?: string
+          job_id: string
+          meta_json?: Json | null
+          storage_path?: string | null
+          url?: string | null
+          workspace_id: string
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          meta_json?: Json | null
+          storage_path?: string | null
+          url?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_assets_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_assets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creative_blueprints: {
+        Row: {
+          blueprint_json: Json
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          job_id: string
+          qa_report_json: Json | null
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          blueprint_json: Json
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          job_id: string
+          qa_report_json?: Json | null
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          blueprint_json?: Json
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          job_id?: string
+          qa_report_json?: Json | null
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_blueprints_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "creative_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_blueprints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creative_jobs: {
+        Row: {
+          approval_id: string | null
+          cost_estimate: number | null
+          created_at: string
+          duration_ms: number | null
+          duration_seconds: number | null
+          error_message: string | null
+          geo: string | null
+          id: string
+          input_json: Json
+          language: string
+          objective: string
+          output_json: Json | null
+          provider: string
+          qa_iterations: number | null
+          site_id: string | null
+          status: string
+          style: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          approval_id?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          geo?: string | null
+          id?: string
+          input_json?: Json
+          language?: string
+          objective: string
+          output_json?: Json | null
+          provider?: string
+          qa_iterations?: number | null
+          site_id?: string | null
+          status?: string
+          style?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          approval_id?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          geo?: string | null
+          id?: string
+          input_json?: Json
+          language?: string
+          objective?: string
+          output_json?: Json | null
+          provider?: string
+          qa_iterations?: number | null
+          site_id?: string | null
+          status?: string
+          style?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creative_jobs_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "approval_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_jobs_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creative_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cro_audits: {
         Row: {
           created_at: string | null
@@ -5071,6 +5255,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_roles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_templates: {
+        Row: {
+          aspect_ratio: string
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          is_global: boolean | null
+          language: string
+          name: string
+          provider: string
+          template_json: Json
+          workspace_id: string | null
+        }
+        Insert: {
+          aspect_ratio: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          language?: string
+          name: string
+          provider?: string
+          template_json: Json
+          workspace_id?: string | null
+        }
+        Update: {
+          aspect_ratio?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          is_global?: boolean | null
+          language?: string
+          name?: string
+          provider?: string
+          template_json?: Json
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_templates_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
