@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import { 
   Search, 
   BarChart3, 
@@ -20,9 +21,11 @@ import {
   AlertCircle,
   Clock,
   Info,
+  Shield,
 } from "lucide-react";
 import { useSites } from "@/hooks/useSites";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MetaSuperConnector } from "@/components/integrations/MetaSuperConnector";
@@ -156,10 +159,19 @@ const categoryLabels: Record<string, string> = {
 const Integrations = () => {
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
+  const { isAtLeastRole } = usePermissions();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localIntegrations, setLocalIntegrations] = useState(integrations);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
+
+  // Route guard: redirect if not admin+
+  useEffect(() => {
+    if (!isAtLeastRole("admin")) {
+      navigate("/dashboard/connections", { replace: true });
+    }
+  }, [isAtLeastRole, navigate]);
 
   // Handle OAuth callback
   useEffect(() => {
