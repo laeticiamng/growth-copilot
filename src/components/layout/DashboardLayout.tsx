@@ -31,6 +31,10 @@ import {
   Loader2,
   Menu,
   X,
+  Shield,
+  Users,
+  Rocket,
+  Palette,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -52,8 +56,12 @@ const navItems = [
   { path: "/dashboard/offers", label: "Offres", icon: Package },
   { path: "/dashboard/lifecycle", label: "Lifecycle", icon: Mail },
   { path: "/dashboard/reputation", label: "Réputation", icon: Star },
+  { path: "/dashboard/competitors", label: "Concurrents", icon: Users },
   { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
-  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Settings },
+  { path: "/dashboard/approvals", label: "Approbations", icon: Shield },
+  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2 },
+  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
+  { path: "/dashboard/guide", label: "Guide", icon: Rocket },
   { path: "/dashboard/logs", label: "Logs", icon: BarChart3 },
   { path: "/dashboard/billing", label: "Billing", icon: Settings },
 ];

@@ -682,6 +682,126 @@ export type Database = {
           },
         ]
       }
+      approval_queue: {
+        Row: {
+          action_data: Json
+          action_type: string
+          agent_type: string
+          auto_approved: boolean | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level: string
+          site_id: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          action_data?: Json
+          action_type: string
+          agent_type: string
+          auto_approved?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string
+          site_id?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          action_data?: Json
+          action_type?: string
+          agent_type?: string
+          auto_approved?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_level?: string
+          site_id?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_queue_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_queue_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      autopilot_settings: {
+        Row: {
+          allowed_actions: Json | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          max_actions_per_week: number | null
+          max_daily_budget: number | null
+          require_approval_above_risk: string | null
+          site_id: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          allowed_actions?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          max_actions_per_week?: number | null
+          max_daily_budget?: number | null
+          require_approval_above_risk?: string | null
+          site_id?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          allowed_actions?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          max_actions_per_week?: number | null
+          max_daily_budget?: number | null
+          require_approval_above_risk?: string | null
+          site_id?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autopilot_settings_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "autopilot_settings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_kit: {
         Row: {
           allowed_claims: Json | null
@@ -822,6 +942,66 @@ export type Database = {
           },
           {
             foreignKeyName: "campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitor_analysis: {
+        Row: {
+          backlink_comparison: Json | null
+          competitor_name: string | null
+          competitor_url: string
+          content_gaps: Json | null
+          created_at: string | null
+          id: string
+          insights: Json | null
+          keyword_gaps: Json | null
+          last_analyzed_at: string | null
+          site_id: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          backlink_comparison?: Json | null
+          competitor_name?: string | null
+          competitor_url: string
+          content_gaps?: Json | null
+          created_at?: string | null
+          id?: string
+          insights?: Json | null
+          keyword_gaps?: Json | null
+          last_analyzed_at?: string | null
+          site_id: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          backlink_comparison?: Json | null
+          competitor_name?: string | null
+          competitor_url?: string
+          content_gaps?: Json | null
+          created_at?: string | null
+          id?: string
+          insights?: Json | null
+          keyword_gaps?: Json | null
+          last_analyzed_at?: string | null
+          site_id?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_analysis_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_analysis_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -2964,53 +3144,68 @@ export type Database = {
       }
       workspace_quotas: {
         Row: {
+          agent_runs_per_month: number | null
           ai_requests_per_minute: number
           concurrent_runs: number
+          crawls_per_month: number | null
           crawls_today: number
           created_at: string
           current_period_start: string
           id: string
+          integrations_limit: number | null
           last_request_at: string | null
           max_concurrent_runs: number
           max_crawls_per_day: number
           max_pages_per_crawl: number
           monthly_tokens_used: number | null
           plan_tier: string
+          reports_per_month: number | null
           requests_this_minute: number
+          sites_limit: number | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          agent_runs_per_month?: number | null
           ai_requests_per_minute?: number
           concurrent_runs?: number
+          crawls_per_month?: number | null
           crawls_today?: number
           created_at?: string
           current_period_start?: string
           id?: string
+          integrations_limit?: number | null
           last_request_at?: string | null
           max_concurrent_runs?: number
           max_crawls_per_day?: number
           max_pages_per_crawl?: number
           monthly_tokens_used?: number | null
           plan_tier?: string
+          reports_per_month?: number | null
           requests_this_minute?: number
+          sites_limit?: number | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          agent_runs_per_month?: number | null
           ai_requests_per_minute?: number
           concurrent_runs?: number
+          crawls_per_month?: number | null
           crawls_today?: number
           created_at?: string
           current_period_start?: string
           id?: string
+          integrations_limit?: number | null
           last_request_at?: string | null
           max_concurrent_runs?: number
           max_crawls_per_day?: number
           max_pages_per_crawl?: number
           monthly_tokens_used?: number | null
           plan_tier?: string
+          reports_per_month?: number | null
           requests_this_minute?: number
+          sites_limit?: number | null
           updated_at?: string
           workspace_id?: string
         }
