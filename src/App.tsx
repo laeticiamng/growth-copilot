@@ -27,6 +27,9 @@ import { PermissionsProvider } from "@/hooks/usePermissions";
 import { PoliciesProvider } from "@/hooks/usePolicies";
 import { ExperimentsProvider } from "@/hooks/useExperiments";
 import { AuditLogProvider } from "@/hooks/useAuditLog";
+import { OpsMetricsProvider } from "@/hooks/useOpsMetrics";
+import { PolicyProfilesProvider } from "@/hooks/usePolicyProfiles";
+import { TokenLifecycleProvider } from "@/hooks/useTokenLifecycle";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -68,8 +71,10 @@ import CreativesStudio from "./pages/dashboard/CreativesStudio";
 import MediaKPIs from "./pages/dashboard/MediaKPIs";
 import TemplateAdsFactory from "./pages/dashboard/TemplateAdsFactory";
 
-// Dashboard pages - Diagnostics
+// Dashboard pages - Diagnostics & Ops
 import Diagnostics from "./pages/dashboard/Diagnostics";
+import Ops from "./pages/dashboard/Ops";
+import ApprovalsV2 from "./pages/dashboard/ApprovalsV2";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +104,9 @@ function App() {
                                         <PoliciesProvider>
                                         <ExperimentsProvider>
                                         <AuditLogProvider>
+                                        <OpsMetricsProvider>
+                                        <PolicyProfilesProvider>
+                                        <TokenLifecycleProvider>
                                         <TooltipProvider>
                                       <Toaster />
                                       <Sonner />
@@ -147,11 +155,16 @@ function App() {
                                         
                                         {/* Dashboard - Debug & Diagnostics */}
                                         <Route path="/dashboard/diagnostics" element={<DashboardLayout><Diagnostics /></DashboardLayout>} />
+                                        <Route path="/dashboard/ops" element={<DashboardLayout><Ops /></DashboardLayout>} />
+                                        <Route path="/dashboard/approvals-v2" element={<DashboardLayout><ApprovalsV2 /></DashboardLayout>} />
                                         
                                         <Route path="*" element={<NotFound />} />
                                       </Routes>
                                     </BrowserRouter>
                                         </TooltipProvider>
+                                        </TokenLifecycleProvider>
+                                        </PolicyProfilesProvider>
+                                        </OpsMetricsProvider>
                                         </AuditLogProvider>
                                         </ExperimentsProvider>
                                         </PoliciesProvider>

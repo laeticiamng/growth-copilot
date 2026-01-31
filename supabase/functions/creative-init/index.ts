@@ -18,6 +18,7 @@ interface CreativeInitRequest {
   logo_url?: string;
   product_images?: string[];
   brand_kit_id?: string;
+  idempotency_key?: string; // V2: Prevent duplicate jobs
 }
 
 interface CopywritingOutput {
@@ -375,25 +376,37 @@ Deno.serve(async (req) => {
     });
     quotaIncremented = true;
 
-    // Create job
+    // Create job with idempotency key
+    const jobInsertData: Record<string, unknown> = {
+      workspace_id: input.workspace_id,
+      site_id: input.site_id,
+      status: 'running',
+      objective: input.objective,
+      language: input.language,
+      geo: input.geo,
+      style: input.style || 'minimal_premium',
+      duration_seconds: input.duration_seconds || 15,
+      input_json: {
+        site_url: input.site_url,
+        offer: input.offer,
+        logo_url: input.logo_url,
+        product_images: input.product_images
+      },
+      audit_manifest: {
+        initiated_at: new Date().toISOString(),
+        initiated_by: userId,
+        inputs_hash: null // Could add hash of inputs for audit
+      }
+    };
+    
+    // Add idempotency key if provided
+    if (input.idempotency_key) {
+      jobInsertData.idempotency_key = input.idempotency_key;
+    }
+    
     const { data: job, error: jobError } = await serviceClient
       .from('creative_jobs')
-      .insert({
-        workspace_id: input.workspace_id,
-        site_id: input.site_id,
-        status: 'running',
-        objective: input.objective,
-        language: input.language,
-        geo: input.geo,
-        style: input.style || 'minimal_premium',
-        duration_seconds: input.duration_seconds || 15,
-        input_json: {
-          site_url: input.site_url,
-          offer: input.offer,
-          logo_url: input.logo_url,
-          product_images: input.product_images
-        }
-      })
+      .insert(jobInsertData)
       .select()
       .single();
 

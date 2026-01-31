@@ -2619,6 +2619,60 @@ export type Database = {
           },
         ]
       }
+      integration_token_audit: {
+        Row: {
+          action: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          integration_id: string | null
+          ip_address: unknown
+          provider: string
+          scopes: Json | null
+          user_agent: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_id?: string | null
+          ip_address?: unknown
+          provider: string
+          scopes?: Json | null
+          user_agent?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_id?: string | null
+          ip_address?: unknown
+          provider?: string
+          scopes?: Json | null
+          user_agent?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_token_audit_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_token_audit_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_tokens: {
         Row: {
           created_at: string
@@ -2693,13 +2747,18 @@ export type Database = {
           created_at: string | null
           expires_at: string | null
           id: string
+          last_auth_failure_at: string | null
           last_sync_at: string | null
           metadata: Json | null
           provider: Database["public"]["Enums"]["integration_provider"]
+          refresh_failure_count: number | null
           refresh_token_ref: string | null
           scopes: Json | null
+          scopes_granted: Json | null
           site_id: string | null
           status: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at: string | null
+          token_refresh_at: string | null
           updated_at: string | null
           workspace_id: string
         }
@@ -2710,13 +2769,18 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          last_auth_failure_at?: string | null
           last_sync_at?: string | null
           metadata?: Json | null
           provider: Database["public"]["Enums"]["integration_provider"]
+          refresh_failure_count?: number | null
           refresh_token_ref?: string | null
           scopes?: Json | null
+          scopes_granted?: Json | null
           site_id?: string | null
           status?: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at?: string | null
+          token_refresh_at?: string | null
           updated_at?: string | null
           workspace_id: string
         }
@@ -2727,13 +2791,18 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          last_auth_failure_at?: string | null
           last_sync_at?: string | null
           metadata?: Json | null
           provider?: Database["public"]["Enums"]["integration_provider"]
+          refresh_failure_count?: number | null
           refresh_token_ref?: string | null
           scopes?: Json | null
+          scopes_granted?: Json | null
           site_id?: string | null
           status?: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at?: string | null
+          token_refresh_at?: string | null
           updated_at?: string | null
           workspace_id?: string
         }
@@ -4842,6 +4911,68 @@ export type Database = {
           },
         ]
       }
+      ops_metrics_daily: {
+        Row: {
+          agent_avg_duration_ms: number | null
+          agent_runs_failed: number | null
+          agent_runs_success: number | null
+          agent_runs_total: number | null
+          ai_cost_usd: number | null
+          created_at: string | null
+          creative_jobs_completed: number | null
+          creative_jobs_manual_review: number | null
+          creative_jobs_total: number | null
+          date: string
+          id: string
+          render_cost_usd: number | null
+          top_manual_review_reasons: Json | null
+          total_cost_usd: number | null
+          workspace_id: string
+        }
+        Insert: {
+          agent_avg_duration_ms?: number | null
+          agent_runs_failed?: number | null
+          agent_runs_success?: number | null
+          agent_runs_total?: number | null
+          ai_cost_usd?: number | null
+          created_at?: string | null
+          creative_jobs_completed?: number | null
+          creative_jobs_manual_review?: number | null
+          creative_jobs_total?: number | null
+          date: string
+          id?: string
+          render_cost_usd?: number | null
+          top_manual_review_reasons?: Json | null
+          total_cost_usd?: number | null
+          workspace_id: string
+        }
+        Update: {
+          agent_avg_duration_ms?: number | null
+          agent_runs_failed?: number | null
+          agent_runs_success?: number | null
+          agent_runs_total?: number | null
+          ai_cost_usd?: number | null
+          created_at?: string | null
+          creative_jobs_completed?: number | null
+          creative_jobs_manual_review?: number | null
+          creative_jobs_total?: number | null
+          date?: string
+          id?: string
+          render_cost_usd?: number | null
+          top_manual_review_reasons?: Json | null
+          total_cost_usd?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_metrics_daily_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_map: {
         Row: {
           cluster_id: string | null
@@ -5173,6 +5304,59 @@ export type Database = {
           },
           {
             foreignKeyName: "policy_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_profiles: {
+        Row: {
+          anti_spam_config: Json | null
+          created_at: string | null
+          id: string
+          industry: string | null
+          is_system_preset: boolean | null
+          name: string
+          platform: string | null
+          policy_rules: Json
+          required_approvals: Json | null
+          updated_at: string | null
+          warnings: Json | null
+          workspace_id: string | null
+        }
+        Insert: {
+          anti_spam_config?: Json | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          is_system_preset?: boolean | null
+          name: string
+          platform?: string | null
+          policy_rules?: Json
+          required_approvals?: Json | null
+          updated_at?: string | null
+          warnings?: Json | null
+          workspace_id?: string | null
+        }
+        Update: {
+          anti_spam_config?: Json | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          is_system_preset?: boolean | null
+          name?: string
+          platform?: string | null
+          policy_rules?: Json
+          required_approvals?: Json | null
+          updated_at?: string | null
+          warnings?: Json | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_profiles_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -6366,6 +6550,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_claim_guardrail: {
+        Args: {
+          _claim: string
+          _evidence_source?: string
+          _has_evidence?: boolean
+          _workspace_id: string
+        }
+        Returns: {
+          allowed: boolean
+          reason: string
+          requires_rewrite: boolean
+        }[]
+      }
       check_idempotency_key: {
         Args: { _key: string }
         Returns: {
@@ -6384,9 +6581,36 @@ export type Database = {
         }[]
       }
       cleanup_expired_oauth_nonces: { Args: never; Returns: undefined }
+      compute_ops_metrics: {
+        Args: { _date?: string; _workspace_id: string }
+        Returns: undefined
+      }
       get_effective_role: {
         Args: { _site_id?: string; _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_policy_profile: {
+        Args: { _industry?: string; _platform?: string; _workspace_id: string }
+        Returns: {
+          anti_spam_config: Json | null
+          created_at: string | null
+          id: string
+          industry: string | null
+          is_system_preset: boolean | null
+          name: string
+          platform: string | null
+          policy_rules: Json
+          required_approvals: Json | null
+          updated_at: string | null
+          warnings: Json | null
+          workspace_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "policy_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_user_permissions: {
         Args: { _site_id?: string; _user_id: string; _workspace_id: string }
@@ -6456,6 +6680,17 @@ export type Database = {
           _policy_id: string
           _reason?: string
           _user_id?: string
+          _workspace_id: string
+        }
+        Returns: string
+      }
+      log_token_audit: {
+        Args: {
+          _action: string
+          _error_message?: string
+          _integration_id: string
+          _provider: string
+          _scopes?: Json
           _workspace_id: string
         }
         Returns: string
