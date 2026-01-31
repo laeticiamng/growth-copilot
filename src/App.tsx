@@ -56,6 +56,9 @@ import LaunchPlan from "./pages/dashboard/LaunchPlan";
 import CreativesStudio from "./pages/dashboard/CreativesStudio";
 import MediaKPIs from "./pages/dashboard/MediaKPIs";
 
+// Dashboard pages - Diagnostics
+import Diagnostics from "./pages/dashboard/Diagnostics";
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -117,6 +120,9 @@ function App() {
                                         <Route path="/dashboard/media/launch" element={<DashboardLayout><LaunchPlan /></DashboardLayout>} />
                                         <Route path="/dashboard/media/creatives" element={<DashboardLayout><CreativesStudio /></DashboardLayout>} />
                                         <Route path="/dashboard/media/kpis" element={<DashboardLayout><MediaKPIs /></DashboardLayout>} />
+                                        
+                                        {/* Dashboard - Debug & Diagnostics */}
+                                        <Route path="/dashboard/diagnostics" element={<DashboardLayout><Diagnostics /></DashboardLayout>} />
                                         
                                         <Route path="*" element={<NotFound />} />
                                       </Routes>
