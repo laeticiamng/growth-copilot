@@ -41,3 +41,9 @@ verify_jwt = false
 
 [functions.sync-ads]
 verify_jwt = false
+
+[functions.sync-gbp]
+verify_jwt = false
+
+[functions.sync-youtube-analytics]
+verify_jwt = false

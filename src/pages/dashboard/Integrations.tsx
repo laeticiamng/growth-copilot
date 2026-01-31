@@ -63,29 +63,41 @@ const integrations: Integration[] = [
     provider: "google_analytics",
   },
   
-  // Ads - Coming Soon
+  // Ads - Active
   { 
     id: "gads", 
     name: "Google Ads", 
     description: "Campagnes publicitaires Search & Display", 
     icon: Megaphone, 
-    status: "coming_soon", 
+    status: "disconnected", 
     category: "ads",
-    comingSoonNote: "Intégration prévue Q2 2026. API Google Ads en cours d'évaluation.",
+    required: true,
+    provider: "google_ads",
   },
   
-  // Local - Coming Soon
+  // Local - Active
   { 
     id: "gbp", 
     name: "Google Business Profile", 
     description: "Fiche locale, avis et posts", 
     icon: MapPin, 
-    status: "coming_soon", 
+    status: "disconnected", 
     category: "local",
-    comingSoonNote: "⚠️ Google Q&A API discontinued. Posts et avis uniquement. Quotas stricts (5 req/sec).",
+    required: true,
+    provider: "google_business_profile",
   },
   
-  // Social - Coming Soon
+  // Social - YouTube Active, Meta Coming Soon
+  { 
+    id: "youtube", 
+    name: "YouTube", 
+    description: "Analytics vidéo et chaîne", 
+    icon: BarChart3, 
+    status: "disconnected", 
+    category: "social",
+    required: true,
+    provider: "youtube",
+  },
   { 
     id: "meta", 
     name: "Meta (Facebook/Instagram)", 
@@ -253,7 +265,8 @@ const Integrations = () => {
     }
 
     // For Google integrations, use OAuth flow
-    if (integration.provider && ["google_analytics", "google_search_console"].includes(integration.provider)) {
+    const googleProviders = ["google_analytics", "google_search_console", "google_ads", "youtube", "google_business_profile"];
+    if (integration.provider && googleProviders.includes(integration.provider)) {
       setConnecting(integration.id);
       try {
         const { data, error } = await supabase.functions.invoke("oauth-init", {
@@ -296,15 +309,38 @@ const Integrations = () => {
   };
 
   const handleSync = async (integrationId: string) => {
-    if (!currentSite || !currentWorkspace) return;
+    if (!currentWorkspace) return;
 
     setSyncing(integrationId);
     
     try {
-      const endpoint = integrationId === "gsc" ? "sync-gsc" : "sync-ga4";
-      const payload = integrationId === "gsc" 
-        ? { workspace_id: currentWorkspace.id, site_id: currentSite.id, site_url: currentSite.url }
-        : { workspace_id: currentWorkspace.id, site_id: currentSite.id, property_id: "GA4-PROPERTY-ID" };
+      let endpoint = "";
+      let payload: Record<string, unknown> = { workspace_id: currentWorkspace.id };
+
+      switch (integrationId) {
+        case "gsc":
+          endpoint = "sync-gsc";
+          payload.site_id = currentSite?.id;
+          payload.site_url = currentSite?.url;
+          break;
+        case "ga4":
+          endpoint = "sync-ga4";
+          payload.site_id = currentSite?.id;
+          break;
+        case "gads":
+          endpoint = "sync-ads";
+          break;
+        case "gbp":
+          endpoint = "sync-gbp";
+          break;
+        case "youtube":
+          endpoint = "sync-youtube-analytics";
+          break;
+        default:
+          toast.error("Sync non supporté pour cette intégration");
+          setSyncing(null);
+          return;
+      }
 
       const { data, error } = await supabase.functions.invoke(endpoint, {
         body: payload,
@@ -397,7 +433,8 @@ const Integrations = () => {
                 const isComingSoon = integration.status === "coming_soon";
                 const isConnecting = connecting === integration.id;
                 const isSyncing = syncing === integration.id;
-                const canSync = (integration.id === "gsc" || integration.id === "ga4") && (isConnected || isPending);
+                const syncableIntegrations = ["gsc", "ga4", "gads", "gbp", "youtube"];
+                const canSync = syncableIntegrations.includes(integration.id) && (isConnected || isPending);
                 
                 return (
                   <Card 

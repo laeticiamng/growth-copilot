@@ -8,7 +8,7 @@ const corsHeaders = {
 
 interface OAuthInitRequest {
   workspace_id: string;
-  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube";
+  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube" | "google_business_profile";
   redirect_url: string;
 }
 
@@ -35,6 +35,12 @@ const PROVIDER_SCOPES: Record<string, string[]> = {
   youtube: [
     "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/yt-analytics.readonly",
+    "openid",
+    "email",
+    "profile",
+  ],
+  google_business_profile: [
+    "https://www.googleapis.com/auth/business.manage",
     "openid",
     "email",
     "profile",
