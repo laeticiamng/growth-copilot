@@ -2757,30 +2757,33 @@ export type Database = {
       }
       oauth_tokens: {
         Row: {
-          access_token_encrypted: string
+          access_ct: string
+          access_iv: string
           created_at: string
           id: string
           integration_id: string
-          iv: string
-          refresh_token_encrypted: string | null
+          refresh_ct: string | null
+          refresh_iv: string | null
           updated_at: string
         }
         Insert: {
-          access_token_encrypted: string
+          access_ct: string
+          access_iv: string
           created_at?: string
           id?: string
           integration_id: string
-          iv: string
-          refresh_token_encrypted?: string | null
+          refresh_ct?: string | null
+          refresh_iv?: string | null
           updated_at?: string
         }
         Update: {
-          access_token_encrypted?: string
+          access_ct?: string
+          access_iv?: string
           created_at?: string
           id?: string
           integration_id?: string
-          iv?: string
-          refresh_token_encrypted?: string | null
+          refresh_ct?: string | null
+          refresh_iv?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -52,35 +52,55 @@ async function generateHmac(data: string, secret: string): Promise<string> {
 }
 
 /**
- * Encrypt token using AES-GCM
+ * Constant-time string comparison to prevent timing attacks
  */
-async function encryptToken(token: string, encryptionKey: string): Promise<{ encrypted: string; iv: string }> {
+function secureCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
+ * Decode hex string to Uint8Array
+ */
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+  }
+  return bytes;
+}
+
+/**
+ * Encrypt token using AES-GCM with raw 256-bit key (no PBKDF2)
+ * TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex chars)
+ */
+async function encryptToken(token: string, encryptionKeyHex: string): Promise<{ ct: string; iv: string }> {
   const encoder = new TextEncoder();
   const tokenData = encoder.encode(token);
   
-  // Derive a 256-bit key from the encryption key
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(encryptionKey),
-    { name: "PBKDF2" },
-    false,
-    ["deriveBits", "deriveKey"]
-  );
+  // Import raw 256-bit key directly (no PBKDF2)
+  const keyBytes = hexToBytes(encryptionKeyHex);
+  if (keyBytes.length !== 32) {
+    throw new Error("TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)");
+  }
   
-  const key = await crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt: encoder.encode("oauth-token-salt"),
-      iterations: 100000,
-      hash: "SHA-256",
-    },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
+  // Create a new ArrayBuffer from the Uint8Array to avoid SharedArrayBuffer type issues
+  const keyBuffer = new ArrayBuffer(32);
+  new Uint8Array(keyBuffer).set(keyBytes);
+  
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBuffer,
+    { name: "AES-GCM" },
     false,
     ["encrypt"]
   );
   
-  // Generate random IV
+  // Generate unique random IV (12 bytes for AES-GCM)
   const iv = crypto.getRandomValues(new Uint8Array(12));
   
   // Encrypt
@@ -91,7 +111,7 @@ async function encryptToken(token: string, encryptionKey: string): Promise<{ enc
   );
   
   return {
-    encrypted: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+    ct: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
     iv: btoa(String.fromCharCode(...iv)),
   };
 }
@@ -141,6 +161,12 @@ serve(async (req) => {
       return redirectWithError("config_error", null);
     }
 
+    // Validate TOKEN_ENCRYPTION_KEY length (must be 64 hex chars = 32 bytes)
+    if (TOKEN_ENCRYPTION_KEY.length !== 64 || !/^[0-9a-fA-F]+$/.test(TOKEN_ENCRYPTION_KEY)) {
+      console.error("TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)");
+      return redirectWithError("config_error", null);
+    }
+
     // Parse and verify state
     let statePayload: { nonce: string; sig: string };
     try {
@@ -181,15 +207,11 @@ serve(async (req) => {
       return redirectWithError("state_expired", nonceRecord.redirect_url);
     }
 
-    // Verify HMAC signature
-    const stateData = {
-      nonce: nonceRecord.nonce,
-      workspace_id: nonceRecord.workspace_id,
-      provider: nonceRecord.provider,
-      redirect_url: nonceRecord.redirect_url,
-      user_id: nonceRecord.user_id,
-      timestamp: Math.floor(new Date(nonceRecord.created_at).getTime()),
-    };
+    // *** FIX #3: Explicit HMAC signature verification ***
+    if (!secureCompare(sig, nonceRecord.hmac_signature)) {
+      console.error("HMAC signature mismatch - potential tampering");
+      return redirectWithError("invalid_signature", nonceRecord.redirect_url);
+    }
 
     // Mark nonce as used immediately (prevent race conditions)
     await supabase
@@ -251,7 +273,7 @@ serve(async (req) => {
         status: "active",
         account_id: accountInfo.id || accountInfo.email,
         account_name: accountInfo.email,
-        access_token_ref: null, // No longer storing tokens here
+        access_token_ref: null,
         refresh_token_ref: null,
         expires_at: expiresAt,
         scopes: tokens.scope ? tokens.scope.split(" ") : [],
@@ -271,14 +293,17 @@ serve(async (req) => {
       return redirectWithError("save_failed", redirect_url);
     }
 
-    // Encrypt and store tokens in secure table
-    const { encrypted: accessTokenEncrypted, iv } = await encryptToken(tokens.access_token, TOKEN_ENCRYPTION_KEY);
+    // *** FIX #1 & #2: AES-GCM with raw key + separate IVs ***
+    // Encrypt access token with unique IV
+    const { ct: accessCt, iv: accessIv } = await encryptToken(tokens.access_token, TOKEN_ENCRYPTION_KEY);
     
-    let refreshTokenEncrypted = null;
+    // Encrypt refresh token with separate unique IV (if present)
+    let refreshCt = null;
+    let refreshIv = null;
     if (tokens.refresh_token) {
       const refreshResult = await encryptToken(tokens.refresh_token, TOKEN_ENCRYPTION_KEY);
-      refreshTokenEncrypted = refreshResult.encrypted;
-      // Note: Using same IV for simplicity, but in production you might want separate IVs
+      refreshCt = refreshResult.ct;
+      refreshIv = refreshResult.iv;
     }
 
     // Delete any existing tokens for this integration
@@ -287,14 +312,15 @@ serve(async (req) => {
       .delete()
       .eq("integration_id", integration.id);
 
-    // Insert new encrypted tokens
+    // Insert new encrypted tokens with separate IVs
     const { error: tokenInsertError } = await supabase
       .from("oauth_tokens")
       .insert({
         integration_id: integration.id,
-        access_token_encrypted: accessTokenEncrypted,
-        refresh_token_encrypted: refreshTokenEncrypted,
-        iv,
+        access_ct: accessCt,
+        access_iv: accessIv,
+        refresh_ct: refreshCt,
+        refresh_iv: refreshIv,
       });
 
     if (tokenInsertError) {
@@ -324,7 +350,6 @@ serve(async (req) => {
 });
 
 function redirectWithError(error: string, redirectUrl: string | null): Response {
-  // Default to a safe fallback
   let finalRedirectUrl = "/dashboard/integrations";
   
   if (redirectUrl && isValidRedirectUrl(redirectUrl)) {
