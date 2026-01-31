@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -8,53 +9,87 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-const steps = [
-  {
-    number: "01",
-    icon: LinkIcon,
-    title: "Colle ton URL",
-    description: "Entre l'adresse de ton site, ton secteur, et tes objectifs. 30 secondes chrono.",
-    details: ["Détection automatique du CMS", "Analyse secteur et concurrence", "Définition des KPIs"],
-  },
-  {
-    number: "02",
-    icon: Scan,
-    title: "Audit automatique",
-    description: "Nos agents analysent technique, contenu, local, conversion, et concurrents.",
-    details: ["Crawl technique complet", "Analyse mots-clés GSC", "Scoring opportunités"],
-  },
-  {
-    number: "03",
-    icon: Bot,
-    title: "Exécution & Optimisation",
-    description: "Actions priorisées, correctifs appliqués, campagnes lancées. Tu valides, on exécute.",
-    details: ["Corrections SEO auto", "Briefs et drafts IA", "Campagnes Ads optimisées"],
-  },
-  {
-    number: "04",
-    icon: LineChart,
-    title: "Reporting & Amélioration",
-    description: "Dashboard live, alertes, rapports mensuels. On apprend, on s'améliore.",
-    details: ["KPIs temps réel", "Rapports PDF auto", "Cycle d'amélioration continue"],
-  },
-];
-
 export function HowItWorks() {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
+
+  const stepsFr = [
+    {
+      number: "01",
+      icon: LinkIcon,
+      title: "Colle ton URL",
+      description: "Entre l'adresse de ton site, ton secteur, et tes objectifs. 30 secondes chrono.",
+      details: ["Détection automatique du CMS", "Analyse secteur et concurrence", "Définition des KPIs"],
+    },
+    {
+      number: "02",
+      icon: Scan,
+      title: "Audit automatique",
+      description: "Nos agents analysent technique, contenu, local, conversion, et concurrents.",
+      details: ["Crawl technique complet", "Analyse mots-clés GSC", "Scoring opportunités"],
+    },
+    {
+      number: "03",
+      icon: Bot,
+      title: "Exécution & Optimisation",
+      description: "Actions priorisées, correctifs appliqués, campagnes lancées. Tu valides, on exécute.",
+      details: ["Corrections SEO auto", "Briefs et drafts IA", "Campagnes Ads optimisées"],
+    },
+    {
+      number: "04",
+      icon: LineChart,
+      title: "Reporting & Amélioration",
+      description: "Dashboard live, alertes, rapports mensuels. On apprend, on s'améliore.",
+      details: ["KPIs temps réel", "Rapports PDF auto", "Cycle d'amélioration continue"],
+    },
+  ];
+
+  const stepsEn = [
+    {
+      number: "01",
+      icon: LinkIcon,
+      title: "Paste your URL",
+      description: "Enter your site address, industry, and objectives. 30 seconds flat.",
+      details: ["Automatic CMS detection", "Industry & competition analysis", "KPI definition"],
+    },
+    {
+      number: "02",
+      icon: Scan,
+      title: "Automatic audit",
+      description: "Our agents analyze technical, content, local, conversion, and competitors.",
+      details: ["Complete technical crawl", "GSC keyword analysis", "Opportunity scoring"],
+    },
+    {
+      number: "03",
+      icon: Bot,
+      title: "Execution & Optimization",
+      description: "Prioritized actions, fixes applied, campaigns launched. You validate, we execute.",
+      details: ["Auto SEO fixes", "AI briefs and drafts", "Optimized Ads campaigns"],
+    },
+    {
+      number: "04",
+      icon: LineChart,
+      title: "Reporting & Improvement",
+      description: "Live dashboard, alerts, monthly reports. We learn, we improve.",
+      details: ["Real-time KPIs", "Auto PDF reports", "Continuous improvement cycle"],
+    },
+  ];
+
+  const steps = isEn ? stepsEn : stepsFr;
+
   return (
     <section id="how-it-works" className="py-24 relative">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">
-            Processus
+            {t("landing.navbar.howItWorks")}
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            De l'URL au ROI en{" "}
-            <span className="gradient-text">4 étapes</span>
+            {t("landing.howItWorks.title")}
           </h2>
           <p className="text-lg text-muted-foreground">
-            Pas de setup compliqué. Pas de formation requise. 
-            Juste des résultats mesurables.
+            {t("landing.howItWorks.subtitle")}
           </p>
         </div>
 

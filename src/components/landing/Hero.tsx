@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Sparkles, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function Hero() {
+  const { t } = useTranslation();
   const [url, setUrl] = useState("");
 
   return (
@@ -23,21 +25,20 @@ export function Hero() {
           <div className="fade-in-up mb-8">
             <Badge variant="agent" className="px-4 py-2 text-sm">
               <Sparkles className="w-4 h-4 mr-2" />
-              Propulsé par des agents IA autonomes
+              {t("landing.hero.tagline")}
             </Badge>
           </div>
 
           {/* Headline */}
           <h1 className="fade-in-up text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-balance" style={{ animationDelay: "0.1s" }}>
-            Automatise ta croissance.
+            {t("landing.hero.title")}
             <br />
-            <span className="gradient-text">SEO, Ads, CRO, Local.</span>
+            <span className="gradient-text">{t("landing.hero.titleHighlight")}</span>
           </h1>
 
           {/* Subheadline */}
           <p className="fade-in-up text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10" style={{ animationDelay: "0.2s" }}>
-            Colle ton URL. On audite, priorise, exécute et optimise en continu. 
-            Tu gardes le contrôle, on fait le travail.
+            {t("landing.hero.subtitle")}
           </p>
 
           {/* URL Input + CTA */}
@@ -46,7 +47,7 @@ export function Hero() {
               <div className="flex-1 relative">
                 <input
                   type="url"
-                  placeholder="https://tonsite.com"
+                  placeholder="https://yoursite.com"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   className="w-full h-14 px-5 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
@@ -54,14 +55,11 @@ export function Hero() {
               </div>
               <Link to={`/onboarding${url ? `?url=${encodeURIComponent(url)}` : ''}`}>
                 <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap">
-                  Audit gratuit
+                  {t("landing.hero.cta")}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">
-              Aucune carte bancaire requise • Résultats en 2 minutes
-            </p>
           </div>
 
           {/* Secondary CTA */}
@@ -69,14 +67,14 @@ export function Hero() {
             <Link to="/dashboard">
               <Button variant="hero-outline">
                 <Play className="w-4 h-4 mr-2" />
-                Voir la démo
+                {t("landing.hero.secondaryCta")}
               </Button>
             </Link>
           </div>
 
           {/* Trust indicators */}
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
-            <p className="text-sm text-muted-foreground mb-6">Ils nous font confiance</p>
+            <p className="text-sm text-muted-foreground mb-6">{t("landing.hero.stats.clients")}</p>
             <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
               {["Startup Alpha", "Agency Pro", "E-commerce Plus", "SaaS Corp", "Local Business"].map((name) => (
                 <div key={name} className="text-lg font-semibold text-muted-foreground">

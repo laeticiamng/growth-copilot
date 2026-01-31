@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,8 @@ const statusColors: Record<string, string> = {
 };
 
 export default function MediaAssets() {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
   const { assets, loading, createAsset, deleteAsset, runAgent, setSelectedAsset } = useMedia();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newUrl, setNewUrl] = useState("");
@@ -95,14 +98,62 @@ export default function MediaAssets() {
   const spotifyAssets = assets.filter(a => a.platform.startsWith('spotify_'));
   const otherAssets = assets.filter(a => !a.platform.startsWith('youtube_') && !a.platform.startsWith('spotify_'));
 
+  const labels = isEn ? {
+    title: "Media Assets",
+    subtitle: "Manage your videos, tracks, and media content",
+    addMedia: "Add Media",
+    addMediaTitle: "Add Media Asset",
+    addMediaDesc: "Paste a YouTube or Spotify URL to auto-detect and import media details.",
+    supportedPlatforms: "Supported platforms:",
+    cancel: "Cancel",
+    import: "Import Media",
+    noAssets: "No media assets yet",
+    noAssetsDesc: "Add your first YouTube video or Spotify track to start creating launch plans and optimizing your content.",
+    addFirst: "Add Your First Media",
+    all: "All",
+    view: "View",
+    viewDetails: "View Details",
+    smartLink: "Smart Link",
+    generateStrategy: "Generate Strategy",
+    delete: "Delete",
+    limitations: "Platform Limitations",
+    limit1: "Virality not guaranteed - We provide optimization & strategy, not magic",
+    limit2: "Spotify for Artists data not accessible via public API (private stats limited)",
+    limit3: "YouTube API quotas (10,000 units/day) limit volume of actions",
+    limit4: "Some social publishing requires pro account permissions",
+  } : {
+    title: "Media Assets",
+    subtitle: "Gérez vos vidéos, pistes et contenus médias",
+    addMedia: "Ajouter un média",
+    addMediaTitle: "Ajouter un média",
+    addMediaDesc: "Collez une URL YouTube ou Spotify pour détecter et importer automatiquement les détails.",
+    supportedPlatforms: "Plateformes supportées :",
+    cancel: "Annuler",
+    import: "Importer le média",
+    noAssets: "Aucun média pour l'instant",
+    noAssetsDesc: "Ajoutez votre première vidéo YouTube ou piste Spotify pour commencer à créer des plans de lancement.",
+    addFirst: "Ajouter votre premier média",
+    all: "Tous",
+    view: "Voir",
+    viewDetails: "Voir les détails",
+    smartLink: "Smart Link",
+    generateStrategy: "Générer une stratégie",
+    delete: "Supprimer",
+    limitations: "Limitations des plateformes",
+    limit1: "Viralité non garantie - Nous fournissons l'optimisation et la stratégie, pas de magie",
+    limit2: "Données Spotify for Artists non accessibles via l'API publique (stats privées limitées)",
+    limit3: "Quotas API YouTube (10 000 unités/jour) limitent le volume d'actions",
+    limit4: "Certaines publications sociales nécessitent des permissions de compte pro",
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Media Assets</h1>
+          <h1 className="text-2xl font-bold">{labels.title}</h1>
           <p className="text-muted-foreground">
-            Manage your videos, tracks, and media content
+            {labels.subtitle}
           </p>
         </div>
         
@@ -110,14 +161,14 @@ export default function MediaAssets() {
           <DialogTrigger asChild>
             <Button variant="gradient">
               <Plus className="w-4 h-4 mr-2" />
-              Add Media
+              {labels.addMedia}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Media Asset</DialogTitle>
+              <DialogTitle>{labels.addMediaTitle}</DialogTitle>
               <DialogDescription>
-                Paste a YouTube or Spotify URL to auto-detect and import media details.
+                {labels.addMediaDesc}
               </DialogDescription>
             </DialogHeader>
             
@@ -132,7 +183,7 @@ export default function MediaAssets() {
               <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
                 <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground" />
                 <div className="text-xs text-muted-foreground">
-                  <p className="font-medium mb-1">Supported platforms:</p>
+                  <p className="font-medium mb-1">{labels.supportedPlatforms}</p>
                   <ul className="list-disc list-inside space-y-0.5">
                     <li>YouTube (videos & channels)</li>
                     <li>Spotify (tracks, albums, artists)</li>
@@ -144,11 +195,11 @@ export default function MediaAssets() {
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                Cancel
+                {labels.cancel}
               </Button>
               <Button onClick={handleAddAsset} disabled={!newUrl.trim() || isCreating}>
                 {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Import Media
+                {labels.import}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -166,20 +217,20 @@ export default function MediaAssets() {
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <Music className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No media assets yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{labels.noAssets}</h3>
             <p className="text-muted-foreground text-center mb-4 max-w-md">
-              Add your first YouTube video or Spotify track to start creating launch plans and optimizing your content.
+              {labels.noAssetsDesc}
             </p>
             <Button variant="gradient" onClick={() => setIsAddOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Your First Media
+              {labels.addFirst}
             </Button>
           </CardContent>
         </Card>
       ) : (
         <Tabs defaultValue="all" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="all">All ({assets.length})</TabsTrigger>
+            <TabsTrigger value="all">{labels.all} ({assets.length})</TabsTrigger>
             <TabsTrigger value="youtube">YouTube ({youtubeAssets.length})</TabsTrigger>
             <TabsTrigger value="spotify">Spotify ({spotifyAssets.length})</TabsTrigger>
             {otherAssets.length > 0 && (
@@ -194,6 +245,7 @@ export default function MediaAssets() {
               onRunAgent={handleRunAgent}
               runningAgents={runningAgents}
               onSelect={setSelectedAsset}
+              labels={labels}
             />
           </TabsContent>
 
@@ -204,6 +256,7 @@ export default function MediaAssets() {
               onRunAgent={handleRunAgent}
               runningAgents={runningAgents}
               onSelect={setSelectedAsset}
+              labels={labels}
             />
           </TabsContent>
 
@@ -214,6 +267,7 @@ export default function MediaAssets() {
               onRunAgent={handleRunAgent}
               runningAgents={runningAgents}
               onSelect={setSelectedAsset}
+              labels={labels}
             />
           </TabsContent>
 
@@ -225,6 +279,7 @@ export default function MediaAssets() {
                 onRunAgent={handleRunAgent}
                 runningAgents={runningAgents}
                 onSelect={setSelectedAsset}
+                labels={labels}
               />
             </TabsContent>
           )}
@@ -236,14 +291,14 @@ export default function MediaAssets() {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
-            Platform Limitations
+            {labels.limitations}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-xs text-muted-foreground space-y-1">
-          <p>• <strong>Virality not guaranteed</strong> - We provide optimization & strategy, not magic</p>
-          <p>• <strong>Spotify for Artists</strong> data not accessible via public API (private stats limited)</p>
-          <p>• <strong>YouTube API quotas</strong> (10,000 units/day) limit volume of actions</p>
-          <p>• Some social publishing requires pro account permissions</p>
+          <p>• <strong>{labels.limit1.split(' - ')[0]}</strong> - {labels.limit1.split(' - ')[1]}</p>
+          <p>• <strong>Spotify for Artists</strong> {isEn ? labels.limit2.split('data ')[1] : labels.limit2.split('Artists ')[1]}</p>
+          <p>• <strong>YouTube API</strong> {isEn ? labels.limit3.split('quotas ')[1] : labels.limit3.split('API ')[1]}</p>
+          <p>• {labels.limit4}</p>
         </CardContent>
       </Card>
     </div>
@@ -265,9 +320,10 @@ interface AssetGridProps {
   onRunAgent: (assetId: string, agentType: string) => void;
   runningAgents: Set<string>;
   onSelect: (asset: any) => void;
+  labels: Record<string, string>;
 }
 
-function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect }: AssetGridProps) {
+function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect, labels }: AssetGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {assets.map((asset) => {
@@ -305,7 +361,7 @@ function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect }: As
                 <Button size="sm" variant="secondary" asChild>
                   <a href={asset.url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-3 h-3 mr-1" />
-                    View
+                    {labels.view}
                   </a>
                 </Button>
                 
@@ -318,13 +374,13 @@ function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect }: As
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onSelect(asset)}>
                       <Eye className="w-4 h-4 mr-2" />
-                      View Details
+                      {labels.viewDetails}
                     </DropdownMenuItem>
                     {asset.smart_link_slug && (
                       <DropdownMenuItem asChild>
                         <a href={`/link/${asset.smart_link_slug}`} target="_blank">
                           <Link2 className="w-4 h-4 mr-2" />
-                          Smart Link
+                          {labels.smartLink}
                         </a>
                       </DropdownMenuItem>
                     )}
@@ -337,14 +393,14 @@ function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect }: As
                       ) : (
                         <Sparkles className="w-4 h-4 mr-2" />
                       )}
-                      Generate Strategy
+                      {labels.generateStrategy}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => onDelete(asset.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      {labels.delete}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
