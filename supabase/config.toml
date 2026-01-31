@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.oauth-callback]
 verify_jwt = false
+
+[functions.sync-ads]
+verify_jwt = false

@@ -37,6 +37,7 @@ export default function Ads() {
   const { 
     accounts, 
     campaigns, 
+    keywords,
     negatives, 
     loading, 
     createCampaign, 
@@ -159,7 +160,7 @@ export default function Ads() {
             <Settings className="w-4 h-4 mr-2" />
             Paramètres
           </Button>
-          <Button variant="hero">
+          <Button variant="hero" onClick={() => setShowCampaignDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle campagne
           </Button>
@@ -294,12 +295,55 @@ export default function Ads() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="keywords">
+        <TabsContent value="keywords" className="space-y-6">
           <Card variant="feature">
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground py-8">
-                Analyse des mots-clés et termes de recherche
-              </p>
+            <CardHeader>
+              <CardTitle>Mots-clés et termes de recherche</CardTitle>
+              <CardDescription>Analyse des performances par mot-clé</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {keywords.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Aucun mot-clé</p>
+                  <p className="text-sm mt-1">Connectez Google Ads pour synchroniser</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Mot-clé</th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">Type</th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">Status</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">QS</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Max CPC</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {keywords.map((kw) => (
+                        <tr key={kw.id} className="border-b border-border/50 hover:bg-secondary/50">
+                          <td className="py-3 px-2 font-medium">{kw.keyword}</td>
+                          <td className="py-3 px-2 text-center">
+                            <Badge variant="outline">{kw.match_type || 'broad'}</Badge>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <Badge variant={kw.status === 'enabled' ? 'gradient' : 'secondary'}>
+                              {kw.status === 'enabled' ? 'Actif' : 'Pause'}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className={kw.quality_score && kw.quality_score >= 7 ? 'text-green-500' : kw.quality_score && kw.quality_score < 5 ? 'text-destructive' : ''}>
+                              {kw.quality_score || '—'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-right">€{kw.max_cpc?.toFixed(2) || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -337,7 +381,7 @@ export default function Ads() {
           <Card variant="feature">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                <AlertTriangle className="w-5 h-5 text-warning" />
                 Garde-fous actifs
               </CardTitle>
               <CardDescription>
