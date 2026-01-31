@@ -270,21 +270,38 @@ Réponds en JSON: {"approved": true/false, "issues": ["issue1", "issue2"]}`;
 
   if (error) {
     console.error('[creative-init] QCO validation error:', error);
-    return { approved: true, issues: ['QCO validation skipped due to error'] };
+    // FAIL-CLOSED: If QCO fails, mark as NOT approved and require manual review
+    return { approved: false, issues: ['QCO validation error - manual review required: ' + error.message] };
   }
 
   try {
     const content = data.output?.content || data.output;
     return typeof content === 'string' ? JSON.parse(content) : content;
   } catch (e) {
-    return { approved: true, issues: ['QCO output parsing failed'] };
+    // FAIL-CLOSED: Parsing failure means we can't trust the output
+    console.error('[creative-init] QCO output parsing failed:', e);
+    return { approved: false, issues: ['QCO output parsing failed - manual review required'] };
   }
 }
+
+// Pricing configuration (cost per render/asset)
+const PRICING_CONFIG = {
+  video_render: 0.05,      // Per video format
+  thumbnail_render: 0.01,  // Per thumbnail
+  ai_tokens_per_1k: 0.002, // Per 1K tokens
+  base_job_cost: 0.10      // Base cost per job
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  // Track workspace for finally{} cleanup
+  let workspaceId: string | null = null;
+  let quotaIncremented = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let serviceClient: any = null;
 
   try {
     const authHeader = req.headers.get('Authorization');
@@ -304,8 +321,8 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Service client for writes
-    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    // Service client for writes (untyped for Deno compatibility)
+    serviceClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Validate user
     const token = authHeader.replace('Bearer ', '');
@@ -319,6 +336,7 @@ Deno.serve(async (req) => {
 
     const userId = claims.claims.sub;
     const input: CreativeInitRequest = await req.json();
+    workspaceId = input.workspace_id;
 
     console.log('[creative-init] Starting job for workspace:', input.workspace_id);
 
@@ -355,6 +373,7 @@ Deno.serve(async (req) => {
       p_workspace_id: input.workspace_id,
       p_increment_concurrent: true
     });
+    quotaIncremented = true;
 
     // Create job
     const { data: job, error: jobError } = await serviceClient
@@ -405,22 +424,41 @@ Deno.serve(async (req) => {
     const copywriting = await generateCopywriting(userClient, input, brandKit);
     console.log('[creative-init] Copywriting generated:', copywriting.hooks.length, 'hooks');
 
-    // Step 2: Generate blueprints for all formats
-    console.log('[creative-init] Generating blueprints...');
+    // Step 2: Generate blueprints for all formats with A/B variations
+    console.log('[creative-init] Generating blueprints with A/B variations...');
     const blueprints: CreativeBlueprint[] = [];
+    const variants = ['A', 'B']; // A/B pack variations using different hooks/CTAs
+    
     for (const ratio of ['9:16', '1:1', '16:9'] as const) {
-      const blueprint = await generateBlueprint(userClient, input, copywriting, ratio);
-      blueprints.push(blueprint);
+      for (let variantIndex = 0; variantIndex < variants.length; variantIndex++) {
+        // Use different hook and CTA for each variant
+        const variantCopywriting = {
+          ...copywriting,
+          // Rotate hooks and CTAs for variation
+          hooks: [copywriting.hooks[variantIndex % copywriting.hooks.length], ...copywriting.hooks],
+          ctas: [copywriting.ctas[variantIndex % copywriting.ctas.length], ...copywriting.ctas]
+        };
+        const blueprint = await generateBlueprint(userClient, input, variantCopywriting, ratio);
+        // Tag the blueprint with variant info using spread
+        const taggedBlueprint = {
+          ...blueprint,
+          variant: variants[variantIndex],
+          variant_index: variantIndex
+        } as CreativeBlueprint & { variant: string; variant_index: number };
+        blueprints.push(taggedBlueprint);
+      }
     }
-    console.log('[creative-init] Blueprints generated:', blueprints.length);
+    console.log('[creative-init] Blueprints generated:', blueprints.length, '(including A/B variants)');
 
     // Step 3: QCO validation
     console.log('[creative-init] Running QCO validation...');
     const qcoResult = await validateWithQCO(userClient, copywriting, blueprints, input.workspace_id);
     console.log('[creative-init] QCO result:', qcoResult.approved, qcoResult.issues);
 
-    // Store blueprints
+    // Store blueprints (all variants)
     for (const blueprint of blueprints) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bpAny = blueprint as any;
       await serviceClient
         .from('creative_blueprints')
         .insert({
@@ -428,7 +466,10 @@ Deno.serve(async (req) => {
           workspace_id: input.workspace_id,
           version: 1,
           blueprint_json: blueprint,
-          qa_report_json: { qco: qcoResult },
+          qa_report_json: { 
+            qco: qcoResult,
+            variant: bpAny.variant || 'A'
+          },
           is_approved: qcoResult.approved
         });
     }
@@ -506,7 +547,19 @@ Deno.serve(async (req) => {
         is_automated: true
       });
 
-    // Decrement concurrent runs
+    // Calculate dynamic cost estimate
+    const costEstimate = PRICING_CONFIG.base_job_cost +
+      (3 * PRICING_CONFIG.video_render) +  // 3 video formats
+      (3 * PRICING_CONFIG.thumbnail_render); // 3 thumbnails
+
+    // Update job with cost estimate
+    await serviceClient
+      .from('creative_jobs')
+      .update({ cost_estimate: costEstimate })
+      .eq('id', job.id);
+
+    // Decrement concurrent runs - now in finally{} but also here for success path
+    quotaIncremented = false;
     await serviceClient.rpc('update_workspace_quota', {
       p_workspace_id: input.workspace_id,
       p_decrement_concurrent: true
@@ -524,7 +577,8 @@ Deno.serve(async (req) => {
           hooks: copywriting.hooks,
           ctas: copywriting.ctas
         },
-        qco: qcoResult
+        qco: qcoResult,
+        cost_estimate: costEstimate
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -536,5 +590,18 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+  } finally {
+    // CRITICAL: Always decrement concurrent_runs to prevent quota leak
+    if (quotaIncremented && workspaceId && serviceClient) {
+      try {
+        await serviceClient.rpc('update_workspace_quota', {
+          p_workspace_id: workspaceId,
+          p_decrement_concurrent: true
+        });
+        console.log('[creative-init] Quota decremented in finally');
+      } catch (cleanupError) {
+        console.error('[creative-init] Failed to decrement quota:', cleanupError);
+      }
+    }
   }
 });

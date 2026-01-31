@@ -26,7 +26,51 @@ interface QAIssue {
   affected_format?: string;
 }
 
-// Ad Quality Gate checks
+// Visual safe zone configuration (in pixels for each format)
+const SAFE_ZONE_CONFIG = {
+  '9:16': { 
+    width: 1080, 
+    height: 1920,
+    top: 150,     // Account for platform UI elements
+    bottom: 200,  // Account for CTA buttons, captions
+    left: 40, 
+    right: 40,
+    cta_safe_bottom: 180
+  },
+  '1:1': { 
+    width: 1080, 
+    height: 1080,
+    top: 80, 
+    bottom: 80, 
+    left: 40, 
+    right: 40,
+    cta_safe_bottom: 100
+  },
+  '16:9': { 
+    width: 1920, 
+    height: 1080,
+    top: 60, 
+    bottom: 80, 
+    left: 80, 
+    right: 80,
+    cta_safe_bottom: 60
+  }
+};
+
+// Text density thresholds (max characters per second of video)
+const TEXT_DENSITY_LIMITS = {
+  max_chars_per_second: 15,
+  max_words_per_screen: 12,
+  min_font_size_mobile: 24 // pixels for 9:16
+};
+
+// Contrast ratio requirements (WCAG AA)
+const CONTRAST_REQUIREMENTS = {
+  min_ratio: 4.5,
+  large_text_min_ratio: 3.0
+};
+
+// Ad Quality Gate checks with enhanced visual validation
 function runQualityGate(
   blueprints: Array<Record<string, unknown>>,
   copywriting: Record<string, unknown>
@@ -37,15 +81,12 @@ function runQualityGate(
   for (const bp of blueprints) {
     const blueprint = bp.blueprint_json as Record<string, unknown>;
     const aspectRatio = blueprint.aspect_ratio as string;
+    const variant = blueprint.variant as string || 'A';
     const scenes = blueprint.scenes as Array<Record<string, unknown>> || [];
+    const duration = blueprint.duration_seconds as number || 15;
+    const safeZone = SAFE_ZONE_CONFIG[aspectRatio as keyof typeof SAFE_ZONE_CONFIG];
 
-    // Check 1: Safe zones
-    const safeZoneLimits = {
-      '9:16': { topSafe: 150, bottomSafe: 200 },
-      '1:1': { topSafe: 80, bottomSafe: 80 },
-      '16:9': { topSafe: 60, bottomSafe: 80 }
-    };
-
+    // Check 1: Safe zones with position validation
     for (const scene of scenes) {
       const textOverlay = scene.text_overlay as Record<string, unknown>;
       if (textOverlay) {
@@ -54,60 +95,119 @@ function runQualityGate(
           issues.push({
             code: 'SAFE_ZONE_MISSING',
             severity: 'critical',
-            description: `Text overlay in ${aspectRatio} scene ${scene.scene_id} not marked as safe zone compliant`,
-            suggestion: 'Adjust text position to respect platform safe zones',
+            description: `[${variant}] Text in ${aspectRatio} scene ${scene.scene_id} not marked safe zone compliant`,
+            suggestion: `Keep text within ${safeZone.left}px from edges, ${safeZone.top}px from top, ${safeZone.bottom}px from bottom`,
             affected_format: aspectRatio
           });
           score -= 15;
         }
 
-        // Check text length (max 2 lines ~ 60 chars)
-        const text = textOverlay.text as string || '';
-        if (text.length > 60) {
+        // Check text position for visual overflow
+        const position = textOverlay.position as string;
+        if (position === 'bottom' && aspectRatio === '9:16') {
           issues.push({
-            code: 'TEXT_TOO_LONG',
+            code: 'POSITION_RISK_9_16',
             severity: 'warning',
-            description: `Text in ${aspectRatio} exceeds recommended length (${text.length} chars)`,
-            suggestion: 'Reduce text to max 60 characters for mobile readability',
+            description: `[${variant}] Bottom-positioned text in 9:16 may overlap platform controls`,
+            suggestion: 'Use center or top position for 9:16 format',
+            affected_format: aspectRatio
+          });
+          score -= 5;
+        }
+
+        // Check text length for overflow risk
+        const text = textOverlay.text as string || '';
+        const maxChars = aspectRatio === '9:16' ? 50 : aspectRatio === '1:1' ? 60 : 80;
+        if (text.length > maxChars) {
+          issues.push({
+            code: 'TEXT_OVERFLOW_RISK',
+            severity: 'warning',
+            description: `[${variant}] Text in ${aspectRatio} (${text.length} chars) may overflow safe zone`,
+            suggestion: `Reduce text to max ${maxChars} characters for ${aspectRatio}`,
             affected_format: aspectRatio
           });
           score -= 10;
         }
+
+        // Check font size for mobile readability
+        const fontSize = textOverlay.font_size as string;
+        if (fontSize === 'small' && aspectRatio === '9:16') {
+          issues.push({
+            code: 'FONT_TOO_SMALL_MOBILE',
+            severity: 'warning',
+            description: `[${variant}] Small font may be illegible on mobile (9:16)`,
+            suggestion: `Use medium or large font size for mobile formats`,
+            affected_format: aspectRatio
+          });
+          score -= 8;
+        }
       }
     }
 
-    // Check 2: CTA visibility
+    // Check 2: Text density (too much text per scene)
+    let totalTextLength = 0;
+    for (const scene of scenes) {
+      const textOverlay = scene.text_overlay as Record<string, unknown>;
+      if (textOverlay?.text) {
+        totalTextLength += (textOverlay.text as string).length;
+      }
+    }
+    const charsPerSecond = totalTextLength / duration;
+    if (charsPerSecond > TEXT_DENSITY_LIMITS.max_chars_per_second) {
+      issues.push({
+        code: 'TEXT_DENSITY_HIGH',
+        severity: 'warning',
+        description: `[${variant}] Text density ${charsPerSecond.toFixed(1)} chars/s exceeds ${TEXT_DENSITY_LIMITS.max_chars_per_second}/s limit in ${aspectRatio}`,
+        suggestion: 'Reduce on-screen text or increase video duration',
+        affected_format: aspectRatio
+      });
+      score -= 10;
+    }
+
+    // Check 3: CTA visibility and placement
     const ctaPlacement = blueprint.cta_placement as Record<string, unknown>;
     if (!ctaPlacement || !ctaPlacement.timing) {
       issues.push({
         code: 'CTA_MISSING',
         severity: 'critical',
-        description: `No CTA placement defined for ${aspectRatio}`,
+        description: `[${variant}] No CTA placement defined for ${aspectRatio}`,
         suggestion: 'Add CTA in the last 3 seconds of the video',
         affected_format: aspectRatio
       });
       score -= 20;
+    } else {
+      // Validate CTA timing (should be in last 3-5 seconds)
+      const ctaTiming = ctaPlacement.timing as number;
+      if (ctaTiming < duration - 5 || ctaTiming > duration - 1) {
+        issues.push({
+          code: 'CTA_TIMING_SUBOPTIMAL',
+          severity: 'info',
+          description: `[${variant}] CTA at ${ctaTiming}s may be too early or cut off`,
+          suggestion: 'Place CTA between 3-5 seconds before end',
+          affected_format: aspectRatio
+        });
+        score -= 3;
+      }
     }
 
-    // Check 3: Duration validation
-    const duration = blueprint.duration_seconds as number;
+    // Check 4: Duration validation
     if (duration < 5 || duration > 60) {
       issues.push({
         code: 'INVALID_DURATION',
         severity: 'warning',
-        description: `Duration ${duration}s is outside optimal range (5-60s) for ${aspectRatio}`,
+        description: `[${variant}] Duration ${duration}s outside optimal range (5-60s) for ${aspectRatio}`,
         affected_format: aspectRatio
       });
       score -= 5;
     }
 
-    // Check 4: Subtitle coverage
+    // Check 5: Subtitle coverage and positioning
     const subtitles = blueprint.subtitles as Array<Record<string, unknown>> || [];
     if (subtitles.length === 0) {
       issues.push({
         code: 'NO_SUBTITLES',
         severity: 'warning',
-        description: `No subtitles defined for ${aspectRatio} - accessibility concern`,
+        description: `[${variant}] No subtitles for ${aspectRatio} - accessibility concern`,
         suggestion: 'Add subtitles for better engagement and accessibility',
         affected_format: aspectRatio
       });
@@ -117,20 +217,33 @@ function runQualityGate(
       let coveredDuration = 0;
       for (const sub of subtitles) {
         coveredDuration += ((sub.end as number) - (sub.start as number));
+        
+        // Check if subtitles would overflow in 9:16 safe zone
+        const subText = sub.text as string || '';
+        if (aspectRatio === '9:16' && subText.length > 40) {
+          issues.push({
+            code: 'SUBTITLE_OVERFLOW_9_16',
+            severity: 'warning',
+            description: `[${variant}] Subtitle "${subText.substring(0, 20)}..." may overflow in 9:16 safe zone`,
+            suggestion: 'Keep subtitles under 40 chars for 9:16 format',
+            affected_format: aspectRatio
+          });
+          score -= 3;
+        }
       }
       const coverage = coveredDuration / duration;
       if (coverage < 0.5) {
         issues.push({
           code: 'LOW_SUBTITLE_COVERAGE',
           severity: 'info',
-          description: `Subtitles only cover ${Math.round(coverage * 100)}% of ${aspectRatio} video`,
+          description: `[${variant}] Subtitles only cover ${Math.round(coverage * 100)}% of ${aspectRatio} video`,
           affected_format: aspectRatio
         });
         score -= 3;
       }
     }
 
-    // Check 5: Scene transitions (9:16 specific)
+    // Check 6: Scene transitions (9:16 specific - fast pacing for social)
     if (aspectRatio === '9:16') {
       for (let i = 0; i < scenes.length - 1; i++) {
         const currentEnd = scenes[i].end_time as number;
@@ -139,13 +252,29 @@ function runQualityGate(
           issues.push({
             code: 'SCENE_GAP',
             severity: 'info',
-            description: `Gap detected between scenes ${i + 1} and ${i + 2} in 9:16 format`,
-            suggestion: 'Consider adding transition or reducing gap',
+            description: `[${variant}] Gap detected between scenes ${i + 1} and ${i + 2} in 9:16`,
+            suggestion: 'Consider adding transition or reducing gap for social video pacing',
             affected_format: '9:16'
           });
           score -= 2;
         }
       }
+    }
+
+    // Check 7: Logo visibility
+    const hasLogoScene = scenes.some(s => {
+      const asset = s.asset_placeholder as Record<string, unknown>;
+      return asset?.type === 'logo';
+    });
+    if (!hasLogoScene) {
+      issues.push({
+        code: 'LOGO_MISSING',
+        severity: 'info',
+        description: `[${variant}] No logo placement in ${aspectRatio}`,
+        suggestion: 'Add logo for brand recognition',
+        affected_format: aspectRatio
+      });
+      score -= 2;
     }
   }
 

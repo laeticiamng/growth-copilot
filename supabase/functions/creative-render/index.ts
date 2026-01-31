@@ -194,12 +194,25 @@ async function pollRenderStatus(apiKey: string, renderId: string): Promise<Creat
   throw new Error('Render timeout exceeded');
 }
 
+// Pricing configuration
+const PRICING_CONFIG = {
+  video_render: 0.05,
+  thumbnail_render: 0.01,
+  srt_generation: 0.005
+};
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   const startTime = Date.now();
+  
+  // Track for finally{} cleanup
+  let workspaceId: string | null = null;
+  let quotaIncremented = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let serviceClient: any = null;
 
   try {
     const authHeader = req.headers.get('Authorization');
@@ -222,8 +235,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    // Service client for writes (untyped for Deno compatibility)
+    serviceClient = createClient(supabaseUrl, supabaseServiceKey);
     const { job_id, workspace_id }: RenderRequest = await req.json();
+    workspaceId = workspace_id;
 
     console.log('[creative-render] Starting render for job:', job_id);
 
@@ -259,6 +274,7 @@ Deno.serve(async (req) => {
       p_workspace_id: workspace_id,
       p_increment_concurrent: true
     });
+    quotaIncremented = true;
 
     // Update job status
     await serviceClient
@@ -290,8 +306,9 @@ Deno.serve(async (req) => {
     const logoUrl = inputJson?.logo_url as string;
 
     const renderResults: Array<{ aspect_ratio: string; url: string; render_id: string }> = [];
+    const thumbnailResults: Array<{ aspect_ratio: string; url: string; variant: number }> = [];
 
-    // Render each format
+    // Render each format (videos + thumbnails)
     for (const bp of blueprints) {
       const blueprint = bp.blueprint_json as Record<string, unknown>;
       const aspectRatio = blueprint.aspect_ratio as string;
@@ -302,7 +319,7 @@ Deno.serve(async (req) => {
         // Convert to Creatomate format
         const source = blueprintToCreatomate(blueprint, copywriting, logoUrl);
 
-        // Create render
+        // Create render for video
         const render = await createRender(creatomateApiKey, source);
         console.log(`[creative-render] Render created: ${render.id}`);
 
@@ -316,7 +333,7 @@ Deno.serve(async (req) => {
           render_id: render.id
         });
 
-        // Store asset
+        // Store video asset
         const assetType = aspectRatio === '9:16' ? 'video_9_16' : 
                           aspectRatio === '1:1' ? 'video_1_1' : 'video_16_9';
 
@@ -333,6 +350,42 @@ Deno.serve(async (req) => {
               duration: blueprint.duration_seconds
             }
           });
+
+        // Generate thumbnail for each format (frame at 25% of video)
+        const thumbnailSource = {
+          ...source,
+          output_format: 'jpg',
+          snapshot_time: (blueprint.duration_seconds as number || 15) * 0.25
+        };
+        
+        try {
+          const thumbRender = await createRender(creatomateApiKey, thumbnailSource);
+          const thumbCompleted = await pollRenderStatus(creatomateApiKey, thumbRender.id);
+          
+          if (thumbCompleted.url) {
+            thumbnailResults.push({
+              aspect_ratio: aspectRatio,
+              url: thumbCompleted.url,
+              variant: 1
+            });
+
+            await serviceClient
+              .from('creative_assets')
+              .insert({
+                job_id,
+                workspace_id,
+                asset_type: 'thumbnail',
+                url: thumbCompleted.url,
+                meta_json: {
+                  aspect_ratio: aspectRatio,
+                  variant: 1,
+                  source: 'auto_generated'
+                }
+              });
+          }
+        } catch (thumbError) {
+          console.warn(`[creative-render] Thumbnail generation failed for ${aspectRatio}:`, thumbError);
+        }
 
         // Generate and store SRT
         const subtitles = blueprint.subtitles as Array<{ start: number; end: number; text: string }>;
@@ -360,6 +413,11 @@ Deno.serve(async (req) => {
 
     const duration_ms = Date.now() - startTime;
 
+    // Calculate dynamic cost based on actual renders
+    const costEstimate = (renderResults.length * PRICING_CONFIG.video_render) +
+                         (thumbnailResults.length * PRICING_CONFIG.thumbnail_render) +
+                         (renderResults.length * PRICING_CONFIG.srt_generation);
+
     // Update job
     await serviceClient
       .from('creative_jobs')
@@ -368,14 +426,17 @@ Deno.serve(async (req) => {
         output_json: {
           ...(job.output_json as Record<string, unknown> || {}),
           renders: renderResults,
-          render_count: renderResults.length
+          thumbnails: thumbnailResults,
+          render_count: renderResults.length,
+          thumbnail_count: thumbnailResults.length
         },
         duration_ms,
-        cost_estimate: renderResults.length * 0.05 // Approximate cost per render
+        cost_estimate: costEstimate
       })
       .eq('id', job_id);
 
-    // Decrement concurrent runs
+    // Decrement concurrent runs - now in finally{} but also here for success path
+    quotaIncremented = false;
     await serviceClient.rpc('update_workspace_quota', {
       p_workspace_id: workspace_id,
       p_decrement_concurrent: true
@@ -390,23 +451,27 @@ Deno.serve(async (req) => {
         actor_type: 'agent',
         action_type: 'creative_render',
         action_category: 'creative',
-        description: `Rendered ${renderResults.length} video formats`,
+        description: `Rendered ${renderResults.length} video formats + ${thumbnailResults.length} thumbnails`,
         details: {
           job_id,
           formats: renderResults.map(r => r.aspect_ratio),
-          duration_ms
+          thumbnails: thumbnailResults.length,
+          duration_ms,
+          cost_estimate: costEstimate
         },
         is_automated: true
       });
 
-    console.log('[creative-render] Completed:', renderResults.length, 'renders');
+    console.log('[creative-render] Completed:', renderResults.length, 'renders,', thumbnailResults.length, 'thumbnails');
 
     return new Response(
       JSON.stringify({
         success: true,
         job_id,
         renders: renderResults,
-        duration_ms
+        thumbnails: thumbnailResults,
+        duration_ms,
+        cost_estimate: costEstimate
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -418,5 +483,18 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+  } finally {
+    // CRITICAL: Always decrement concurrent_runs to prevent quota leak
+    if (quotaIncremented && workspaceId && serviceClient) {
+      try {
+        await serviceClient.rpc('update_workspace_quota', {
+          p_workspace_id: workspaceId,
+          p_decrement_concurrent: true
+        });
+        console.log('[creative-render] Quota decremented in finally');
+      } catch (cleanupError) {
+        console.error('[creative-render] Failed to decrement quota:', cleanupError);
+      }
+    }
   }
 });
