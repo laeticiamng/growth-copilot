@@ -129,6 +129,8 @@ serve(async (req) => {
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
   const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+  const META_APP_ID = Deno.env.get("META_APP_ID");
+  const META_APP_SECRET = Deno.env.get("META_APP_SECRET");
   const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
   const TOKEN_ENCRYPTION_KEY = Deno.env.get("TOKEN_ENCRYPTION_KEY");
 
@@ -151,10 +153,7 @@ serve(async (req) => {
       return redirectWithError("missing_params", null);
     }
 
-    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-      console.error("Missing Google OAuth credentials");
-      return redirectWithError("config_error", null);
-    }
+    // Credentials validation happens after we know the provider type
 
     if (!OAUTH_STATE_SECRET || !TOKEN_ENCRYPTION_KEY) {
       console.error("Missing security secrets");
@@ -221,42 +220,98 @@ serve(async (req) => {
 
     const { workspace_id, provider, redirect_url } = nonceRecord;
 
+    // Determine provider type
+    const isMetaProvider = provider === "meta";
+    const isGoogleProvider = !isMetaProvider;
+
+    // Validate credentials based on provider
+    if (isGoogleProvider && (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET)) {
+      console.error("Missing Google OAuth credentials");
+      return redirectWithError("config_error", redirect_url);
+    }
+
+    if (isMetaProvider && (!META_APP_ID || !META_APP_SECRET)) {
+      console.error("Missing Meta OAuth credentials");
+      return redirectWithError("config_error", redirect_url);
+    }
+
     // Validate redirect URL
     if (!isValidRedirectUrl(redirect_url)) {
       console.error(`Invalid redirect URL in nonce: ${redirect_url}`);
       return redirectWithError("invalid_redirect", null);
     }
 
-    // Exchange code for tokens
-    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${SUPABASE_URL}/functions/v1/oauth-callback`,
-        grant_type: "authorization_code",
-      }),
-    });
+    // Exchange code for tokens - different endpoints for Google vs Meta
+    let tokens: any;
+    let accountInfo = { email: "unknown", id: "unknown", name: "unknown" };
 
-    if (!tokenResponse.ok) {
-      const errText = await tokenResponse.text();
-      console.error("Token exchange failed:", errText);
-      return redirectWithError("token_exchange_failed", redirect_url);
-    }
+    if (isGoogleProvider) {
+      // Google token exchange
+      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code,
+          client_id: GOOGLE_CLIENT_ID!,
+          client_secret: GOOGLE_CLIENT_SECRET!,
+          redirect_uri: `${SUPABASE_URL}/functions/v1/oauth-callback`,
+          grant_type: "authorization_code",
+        }),
+      });
 
-    const tokens = await tokenResponse.json();
-    console.log("Token exchange successful for provider:", provider);
+      if (!tokenResponse.ok) {
+        const errText = await tokenResponse.text();
+        console.error("Google token exchange failed:", errText);
+        return redirectWithError("token_exchange_failed", redirect_url);
+      }
 
-    // Get user info from Google
-    const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
-    
-    let accountInfo = { email: "unknown", id: "unknown" };
-    if (userInfoResponse.ok) {
-      accountInfo = await userInfoResponse.json();
+      tokens = await tokenResponse.json();
+      console.log("Google token exchange successful for provider:", provider);
+
+      // Get user info from Google
+      const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      });
+      
+      if (userInfoResponse.ok) {
+        const googleUserInfo = await userInfoResponse.json();
+        accountInfo = { email: googleUserInfo.email, id: googleUserInfo.id, name: googleUserInfo.name || googleUserInfo.email };
+      }
+    } else {
+      // Meta token exchange
+      const tokenResponse = await fetch("https://graph.facebook.com/v19.0/oauth/access_token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code,
+          client_id: META_APP_ID!,
+          client_secret: META_APP_SECRET!,
+          redirect_uri: `${SUPABASE_URL}/functions/v1/oauth-callback`,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        const errText = await tokenResponse.text();
+        console.error("Meta token exchange failed:", errText);
+        return redirectWithError("token_exchange_failed", redirect_url);
+      }
+
+      tokens = await tokenResponse.json();
+      console.log("Meta token exchange successful");
+
+      // Get user info from Meta
+      const userInfoResponse = await fetch(
+        `https://graph.facebook.com/v19.0/me?fields=id,name,email&access_token=${tokens.access_token}`
+      );
+      
+      if (userInfoResponse.ok) {
+        const metaUserInfo = await userInfoResponse.json();
+        accountInfo = { 
+          email: metaUserInfo.email || "unknown", 
+          id: metaUserInfo.id, 
+          name: metaUserInfo.name || "unknown" 
+        };
+      }
     }
 
     // Calculate token expiry
@@ -272,11 +327,11 @@ serve(async (req) => {
         provider: provider as any,
         status: "active",
         account_id: accountInfo.id || accountInfo.email,
-        account_name: accountInfo.email,
+        account_name: accountInfo.name || accountInfo.email,
         access_token_ref: null,
         refresh_token_ref: null,
         expires_at: expiresAt,
-        scopes: tokens.scope ? tokens.scope.split(" ") : [],
+        scopes: tokens.scope ? (typeof tokens.scope === "string" ? tokens.scope.split(/[\s,]+/) : []) : [],
         last_sync_at: new Date().toISOString(),
         metadata: {
           token_type: tokens.token_type,

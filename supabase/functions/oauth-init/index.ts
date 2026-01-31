@@ -8,50 +8,94 @@ const corsHeaders = {
 
 interface OAuthInitRequest {
   workspace_id: string;
-  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube" | "google_business_profile";
+  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube" | "google_business_profile" | "meta";
   redirect_url: string;
 }
 
-// Scopes for each provider
-const PROVIDER_SCOPES: Record<string, string[]> = {
-  google_analytics: [
-    "https://www.googleapis.com/auth/analytics.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
-  google_search_console: [
-    "https://www.googleapis.com/auth/webmasters.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
-  google_ads: [
-    "https://www.googleapis.com/auth/adwords",
-    "openid",
-    "email",
-    "profile",
-  ],
-  youtube: [
-    "https://www.googleapis.com/auth/youtube.readonly",
-    "https://www.googleapis.com/auth/yt-analytics.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
-  google_business_profile: [
-    "https://www.googleapis.com/auth/business.manage",
-    "openid",
-    "email",
-    "profile",
-  ],
-  google_combined: [
-    "https://www.googleapis.com/auth/analytics.readonly",
-    "https://www.googleapis.com/auth/webmasters.readonly",
-    "openid",
-    "email",
-    "profile",
-  ],
+// Provider configurations
+type ProviderType = "google" | "meta";
+
+interface ProviderConfig {
+  type: ProviderType;
+  scopes: string[];
+  authUrl: string;
+}
+
+const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
+  google_analytics: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/analytics.readonly",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  google_search_console: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/webmasters.readonly",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  google_ads: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/adwords",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  youtube: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/youtube.readonly",
+      "https://www.googleapis.com/auth/yt-analytics.readonly",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  google_business_profile: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/business.manage",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  google_combined: {
+    type: "google",
+    scopes: [
+      "https://www.googleapis.com/auth/analytics.readonly",
+      "https://www.googleapis.com/auth/webmasters.readonly",
+      "openid",
+      "email",
+      "profile",
+    ],
+    authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  },
+  meta: {
+    type: "meta",
+    scopes: [
+      "public_profile",
+      "email",
+      "pages_show_list",
+      "pages_read_engagement",
+      "instagram_basic",
+      "instagram_manage_insights",
+    ],
+    authUrl: "https://www.facebook.com/v19.0/dialog/oauth",
+  },
 };
 
 // Whitelist of allowed redirect URL origins
@@ -123,6 +167,7 @@ serve(async (req) => {
   const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+  const META_APP_ID = Deno.env.get("META_APP_ID");
   const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
 
   try {
@@ -151,15 +196,7 @@ serve(async (req) => {
 
     const userId = claims.claims.sub as string;
 
-    if (!GOOGLE_CLIENT_ID) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Google OAuth not configured",
-          message: "GOOGLE_CLIENT_ID secret is missing. Please configure it in Lovable Cloud.",
-        }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Provider-specific validation happens after we know which provider
 
     if (!OAUTH_STATE_SECRET) {
       return new Response(
@@ -190,12 +227,33 @@ serve(async (req) => {
       );
     }
 
-    // Get scopes for provider
-    const scopes = PROVIDER_SCOPES[provider];
-    if (!scopes) {
+    // Get provider config
+    const providerConfig = PROVIDER_CONFIGS[provider];
+    if (!providerConfig) {
       return new Response(
         JSON.stringify({ error: `Unsupported provider: ${provider}` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate credentials for the provider type
+    if (providerConfig.type === "google" && !GOOGLE_CLIENT_ID) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Google OAuth not configured",
+          message: "GOOGLE_CLIENT_ID secret is missing. Please configure it in Lovable Cloud.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (providerConfig.type === "meta" && !META_APP_ID) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Meta OAuth not configured",
+          message: "META_APP_ID secret is missing. Please configure it in Lovable Cloud.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -244,15 +302,25 @@ serve(async (req) => {
     // State only contains nonce - all sensitive data stored server-side
     const state = btoa(JSON.stringify({ nonce, sig: hmacSignature }));
 
-    // Build OAuth authorization URL
-    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
-    authUrl.searchParams.set("redirect_uri", `${SUPABASE_URL}/functions/v1/oauth-callback`);
-    authUrl.searchParams.set("response_type", "code");
-    authUrl.searchParams.set("scope", scopes.join(" "));
-    authUrl.searchParams.set("state", state);
-    authUrl.searchParams.set("access_type", "offline");
-    authUrl.searchParams.set("prompt", "consent");
+    // Build OAuth authorization URL based on provider type
+    const authUrl = new URL(providerConfig.authUrl);
+    const redirectUri = `${SUPABASE_URL}/functions/v1/oauth-callback`;
+
+    if (providerConfig.type === "google") {
+      authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID!);
+      authUrl.searchParams.set("redirect_uri", redirectUri);
+      authUrl.searchParams.set("response_type", "code");
+      authUrl.searchParams.set("scope", providerConfig.scopes.join(" "));
+      authUrl.searchParams.set("state", state);
+      authUrl.searchParams.set("access_type", "offline");
+      authUrl.searchParams.set("prompt", "consent");
+    } else if (providerConfig.type === "meta") {
+      authUrl.searchParams.set("client_id", META_APP_ID!);
+      authUrl.searchParams.set("redirect_uri", redirectUri);
+      authUrl.searchParams.set("response_type", "code");
+      authUrl.searchParams.set("scope", providerConfig.scopes.join(","));
+      authUrl.searchParams.set("state", state);
+    }
 
     console.log(`OAuth init for ${provider}, workspace ${workspace_id}, nonce ${nonce.substring(0, 8)}...`);
 
@@ -261,7 +329,7 @@ serve(async (req) => {
         success: true,
         auth_url: authUrl.toString(),
         provider,
-        scopes,
+        scopes: providerConfig.scopes,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
