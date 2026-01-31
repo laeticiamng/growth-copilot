@@ -142,12 +142,16 @@ function hashInput(input: unknown): string {
   return Math.abs(hash).toString(16);
 }
 
-// Get model config from purpose
+// Model mapping by agent/purpose - optimized for cost
+// CGO: orchestrator (needs reasoning) → gemini-2.5-flash
+// QCO: validator (needs precision) → gemini-2.5-flash (low temp)
+// SEO Auditor: worker (bulk analysis) → gemini-2.5-flash-lite (cheaper)
+// Copywriting: creative → gemini-2.5-flash-lite (higher temp)
 function getModelConfig(purpose: string): { model: string; temperature: number; max_tokens: number } {
   const configs: Record<string, { model: string; temperature: number; max_tokens: number }> = {
     cgo_plan: { model: "google/gemini-2.5-flash", temperature: 0.3, max_tokens: 8192 },
     qa_review: { model: "google/gemini-2.5-flash", temperature: 0.1, max_tokens: 4096 },
-    seo_audit: { model: "google/gemini-2.5-flash", temperature: 0.2, max_tokens: 4096 },
+    seo_audit: { model: "google/gemini-2.5-flash-lite", temperature: 0.2, max_tokens: 4096 },
     copywriting: { model: "google/gemini-2.5-flash-lite", temperature: 0.7, max_tokens: 4096 },
     analysis: { model: "google/gemini-2.5-flash", temperature: 0.3, max_tokens: 4096 },
   };
@@ -156,13 +160,131 @@ function getModelConfig(purpose: string): { model: string; temperature: number; 
 
 // Estimate cost based on tokens (rough estimates)
 function estimateCost(tokensIn: number, tokensOut: number, model: string): number {
-  // Rough pricing per 1M tokens (Gemini models are much cheaper)
   const pricing: Record<string, { input: number; output: number }> = {
     "google/gemini-2.5-flash": { input: 0.075, output: 0.30 },
     "google/gemini-2.5-flash-lite": { input: 0.0375, output: 0.15 },
   };
   const modelPricing = pricing[model] || pricing["google/gemini-2.5-flash"];
   return (tokensIn * modelPricing.input + tokensOut * modelPricing.output) / 1_000_000;
+}
+
+// Plan tier limits
+const PLAN_LIMITS: Record<string, { requests_per_minute: number; max_concurrent: number; monthly_budget: number }> = {
+  free: { requests_per_minute: 10, max_concurrent: 2, monthly_budget: 5.00 },
+  starter: { requests_per_minute: 30, max_concurrent: 5, monthly_budget: 25.00 },
+  growth: { requests_per_minute: 60, max_concurrent: 10, monthly_budget: 100.00 },
+  agency: { requests_per_minute: 120, max_concurrent: 20, monthly_budget: 500.00 },
+};
+
+interface QuotaRecord {
+  plan_tier: string;
+  requests_this_minute: number;
+  concurrent_runs: number;
+  monthly_ai_spent: number;
+  monthly_ai_budget: number;
+  last_request_at: string | null;
+  current_period_start: string;
+}
+
+interface QuotaCheck {
+  allowed: boolean;
+  reason?: string;
+  quota?: QuotaRecord;
+}
+
+// Check and update workspace quotas using RPC
+// deno-lint-ignore no-explicit-any
+async function checkAndUpdateQuota(
+  supabase: any,
+  workspaceId: string,
+  action: "check" | "increment" | "decrement" | "add_cost",
+  costToAdd?: number
+): Promise<QuotaCheck> {
+  try {
+    // Use RPC for type safety with new tables
+    // Cast to any to bypass TypeScript type checking for new RPCs
+    const client = supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> };
+    
+    const { data, error } = await client.rpc("get_workspace_quota", { p_workspace_id: workspaceId });
+
+    // If RPC doesn't exist yet or error, fail open
+    if (error) {
+      console.warn("Quota check skipped:", (error as { message?: string }).message);
+      return { allowed: true };
+    }
+
+    const quotaArray = data as QuotaRecord[] | null;
+    const quota = quotaArray?.[0];
+    if (!quota) {
+      return { allowed: true }; // No quota record, allow
+    }
+
+    const limits = PLAN_LIMITS[quota.plan_tier] || PLAN_LIMITS.free;
+    const now = new Date();
+    const lastRequest = quota.last_request_at ? new Date(quota.last_request_at) : null;
+
+    // Reset minute counter if more than 60s since last request
+    let requestsThisMinute = quota.requests_this_minute || 0;
+    if (!lastRequest || (now.getTime() - lastRequest.getTime()) > 60000) {
+      requestsThisMinute = 0;
+    }
+
+    if (action === "check") {
+      // Check rate limit
+      if (requestsThisMinute >= limits.requests_per_minute) {
+        return {
+          allowed: false,
+          reason: `Rate limit exceeded: ${limits.requests_per_minute} requests/minute for ${quota.plan_tier} plan`,
+          quota,
+        };
+      }
+      // Check concurrent runs
+      if ((quota.concurrent_runs || 0) >= limits.max_concurrent) {
+        return {
+          allowed: false,
+          reason: `Max concurrent runs exceeded: ${limits.max_concurrent} for ${quota.plan_tier} plan`,
+          quota,
+        };
+      }
+      // Check budget
+      if (Number(quota.monthly_ai_spent || 0) >= limits.monthly_budget) {
+        return {
+          allowed: false,
+          reason: `Monthly AI budget exhausted: $${limits.monthly_budget} for ${quota.plan_tier} plan`,
+          quota,
+        };
+      }
+      return { allowed: true, quota };
+    }
+
+    // For mutations, use update_workspace_quota RPC
+    if (action === "increment") {
+      await client.rpc("update_workspace_quota", {
+        p_workspace_id: workspaceId,
+        p_increment_requests: true,
+        p_increment_concurrent: true,
+      });
+    }
+
+    if (action === "decrement") {
+      await client.rpc("update_workspace_quota", {
+        p_workspace_id: workspaceId,
+        p_decrement_concurrent: true,
+      });
+    }
+
+    if (action === "add_cost" && costToAdd) {
+      await client.rpc("update_workspace_quota", {
+        p_workspace_id: workspaceId,
+        p_add_cost: costToAdd,
+      });
+    }
+
+    return { allowed: true, quota };
+  } catch (err) {
+    console.warn("Quota check error, allowing request:", err);
+    return { allowed: true }; // Fail open
+  }
 }
 
 serve(async (req) => {
@@ -189,6 +311,26 @@ serve(async (req) => {
     if (!workspace_id || !agent_name || !purpose || !input) {
       throw new Error("Missing required fields: workspace_id, agent_name, purpose, input");
     }
+
+    // Check quota before processing
+    const quotaCheck = await checkAndUpdateQuota(supabase, workspace_id, "check");
+    if (!quotaCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: "quota_exceeded",
+          error: quotaCheck.reason,
+          quota: quotaCheck.quota,
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Increment counters before processing
+    await checkAndUpdateQuota(supabase, workspace_id, "increment");
 
     const modelConfig = getModelConfig(purpose);
     const inputHash = hashInput(input);
@@ -341,6 +483,12 @@ Please fix these issues and try again. Original request: ${input.user_prompt}`;
 
     const durationMs = Date.now() - startTime;
     const costEstimate = estimateCost(tokensIn, tokensOut, modelConfig.model);
+
+    // Decrement concurrent runs and add cost to quota
+    await checkAndUpdateQuota(supabase, workspace_id, "decrement");
+    if (costEstimate > 0) {
+      await checkAndUpdateQuota(supabase, workspace_id, "add_cost", costEstimate);
+    }
 
     // Update ai_request with results
     if (requestId) {
