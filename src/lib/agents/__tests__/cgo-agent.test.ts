@@ -1,95 +1,57 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CGOAgent, type CGOContext } from "../cgo-agent";
 
-// Mock Supabase client
+// Create chainable mock that properly handles all Supabase query patterns
+const createChainableMock = (finalValue: unknown) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chain: any = {};
+  const methods = [
+    'select', 'eq', 'neq', 'gte', 'gt', 'lt', 'lte',
+    'order', 'limit', 'maybeSingle', 'single', 'insert', 'update', 'delete'
+  ];
+  
+  methods.forEach(method => {
+    chain[method] = vi.fn(() => chain);
+  });
+  
+  // Make the chain thenable (Promise-like)
+  chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve(finalValue).then(resolve);
+  
+  return chain;
+};
+
+// Mock Supabase client with table-specific responses
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: vi.fn((table: string) => {
-      if (table === "agent_runs") {
-        return {
-          insert: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({ data: { id: "test-run-id" }, error: null })),
-            })),
-          })),
-          update: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve({ error: null })),
-          })),
-        };
+      switch (table) {
+        case "agent_runs":
+          return createChainableMock({ data: { id: "test-run-id" }, error: null });
+        
+        case "action_log":
+          return createChainableMock({ data: null, error: null, count: 0 });
+        
+        case "integrations":
+          return createChainableMock({ data: [], error: null });
+        
+        case "data_quality_alerts":
+          return createChainableMock({ data: [], error: null });
+        
+        case "issues":
+          return createChainableMock({ data: [], error: null });
+        
+        case "kpis_daily":
+          return createChainableMock({ data: [], error: null });
+        
+        case "autopilot_settings":
+          return createChainableMock({ data: null, error: null });
+        
+        case "approval_queue":
+          return createChainableMock({ data: { id: "queue-id" }, error: null });
+        
+        default:
+          return createChainableMock({ data: [], error: null, count: 0 });
       }
-      if (table === "action_log") {
-        return {
-          insert: vi.fn(() => Promise.resolve({ error: null })),
-        };
-      }
-      if (table === "integrations") {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
-            })),
-          })),
-        };
-      }
-      if (table === "data_quality_alerts") {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
-              })),
-            })),
-          })),
-        };
-      }
-      if (table === "issues") {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  order: vi.fn(() => ({
-                    limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-                  })),
-                })),
-              })),
-            })),
-          })),
-        };
-      }
-      if (table === "kpis_daily") {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              gte: vi.fn(() => Promise.resolve({ data: [], error: null })),
-              lt: vi.fn(() => Promise.resolve({ data: [], error: null })),
-            })),
-          })),
-        };
-      }
-      if (table === "autopilot_settings") {
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
-            })),
-          })),
-        };
-      }
-      if (table === "approval_queue") {
-        return {
-          insert: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn(() => Promise.resolve({ data: { id: "queue-id" }, error: null })),
-            })),
-          })),
-        };
-      }
-      return {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: [], error: null, count: 0 })),
-        })),
-      };
     }),
   },
 }));
@@ -119,7 +81,7 @@ vi.mock("../ai-gateway-client", () => ({
               id: "cgo_seo_001",
               title: "Fix missing meta descriptions",
               type: "auto_safe",
-              impact: "medium",
+              impact: "low",
               effort: "low",
               why: "15 pages missing meta descriptions",
               how: ["Export list from SEO audit", "Write unique descriptions"],
