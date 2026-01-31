@@ -282,14 +282,34 @@ Deno.serve(async (req) => {
       .update({ status: 'running' })
       .eq('id', job_id);
 
-    // Fetch blueprints
+    // Fetch blueprints - only approved ones
     const { data: blueprints } = await serviceClient
       .from('creative_blueprints')
       .select('*')
       .eq('job_id', job_id)
+      .eq('is_approved', true) // Only render approved blueprints
       .order('version', { ascending: false });
 
     if (!blueprints || blueprints.length === 0) {
+      // Check if there are unapproved blueprints that need QA
+      const { data: unapprovedBp } = await serviceClient
+        .from('creative_blueprints')
+        .select('id')
+        .eq('job_id', job_id)
+        .eq('is_approved', false)
+        .limit(1);
+      
+      if (unapprovedBp && unapprovedBp.length > 0) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'blueprints_not_approved', 
+            message: 'Blueprints must pass QA before rendering. Run creative-qa first.',
+            next_action: 'call_creative_qa'
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       throw new Error('No blueprints found for job');
     }
 
@@ -351,11 +371,22 @@ Deno.serve(async (req) => {
             }
           });
 
-        // Generate thumbnail for each format (frame at 25% of video)
+        // Generate thumbnail for each format using a 1-frame composition
+        // Creatomate requires snapshot_time on compositions with video elements,
+        // so we create a static image render instead
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sourceAny = source as any;
         const thumbnailSource = {
-          ...source,
           output_format: 'jpg',
-          snapshot_time: (blueprint.duration_seconds as number || 15) * 0.25
+          width: sourceAny.width,
+          height: sourceAny.height,
+          // Render as static image composition (no duration = single frame)
+          elements: (sourceAny.elements || []).map((el: Record<string, unknown>) => {
+            // Remove animations for static thumbnail
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { animations, time, duration, ...rest } = el;
+            return rest;
+          })
         };
         
         try {
@@ -379,12 +410,27 @@ Deno.serve(async (req) => {
                 meta_json: {
                   aspect_ratio: aspectRatio,
                   variant: 1,
-                  source: 'auto_generated'
+                  source: 'composition_frame'
                 }
               });
           }
         } catch (thumbError) {
           console.warn(`[creative-render] Thumbnail generation failed for ${aspectRatio}:`, thumbError);
+          // Fallback: store placeholder to indicate thumbnail needed
+          await serviceClient
+            .from('creative_assets')
+            .insert({
+              job_id,
+              workspace_id,
+              asset_type: 'thumbnail',
+              url: null,
+              meta_json: {
+                aspect_ratio: aspectRatio,
+                variant: 1,
+                source: 'pending_manual',
+                error: 'Auto-generation failed, manual upload required'
+              }
+            });
         }
 
         // Generate and store SRT
