@@ -15,6 +15,20 @@ export interface WorkspaceAuthResult extends AuthResult {
   hasAccess?: boolean;
 }
 
+export interface RoleAuthResult extends WorkspaceAuthResult {
+  role?: string;
+  hasRequiredRole?: boolean;
+}
+
+// Role hierarchy for permission checks
+const ROLE_HIERARCHY: Record<string, number> = {
+  viewer: 0,
+  analyst: 1,
+  manager: 2,
+  admin: 3,
+  owner: 4,
+};
+
 /**
  * Validate JWT from Authorization header
  * Returns userId if valid, error message if invalid
@@ -119,6 +133,108 @@ export async function validateWorkspaceAccess(
       hasAccess: false,
       error: "Failed to verify workspace access",
     };
+  }
+}
+
+/**
+ * Validate JWT, workspace access, AND role requirement
+ * Enforces minimum role level for sensitive operations
+ */
+export async function validateRoleAccess(
+  req: Request,
+  workspaceId: string,
+  requiredRole: "viewer" | "analyst" | "manager" | "admin" | "owner",
+  supabaseUrl: string,
+  supabaseAnonKey: string,
+  supabaseServiceKey: string
+): Promise<RoleAuthResult> {
+  // First validate workspace access
+  const wsResult = await validateWorkspaceAccess(
+    req,
+    workspaceId,
+    supabaseUrl,
+    supabaseAnonKey,
+    supabaseServiceKey
+  );
+  
+  if (!wsResult.hasAccess) {
+    return wsResult;
+  }
+
+  // Now check role using service role
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  
+  try {
+    const { data: effectiveRole, error } = await supabase.rpc("get_effective_role", {
+      _user_id: wsResult.userId,
+      _workspace_id: workspaceId,
+    });
+
+    if (error) {
+      console.error("Role check failed:", error.message);
+      return {
+        ...wsResult,
+        hasRequiredRole: false,
+        error: "Failed to verify role",
+      };
+    }
+
+    const userRoleLevel = ROLE_HIERARCHY[effectiveRole] ?? 0;
+    const requiredRoleLevel = ROLE_HIERARCHY[requiredRole];
+    const hasRequiredRole = userRoleLevel >= requiredRoleLevel;
+
+    if (!hasRequiredRole) {
+      return {
+        ...wsResult,
+        role: effectiveRole,
+        hasRequiredRole: false,
+        error: `Access denied: Requires ${requiredRole} role or higher (you have ${effectiveRole})`,
+      };
+    }
+
+    return {
+      ...wsResult,
+      role: effectiveRole,
+      hasRequiredRole: true,
+    };
+  } catch (err) {
+    console.error("Role check exception:", err);
+    return {
+      ...wsResult,
+      hasRequiredRole: false,
+      error: "Failed to verify role",
+    };
+  }
+}
+
+/**
+ * Log integration action to action_log table
+ */
+export async function logIntegrationAction(
+  supabaseServiceKey: string,
+  supabaseUrl: string,
+  workspaceId: string,
+  userId: string,
+  actionType: "integration_connected" | "integration_disconnected" | "integration_sync",
+  provider: string,
+  details?: Record<string, unknown>
+): Promise<void> {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  
+  try {
+    await supabase.from("action_log").insert({
+      workspace_id: workspaceId,
+      actor_id: userId,
+      actor_type: "user",
+      action_type: actionType,
+      action_category: "integration",
+      description: `${actionType}: ${provider}`,
+      details: details || {},
+      entity_type: "integration",
+      is_automated: false,
+    });
+  } catch (err) {
+    console.error("Failed to log integration action:", err);
   }
 }
 

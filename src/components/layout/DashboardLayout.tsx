@@ -1,7 +1,8 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,6 +42,8 @@ import {
   TrendingUp,
   Webhook,
   Bot,
+  Plug,
+  Wifi,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -51,10 +54,21 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
+interface NavItem {
+  path: string;
+  label: string;
+  icon: React.ElementType;
+  requiresRole?: "admin" | "manager" | "owner";
+  hideForClients?: boolean;
+}
+
+const allNavItems: NavItem[] = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/dashboard/sites", label: "Sites", icon: Building2 },
-  // Intégrations masquée - Mode Agence Full-Service (géré en coulisse)
+  // Connection Status (read-only) for all users
+  { path: "/dashboard/connections", label: "Connexions", icon: Wifi },
+  // Integrations management - Agency/Admin only
+  { path: "/dashboard/integrations", label: "Intégrations (Admin)", icon: Plug, requiresRole: "admin", hideForClients: true },
   // Media Launch OS
   { path: "/dashboard/media", label: "Media Assets", icon: Youtube },
   { path: "/dashboard/media/launch", label: "Launch Plan", icon: Play },
@@ -74,21 +88,32 @@ const navItems = [
   { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
   { path: "/dashboard/approvals", label: "Approbations", icon: Shield },
   { path: "/dashboard/automations", label: "Automations", icon: Webhook },
-  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2 },
+  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
   { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
   { path: "/dashboard/guide", label: "Guide", icon: Rocket },
-  { path: "/dashboard/logs", label: "Logs", icon: BarChart3 },
-  { path: "/dashboard/ops", label: "Ops", icon: TrendingUp },
-  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: Bot },
-  { path: "/dashboard/billing", label: "Billing", icon: Settings },
+  { path: "/dashboard/logs", label: "Logs", icon: BarChart3, requiresRole: "manager" },
+  { path: "/dashboard/ops", label: "Ops", icon: TrendingUp, requiresRole: "admin" },
+  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: Bot, requiresRole: "admin" },
+  { path: "/dashboard/billing", label: "Billing", icon: Settings, requiresRole: "owner" },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { workspaces, currentWorkspace, setCurrentWorkspace, loading: wsLoading } = useWorkspace();
+  const { isAtLeastRole, loading: permLoading } = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Filter nav items based on user role
+  const navItems = useMemo(() => {
+    return allNavItems.filter(item => {
+      // If no role requirement, show to everyone
+      if (!item.requiresRole) return true;
+      // Check if user has at least the required role
+      return isAtLeastRole(item.requiresRole);
+    });
+  }, [isAtLeastRole]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -96,7 +121,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [user, authLoading, navigate]);
 
-  if (authLoading || wsLoading) {
+  if (authLoading || wsLoading || permLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

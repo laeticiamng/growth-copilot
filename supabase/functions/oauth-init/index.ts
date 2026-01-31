@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { validateRoleAccess, forbiddenResponse, logIntegrationAction } from "../_shared/auth.ts";
 
 interface OAuthInitRequest {
   workspace_id: string;
@@ -206,6 +202,11 @@ function generateNonce(): string {
  * Returns the authorization URL for the user to visit
  */
 serve(async (req) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -218,32 +219,36 @@ serve(async (req) => {
   const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
 
   try {
-    // Validate auth
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // Parse body first to get workspace_id for auth check
+    const body: OAuthInitRequest = await req.json();
+    const { workspace_id, provider, redirect_url } = body;
+
+    if (!workspace_id || !provider || !redirect_url) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Missing required fields: workspace_id, provider, redirect_url" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    // RBAC: Require admin role for integration management
+    const authResult = await validateRoleAccess(
+      req,
+      workspace_id,
+      "admin",
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: authError } = await supabaseClient.auth.getClaims(token);
-    
-    if (authError || !claims?.claims) {
-      return new Response(
-        JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    if (!authResult.hasRequiredRole) {
+      console.error(`OAuth init denied for user ${authResult.userId}: ${authResult.error}`);
+      return forbiddenResponse(
+        authResult.error || "Admin role required for integration management",
+        corsHeaders
       );
     }
 
-    const userId = claims.claims.sub as string;
-
-    // Provider-specific validation happens after we know which provider
+    const userId = authResult.userId!;
 
     if (!OAUTH_STATE_SECRET) {
       return new Response(
@@ -252,16 +257,6 @@ serve(async (req) => {
           message: "OAUTH_STATE_SECRET is missing. Please configure it in Lovable Cloud.",
         }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const body: OAuthInitRequest = await req.json();
-    const { workspace_id, provider, redirect_url } = body;
-
-    if (!workspace_id || !provider || !redirect_url) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: workspace_id, provider, redirect_url" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -369,7 +364,18 @@ serve(async (req) => {
       authUrl.searchParams.set("state", state);
     }
 
-    console.log(`OAuth init for ${provider}, workspace ${workspace_id}, nonce ${nonce.substring(0, 8)}...`);
+    console.log(`OAuth init for ${provider}, workspace ${workspace_id}, user ${userId}, role ${authResult.role}`);
+
+    // Log the integration action
+    await logIntegrationAction(
+      SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_URL,
+      workspace_id,
+      userId,
+      "integration_connected",
+      provider,
+      { scopes: providerConfig.scopes }
+    );
 
     return new Response(
       JSON.stringify({

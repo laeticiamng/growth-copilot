@@ -41,6 +41,7 @@ import SmartLink from "./pages/SmartLink";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import Sites from "./pages/dashboard/Sites";
 import Integrations from "./pages/dashboard/Integrations";
+import ConnectionStatus from "./pages/dashboard/ConnectionStatus";
 import BrandKit from "./pages/dashboard/BrandKit";
 import Logs from "./pages/dashboard/Logs";
 import Billing from "./pages/dashboard/Billing";
@@ -122,6 +123,7 @@ function App() {
                                         {/* Dashboard - Foundation */}
                                         <Route path="/dashboard" element={<DashboardLayout><DashboardHome /></DashboardLayout>} />
                                         <Route path="/dashboard/sites" element={<DashboardLayout><Sites /></DashboardLayout>} />
+                                        <Route path="/dashboard/connections" element={<DashboardLayout><ConnectionStatus /></DashboardLayout>} />
                                         <Route path="/dashboard/integrations" element={<DashboardLayout><Integrations /></DashboardLayout>} />
                                         <Route path="/dashboard/brand-kit" element={<DashboardLayout><BrandKit /></DashboardLayout>} />
                                         <Route path="/dashboard/logs" element={<DashboardLayout><Logs /></DashboardLayout>} />
