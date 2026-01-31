@@ -1214,6 +1214,81 @@ export type Database = {
           },
         ]
       }
+      data_quality_alerts: {
+        Row: {
+          actual_value: number | null
+          alert_type: string
+          created_at: string | null
+          date_range_end: string | null
+          date_range_start: string | null
+          description: string | null
+          expected_value: number | null
+          id: string
+          is_resolved: boolean | null
+          metric_name: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          site_id: string
+          title: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          actual_value?: number | null
+          alert_type: string
+          created_at?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          description?: string | null
+          expected_value?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          metric_name?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          site_id: string
+          title: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          actual_value?: number | null
+          alert_type?: string
+          created_at?: string | null
+          date_range_end?: string | null
+          date_range_start?: string | null
+          description?: string | null
+          expected_value?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          metric_name?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          site_id?: string
+          title?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_quality_alerts_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_quality_alerts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           assigned_to: string | null
@@ -1782,11 +1857,14 @@ export type Database = {
           gbp_views: number | null
           id: string
           indexed_pages: number | null
+          metrics_json: Json | null
           organic_clicks: number | null
           organic_impressions: number | null
           organic_sessions: number | null
           revenue: number | null
           site_id: string
+          source: string | null
+          sync_id: string | null
           total_conversions: number | null
           total_leads: number | null
           workspace_id: string
@@ -1806,11 +1884,14 @@ export type Database = {
           gbp_views?: number | null
           id?: string
           indexed_pages?: number | null
+          metrics_json?: Json | null
           organic_clicks?: number | null
           organic_impressions?: number | null
           organic_sessions?: number | null
           revenue?: number | null
           site_id: string
+          source?: string | null
+          sync_id?: string | null
           total_conversions?: number | null
           total_leads?: number | null
           workspace_id: string
@@ -1830,11 +1911,14 @@ export type Database = {
           gbp_views?: number | null
           id?: string
           indexed_pages?: number | null
+          metrics_json?: Json | null
           organic_clicks?: number | null
           organic_impressions?: number | null
           organic_sessions?: number | null
           revenue?: number | null
           site_id?: string
+          source?: string | null
+          sync_id?: string | null
           total_conversions?: number | null
           total_leads?: number | null
           workspace_id?: string

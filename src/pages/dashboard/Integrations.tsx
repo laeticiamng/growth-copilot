@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { 
   Search, 
   BarChart3, 
@@ -19,41 +18,125 @@ import {
   ExternalLink,
   Loader2,
   AlertCircle,
+  Clock,
+  Info,
 } from "lucide-react";
 import { useSites } from "@/hooks/useSites";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Integration {
   id: string;
   name: string;
   description: string;
   icon: React.ElementType;
-  status: "connected" | "disconnected" | "pending";
+  status: "connected" | "disconnected" | "pending" | "coming_soon";
   category: "analytics" | "ads" | "local" | "social" | "cms" | "crm";
   required?: boolean;
+  provider?: string;
+  comingSoonNote?: string;
 }
 
 const integrations: Integration[] = [
-  // Analytics
-  { id: "gsc", name: "Google Search Console", description: "Données SEO officielles et positionnement", icon: Search, status: "disconnected", category: "analytics", required: true },
-  { id: "ga4", name: "Google Analytics 4", description: "Tracking et conversions", icon: BarChart3, status: "disconnected", category: "analytics", required: true },
+  // Analytics - Active
+  { 
+    id: "gsc", 
+    name: "Google Search Console", 
+    description: "Données SEO officielles et positionnement", 
+    icon: Search, 
+    status: "disconnected", 
+    category: "analytics", 
+    required: true,
+    provider: "google_search_console",
+  },
+  { 
+    id: "ga4", 
+    name: "Google Analytics 4", 
+    description: "Tracking et conversions", 
+    icon: BarChart3, 
+    status: "disconnected", 
+    category: "analytics", 
+    required: true,
+    provider: "google_analytics",
+  },
   
-  // Ads
-  { id: "gads", name: "Google Ads", description: "Campagnes publicitaires Search & Display", icon: Megaphone, status: "disconnected", category: "ads" },
+  // Ads - Coming Soon
+  { 
+    id: "gads", 
+    name: "Google Ads", 
+    description: "Campagnes publicitaires Search & Display", 
+    icon: Megaphone, 
+    status: "coming_soon", 
+    category: "ads",
+    comingSoonNote: "Intégration prévue Q2 2026. API Google Ads en cours d'évaluation.",
+  },
   
-  // Local
-  { id: "gbp", name: "Google Business Profile", description: "Fiche locale, avis et posts", icon: MapPin, status: "disconnected", category: "local" },
+  // Local - Coming Soon
+  { 
+    id: "gbp", 
+    name: "Google Business Profile", 
+    description: "Fiche locale, avis et posts", 
+    icon: MapPin, 
+    status: "coming_soon", 
+    category: "local",
+    comingSoonNote: "⚠️ Google Q&A API discontinued. Posts et avis uniquement. Quotas stricts (5 req/sec).",
+  },
   
-  // Social
-  { id: "meta", name: "Meta (Facebook/Instagram)", description: "Social media et publicités", icon: Instagram, status: "disconnected", category: "social" },
+  // Social - Coming Soon
+  { 
+    id: "meta", 
+    name: "Meta (Facebook/Instagram)", 
+    description: "Social media et publicités", 
+    icon: Instagram, 
+    status: "coming_soon", 
+    category: "social",
+    comingSoonNote: "⚠️ Instagram direct publishing dépend des permissions (Business vs Creator). Export mode disponible.",
+  },
   
   // CMS
-  { id: "wordpress", name: "WordPress", description: "Modifications et corrections automatiques", icon: FileCode, status: "disconnected", category: "cms" },
-  { id: "shopify", name: "Shopify", description: "Optimisation e-commerce", icon: ShoppingCart, status: "disconnected", category: "cms" },
-  { id: "webflow", name: "Webflow", description: "Design et contenu", icon: Palette, status: "disconnected", category: "cms" },
+  { 
+    id: "wordpress", 
+    name: "WordPress", 
+    description: "Modifications et corrections automatiques", 
+    icon: FileCode, 
+    status: "disconnected", 
+    category: "cms",
+  },
+  { 
+    id: "shopify", 
+    name: "Shopify", 
+    description: "Optimisation e-commerce", 
+    icon: ShoppingCart, 
+    status: "disconnected", 
+    category: "cms",
+  },
+  { 
+    id: "webflow", 
+    name: "Webflow", 
+    description: "Design et contenu", 
+    icon: Palette, 
+    status: "disconnected", 
+    category: "cms",
+  },
   
   // CRM
-  { id: "email", name: "Email Provider", description: "Sendgrid, Mailchimp, Brevo...", icon: Mail, status: "disconnected", category: "crm" },
-  { id: "calendar", name: "Calendrier", description: "Google Calendar, Calendly...", icon: Calendar, status: "disconnected", category: "crm" },
+  { 
+    id: "email", 
+    name: "Email Provider", 
+    description: "Sendgrid, Mailchimp, Brevo...", 
+    icon: Mail, 
+    status: "disconnected", 
+    category: "crm",
+  },
+  { 
+    id: "calendar", 
+    name: "Calendrier", 
+    description: "Google Calendar, Calendly...", 
+    icon: Calendar, 
+    status: "disconnected", 
+    category: "crm",
+  },
 ];
 
 const categoryLabels: Record<string, string> = {
@@ -67,23 +150,73 @@ const categoryLabels: Record<string, string> = {
 
 const Integrations = () => {
   const { currentSite } = useSites();
+  const { currentWorkspace } = useWorkspace();
   const [localIntegrations, setLocalIntegrations] = useState(integrations);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState<string | null>(null);
 
-  const handleConnect = async (integrationId: string) => {
-    setConnecting(integrationId);
+  const handleConnect = async (integration: Integration) => {
+    if (!currentSite || !currentWorkspace) {
+      toast.error("Sélectionnez d'abord un site");
+      return;
+    }
+
+    if (integration.status === "coming_soon") {
+      toast.info(integration.comingSoonNote || "Cette intégration sera disponible prochainement");
+      return;
+    }
+
+    setConnecting(integration.id);
     
-    // Simulate OAuth flow
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // For demo, just toggle local state
+      // Real implementation would use OAuth flow
+      setLocalIntegrations(prev => prev.map(i => 
+        i.id === integration.id 
+          ? { ...i, status: i.status === "connected" ? "disconnected" : "connected" as const }
+          : i
+      ));
+      
+      toast.success(
+        integration.status === "connected" ? "Intégration désactivée" : "Configuration requise",
+        { description: integration.status !== "connected" ? "Configurez les tokens OAuth pour finaliser." : undefined }
+      );
+    } catch (error) {
+      console.error("Connection error:", error);
+      toast.error("Erreur lors de la connexion");
+    } finally {
+      setConnecting(null);
+    }
+  };
+
+  const handleSync = async (integrationId: string) => {
+    if (!currentSite || !currentWorkspace) return;
+
+    setSyncing(integrationId);
     
-    // Demo: toggle connection status
-    setLocalIntegrations(prev => prev.map(i => 
-      i.id === integrationId 
-        ? { ...i, status: i.status === "connected" ? "disconnected" : "connected" as const }
-        : i
-    ));
-    
-    setConnecting(null);
+    try {
+      const endpoint = integrationId === "gsc" ? "sync-gsc" : "sync-ga4";
+      const payload = integrationId === "gsc" 
+        ? { workspace_id: currentWorkspace.id, site_id: currentSite.id, site_url: currentSite.url }
+        : { workspace_id: currentWorkspace.id, site_id: currentSite.id, property_id: "GA4-PROPERTY-ID" };
+
+      const { data, error } = await supabase.functions.invoke(endpoint, {
+        body: payload,
+      });
+
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success("Synchronisation terminée", { description: data.message });
+      } else {
+        toast.error(data.error || "Échec de la synchronisation");
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.error("Erreur lors de la synchronisation");
+    } finally {
+      setSyncing(null);
+    }
   };
 
   const groupedIntegrations = localIntegrations.reduce((acc, integration) => {
@@ -93,6 +226,7 @@ const Integrations = () => {
   }, {} as Record<string, Integration[]>);
 
   const connectedCount = localIntegrations.filter(i => i.status === "connected").length;
+  const comingSoonCount = localIntegrations.filter(i => i.status === "coming_soon").length;
 
   return (
     <div className="space-y-6">
@@ -104,20 +238,30 @@ const Integrations = () => {
             Connectez vos outils pour débloquer toutes les fonctionnalités.
           </p>
         </div>
-        <Badge variant={connectedCount > 0 ? "success" : "secondary"}>
-          {connectedCount}/{localIntegrations.length} connectées
-        </Badge>
+        <div className="flex gap-2">
+          <Badge variant={connectedCount > 0 ? "success" : "secondary"}>
+            {connectedCount} connectées
+          </Badge>
+          <Badge variant="secondary">
+            {comingSoonCount} à venir
+          </Badge>
+        </div>
       </div>
 
-      {/* Demo Mode Alert */}
+      {/* Token Setup Instructions */}
       <Card className="border-primary/50 bg-primary/5">
-        <CardContent className="flex items-center gap-4 py-4">
-          <AlertCircle className="w-5 h-5 text-primary flex-shrink-0" />
+        <CardContent className="flex items-start gap-4 py-4">
+          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium">Mode Démonstration</p>
+            <p className="font-medium">Configuration OAuth</p>
             <p className="text-sm text-muted-foreground">
-              Les connexions OAuth sont simulées. En production, vous serez redirigé vers les services pour autoriser l'accès.
+              GSC et GA4 nécessitent des tokens OAuth. Après connexion :
             </p>
+            <ol className="text-sm text-muted-foreground mt-2 list-decimal list-inside space-y-1">
+              <li>Configurez vos credentials dans Google Cloud Console</li>
+              <li>Ajoutez les tokens via les secrets Lovable Cloud</li>
+              <li>Cliquez "Sync Now" pour récupérer les données</li>
+            </ol>
           </div>
         </CardContent>
       </Card>
@@ -143,56 +287,90 @@ const Integrations = () => {
               {items.map((integration) => {
                 const Icon = integration.icon;
                 const isConnected = integration.status === "connected";
+                const isPending = integration.status === "pending";
+                const isComingSoon = integration.status === "coming_soon";
                 const isConnecting = connecting === integration.id;
+                const isSyncing = syncing === integration.id;
+                const canSync = (integration.id === "gsc" || integration.id === "ga4") && (isConnected || isPending);
                 
                 return (
                   <Card 
                     key={integration.id} 
-                    variant={isConnected ? "gradient" : "feature"}
+                    variant={isConnected ? "gradient" : isComingSoon ? "default" : "feature"}
+                    className={isComingSoon ? "opacity-75" : ""}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${isConnected ? 'bg-primary/20' : 'bg-secondary'}`}>
-                          <Icon className="w-6 h-6" />
+                        <div className={`p-3 rounded-lg ${isConnected ? 'bg-primary/20' : isComingSoon ? 'bg-muted' : 'bg-secondary'}`}>
+                          <Icon className={`w-6 h-6 ${isComingSoon ? 'text-muted-foreground' : ''}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold">{integration.name}</h3>
-                            {integration.required && (
+                            {integration.required && !isComingSoon && (
                               <Badge variant="outline" className="text-xs">Recommandé</Badge>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">
                             {integration.description}
                           </p>
+                          
+                          {isComingSoon && integration.comingSoonNote && (
+                            <p className="text-xs text-muted-foreground bg-muted p-2 rounded mb-3">
+                              {integration.comingSoonNote}
+                            </p>
+                          )}
+
                           <div className="flex items-center justify-between">
                             <Badge 
-                              variant={isConnected ? "success" : "secondary"}
+                              variant={isConnected ? "success" : isPending ? "secondary" : isComingSoon ? "outline" : "secondary"}
                               className="text-xs"
                             >
                               {isConnected ? (
                                 <><Check className="w-3 h-3 mr-1" /> Connecté</>
+                              ) : isPending ? (
+                                <><Clock className="w-3 h-3 mr-1" /> En attente</>
+                              ) : isComingSoon ? (
+                                <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
                               ) : (
                                 <><X className="w-3 h-3 mr-1" /> Non connecté</>
                               )}
                             </Badge>
-                            <Button 
-                              variant={isConnected ? "outline" : "default"} 
-                              size="sm"
-                              onClick={() => handleConnect(integration.id)}
-                              disabled={isConnecting || !currentSite}
-                            >
-                              {isConnecting ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : isConnected ? (
-                                "Déconnecter"
-                              ) : (
-                                <>
-                                  Connecter
-                                  <ExternalLink className="w-3 h-3 ml-1" />
-                                </>
+                            <div className="flex gap-2">
+                              {canSync && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleSync(integration.id)}
+                                  disabled={isSyncing}
+                                >
+                                  {isSyncing ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    "Sync Now"
+                                  )}
+                                </Button>
                               )}
-                            </Button>
+                              <Button 
+                                variant={isConnected ? "outline" : isComingSoon ? "ghost" : "default"} 
+                                size="sm"
+                                onClick={() => handleConnect(integration)}
+                                disabled={isConnecting || !currentSite || isComingSoon}
+                              >
+                                {isConnecting ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : isComingSoon ? (
+                                  "Bientôt"
+                                ) : isConnected ? (
+                                  "Déconnecter"
+                                ) : (
+                                  <>
+                                    Connecter
+                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                  </>
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>

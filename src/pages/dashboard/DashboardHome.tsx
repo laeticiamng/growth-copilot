@@ -1,135 +1,272 @@
+import { useState, useEffect } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useSites } from "@/hooks/useSites";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   TrendingUp,
   TrendingDown,
   AlertTriangle,
-  CheckCircle2,
   ArrowRight,
   Search,
   MapPin,
-  Megaphone,
   Target,
-  Play,
   Pause,
   Bot,
   Zap,
   ExternalLink,
+  FileText,
+  Loader2,
+  RefreshCw,
+  Eye,
+  MousePointerClick,
+  BarChart3,
+  Download,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 
-// Demo data for display
-const kpiData = [
-  {
-    label: "Trafic Organique",
-    value: "12,847",
-    change: "+18.2%",
-    trend: "up",
-    icon: Search,
-  },
-  {
-    label: "Conversions",
-    value: "342",
-    change: "+24.5%",
-    trend: "up",
-    icon: Target,
-  },
-  {
-    label: "Position Moyenne",
-    value: "12.4",
-    change: "-2.1",
-    trend: "up",
-    icon: TrendingUp,
-  },
-  {
-    label: "Avis Google",
-    value: "4.8",
-    change: "+0.2",
-    trend: "up",
-    icon: MapPin,
-  },
-];
+interface KPIData {
+  date: string;
+  organic_clicks: number;
+  organic_impressions: number;
+  organic_sessions: number;
+  total_conversions: number;
+  avg_position: number;
+}
 
-const topActions = [
-  {
-    id: 1,
-    priority: "critical",
-    title: "Corriger 12 erreurs 404",
-    category: "SEO Tech",
-    impact: 85,
-    effort: "Faible",
-    description: "Pages cassées détectées qui impactent l'expérience utilisateur et le SEO.",
-  },
-  {
-    id: 2,
-    priority: "high",
-    title: "Optimiser les Core Web Vitals",
-    category: "Performance",
-    impact: 78,
-    effort: "Moyen",
-    description: "LCP à 4.2s sur mobile. Objectif < 2.5s pour meilleur ranking.",
-  },
-  {
-    id: 3,
-    priority: "high",
-    title: "Ajouter schema LocalBusiness",
-    category: "Local SEO",
-    impact: 72,
-    effort: "Faible",
-    description: "Améliorer la visibilité dans les résultats locaux avec structured data.",
-  },
-  {
-    id: 4,
-    priority: "medium",
-    title: "Créer 5 articles piliers",
-    category: "Contenu",
-    impact: 68,
-    effort: "Élevé",
-    description: "Opportunités de mots-clés à fort volume identifiées.",
-  },
-  {
-    id: 5,
-    priority: "medium",
-    title: "Répondre à 8 avis en attente",
-    category: "Réputation",
-    impact: 55,
-    effort: "Faible",
-    description: "Avis clients non répondus depuis plus de 48h.",
-  },
-];
+interface DataQualityAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  title: string;
+  description: string | null;
+  created_at: string | null;
+}
 
-const agentStatus = [
-  { name: "Chief Growth Officer", status: "active", lastRun: "Il y a 2 min" },
-  { name: "Tech Auditor", status: "idle", lastRun: "Il y a 1h" },
-  { name: "Content Builder", status: "active", lastRun: "En cours" },
-  { name: "Analytics Guardian", status: "active", lastRun: "Il y a 5 min" },
-  { name: "CRO Optimizer", status: "idle", lastRun: "Il y a 3h" },
-  { name: "Local Manager", status: "idle", lastRun: "Il y a 2h" },
-];
-
-const alerts = [
-  {
-    type: "error",
-    message: "Tracking GA4 cassé sur /checkout",
-    time: "Il y a 15 min",
-  },
-  {
-    type: "warning",
-    message: "Budget Ads atteint à 80%",
-    time: "Il y a 1h",
-  },
-  {
-    type: "info",
-    message: "Nouveau concurrent détecté",
-    time: "Il y a 3h",
-  },
-];
+interface TopAction {
+  id: string;
+  priority: string;
+  title: string;
+  category: string;
+  impact: number;
+  effort: string;
+  description: string;
+}
 
 export default function DashboardHome() {
   const { currentWorkspace } = useWorkspace();
+  const { currentSite } = useSites();
+  const [kpiData, setKpiData] = useState<KPIData[]>([]);
+  const [alerts, setAlerts] = useState<DataQualityAlert[]>([]);
+  const [topActions, setTopActions] = useState<TopAction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const [runningGuardian, setRunningGuardian] = useState(false);
+
+  useEffect(() => {
+    if (currentWorkspace && currentSite) {
+      loadDashboardData();
+    } else {
+      setLoading(false);
+    }
+  }, [currentWorkspace, currentSite]);
+
+  const loadDashboardData = async () => {
+    if (!currentSite) return;
+    
+    setLoading(true);
+    try {
+      // Load KPI data (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data: kpis } = await supabase
+        .from("kpis_daily")
+        .select("*")
+        .eq("site_id", currentSite.id)
+        .gte("date", thirtyDaysAgo.toISOString().split("T")[0])
+        .order("date", { ascending: true });
+
+      // Load data quality alerts
+      const { data: alertsData } = await supabase
+        .from("data_quality_alerts")
+        .select("*")
+        .eq("site_id", currentSite.id)
+        .eq("is_resolved", false)
+        .order("severity", { ascending: true })
+        .limit(5);
+
+      // Load top issues as actions
+      const { data: issues } = await supabase
+        .from("issues")
+        .select("*")
+        .eq("site_id", currentSite.id)
+        .eq("status", "open")
+        .order("impact_score", { ascending: false })
+        .limit(5);
+
+      setKpiData(kpis || []);
+      setAlerts(alertsData || []);
+      setTopActions((issues || []).map(i => ({
+        id: i.id,
+        priority: i.severity || "medium",
+        title: i.title,
+        category: i.category,
+        impact: i.impact_score || 50,
+        effort: i.effort_score && i.effort_score > 70 ? "Élevé" : i.effort_score && i.effort_score > 40 ? "Moyen" : "Faible",
+        description: i.description || "",
+      })));
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const runAnalyticsGuardian = async () => {
+    if (!currentWorkspace || !currentSite) return;
+    
+    setRunningGuardian(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("analytics-guardian", {
+        body: { workspace_id: currentWorkspace.id, site_id: currentSite.id },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success(`Analytics Guardian: ${data.alerts_created} alerte(s) détectée(s)`);
+        loadDashboardData();
+      } else {
+        toast.error(data.error || "Échec de l'analyse");
+      }
+    } catch (error) {
+      console.error("Guardian error:", error);
+      toast.error("Erreur lors de l'analyse data quality");
+    } finally {
+      setRunningGuardian(false);
+    }
+  };
+
+  const generateMonthlyReport = async () => {
+    if (!currentWorkspace || !currentSite) return;
+    
+    setGeneratingReport(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-report", {
+        body: { workspace_id: currentWorkspace.id, site_id: currentSite.id },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success("Rapport généré avec succès", {
+          action: {
+            label: "Voir",
+            onClick: () => window.open(data.url, "_blank"),
+          },
+        });
+      } else {
+        toast.error(data.error || "Échec de la génération");
+      }
+    } catch (error) {
+      console.error("Report generation error:", error);
+      toast.error("Erreur lors de la génération du rapport");
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
+  // Calculate summary KPIs
+  const calculateSummary = () => {
+    if (kpiData.length === 0) return null;
+
+    const lastWeek = kpiData.slice(-7);
+    const prevWeek = kpiData.slice(-14, -7);
+
+    const sum = (data: KPIData[], key: keyof KPIData) =>
+      data.reduce((acc, d) => acc + (Number(d[key]) || 0), 0);
+    
+    const calcChange = (curr: number, prev: number) =>
+      prev === 0 ? 0 : ((curr - prev) / prev) * 100;
+
+    const currentClicks = sum(lastWeek, "organic_clicks");
+    const prevClicks = sum(prevWeek, "organic_clicks");
+    const currentConversions = sum(lastWeek, "total_conversions");
+    const prevConversions = sum(prevWeek, "total_conversions");
+    const currentSessions = sum(lastWeek, "organic_sessions");
+    const prevSessions = sum(prevWeek, "organic_sessions");
+
+    const avgPosition = lastWeek.length > 0
+      ? lastWeek.reduce((acc, d) => acc + (Number(d.avg_position) || 0), 0) / lastWeek.length
+      : 0;
+    const prevAvgPosition = prevWeek.length > 0
+      ? prevWeek.reduce((acc, d) => acc + (Number(d.avg_position) || 0), 0) / prevWeek.length
+      : 0;
+
+    return [
+      {
+        label: "Clics Organiques",
+        value: currentClicks.toLocaleString(),
+        change: calcChange(currentClicks, prevClicks).toFixed(1),
+        trend: currentClicks >= prevClicks ? "up" : "down",
+        icon: MousePointerClick,
+      },
+      {
+        label: "Conversions",
+        value: currentConversions.toLocaleString(),
+        change: calcChange(currentConversions, prevConversions).toFixed(1),
+        trend: currentConversions >= prevConversions ? "up" : "down",
+        icon: Target,
+      },
+      {
+        label: "Sessions",
+        value: currentSessions.toLocaleString(),
+        change: calcChange(currentSessions, prevSessions).toFixed(1),
+        trend: currentSessions >= prevSessions ? "up" : "down",
+        icon: BarChart3,
+      },
+      {
+        label: "Position Moyenne",
+        value: avgPosition.toFixed(1),
+        change: (prevAvgPosition - avgPosition).toFixed(1), // inverted - lower is better
+        trend: avgPosition <= prevAvgPosition ? "up" : "down",
+        icon: Search,
+      },
+    ];
+  };
+
+  const summaryKpis = calculateSummary();
+
+  // Demo data fallback
+  const demoKpiData = summaryKpis || [
+    { label: "Clics Organiques", value: "—", change: "0", trend: "up", icon: MousePointerClick },
+    { label: "Conversions", value: "—", change: "0", trend: "up", icon: Target },
+    { label: "Sessions", value: "—", change: "0", trend: "up", icon: BarChart3 },
+    { label: "Position Moyenne", value: "—", change: "0", trend: "up", icon: Search },
+  ];
+
+  const agentStatus = [
+    { name: "Chief Growth Officer", status: "active", lastRun: "Il y a 2 min" },
+    { name: "Tech Auditor", status: "idle", lastRun: "Il y a 1h" },
+    { name: "Analytics Guardian", status: runningGuardian ? "active" : "idle", lastRun: runningGuardian ? "En cours" : "Il y a 5 min" },
+    { name: "Content Builder", status: "idle", lastRun: "Il y a 3h" },
+  ];
 
   if (!currentWorkspace) {
     return (
@@ -157,44 +294,90 @@ export default function DashboardHome() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
             Vue d'ensemble de {currentWorkspace.name}
+            {currentSite && ` - ${currentSite.name}`}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={runAnalyticsGuardian}
+            disabled={runningGuardian || !currentSite}
+          >
+            {runningGuardian ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            Data Check
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={generateMonthlyReport}
+            disabled={generatingReport || !currentSite}
+          >
+            {generatingReport ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Rapport PDF
+          </Button>
           <Badge variant={currentWorkspace.plan === 'free' ? 'secondary' : 'gradient'} className="capitalize">
             Plan {currentWorkspace.plan}
           </Badge>
-          <Button variant="outline" size="sm">
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Voir le site
-          </Button>
         </div>
       </div>
 
-      {/* Alerts */}
+      {/* Data Quality Alerts */}
       {alerts.length > 0 && (
         <div className="space-y-2">
-          {alerts.map((alert, i) => (
+          {alerts.map((alert) => (
             <div
-              key={i}
+              key={alert.id}
               className={`flex items-center gap-3 p-3 rounded-lg border ${
-                alert.type === "error"
+                alert.severity === "critical"
                   ? "bg-destructive/10 border-destructive/30 text-destructive"
-                  : alert.type === "warning"
-                  ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-500"
+                  : alert.severity === "warning"
+                  ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-600 dark:text-yellow-400"
                   : "bg-primary/10 border-primary/30 text-primary"
               }`}
             >
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span className="flex-1 text-sm">{alert.message}</span>
-              <span className="text-xs opacity-70">{alert.time}</span>
+              <div className="flex-1">
+                <span className="font-medium text-sm">{alert.title}</span>
+                <p className="text-xs opacity-80">{alert.description}</p>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {alert.alert_type}
+              </Badge>
             </div>
           ))}
         </div>
       )}
 
+      {/* No Site Warning */}
+      {!currentSite && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="flex items-center gap-4 py-4">
+            <Eye className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium">Sélectionnez un site</p>
+              <p className="text-sm text-muted-foreground">
+                Accédez à la page Sites pour sélectionner ou créer un site et voir les données.
+              </p>
+            </div>
+            <Link to="/dashboard/sites">
+              <Button size="sm">Gérer les sites</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpiData.map((kpi, i) => {
+        {demoKpiData.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
             <Card key={i} variant="kpi" className="fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
@@ -211,7 +394,7 @@ export default function DashboardHome() {
                       ) : (
                         <TrendingDown className="w-4 h-4" />
                       )}
-                      {kpi.change}
+                      {Number(kpi.change) >= 0 ? "+" : ""}{kpi.change}%
                     </div>
                   </div>
                   <div className="p-2 rounded-lg bg-primary/10">
@@ -224,6 +407,97 @@ export default function DashboardHome() {
         })}
       </div>
 
+      {/* Charts */}
+      {kpiData.length > 0 && (
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Clicks & Impressions Chart */}
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MousePointerClick className="w-5 h-5 text-primary" />
+                GSC: Clics & Impressions
+              </CardTitle>
+              <CardDescription>Derniers 30 jours</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={kpiData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(v) => new Date(v).toLocaleDateString("fr", { day: "2-digit", month: "short" })}
+                    className="text-xs"
+                  />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    labelFormatter={(v) => new Date(v as string).toLocaleDateString("fr")}
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="organic_impressions" 
+                    stroke="hsl(var(--primary))" 
+                    fill="hsl(var(--primary) / 0.2)" 
+                    name="Impressions"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="organic_clicks" 
+                    stroke="hsl(var(--accent-foreground))" 
+                    fill="hsl(var(--accent) / 0.3)" 
+                    name="Clics"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Sessions & Conversions Chart */}
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                GA4: Sessions & Conversions
+              </CardTitle>
+              <CardDescription>Derniers 30 jours</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={kpiData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(v) => new Date(v).toLocaleDateString("fr", { day: "2-digit", month: "short" })}
+                    className="text-xs"
+                  />
+                  <YAxis className="text-xs" />
+                  <Tooltip 
+                    labelFormatter={(v) => new Date(v as string).toLocaleDateString("fr")}
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="organic_sessions" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    dot={false}
+                    name="Sessions"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="total_conversions" 
+                    stroke="#22c55e" 
+                    strokeWidth={2}
+                    dot={false}
+                    name="Conversions"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Top Actions */}
         <div className="lg:col-span-2">
@@ -234,14 +508,16 @@ export default function DashboardHome() {
                   <CardTitle>Actions prioritaires</CardTitle>
                   <CardDescription>Recommandations classées par impact</CardDescription>
                 </div>
-                <Button variant="ghost" size="sm">
-                  Voir tout
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <Link to="/dashboard/seo-tech">
+                  <Button variant="ghost" size="sm">
+                    Voir tout
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {topActions.map((action, i) => (
+              {topActions.length > 0 ? topActions.map((action) => (
                 <div
                   key={action.id}
                   className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
@@ -282,7 +558,13 @@ export default function DashboardHome() {
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>Aucune action en attente</p>
+                  <p className="text-sm">Lancez un audit SEO pour détecter les opportunités</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -297,7 +579,7 @@ export default function DashboardHome() {
                   Agents IA
                 </CardTitle>
                 <Badge variant="gradient" className="text-xs">
-                  3 actifs
+                  {agentStatus.filter(a => a.status === "active").length} actifs
                 </Badge>
               </div>
             </CardHeader>

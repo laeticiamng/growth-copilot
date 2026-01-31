@@ -5,3 +5,15 @@ verify_jwt = false
 
 [functions.ai-gateway]
 verify_jwt = false
+
+[functions.sync-gsc]
+verify_jwt = false
+
+[functions.sync-ga4]
+verify_jwt = false
+
+[functions.analytics-guardian]
+verify_jwt = false
+
+[functions.generate-report]
+verify_jwt = false
