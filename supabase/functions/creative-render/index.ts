@@ -371,25 +371,24 @@ Deno.serve(async (req) => {
             }
           });
 
-        // Generate thumbnail for each format using a 1-frame composition
-        // Creatomate requires snapshot_time on compositions with video elements,
-        // so we create a static image render instead
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sourceAny = source as any;
-        const thumbnailSource = {
-          output_format: 'jpg',
-          width: sourceAny.width,
-          height: sourceAny.height,
-          // Render as static image composition (no duration = single frame)
-          elements: (sourceAny.elements || []).map((el: Record<string, unknown>) => {
-            // Remove animations for static thumbnail
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { animations, time, duration, ...rest } = el;
-            return rest;
-          })
-        };
+        // Generate thumbnail using snapshot_time extraction from the rendered video
+        // This is the recommended Creatomate approach for extracting frames
+        const duration = blueprint.duration_seconds as number || 15;
+        const snapshotTime = Math.max(0.5, duration * 0.25); // Extract at 25% mark, min 0.5s
         
         try {
+          // Method 1: Extract frame from rendered video using snapshot_time
+          const thumbnailSource = {
+            output_format: 'jpg',
+            snapshot_time: snapshotTime,
+            elements: [
+              {
+                type: 'video',
+                source: completed.url // Use the just-rendered video
+              }
+            ]
+          };
+          
           const thumbRender = await createRender(creatomateApiKey, thumbnailSource);
           const thumbCompleted = await pollRenderStatus(creatomateApiKey, thumbRender.id);
           
@@ -410,27 +409,75 @@ Deno.serve(async (req) => {
                 meta_json: {
                   aspect_ratio: aspectRatio,
                   variant: 1,
-                  source: 'composition_frame'
+                  source: 'snapshot_extraction',
+                  snapshot_time: snapshotTime
+                }
+              });
+              
+            console.log(`[creative-render] Thumbnail generated via snapshot_time for ${aspectRatio}`);
+          }
+        } catch (thumbError) {
+          console.warn(`[creative-render] Snapshot extraction failed for ${aspectRatio}, trying static composition fallback:`, thumbError);
+          
+          // Fallback Method 2: Render static composition (1-frame, no animations)
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const sourceAny = source as any;
+            const staticThumbnailSource = {
+              output_format: 'jpg',
+              width: sourceAny.width,
+              height: sourceAny.height,
+              elements: (sourceAny.elements || []).map((el: Record<string, unknown>) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { animations, time, duration: elDuration, ...rest } = el;
+                return rest;
+              })
+            };
+            
+            const fallbackRender = await createRender(creatomateApiKey, staticThumbnailSource);
+            const fallbackCompleted = await pollRenderStatus(creatomateApiKey, fallbackRender.id);
+            
+            if (fallbackCompleted.url) {
+              thumbnailResults.push({
+                aspect_ratio: aspectRatio,
+                url: fallbackCompleted.url,
+                variant: 1
+              });
+
+              await serviceClient
+                .from('creative_assets')
+                .insert({
+                  job_id,
+                  workspace_id,
+                  asset_type: 'thumbnail',
+                  url: fallbackCompleted.url,
+                  meta_json: {
+                    aspect_ratio: aspectRatio,
+                    variant: 1,
+                    source: 'static_composition_fallback'
+                  }
+                });
+                
+              console.log(`[creative-render] Thumbnail generated via static fallback for ${aspectRatio}`);
+            }
+          } catch (fallbackError) {
+            console.error(`[creative-render] All thumbnail methods failed for ${aspectRatio}:`, fallbackError);
+            // Final fallback: mark as needing manual upload
+            await serviceClient
+              .from('creative_assets')
+              .insert({
+                job_id,
+                workspace_id,
+                asset_type: 'thumbnail',
+                url: null,
+                meta_json: {
+                  aspect_ratio: aspectRatio,
+                  variant: 1,
+                  source: 'pending_manual',
+                  error: 'All auto-generation methods failed, manual upload required'
                 }
               });
           }
-        } catch (thumbError) {
-          console.warn(`[creative-render] Thumbnail generation failed for ${aspectRatio}:`, thumbError);
-          // Fallback: store placeholder to indicate thumbnail needed
-          await serviceClient
-            .from('creative_assets')
-            .insert({
-              job_id,
-              workspace_id,
-              asset_type: 'thumbnail',
-              url: null,
-              meta_json: {
-                aspect_ratio: aspectRatio,
-                variant: 1,
-                source: 'pending_manual',
-                error: 'Auto-generation failed, manual upload required'
-              }
-            });
         }
 
         // Generate and store SRT
