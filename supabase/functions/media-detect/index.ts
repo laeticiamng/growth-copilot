@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validateWorkspaceAccess, unauthorizedResponse, forbiddenResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -150,6 +151,10 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+  const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
   try {
     const { url, workspace_id, save } = await req.json();
     
@@ -158,6 +163,25 @@ serve(async (req) => {
         JSON.stringify({ error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // If saving, require authentication and workspace access
+    if (save && workspace_id) {
+      const authResult = await validateWorkspaceAccess(
+        req,
+        workspace_id,
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_KEY
+      );
+
+      if (!authResult.authenticated) {
+        return unauthorizedResponse(authResult.error || "Unauthorized", corsHeaders);
+      }
+
+      if (!authResult.hasAccess) {
+        return forbiddenResponse(authResult.error || "Access denied", corsHeaders);
+      }
     }
 
     // Detect platform
@@ -183,11 +207,9 @@ serve(async (req) => {
       metadata_json: metadata.metadata_json || {},
     };
 
-    // Optionally save to database
+    // Optionally save to database (auth already verified above)
     if (save && workspace_id) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
       
       // Generate smart link slug
       const slug = `${platform_id || Date.now()}-${Math.random().toString(36).substring(7)}`;

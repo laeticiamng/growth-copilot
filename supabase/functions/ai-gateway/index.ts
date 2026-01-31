@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validateWorkspaceAccess, unauthorizedResponse, forbiddenResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -301,17 +302,16 @@ serve(async (req) => {
   }
 
   const startTime = Date.now();
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
     const body: RunLLMRequest = await req.json();
     const { workspace_id, user_id, agent_name, purpose, input } = body;
@@ -319,6 +319,25 @@ serve(async (req) => {
     if (!workspace_id || !agent_name || !purpose || !input) {
       throw new Error("Missing required fields: workspace_id, agent_name, purpose, input");
     }
+
+    // Authenticate user and verify workspace access
+    const authResult = await validateWorkspaceAccess(
+      req,
+      workspace_id,
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    if (!authResult.authenticated) {
+      return unauthorizedResponse(authResult.error || "Unauthorized", corsHeaders);
+    }
+
+    if (!authResult.hasAccess) {
+      return forbiddenResponse(authResult.error || "Access denied", corsHeaders);
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Check quota before processing
     const quotaCheck = await checkAndUpdateQuota(supabase, workspace_id, "check");

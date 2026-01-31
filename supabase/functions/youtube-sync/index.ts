@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validateWorkspaceAccess, unauthorizedResponse, forbiddenResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +8,7 @@ const corsHeaders = {
 };
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY');
 
@@ -38,6 +40,25 @@ serve(async (req) => {
         JSON.stringify({ error: 'video_id is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // If workspace_id provided, require authentication
+    if (workspace_id) {
+      const authResult = await validateWorkspaceAccess(
+        req,
+        workspace_id,
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_KEY
+      );
+
+      if (!authResult.authenticated) {
+        return unauthorizedResponse(authResult.error || "Unauthorized", corsHeaders);
+      }
+
+      if (!authResult.hasAccess) {
+        return forbiddenResponse(authResult.error || "Access denied", corsHeaders);
+      }
     }
 
     // Check if API key is configured

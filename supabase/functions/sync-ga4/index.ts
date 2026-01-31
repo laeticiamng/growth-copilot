@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validateWorkspaceAccess, unauthorizedResponse, forbiddenResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,8 +23,8 @@ serve(async (req) => {
   }
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const body: GA4Request = await req.json();
@@ -32,6 +33,25 @@ serve(async (req) => {
     if (!workspace_id || !site_id || !property_id) {
       throw new Error("Missing required fields: workspace_id, site_id, property_id");
     }
+
+    // Authenticate user and verify workspace access
+    const authResult = await validateWorkspaceAccess(
+      req,
+      workspace_id,
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    if (!authResult.authenticated) {
+      return unauthorizedResponse(authResult.error || "Unauthorized", corsHeaders);
+    }
+
+    if (!authResult.hasAccess) {
+      return forbiddenResponse(authResult.error || "Access denied", corsHeaders);
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Get integration credentials
     const { data: integration, error: intError } = await supabase
