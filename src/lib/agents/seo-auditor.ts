@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentArtifact, SEOIssue, CrawlResult } from "./types";
 import { ChiefGrowthOfficer, QualityComplianceOfficer } from "./orchestrator";
+import { AIGatewayClient, AGENT_PROMPTS, type AgentArtifactV2 } from "./ai-gateway-client";
 import type { Database } from "@/integrations/supabase/types";
 
 type DbIssueSeverity = Database['public']['Enums']['issue_severity'];
@@ -137,6 +138,49 @@ export class SEOTechAuditor {
       ],
       requires_approval: false,
     };
+  }
+
+  /**
+   * Analyze crawl results using AI for deeper insights
+   */
+  async analyzeWithAI(result: CrawlResult, siteUrl: string): Promise<AgentArtifactV2> {
+    const issuesSummary = result.issues.map(i => ({
+      type: i.type,
+      severity: i.severity,
+      title: i.title,
+      affected_count: i.affected_urls.length,
+    }));
+
+    const response = await AIGatewayClient.runLLM({
+      workspaceId: this.workspaceId,
+      agentName: 'seo_tech_auditor',
+      purpose: 'seo_audit',
+      systemPrompt: AGENT_PROMPTS.SEO_AUDITOR,
+      userPrompt: `Analyze the following SEO audit results and provide prioritized recommendations:
+
+Site: ${siteUrl}
+Pages Crawled: ${result.pages_crawled}
+Total Pages: ${result.pages_total}
+
+Issues Found:
+${JSON.stringify(issuesSummary, null, 2)}
+
+Please:
+1. Prioritize issues by impact using ICE scoring
+2. Group related issues that should be fixed together
+3. Identify quick wins (high impact, low effort)
+4. Note any critical issues that block indexation
+5. Suggest the optimal fix order`,
+      context: {
+        pages_crawled: result.pages_crawled,
+        pages_total: result.pages_total,
+        issues_count: result.issues.length,
+        critical_count: result.issues.filter(i => i.severity === 'critical').length,
+        high_count: result.issues.filter(i => i.severity === 'high').length,
+      },
+    });
+
+    return response.artifact;
   }
 
   /**

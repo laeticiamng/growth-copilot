@@ -457,6 +457,7 @@ export type Database = {
       agent_runs: {
         Row: {
           agent_type: Database["public"]["Enums"]["agent_type"]
+          ai_request_id: string | null
           approved_at: string | null
           approved_by: string | null
           completed_at: string | null
@@ -466,8 +467,10 @@ export type Database = {
           error_message: string | null
           id: string
           inputs: Json | null
+          model_name: string | null
           outputs: Json | null
           parent_run_id: string | null
+          provider_name: string | null
           requires_approval: boolean | null
           site_id: string | null
           started_at: string | null
@@ -476,6 +479,7 @@ export type Database = {
         }
         Insert: {
           agent_type: Database["public"]["Enums"]["agent_type"]
+          ai_request_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           completed_at?: string | null
@@ -485,8 +489,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           inputs?: Json | null
+          model_name?: string | null
           outputs?: Json | null
           parent_run_id?: string | null
+          provider_name?: string | null
           requires_approval?: boolean | null
           site_id?: string | null
           started_at?: string | null
@@ -495,6 +501,7 @@ export type Database = {
         }
         Update: {
           agent_type?: Database["public"]["Enums"]["agent_type"]
+          ai_request_id?: string | null
           approved_at?: string | null
           approved_by?: string | null
           completed_at?: string | null
@@ -504,8 +511,10 @@ export type Database = {
           error_message?: string | null
           id?: string
           inputs?: Json | null
+          model_name?: string | null
           outputs?: Json | null
           parent_run_id?: string | null
+          provider_name?: string | null
           requires_approval?: boolean | null
           site_id?: string | null
           started_at?: string | null
@@ -513,6 +522,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "agent_runs_ai_request_id_fkey"
+            columns: ["ai_request_id"]
+            isOneToOne: false
+            referencedRelation: "ai_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "agent_runs_parent_run_id_fkey"
             columns: ["parent_run_id"]
@@ -529,6 +545,136 @@ export type Database = {
           },
           {
             foreignKeyName: "agent_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_models: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          max_output_tokens: number | null
+          model_name: string
+          provider_id: string
+          purpose: string
+          temperature: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          max_output_tokens?: number | null
+          model_name: string
+          provider_id: string
+          purpose: string
+          temperature?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          max_output_tokens?: number | null
+          model_name?: string
+          provider_id?: string
+          purpose?: string
+          temperature?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_models_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "ai_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_providers: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+      ai_requests: {
+        Row: {
+          agent_name: string
+          cost_estimate: number | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          input_hash: string | null
+          input_json: Json
+          model_name: string
+          output_json: Json | null
+          provider_name: string
+          purpose: string
+          status: string
+          tokens_in: number | null
+          tokens_out: number | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          agent_name: string
+          cost_estimate?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          input_hash?: string | null
+          input_json?: Json
+          model_name: string
+          output_json?: Json | null
+          provider_name: string
+          purpose: string
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          agent_name?: string
+          cost_estimate?: number | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          input_hash?: string | null
+          input_json?: Json
+          model_name?: string
+          output_json?: Json | null
+          provider_name?: string
+          purpose?: string
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
