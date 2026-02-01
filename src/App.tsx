@@ -92,6 +92,7 @@ import TemplateAdsFactory from "./pages/dashboard/TemplateAdsFactory";
 import Diagnostics from "./pages/dashboard/Diagnostics";
 import Ops from "./pages/dashboard/Ops";
 import ApprovalsV2 from "./pages/dashboard/ApprovalsV2";
+import Agents from "./pages/dashboard/Agents";
 
 const queryClient = new QueryClient();
 
@@ -219,6 +220,7 @@ function App() {
               <Route path="/dashboard/diagnostics" element={<DashboardRoute><Diagnostics /></DashboardRoute>} />
               <Route path="/dashboard/ops" element={<DashboardRoute><Ops /></DashboardRoute>} />
               <Route path="/dashboard/approvals-v2" element={<DashboardRoute><ApprovalsV2 /></DashboardRoute>} />
+              <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
