@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,39 +16,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Zap,
   LayoutDashboard,
-  Search,
-  FileText,
-  MapPin,
-  Megaphone,
-  Instagram,
-  Target,
-  Package,
-  Mail,
-  Star,
-  BarChart3,
   Settings,
   LogOut,
   ChevronDown,
+  ChevronRight,
   Building2,
   Loader2,
   Menu,
   X,
-  Shield,
-  Users,
-  Rocket,
-  Palette,
-  Youtube,
-  Play,
-  Sparkles,
-  TrendingUp,
-  Webhook,
   Bot,
-  Plug,
-  Wifi,
+  Wrench,
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
@@ -65,42 +50,41 @@ interface NavItem {
   icon: React.ElementType;
   requiresRole?: "admin" | "manager" | "owner";
   hideForClients?: boolean;
+  category?: "main" | "advanced";
 }
 
+// Simplified navigation - Main items visible, technical items in "Advanced"
 const allNavItems: NavItem[] = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/dashboard/sites", label: "Sites", icon: Building2 },
-  // Connection Status (read-only) for all users
-  { path: "/dashboard/connections", label: "Connexions", icon: Wifi },
-  // Integrations management - Agency/Admin only
-  { path: "/dashboard/integrations", label: "Intégrations (Admin)", icon: Plug, requiresRole: "admin", hideForClients: true },
-  // Media Launch OS
-  { path: "/dashboard/media", label: "Media Assets", icon: Youtube },
-  { path: "/dashboard/media/launch", label: "Launch Plan", icon: Play },
-  { path: "/dashboard/media/creatives", label: "Creatives", icon: Sparkles },
-  { path: "/dashboard/media/kpis", label: "Media KPIs", icon: TrendingUp },
-  // Core modules
-  { path: "/dashboard/seo", label: "SEO Tech", icon: Search },
-  { path: "/dashboard/content", label: "Contenu", icon: FileText },
-  { path: "/dashboard/local", label: "Local SEO", icon: MapPin },
-  { path: "/dashboard/ads", label: "Google Ads", icon: Megaphone },
-  { path: "/dashboard/social", label: "Social", icon: Instagram },
-  { path: "/dashboard/cro", label: "CRO", icon: Target },
-  { path: "/dashboard/offers", label: "Offres", icon: Package },
-  { path: "/dashboard/lifecycle", label: "Lifecycle", icon: Mail },
-  { path: "/dashboard/reputation", label: "Réputation", icon: Star },
-  { path: "/dashboard/competitors", label: "Concurrents", icon: Users },
-  { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
-  { path: "/dashboard/approvals", label: "Approbations", icon: Shield },
-  { path: "/dashboard/automations", label: "Automations", icon: Webhook },
-  { path: "/dashboard/agents", label: "Agents IA", icon: Bot },
-  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
-  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
-  { path: "/dashboard/guide", label: "Guide", icon: Rocket },
-  { path: "/dashboard/logs", label: "Logs", icon: BarChart3, requiresRole: "manager" },
-  { path: "/dashboard/ops", label: "Ops", icon: TrendingUp, requiresRole: "admin" },
-  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: Bot, requiresRole: "admin" },
-  { path: "/dashboard/billing", label: "Billing", icon: Settings, requiresRole: "owner" },
+  // Main navigation - CEO-level
+  { path: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard, category: "main" },
+  { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot, category: "main" },
+  { path: "/dashboard/approvals", label: "À valider", icon: () => <span className="text-base">✓</span>, category: "main" },
+  { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span>, category: "main" },
+  
+  // Advanced - Technical tools (collapsible)
+  { path: "/dashboard/sites", label: "Sites", icon: Building2, category: "advanced" },
+  { path: "/dashboard/integrations", label: "Intégrations", icon: () => <span className="text-base">🔌</span>, category: "advanced", requiresRole: "admin", hideForClients: true },
+  { path: "/dashboard/connections", label: "Connexions", icon: () => <span className="text-base">📡</span>, category: "advanced" },
+  { path: "/dashboard/seo", label: "SEO Tech", icon: () => <span className="text-base">🔍</span>, category: "advanced" },
+  { path: "/dashboard/content", label: "Contenu", icon: () => <span className="text-base">📝</span>, category: "advanced" },
+  { path: "/dashboard/local", label: "Local SEO", icon: () => <span className="text-base">📍</span>, category: "advanced" },
+  { path: "/dashboard/ads", label: "Google Ads", icon: () => <span className="text-base">📣</span>, category: "advanced" },
+  { path: "/dashboard/social", label: "Social", icon: () => <span className="text-base">📱</span>, category: "advanced" },
+  { path: "/dashboard/cro", label: "CRO", icon: () => <span className="text-base">🎯</span>, category: "advanced" },
+  { path: "/dashboard/offers", label: "Offres", icon: () => <span className="text-base">📦</span>, category: "advanced" },
+  { path: "/dashboard/lifecycle", label: "Lifecycle", icon: () => <span className="text-base">📧</span>, category: "advanced" },
+  { path: "/dashboard/reputation", label: "Réputation", icon: () => <span className="text-base">⭐</span>, category: "advanced" },
+  { path: "/dashboard/competitors", label: "Concurrents", icon: () => <span className="text-base">👥</span>, category: "advanced" },
+  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: () => <span className="text-base">🎨</span>, category: "advanced" },
+  { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span>, category: "advanced" },
+  { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span>, category: "advanced" },
+  { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span>, category: "advanced" },
+  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, category: "advanced", requiresRole: "admin" },
+  { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, category: "advanced", requiresRole: "manager" },
+  { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, category: "advanced", requiresRole: "admin" },
+  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span>, category: "advanced", requiresRole: "admin" },
+  { path: "/dashboard/billing", label: "Facturation", icon: () => <span className="text-base">💳</span>, category: "advanced", requiresRole: "owner" },
+  { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span>, category: "advanced" },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -111,18 +95,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  // Check if current route is in advanced section
+  useEffect(() => {
+    const isAdvancedRoute = allNavItems
+      .filter((item) => item.category === "advanced")
+      .some((item) => location.pathname === item.path);
+    if (isAdvancedRoute) {
+      setAdvancedOpen(true);
+    }
+  }, [location.pathname]);
 
   // Filter nav items based on user role
-  const navItems = useMemo(() => {
-    return allNavItems.filter(item => {
-      // If no role requirement, show to everyone
+  const { mainItems, advancedItems } = useMemo(() => {
+    const filtered = allNavItems.filter((item) => {
       if (!item.requiresRole) return true;
-      // Check if user has at least the required role
       return isAtLeastRole(item.requiresRole);
     });
+    return {
+      mainItems: filtered.filter((item) => item.category === "main"),
+      advancedItems: filtered.filter((item) => item.category === "advanced"),
+    };
   }, [isAtLeastRole]);
 
-  // Monitor session expiry and show warnings
+  // Monitor session expiry
   useSessionExpiry({
     warningMinutes: 5,
     onExpired: () => {
@@ -151,9 +148,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     navigate("/");
   };
 
+  const NavLink = ({ item }: { item: NavItem }) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.path;
+    return (
+      <Link
+        to={item.path}
+        onClick={() => setSidebarOpen(false)}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+          isActive
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+        )}
+      >
+        <Icon className="w-4 h-4" />
+        {item.label}
+      </Link>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <OfflineBanner />
+      
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
@@ -203,17 +221,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <DropdownMenuItem
                     key={ws.id}
                     onClick={() => setCurrentWorkspace(ws)}
-                    className={cn(
-                      currentWorkspace?.id === ws.id && "bg-secondary"
-                    )}
+                    className={cn(currentWorkspace?.id === ws.id && "bg-secondary")}
                   >
                     {ws.name}
                   </DropdownMenuItem>
                 ))}
                 {workspaces.length === 0 && (
-                  <DropdownMenuItem disabled>
-                    Aucun workspace
-                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>Aucun workspace</DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/onboarding")}>
@@ -225,26 +239,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
+            {/* Main navigation items */}
+            {mainItems.map((item) => (
+              <NavLink key={item.path} item={item} />
+            ))}
+
+            {/* Advanced section (collapsible) */}
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <CollapsibleTrigger className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors mt-4">
+                <Wrench className="w-4 h-4" />
+                <span className="flex-1 text-left">Avancé</span>
+                <ChevronRight
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    "w-4 h-4 transition-transform",
+                    advancedOpen && "rotate-90"
                   )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-1 pt-1">
+                {advancedItems.map((item) => (
+                  <NavLink key={item.path} item={item} />
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
           </nav>
 
           {/* User menu */}
@@ -291,12 +308,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <NotificationCenter />
         </div>
         <div className="p-6 lg:p-8">
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <ErrorBoundary>{children}</ErrorBoundary>
         </div>
       </main>
-      
+
       {/* AI Assistant */}
       <AIAssistant />
     </div>
