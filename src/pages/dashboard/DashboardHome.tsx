@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,12 +15,11 @@ import {
   AlertTriangle,
   ArrowRight,
   Search,
-  MapPin,
   Target,
   Pause,
+  Play,
   Bot,
   Zap,
-  ExternalLink,
   FileText,
   Loader2,
   RefreshCw,
@@ -68,26 +68,39 @@ interface TopAction {
   description: string;
 }
 
+interface AgentRun {
+  agent_type: string;
+  status: string;
+  created_at: string;
+}
+
 export default function DashboardHome() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [kpiData, setKpiData] = useState<KPIData[]>([]);
   const [alerts, setAlerts] = useState<DataQualityAlert[]>([]);
   const [topActions, setTopActions] = useState<TopAction[]>([]);
+  const [agentRuns, setAgentRuns] = useState<AgentRun[]>([]);
+  const [autopilotEnabled, setAutopilotEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generatingReport, setGeneratingReport] = useState(false);
   const [runningGuardian, setRunningGuardian] = useState(false);
+  const [togglingAutopilot, setTogglingAutopilot] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace && currentSite) {
       loadDashboardData();
+    } else if (currentWorkspace) {
+      loadAutopilotSettings();
+      setLoading(false);
     } else {
       setLoading(false);
     }
   }, [currentWorkspace, currentSite]);
 
   const loadDashboardData = async () => {
-    if (!currentSite) return;
+    if (!currentSite || !currentWorkspace) return;
     
     setLoading(true);
     try {
@@ -95,46 +108,99 @@ export default function DashboardHome() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: kpis } = await supabase
-        .from("kpis_daily")
-        .select("*")
-        .eq("site_id", currentSite.id)
-        .gte("date", thirtyDaysAgo.toISOString().split("T")[0])
-        .order("date", { ascending: true });
+      const [kpisRes, alertsRes, issuesRes, agentsRes, autopilotRes] = await Promise.all([
+        supabase
+          .from("kpis_daily")
+          .select("*")
+          .eq("site_id", currentSite.id)
+          .gte("date", thirtyDaysAgo.toISOString().split("T")[0])
+          .order("date", { ascending: true }),
+        supabase
+          .from("data_quality_alerts")
+          .select("*")
+          .eq("site_id", currentSite.id)
+          .eq("is_resolved", false)
+          .order("severity", { ascending: true })
+          .limit(5),
+        supabase
+          .from("issues")
+          .select("*")
+          .eq("site_id", currentSite.id)
+          .eq("status", "open")
+          .order("impact_score", { ascending: false })
+          .limit(5),
+        supabase
+          .from("agent_runs")
+          .select("agent_type, status, created_at")
+          .eq("workspace_id", currentWorkspace.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("autopilot_settings")
+          .select("enabled")
+          .eq("workspace_id", currentWorkspace.id)
+          .maybeSingle(),
+      ]);
 
-      // Load data quality alerts
-      const { data: alertsData } = await supabase
-        .from("data_quality_alerts")
-        .select("*")
-        .eq("site_id", currentSite.id)
-        .eq("is_resolved", false)
-        .order("severity", { ascending: true })
-        .limit(5);
-
-      // Load top issues as actions
-      const { data: issues } = await supabase
-        .from("issues")
-        .select("*")
-        .eq("site_id", currentSite.id)
-        .eq("status", "open")
-        .order("impact_score", { ascending: false })
-        .limit(5);
-
-      setKpiData(kpis || []);
-      setAlerts(alertsData || []);
-      setTopActions((issues || []).map(i => ({
+      setKpiData(kpisRes.data || []);
+      setAlerts(alertsRes.data || []);
+      setTopActions((issuesRes.data || []).map(i => ({
         id: i.id,
         priority: i.severity || "medium",
         title: i.title,
         category: i.category,
         impact: i.impact_score || 50,
-        effort: i.effort_score && i.effort_score > 70 ? "Élevé" : i.effort_score && i.effort_score > 40 ? "Moyen" : "Faible",
+        effort: i.effort_score && i.effort_score > 70 ? t("dashboard.home.effort") + ": High" : 
+                i.effort_score && i.effort_score > 40 ? t("dashboard.home.effort") + ": Medium" : 
+                t("dashboard.home.effort") + ": Low",
         description: i.description || "",
       })));
+      setAgentRuns(agentsRes.data || []);
+      setAutopilotEnabled(autopilotRes.data?.enabled ?? false);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAutopilotSettings = async () => {
+    if (!currentWorkspace) return;
+    try {
+      const { data } = await supabase
+        .from("autopilot_settings")
+        .select("enabled")
+        .eq("workspace_id", currentWorkspace.id)
+        .maybeSingle();
+      setAutopilotEnabled(data?.enabled ?? false);
+    } catch (error) {
+      console.error("Failed to load autopilot settings:", error);
+    }
+  };
+
+  const toggleAutopilot = async () => {
+    if (!currentWorkspace) return;
+    
+    setTogglingAutopilot(true);
+    try {
+      const newValue = !autopilotEnabled;
+      const { error } = await supabase
+        .from("autopilot_settings")
+        .upsert({
+          workspace_id: currentWorkspace.id,
+          enabled: newValue,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "workspace_id" });
+
+      if (error) throw error;
+      
+      setAutopilotEnabled(newValue);
+      toast.success(newValue ? "Autopilot activé" : "Autopilot désactivé");
+    } catch (error) {
+      console.error("Failed to toggle autopilot:", error);
+      toast.error("Erreur lors du changement d'état de l'Autopilot");
+    } finally {
+      setTogglingAutopilot(false);
     }
   };
 
@@ -150,14 +216,14 @@ export default function DashboardHome() {
       if (error) throw error;
 
       if (data.success) {
-        toast.success(`Analytics Guardian: ${data.alerts_created} alerte(s) détectée(s)`);
+        toast.success(`Analytics Guardian: ${data.alerts_created} ${t("notifications.types.info").toLowerCase()}`);
         loadDashboardData();
       } else {
-        toast.error(data.error || "Échec de l'analyse");
+        toast.error(data.error || t("errors.generic"));
       }
     } catch (error) {
       console.error("Guardian error:", error);
-      toast.error("Erreur lors de l'analyse data quality");
+      toast.error(t("errors.generic"));
     } finally {
       setRunningGuardian(false);
     }
@@ -175,18 +241,18 @@ export default function DashboardHome() {
       if (error) throw error;
 
       if (data.success) {
-        toast.success("Rapport généré avec succès", {
+        toast.success(t("common.export") + " OK", {
           action: {
-            label: "Voir",
+            label: t("common.view"),
             onClick: () => window.open(data.url, "_blank"),
           },
         });
       } else {
-        toast.error(data.error || "Échec de la génération");
+        toast.error(data.error || t("errors.generic"));
       }
     } catch (error) {
       console.error("Report generation error:", error);
-      toast.error("Erreur lors de la génération du rapport");
+      toast.error(t("errors.generic"));
     } finally {
       setGeneratingReport(false);
     }
@@ -221,30 +287,30 @@ export default function DashboardHome() {
 
     return [
       {
-        label: "Clics Organiques",
+        label: t("dashboard.home.organicClicks"),
         value: currentClicks.toLocaleString(),
         change: calcChange(currentClicks, prevClicks).toFixed(1),
         trend: currentClicks >= prevClicks ? "up" : "down",
         icon: MousePointerClick,
       },
       {
-        label: "Conversions",
+        label: t("dashboard.home.conversions"),
         value: currentConversions.toLocaleString(),
         change: calcChange(currentConversions, prevConversions).toFixed(1),
         trend: currentConversions >= prevConversions ? "up" : "down",
         icon: Target,
       },
       {
-        label: "Sessions",
+        label: t("dashboard.home.sessions"),
         value: currentSessions.toLocaleString(),
         change: calcChange(currentSessions, prevSessions).toFixed(1),
         trend: currentSessions >= prevSessions ? "up" : "down",
         icon: BarChart3,
       },
       {
-        label: "Position Moyenne",
+        label: t("dashboard.home.avgPosition"),
         value: avgPosition.toFixed(1),
-        change: (prevAvgPosition - avgPosition).toFixed(1), // inverted - lower is better
+        change: (prevAvgPosition - avgPosition).toFixed(1),
         trend: avgPosition <= prevAvgPosition ? "up" : "down",
         icon: Search,
       },
@@ -255,30 +321,59 @@ export default function DashboardHome() {
 
   // Demo data fallback
   const demoKpiData = summaryKpis || [
-    { label: "Clics Organiques", value: "—", change: "0", trend: "up", icon: MousePointerClick },
-    { label: "Conversions", value: "—", change: "0", trend: "up", icon: Target },
-    { label: "Sessions", value: "—", change: "0", trend: "up", icon: BarChart3 },
-    { label: "Position Moyenne", value: "—", change: "0", trend: "up", icon: Search },
+    { label: t("dashboard.home.organicClicks"), value: "—", change: "0", trend: "up", icon: MousePointerClick },
+    { label: t("dashboard.home.conversions"), value: "—", change: "0", trend: "up", icon: Target },
+    { label: t("dashboard.home.sessions"), value: "—", change: "0", trend: "up", icon: BarChart3 },
+    { label: t("dashboard.home.avgPosition"), value: "—", change: "0", trend: "up", icon: Search },
   ];
 
-  const agentStatus = [
-    { name: "Chief Growth Officer", status: "active", lastRun: "Il y a 2 min" },
-    { name: "Tech Auditor", status: "idle", lastRun: "Il y a 1h" },
-    { name: "Analytics Guardian", status: runningGuardian ? "active" : "idle", lastRun: runningGuardian ? "En cours" : "Il y a 5 min" },
-    { name: "Content Builder", status: "idle", lastRun: "Il y a 3h" },
-  ];
+  // Build agent status from real data
+  const getAgentStatus = () => {
+    const agentTypes = ["cgo", "tech_auditor", "analytics_guardian", "content_builder"];
+    const agentNames: Record<string, string> = {
+      cgo: "Chief Growth Officer",
+      tech_auditor: "Tech Auditor",
+      analytics_guardian: "Analytics Guardian",
+      content_builder: "Content Builder",
+    };
+    
+    return agentTypes.map(type => {
+      const latestRun = agentRuns.find(r => r.agent_type === type);
+      const isActive = latestRun?.status === "running" || (type === "analytics_guardian" && runningGuardian);
+      
+      let lastRun = "—";
+      if (type === "analytics_guardian" && runningGuardian) {
+        lastRun = t("dashboard.home.running");
+      } else if (latestRun) {
+        const minutesAgo = Math.floor((Date.now() - new Date(latestRun.created_at).getTime()) / 60000);
+        if (minutesAgo < 60) {
+          lastRun = t("dashboard.home.agoMinutes", { n: minutesAgo });
+        } else {
+          lastRun = t("dashboard.home.agoHours", { n: Math.floor(minutesAgo / 60) });
+        }
+      }
+      
+      return {
+        name: agentNames[type] || type,
+        status: isActive ? "active" : "idle",
+        lastRun,
+      };
+    });
+  };
+
+  const agentStatus = getAgentStatus();
 
   if (!currentWorkspace) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Bot className="w-16 h-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Aucun workspace sélectionné</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("dashboard.home.noWorkspace")}</h2>
         <p className="text-muted-foreground mb-6">
-          Créez ou sélectionnez un workspace pour commencer
+          {t("dashboard.home.createWorkspace")}
         </p>
         <Link to="/onboarding">
           <Button variant="hero">
-            Créer un workspace
+            {t("dashboard.home.createWorkspaceBtn")}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </Link>
@@ -291,9 +386,9 @@ export default function DashboardHome() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t("dashboard.home.title")}</h1>
           <p className="text-muted-foreground">
-            Vue d'ensemble de {currentWorkspace.name}
+            {currentWorkspace.name}
             {currentSite && ` - ${currentSite.name}`}
           </p>
         </div>
@@ -309,7 +404,7 @@ export default function DashboardHome() {
             ) : (
               <RefreshCw className="w-4 h-4 mr-2" />
             )}
-            Data Check
+            {t("dashboard.home.dataCheck")}
           </Button>
           <Button 
             variant="outline" 
@@ -322,7 +417,7 @@ export default function DashboardHome() {
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            Rapport PDF
+            {t("dashboard.home.pdfReport")}
           </Button>
           <Badge variant={currentWorkspace.plan === 'free' ? 'secondary' : 'gradient'} className="capitalize">
             Plan {currentWorkspace.plan}
@@ -363,13 +458,13 @@ export default function DashboardHome() {
           <CardContent className="flex items-center gap-4 py-4">
             <Eye className="w-5 h-5 text-primary flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium">Sélectionnez un site</p>
+              <p className="font-medium">{t("dashboard.home.selectSite")}</p>
               <p className="text-sm text-muted-foreground">
-                Accédez à la page Sites pour sélectionner ou créer un site et voir les données.
+                {t("dashboard.home.selectSiteDesc")}
               </p>
             </div>
             <Link to="/dashboard/sites">
-              <Button size="sm">Gérer les sites</Button>
+              <Button size="sm">{t("dashboard.home.manageSites")}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -415,9 +510,9 @@ export default function DashboardHome() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MousePointerClick className="w-5 h-5 text-primary" />
-                GSC: Clics & Impressions
+                {t("dashboard.home.gscChart")}
               </CardTitle>
-              <CardDescription>Derniers 30 jours</CardDescription>
+              <CardDescription>{t("dashboard.home.last30Days")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -445,7 +540,7 @@ export default function DashboardHome() {
                     dataKey="organic_clicks" 
                     stroke="hsl(var(--accent-foreground))" 
                     fill="hsl(var(--accent) / 0.3)" 
-                    name="Clics"
+                    name="Clicks"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -457,9 +552,9 @@ export default function DashboardHome() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
-                GA4: Sessions & Conversions
+                {t("dashboard.home.ga4Chart")}
               </CardTitle>
-              <CardDescription>Derniers 30 jours</CardDescription>
+              <CardDescription>{t("dashboard.home.last30Days")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -505,12 +600,12 @@ export default function DashboardHome() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Actions prioritaires</CardTitle>
-                  <CardDescription>Recommandations classées par impact</CardDescription>
+                  <CardTitle>{t("dashboard.home.priorityActions")}</CardTitle>
+                  <CardDescription>{t("dashboard.home.priorityActionsDesc")}</CardDescription>
                 </div>
-                <Link to="/dashboard/seo-tech">
+                <Link to="/dashboard/seo">
                   <Button variant="ghost" size="sm">
-                    Voir tout
+                    {t("dashboard.home.viewAll")}
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
@@ -545,12 +640,12 @@ export default function DashboardHome() {
                     </p>
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Impact</span>
+                        <span className="text-xs text-muted-foreground">{t("dashboard.home.impact")}</span>
                         <Progress value={action.impact} className="w-20 h-1.5" />
                         <span className="text-xs font-medium">{action.impact}%</span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        Effort: {action.effort}
+                        {action.effort}
                       </span>
                     </div>
                   </div>
@@ -561,8 +656,8 @@ export default function DashboardHome() {
               )) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Aucune action en attente</p>
-                  <p className="text-sm">Lancez un audit SEO pour détecter les opportunités</p>
+                  <p>{t("dashboard.home.noActions")}</p>
+                  <p className="text-sm">{t("dashboard.home.noActionsDesc")}</p>
                 </div>
               )}
             </CardContent>
@@ -576,10 +671,10 @@ export default function DashboardHome() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="w-5 h-5 text-primary" />
-                  Agents IA
+                  {t("dashboard.home.aiAgents")}
                 </CardTitle>
                 <Badge variant="gradient" className="text-xs">
-                  {agentStatus.filter(a => a.status === "active").length} actifs
+                  {agentStatus.filter(a => a.status === "active").length} {t("dashboard.home.active")}
                 </Badge>
               </div>
             </CardHeader>
@@ -607,7 +702,7 @@ export default function DashboardHome() {
             </CardContent>
           </Card>
 
-          {/* Autopilot toggle */}
+          {/* Autopilot toggle - NOW FUNCTIONAL */}
           <Card variant="gradient">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -616,17 +711,32 @@ export default function DashboardHome() {
                     <Zap className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-medium">Autopilot</p>
-                    <p className="text-xs opacity-80">Exécution auto</p>
+                    <p className="font-medium">{t("dashboard.home.autopilot")}</p>
+                    <p className="text-xs opacity-80">{t("dashboard.home.autopilotAuto")}</p>
                   </div>
                 </div>
-                <Button variant="secondary" size="sm" className="gap-2">
-                  <Pause className="w-4 h-4" />
-                  OFF
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={toggleAutopilot}
+                  disabled={togglingAutopilot}
+                >
+                  {togglingAutopilot ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : autopilotEnabled ? (
+                    <Play className="w-4 h-4" />
+                  ) : (
+                    <Pause className="w-4 h-4" />
+                  )}
+                  {autopilotEnabled ? "ON" : "OFF"}
                 </Button>
               </div>
               <p className="text-xs mt-4 opacity-70">
-                En mode OFF, les actions sont suggérées mais requièrent votre validation.
+                {autopilotEnabled 
+                  ? t("dashboard.home.autopilotOnDesc")
+                  : t("dashboard.home.autopilotOffDesc")
+                }
               </p>
             </CardContent>
           </Card>
