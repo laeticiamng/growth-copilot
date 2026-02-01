@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useSessionExpiry } from "@/hooks/useSessionExpiry";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -119,6 +120,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       return isAtLeastRole(item.requiresRole);
     });
   }, [isAtLeastRole]);
+
+  // Monitor session expiry and show warnings
+  useSessionExpiry({
+    warningMinutes: 5,
+    onExpired: () => {
+      navigate("/auth");
+    },
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
