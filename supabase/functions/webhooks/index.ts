@@ -153,6 +153,12 @@ serve(async (req) => {
     const { action, ...params } = await req.json();
 
     switch (action) {
+      case "ping": {
+        return new Response(JSON.stringify({ ok: true, timestamp: Date.now() }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       case "trigger": {
         const result = await triggerWebhooks(supabaseUrl, supabaseServiceKey, params as WebhookPayload);
         return new Response(JSON.stringify(result), {
