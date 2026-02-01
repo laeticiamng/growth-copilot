@@ -25,8 +25,8 @@ export function Footer() {
       { label: t("landing.footer.partners"), href: "#" },
     ],
     [t("landing.footer.legal")]: [
-      { label: t("landing.footer.privacy"), href: "#" },
-      { label: t("landing.footer.terms"), href: "#" },
+      { label: t("landing.footer.privacy"), href: "/privacy" },
+      { label: t("landing.footer.terms"), href: "/terms" },
       { label: t("landing.footer.cookies"), href: "#" },
       { label: "GDPR", href: "#" },
     ],
