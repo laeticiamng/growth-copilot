@@ -1,6 +1,11 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+/**
+ * Enhanced useAds hook with complete CRUD operations
+ * Adds: deleteCampaign, deleteNegative, updateAccount, refreshMetrics
+ */
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkspace } from './useWorkspace';
+import { toast } from 'sonner';
 
 interface AdsAccount {
   id: string;
@@ -10,6 +15,7 @@ interface AdsAccount {
   is_active: boolean | null;
   budget_limit_daily: number | null;
   budget_limit_monthly: number | null;
+  timezone: string | null;
 }
 
 interface Campaign {
@@ -33,6 +39,7 @@ interface AdGroup {
   name: string;
   campaign_id: string;
   status: string | null;
+  adgroup_id: string | null;
 }
 
 interface AdsKeyword {
@@ -63,12 +70,18 @@ interface AdsContextType {
   keywords: AdsKeyword[];
   negatives: AdsNegative[];
   loading: boolean;
+  syncing: boolean;
   refetch: () => void;
   setCurrentAccount: (account: AdsAccount | null) => void;
+  // CRUD operations
   createCampaign: (data: Partial<Campaign>) => Promise<{ error: Error | null }>;
   updateCampaign: (campaignId: string, data: Partial<Campaign>) => Promise<{ error: Error | null }>;
+  deleteCampaign: (campaignId: string) => Promise<{ error: Error | null }>;
   updateCampaignStatus: (campaignId: string, status: string) => Promise<{ error: Error | null }>;
   addNegativeKeyword: (keyword: string, matchType: string, campaignId?: string) => Promise<{ error: Error | null }>;
+  deleteNegativeKeyword: (negativeId: string) => Promise<{ error: Error | null }>;
+  updateAccountBudget: (accountId: string, daily: number, monthly: number) => Promise<{ error: Error | null }>;
+  syncAdsData: () => Promise<{ error: Error | null }>;
 }
 
 const AdsContext = createContext<AdsContextType | undefined>(undefined);
@@ -82,8 +95,9 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   const [keywords, setKeywords] = useState<AdsKeyword[]>([]);
   const [negatives, setNegatives] = useState<AdsNegative[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
-  const fetchAds = async () => {
+  const fetchAds = useCallback(async () => {
     if (!currentWorkspace) {
       setAccounts([]);
       setCurrentAccount(null);
@@ -97,35 +111,41 @@ export function AdsProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
-    const [accountsRes, negativesRes] = await Promise.all([
-      supabase.from('ads_accounts').select('*').eq('workspace_id', currentWorkspace.id),
-      supabase.from('ads_negatives').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }),
-    ]);
-
-    const adsAccounts = (accountsRes.data || []) as AdsAccount[];
-    setAccounts(adsAccounts);
-    setNegatives((negativesRes.data || []) as AdsNegative[]);
-
-    if (adsAccounts.length > 0 && !currentAccount) {
-      setCurrentAccount(adsAccounts[0]);
-    }
-
-    if (currentAccount) {
-      const [campaignsRes, adGroupsRes] = await Promise.all([
-        supabase.from('campaigns').select('*').eq('ads_account_id', currentAccount.id).order('cost_30d', { ascending: false }),
-        supabase.from('adgroups').select('*').eq('workspace_id', currentWorkspace.id),
+    try {
+      const [accountsRes, negativesRes] = await Promise.all([
+        supabase.from('ads_accounts').select('*').eq('workspace_id', currentWorkspace.id),
+        supabase.from('ads_negatives').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }),
       ]);
 
-      setCampaigns((campaignsRes.data || []) as Campaign[]);
-      setAdGroups((adGroupsRes.data || []) as AdGroup[]);
-    }
+      const adsAccounts = (accountsRes.data || []) as AdsAccount[];
+      setAccounts(adsAccounts);
+      setNegatives((negativesRes.data || []) as AdsNegative[]);
 
-    setLoading(false);
-  };
+      if (adsAccounts.length > 0 && !currentAccount) {
+        setCurrentAccount(adsAccounts[0]);
+      }
+
+      if (currentAccount) {
+        const [campaignsRes, adGroupsRes, keywordsRes] = await Promise.all([
+          supabase.from('campaigns').select('*').eq('ads_account_id', currentAccount.id).order('cost_30d', { ascending: false }),
+          supabase.from('adgroups').select('*').eq('workspace_id', currentWorkspace.id),
+          supabase.from('ads_keywords').select('*').eq('workspace_id', currentWorkspace.id),
+        ]);
+
+        setCampaigns((campaignsRes.data || []) as Campaign[]);
+        setAdGroups((adGroupsRes.data || []) as AdGroup[]);
+        setKeywords((keywordsRes.data || []) as AdsKeyword[]);
+      }
+    } catch (error) {
+      console.error('[useAds] Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentWorkspace, currentAccount]);
 
   useEffect(() => {
     fetchAds();
-  }, [currentWorkspace, currentAccount?.id]);
+  }, [fetchAds]);
 
   const createCampaign = async (data: Partial<Campaign>) => {
     if (!currentWorkspace || !currentAccount) {
@@ -139,12 +159,19 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       budget_daily: data.budget_daily,
       strategy: data.strategy,
       campaign_type: data.campaign_type,
+      target_cpa: data.target_cpa,
+      target_roas: data.target_roas,
       status: 'draft',
     };
 
     const { error } = await supabase.from('campaigns').insert(insertData);
 
-    if (!error) fetchAds();
+    if (error) {
+      toast.error('Erreur lors de la création de la campagne');
+    } else {
+      toast.success('Campagne créée avec succès');
+      fetchAds();
+    }
     return { error: error as Error | null };
   };
 
@@ -154,13 +181,29 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       .update(data)
       .eq('id', campaignId);
 
-    if (!error) fetchAds();
+    if (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } else {
+      toast.success('Campagne mise à jour');
+      fetchAds();
+    }
     return { error: error as Error | null };
   };
 
-  useEffect(() => {
-    fetchAds();
-  }, [currentWorkspace, currentAccount?.id]);
+  const deleteCampaign = async (campaignId: string) => {
+    const { error } = await supabase
+      .from('campaigns')
+      .delete()
+      .eq('id', campaignId);
+
+    if (error) {
+      toast.error('Erreur lors de la suppression');
+    } else {
+      toast.success('Campagne supprimée');
+      fetchAds();
+    }
+    return { error: error as Error | null };
+  };
 
   const updateCampaignStatus = async (campaignId: string, status: string) => {
     return updateCampaign(campaignId, { status });
@@ -179,8 +222,76 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       campaign_id: campaignId || null,
     });
 
-    if (!error) fetchAds();
+    if (error) {
+      toast.error('Erreur lors de l\'ajout du mot-clé négatif');
+    } else {
+      toast.success('Mot-clé négatif ajouté');
+      fetchAds();
+    }
     return { error: error as Error | null };
+  };
+
+  const deleteNegativeKeyword = async (negativeId: string) => {
+    const { error } = await supabase
+      .from('ads_negatives')
+      .delete()
+      .eq('id', negativeId);
+
+    if (error) {
+      toast.error('Erreur lors de la suppression');
+    } else {
+      toast.success('Mot-clé négatif supprimé');
+      fetchAds();
+    }
+    return { error: error as Error | null };
+  };
+
+  const updateAccountBudget = async (accountId: string, daily: number, monthly: number) => {
+    const { error } = await supabase
+      .from('ads_accounts')
+      .update({ 
+        budget_limit_daily: daily, 
+        budget_limit_monthly: monthly 
+      })
+      .eq('id', accountId);
+
+    if (error) {
+      toast.error('Erreur lors de la mise à jour du budget');
+    } else {
+      toast.success('Budget mis à jour');
+      fetchAds();
+    }
+    return { error: error as Error | null };
+  };
+
+  const syncAdsData = async () => {
+    if (!currentWorkspace || !currentAccount) {
+      return { error: new Error('No workspace or account selected') };
+    }
+
+    setSyncing(true);
+    try {
+      const { error } = await supabase.functions.invoke('sync-ads', {
+        body: {
+          workspace_id: currentWorkspace.id,
+          account_id: currentAccount.id,
+        }
+      });
+
+      if (error) {
+        toast.error('Erreur lors de la synchronisation');
+        return { error: error as Error };
+      }
+
+      toast.success('Données synchronisées');
+      await fetchAds();
+      return { error: null };
+    } catch (err) {
+      toast.error('Erreur de synchronisation');
+      return { error: err as Error };
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -192,12 +303,17 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       keywords,
       negatives,
       loading,
+      syncing,
       refetch: fetchAds,
       setCurrentAccount,
       createCampaign,
       updateCampaign,
+      deleteCampaign,
       updateCampaignStatus,
       addNegativeKeyword,
+      deleteNegativeKeyword,
+      updateAccountBudget,
+      syncAdsData,
     }}>
       {children}
     </AdsContext.Provider>
