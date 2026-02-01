@@ -69,7 +69,7 @@ export const en = {
     hero: {
       tagline: "Powered by AI",
       title: "Automate your digital growth",
-      titleHighlight: "without a marketing team",
+      titleHighlight: "with an AI marketing team",
       subtitle: "An AI platform that manages your SEO, ads, content and social media. Real results, zero complexity.",
       cta: "Free audit in 2 min",
       secondaryCta: "Watch demo",

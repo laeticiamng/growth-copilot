@@ -69,7 +69,7 @@ export const fr = {
     hero: {
       tagline: "Propulsé par l'IA",
       title: "Automatise ta croissance digitale",
-      titleHighlight: "sans équipe marketing",
+      titleHighlight: "avec une équipe marketing IA",
       subtitle: "Une plateforme IA qui gère ton SEO, tes ads, ton contenu et tes réseaux sociaux. Résultats concrets, zéro complexité.",
       cta: "Audit gratuit en 2 min",
       secondaryCta: "Voir la démo",
