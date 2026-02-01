@@ -111,7 +111,7 @@ export default function Privacy() {
             <h2 className="text-2xl font-semibold">9. Contact</h2>
             <p>
               Pour toute question concernant cette politique de confidentialité ou pour exercer vos 
-              droits, contactez-nous à : <a href="mailto:privacy@agentgrowth.io" className="text-primary hover:underline">privacy@agentgrowth.io</a>
+              droits, contactez-nous à : <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline">m.laeticia@hotmail.fr</a>
             </p>
           </section>
 

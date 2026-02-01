@@ -146,8 +146,8 @@ export default function Terms() {
             <h2 className="text-2xl font-semibold">13. Contact</h2>
             <p>
               Pour toute question concernant ces conditions, contactez-nous à :{" "}
-              <a href="mailto:legal@agentgrowth.io" className="text-primary hover:underline">
-                legal@agentgrowth.io
+              <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline">
+                m.laeticia@hotmail.fr
               </a>
             </p>
           </section>
