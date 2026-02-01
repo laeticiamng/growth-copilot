@@ -42,7 +42,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg">EmotionsCare</span>
+              <span className="font-bold text-lg">Growth OS</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               {t("landing.footer.description")}
