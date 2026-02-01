@@ -1293,6 +1293,292 @@ export type Database = {
           },
         ]
       }
+      cms_media: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          file_path: string
+          file_size: number
+          file_url: string
+          filename: string
+          folder: string | null
+          height: number | null
+          id: string
+          metadata: Json | null
+          mime_type: string
+          original_filename: string
+          tags: string[] | null
+          updated_at: string
+          uploaded_by: string | null
+          width: number | null
+          workspace_id: string
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_path: string
+          file_size: number
+          file_url: string
+          filename: string
+          folder?: string | null
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type: string
+          original_filename: string
+          tags?: string[] | null
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+          workspace_id: string
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_path?: string
+          file_size?: number
+          file_url?: string
+          filename?: string
+          folder?: string | null
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string
+          original_filename?: string
+          tags?: string[] | null
+          updated_at?: string
+          uploaded_by?: string | null
+          width?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_media_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_page_revisions: {
+        Row: {
+          change_summary: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          page_id: string
+          revision_number: number
+          title: string
+          workspace_id: string
+        }
+        Insert: {
+          change_summary?: string | null
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          page_id: string
+          revision_number: number
+          title: string
+          workspace_id: string
+        }
+        Update: {
+          change_summary?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          page_id?: string
+          revision_number?: number
+          title?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_page_revisions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_page_revisions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_pages: {
+        Row: {
+          content: Json | null
+          created_at: string
+          created_by: string | null
+          excerpt: string | null
+          featured_image_url: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_image_url: string | null
+          page_type: string | null
+          parent_version_id: string | null
+          published_at: string | null
+          published_by: string | null
+          settings: Json | null
+          site_id: string | null
+          slug: string
+          status: string
+          template_id: string | null
+          title: string
+          updated_at: string
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
+          page_type?: string | null
+          parent_version_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          settings?: Json | null
+          site_id?: string | null
+          slug: string
+          status?: string
+          template_id?: string | null
+          title: string
+          updated_at?: string
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
+          page_type?: string | null
+          parent_version_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          settings?: Json | null
+          site_id?: string | null
+          slug?: string
+          status?: string
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_pages_parent_version_id_fkey"
+            columns: ["parent_version_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_pages_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_pages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_pages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_reviews: {
+        Row: {
+          changes_requested: Json | null
+          comment: string | null
+          created_at: string
+          id: string
+          page_id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+          submitted_at: string
+          workspace_id: string
+        }
+        Insert: {
+          changes_requested?: Json | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          page_id: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          submitted_at?: string
+          workspace_id: string
+        }
+        Update: {
+          changes_requested?: Json | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          page_id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          submitted_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_reviews_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitor_analysis: {
         Row: {
           backlink_comparison: Json | null
