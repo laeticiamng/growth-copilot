@@ -6618,6 +6618,10 @@ export type Database = {
           permission: Database["public"]["Enums"]["permission_action"]
         }[]
       }
+      get_user_role: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_workspace_ids: { Args: { _user_id: string }; Returns: string[] }
       get_workspace_quota: {
         Args: { p_workspace_id: string }
@@ -6638,6 +6642,14 @@ export type Database = {
         Args: {
           _permission: Database["public"]["Enums"]["permission_action"]
           _site_id?: string
+          _user_id: string
+          _workspace_id: string
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
           _workspace_id: string
         }

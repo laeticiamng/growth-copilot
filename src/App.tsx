@@ -31,6 +31,7 @@ import { OpsMetricsProvider } from "@/hooks/useOpsMetrics";
 import { PolicyProfilesProvider } from "@/hooks/usePolicyProfiles";
 import { TokenLifecycleProvider } from "@/hooks/useTokenLifecycle";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
@@ -116,49 +117,49 @@ function App() {
                                       <Routes>
                                         {/* Public routes */}
                                         <Route path="/" element={<Index />} />
-                                        <Route path="/auth" element={<Auth />} />
-                                        <Route path="/onboarding" element={<Onboarding />} />
+                                        <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
+                                        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                                         <Route path="/link/:slug" element={<SmartLink />} />
                                         
-                                        {/* Dashboard - Foundation */}
-                                        <Route path="/dashboard" element={<DashboardLayout><DashboardHome /></DashboardLayout>} />
-                                        <Route path="/dashboard/sites" element={<DashboardLayout><Sites /></DashboardLayout>} />
-                                        <Route path="/dashboard/connections" element={<DashboardLayout><ConnectionStatus /></DashboardLayout>} />
-                                        <Route path="/dashboard/integrations" element={<DashboardLayout><Integrations /></DashboardLayout>} />
-                                        <Route path="/dashboard/brand-kit" element={<DashboardLayout><BrandKit /></DashboardLayout>} />
-                                        <Route path="/dashboard/logs" element={<DashboardLayout><Logs /></DashboardLayout>} />
-                                        <Route path="/dashboard/billing" element={<DashboardLayout><Billing /></DashboardLayout>} />
+                                        {/* Dashboard - Foundation (Protected) */}
+                                        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><DashboardHome /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/sites" element={<ProtectedRoute><DashboardLayout><Sites /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/connections" element={<ProtectedRoute><DashboardLayout><ConnectionStatus /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/integrations" element={<ProtectedRoute><DashboardLayout><Integrations /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/brand-kit" element={<ProtectedRoute><DashboardLayout><BrandKit /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/logs" element={<ProtectedRoute><DashboardLayout><Logs /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/billing" element={<ProtectedRoute><DashboardLayout><Billing /></DashboardLayout></ProtectedRoute>} />
                                         
-                                        {/* Dashboard - Modules */}
-                                        <Route path="/dashboard/seo" element={<DashboardLayout><SEOTech /></DashboardLayout>} />
-                                        <Route path="/dashboard/content" element={<DashboardLayout><Content /></DashboardLayout>} />
-                                        <Route path="/dashboard/local" element={<DashboardLayout><LocalSEO /></DashboardLayout>} />
-                                        <Route path="/dashboard/ads" element={<DashboardLayout><Ads /></DashboardLayout>} />
-                                        <Route path="/dashboard/social" element={<DashboardLayout><Social /></DashboardLayout>} />
-                                        <Route path="/dashboard/cro" element={<DashboardLayout><CRO /></DashboardLayout>} />
-                                        <Route path="/dashboard/offers" element={<DashboardLayout><Offers /></DashboardLayout>} />
-                                        <Route path="/dashboard/lifecycle" element={<DashboardLayout><Lifecycle /></DashboardLayout>} />
-                                        <Route path="/dashboard/reputation" element={<DashboardLayout><Reputation /></DashboardLayout>} />
-                                        <Route path="/dashboard/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+                                        {/* Dashboard - Modules (Protected) */}
+                                        <Route path="/dashboard/seo" element={<ProtectedRoute><DashboardLayout><SEOTech /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/content" element={<ProtectedRoute><DashboardLayout><Content /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/local" element={<ProtectedRoute><DashboardLayout><LocalSEO /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/ads" element={<ProtectedRoute><DashboardLayout><Ads /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/social" element={<ProtectedRoute><DashboardLayout><Social /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/cro" element={<ProtectedRoute><DashboardLayout><CRO /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/offers" element={<ProtectedRoute><DashboardLayout><Offers /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/lifecycle" element={<ProtectedRoute><DashboardLayout><Lifecycle /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/reputation" element={<ProtectedRoute><DashboardLayout><Reputation /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/reports" element={<ProtectedRoute><DashboardLayout><Reports /></DashboardLayout></ProtectedRoute>} />
                                         
-                                        {/* Dashboard - Advanced (Livraison 4+5) */}
-                                        <Route path="/dashboard/approvals" element={<DashboardLayout><Approvals /></DashboardLayout>} />
-                                        <Route path="/dashboard/competitors" element={<DashboardLayout><Competitors /></DashboardLayout>} />
-                                        <Route path="/dashboard/agency" element={<DashboardLayout><Agency /></DashboardLayout>} />
-                                        <Route path="/dashboard/guide" element={<DashboardLayout><OnboardingGuide /></DashboardLayout>} />
-                                        <Route path="/dashboard/automations" element={<DashboardLayout><Automations /></DashboardLayout>} />
+                                        {/* Dashboard - Advanced (Protected) */}
+                                        <Route path="/dashboard/approvals" element={<ProtectedRoute><DashboardLayout><Approvals /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/competitors" element={<ProtectedRoute><DashboardLayout><Competitors /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/agency" element={<ProtectedRoute><DashboardLayout><Agency /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/guide" element={<ProtectedRoute><DashboardLayout><OnboardingGuide /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/automations" element={<ProtectedRoute><DashboardLayout><Automations /></DashboardLayout></ProtectedRoute>} />
                                         
-                                        {/* Dashboard - Media Launch (Livraison 6) */}
-                                        <Route path="/dashboard/media" element={<DashboardLayout><MediaAssets /></DashboardLayout>} />
-                                        <Route path="/dashboard/media/launch" element={<DashboardLayout><LaunchPlan /></DashboardLayout>} />
-                                        <Route path="/dashboard/media/creatives" element={<DashboardLayout><CreativesStudio /></DashboardLayout>} />
-                                        <Route path="/dashboard/media/kpis" element={<DashboardLayout><MediaKPIs /></DashboardLayout>} />
-                                        <Route path="/dashboard/media/ads-factory" element={<DashboardLayout><TemplateAdsFactory /></DashboardLayout>} />
+                                        {/* Dashboard - Media Launch (Protected) */}
+                                        <Route path="/dashboard/media" element={<ProtectedRoute><DashboardLayout><MediaAssets /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/media/launch" element={<ProtectedRoute><DashboardLayout><LaunchPlan /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/media/creatives" element={<ProtectedRoute><DashboardLayout><CreativesStudio /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/media/kpis" element={<ProtectedRoute><DashboardLayout><MediaKPIs /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/media/ads-factory" element={<ProtectedRoute><DashboardLayout><TemplateAdsFactory /></DashboardLayout></ProtectedRoute>} />
                                         
-                                        {/* Dashboard - Debug & Diagnostics */}
-                                        <Route path="/dashboard/diagnostics" element={<DashboardLayout><Diagnostics /></DashboardLayout>} />
-                                        <Route path="/dashboard/ops" element={<DashboardLayout><Ops /></DashboardLayout>} />
-                                        <Route path="/dashboard/approvals-v2" element={<DashboardLayout><ApprovalsV2 /></DashboardLayout>} />
+                                        {/* Dashboard - Debug & Diagnostics (Protected) */}
+                                        <Route path="/dashboard/diagnostics" element={<ProtectedRoute><DashboardLayout><Diagnostics /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/ops" element={<ProtectedRoute><DashboardLayout><Ops /></DashboardLayout></ProtectedRoute>} />
+                                        <Route path="/dashboard/approvals-v2" element={<ProtectedRoute><DashboardLayout><ApprovalsV2 /></DashboardLayout></ProtectedRoute>} />
                                         
                                         <Route path="*" element={<NotFound />} />
                                       </Routes>
