@@ -8,31 +8,37 @@ import {
   ArrowLeft, 
   Globe, 
   Link as LinkIcon,
-  Key,
   Target,
   Check,
   Loader2,
   MapPin,
   Building,
+  Briefcase,
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { toast } from "sonner";
 
 const steps = [
-  { id: 1, title: "Ton site", icon: Globe },
-  { id: 2, title: "Connexions", icon: LinkIcon },
-  { id: 3, title: "Accès CMS", icon: Key },
+  { id: 1, title: "Workspace", icon: Briefcase },
+  { id: 2, title: "Ton site", icon: Globe },
+  { id: 3, title: "Connexions", icon: LinkIcon },
   { id: 4, title: "Objectifs", icon: Target },
 ];
 
 const Onboarding = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { createWorkspace, currentWorkspace } = useWorkspace();
   const initialUrl = searchParams.get("url") || "";
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
+    workspaceName: "",
     url: initialUrl,
     sector: "",
     location: "",
@@ -46,20 +52,60 @@ const Onboarding = () => {
     goals: [] as string[],
   });
 
-  const handleNext = () => {
+  // Generate slug from workspace name
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  };
+
+  const handleNext = async () => {
+    // Step 1: Create workspace
+    if (currentStep === 1) {
+      if (!formData.workspaceName.trim()) {
+        setWorkspaceError("Le nom du workspace est requis");
+        return;
+      }
+      
+      setIsLoading(true);
+      setWorkspaceError(null);
+      
+      const slug = generateSlug(formData.workspaceName);
+      const { error, workspace } = await createWorkspace(formData.workspaceName, slug);
+      
+      setIsLoading(false);
+      
+      if (error) {
+        console.error("Workspace creation error:", error);
+        if (error.message.includes("duplicate") || error.message.includes("unique")) {
+          setWorkspaceError("Ce nom de workspace existe déjà");
+        } else {
+          setWorkspaceError(error.message || "Erreur lors de la création du workspace");
+        }
+        return;
+      }
+      
+      toast.success("Workspace créé !");
+      setCurrentStep(2);
+      return;
+    }
+    
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
       setIsLoading(true);
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 2000);
+      toast.success("Configuration terminée !");
+      navigate("/dashboard");
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      setWorkspaceError(null);
     }
   };
 
@@ -115,22 +161,56 @@ const Onboarding = () => {
               Étape {currentStep} sur 4
             </Badge>
             <CardTitle className="text-2xl">
-              {currentStep === 1 && "Parle-nous de ton site"}
-              {currentStep === 2 && "Connecte tes outils"}
-              {currentStep === 3 && "Accès à ton CMS"}
+              {currentStep === 1 && "Crée ton workspace"}
+              {currentStep === 2 && "Parle-nous de ton site"}
+              {currentStep === 3 && "Connecte tes outils"}
               {currentStep === 4 && "Tes objectifs"}
             </CardTitle>
             <CardDescription>
-              {currentStep === 1 && "On a besoin de quelques infos pour personnaliser ton audit."}
-              {currentStep === 2 && "Plus tu connectes d'outils, plus on peut optimiser."}
-              {currentStep === 3 && "Pour appliquer les corrections automatiquement (optionnel)."}
+              {currentStep === 1 && "Un workspace regroupe tous tes sites et données."}
+              {currentStep === 2 && "On a besoin de quelques infos pour personnaliser ton audit."}
+              {currentStep === 3 && "Plus tu connectes d'outils, plus on peut optimiser."}
               {currentStep === 4 && "Qu'est-ce qui compte le plus pour toi ?"}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6">
-            {/* Step 1: Site Info */}
+            {/* Step 1: Create Workspace */}
             {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Nom de ton workspace</label>
+                  <input
+                    type="text"
+                    placeholder="Mon Entreprise, Mon Agence..."
+                    value={formData.workspaceName}
+                    onChange={(e) => {
+                      setFormData({ ...formData, workspaceName: e.target.value });
+                      setWorkspaceError(null);
+                    }}
+                    className={`w-full h-12 px-4 rounded-lg bg-secondary border focus:outline-none transition-colors ${
+                      workspaceError ? "border-destructive" : "border-border focus:border-primary"
+                    }`}
+                  />
+                  {workspaceError && (
+                    <p className="text-sm text-destructive mt-2">{workspaceError}</p>
+                  )}
+                  {formData.workspaceName && !workspaceError && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Slug : <code className="bg-secondary px-1 rounded">{generateSlug(formData.workspaceName)}</code>
+                    </p>
+                  )}
+                </div>
+                <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-sm text-muted-foreground">
+                    💡 Un workspace regroupe tous tes sites, données et équipe. Tu pourras inviter des collaborateurs plus tard.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Site Info */}
+            {currentStep === 2 && (
               <div className="space-y-6">
                 <div>
                   <label className="text-sm font-medium mb-2 block">URL de ton site</label>
@@ -196,8 +276,8 @@ const Onboarding = () => {
               </div>
             )}
 
-            {/* Step 2: Integrations */}
-            {currentStep === 2 && (
+            {/* Step 3: Integrations */}
+            {currentStep === 3 && (
               <div className="space-y-4">
                 {[
                   { key: "gsc", name: "Google Search Console", desc: "Données SEO officielles", recommended: true },
@@ -248,43 +328,6 @@ const Onboarding = () => {
               </div>
             )}
 
-            {/* Step 3: CMS Access */}
-            {currentStep === 3 && (
-              <div className="space-y-4">
-                {[
-                  { key: "wordpress", name: "WordPress", desc: "Corrections SEO automatiques" },
-                  { key: "shopify", name: "Shopify", desc: "Optimisation e-commerce" },
-                  { key: "webflow", name: "Webflow", desc: "Modifications design" },
-                  { key: "none", name: "Pas de CMS connecté", desc: "Mode instructions & patchs" },
-                ].map((cms) => (
-                  <button
-                    key={cms.key}
-                    onClick={() => setFormData({ ...formData, cmsType: cms.key })}
-                    className={`
-                      w-full p-4 rounded-lg border text-left transition-all flex items-center justify-between
-                      ${formData.cmsType === cms.key
-                        ? "border-primary bg-primary/10" 
-                        : "border-border hover:border-primary/50"
-                      }
-                    `}
-                  >
-                    <div>
-                      <span className="font-medium">{cms.name}</span>
-                      <p className="text-sm text-muted-foreground">{cms.desc}</p>
-                    </div>
-                    <div className={`
-                      w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-                      ${formData.cmsType === cms.key
-                        ? "border-primary bg-primary text-primary-foreground" 
-                        : "border-border"
-                      }
-                    `}>
-                      {formData.cmsType === cms.key && <Check className="w-4 h-4" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
 
             {/* Step 4: Goals */}
             {currentStep === 4 && (
