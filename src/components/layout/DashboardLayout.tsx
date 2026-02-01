@@ -93,6 +93,7 @@ const allNavItems: NavItem[] = [
   { path: "/dashboard/reports", label: "Rapports", icon: BarChart3 },
   { path: "/dashboard/approvals", label: "Approbations", icon: Shield },
   { path: "/dashboard/automations", label: "Automations", icon: Webhook },
+  { path: "/dashboard/agents", label: "Agents IA", icon: Bot },
   { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
   { path: "/dashboard/brand-kit", label: "Brand Kit", icon: Palette },
   { path: "/dashboard/guide", label: "Guide", icon: Rocket },
