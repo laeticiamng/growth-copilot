@@ -4,7 +4,7 @@ import { validateRoleAccess, forbiddenResponse, logIntegrationAction } from "../
 
 interface OAuthInitRequest {
   workspace_id: string;
-  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube" | "google_business_profile" | "meta";
+  provider: "google_analytics" | "google_search_console" | "google_ads" | "youtube" | "google_business_profile" | "google_combined" | "meta" | "meta_ads" | "meta_instagram" | "meta_messaging";
   redirect_url: string;
 }
 
