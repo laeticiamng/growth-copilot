@@ -1089,7 +1089,7 @@ export type Database = {
           {
             foreignKeyName: "autopilot_settings_workspace_id_fkey"
             columns: ["workspace_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
