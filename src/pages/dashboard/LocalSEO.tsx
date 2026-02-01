@@ -33,10 +33,12 @@ import {
 } from "lucide-react";
 import { useLocalSEO } from "@/hooks/useLocalSEO";
 import { useSites } from "@/hooks/useSites";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function LocalSEO() {
+  const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const { 
     profiles, 
@@ -120,30 +122,41 @@ export default function LocalSEO() {
 
   const handleGenerateAIReply = async () => {
     if (!selectedReview) return;
+    
+    // Use workspace from context
+    if (!currentWorkspace) {
+      toast.error("Workspace non trouvé");
+      return;
+    }
+    
     setGeneratingReply(true);
     try {
       const { data, error } = await supabase.functions.invoke("ai-gateway", {
         body: {
+          workspace_id: currentWorkspace.id,
           agent_name: "review_responder",
-          purpose: "generate_review_reply",
-          messages: [
-            {
-              role: "system",
-              content: "Tu es un assistant qui génère des réponses professionnelles et empathiques aux avis clients. Réponds en français, de manière concise (max 3 phrases)."
-            },
-            {
-              role: "user",
-              content: `Génère une réponse à cet avis client:\n\nAuteur: ${selectedReview.author}\nAvis: "${selectedReview.comment}"`
+          purpose: "copywriting",
+          input: {
+            system_prompt: "Tu es un assistant qui génère des réponses professionnelles et empathiques aux avis clients. Réponds en français, de manière concise (max 3 phrases).",
+            user_prompt: `Génère une réponse à cet avis client:\n\nAuteur: ${selectedReview.author}\nAvis: "${selectedReview.comment}"`,
+            context: {
+              author: selectedReview.author,
+              review: selectedReview.comment,
             }
-          ]
+          }
         }
       });
 
       if (error) throw error;
       
-      const content = data?.choices?.[0]?.message?.content || "";
-      setReplyText(content);
-      toast.success("Réponse générée par l'IA");
+      if (data?.success && data?.artifact?.summary) {
+        setReplyText(data.artifact.summary);
+        toast.success("Réponse générée par l'IA");
+      } else {
+        // Fallback if no structured response
+        setReplyText(`Merci ${selectedReview.author} pour votre retour. Nous prenons note de vos commentaires et restons à votre disposition.`);
+        toast.info("Réponse par défaut générée");
+      }
     } catch (error) {
       console.error("AI reply error:", error);
       toast.error("Erreur lors de la génération");

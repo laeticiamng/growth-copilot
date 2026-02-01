@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useSocial } from "@/hooks/useSocial";
 import { useSites } from "@/hooks/useSites";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 
@@ -61,34 +62,51 @@ export default function Social() {
       toast.error("Décrivez le type de contenu souhaité");
       return;
     }
+    
+    // Get current workspace from site
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Veuillez vous connecter");
+      return;
+    }
+
+    // Get workspace_id from accounts or use a fallback
+    const workspaceId = accounts[0]?.id ? 
+      (await supabase.from('social_accounts').select('workspace_id').eq('id', accounts[0].id).single())?.data?.workspace_id 
+      : null;
+
+    if (!workspaceId) {
+      toast.error("Workspace non trouvé");
+      return;
+    }
+
     setGeneratingAI(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-gateway`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          purpose: "copywriting",
+      const { data, error } = await supabase.functions.invoke("ai-gateway", {
+        body: {
+          workspace_id: workspaceId,
           agent_name: "social-generator",
+          purpose: "copywriting",
           input: {
-            task: "generate_social_post",
-            prompt: aiPrompt,
-            platforms: postForm.platforms.length > 0 ? postForm.platforms : ["Instagram", "LinkedIn"],
-          },
-        }),
+            system_prompt: "Tu es un expert en création de contenu pour les réseaux sociaux. Génère du contenu engageant, adapté à chaque plateforme.",
+            user_prompt: aiPrompt,
+            context: {
+              platforms: postForm.platforms.length > 0 ? postForm.platforms : ["Instagram", "LinkedIn"],
+            }
+          }
+        },
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const generatedContent = data.output?.content || data.output?.text || "";
+      if (error) throw error;
+      
+      if (data?.success && data?.artifact) {
+        const generatedContent = data.artifact.summary || "";
         setPostForm(prev => ({ ...prev, content: generatedContent }));
         setShowAIDialog(false);
         setShowPostDialog(true);
         toast.success("Contenu généré avec succès");
       } else {
-        toast.error("Erreur lors de la génération");
+        toast.error(data?.error || "Erreur lors de la génération");
       }
     } catch (err) {
       console.error("AI generation error:", err);
