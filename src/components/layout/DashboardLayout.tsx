@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { OfflineBanner } from "@/components/ui/offline-banner";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -141,6 +143,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <OfflineBanner />
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border h-16 flex items-center justify-between px-4">
         <div className="flex items-center">
@@ -278,7 +281,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <NotificationCenter />
         </div>
         <div className="p-6 lg:p-8">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </div>
       </main>
       
