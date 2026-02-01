@@ -1,7 +1,12 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+/**
+ * Enhanced useCRO hook with complete CRUD operations
+ * Adds: deleteExperiment, createVariant, updateVariant, deleteVariant, createAudit
+ */
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkspace } from './useWorkspace';
 import { useSites } from './useSites';
+import { toast } from 'sonner';
 
 interface CROAudit {
   id: string;
@@ -43,9 +48,19 @@ interface CROContextType {
   variants: CROVariant[];
   loading: boolean;
   refetch: () => void;
+  // Experiment CRUD
   createExperiment: (data: Partial<CROExperiment>) => Promise<{ error: Error | null; experiment: CROExperiment | null }>;
+  updateExperiment: (experimentId: string, data: Partial<CROExperiment>) => Promise<{ error: Error | null }>;
+  deleteExperiment: (experimentId: string) => Promise<{ error: Error | null }>;
   updateExperimentStatus: (experimentId: string, status: string) => Promise<{ error: Error | null }>;
   declareWinner: (experimentId: string, variantId: string) => Promise<{ error: Error | null }>;
+  // Variant CRUD
+  createVariant: (experimentId: string, data: Partial<CROVariant>) => Promise<{ error: Error | null; variant: CROVariant | null }>;
+  updateVariant: (variantId: string, data: Partial<CROVariant>) => Promise<{ error: Error | null }>;
+  deleteVariant: (variantId: string) => Promise<{ error: Error | null }>;
+  // Audit
+  createAudit: (pageUrl: string, pageType?: string) => Promise<{ error: Error | null }>;
+  getExperimentVariants: (experimentId: string) => CROVariant[];
 }
 
 const CROContext = createContext<CROContextType | undefined>(undefined);
@@ -58,7 +73,7 @@ export function CROProvider({ children }: { children: ReactNode }) {
   const [variants, setVariants] = useState<CROVariant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCRO = async () => {
+  const fetchCRO = useCallback(async () => {
     if (!currentWorkspace || !currentSite) {
       setAudits([]);
       setExperiments([]);
@@ -69,21 +84,28 @@ export function CROProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
-    const [auditsRes, experimentsRes, variantsRes] = await Promise.all([
-      supabase.from('cro_audits').select('*').eq('site_id', currentSite.id).order('created_at', { ascending: false }),
-      supabase.from('cro_experiments').select('*').eq('site_id', currentSite.id).order('created_at', { ascending: false }),
-      supabase.from('cro_variants').select('*').eq('workspace_id', currentWorkspace.id),
-    ]);
+    try {
+      const [auditsRes, experimentsRes, variantsRes] = await Promise.all([
+        supabase.from('cro_audits').select('*').eq('site_id', currentSite.id).order('created_at', { ascending: false }),
+        supabase.from('cro_experiments').select('*').eq('site_id', currentSite.id).order('created_at', { ascending: false }),
+        supabase.from('cro_variants').select('*').eq('workspace_id', currentWorkspace.id),
+      ]);
 
-    setAudits((auditsRes.data || []) as CROAudit[]);
-    setExperiments((experimentsRes.data || []) as CROExperiment[]);
-    setVariants((variantsRes.data || []) as CROVariant[]);
-    setLoading(false);
-  };
+      setAudits((auditsRes.data || []) as CROAudit[]);
+      setExperiments((experimentsRes.data || []) as CROExperiment[]);
+      setVariants((variantsRes.data || []) as CROVariant[]);
+    } catch (error) {
+      console.error('[useCRO] Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentWorkspace, currentSite]);
 
   useEffect(() => {
     fetchCRO();
-  }, [currentWorkspace, currentSite]);
+  }, [fetchCRO]);
+
+  // === EXPERIMENT CRUD ===
 
   const createExperiment = async (data: Partial<CROExperiment>) => {
     if (!currentWorkspace || !currentSite) {
@@ -97,15 +119,62 @@ export function CROProvider({ children }: { children: ReactNode }) {
         hypothesis: data.hypothesis,
         page_url: data.page_url,
         element_type: data.element_type,
-        test_type: data.test_type,
+        test_type: data.test_type || 'ab',
+        status: 'draft',
         workspace_id: currentWorkspace.id,
         site_id: currentSite.id,
       })
       .select()
       .single();
 
-    if (!error) fetchCRO();
+    if (error) {
+      toast.error('Erreur lors de la création');
+    } else {
+      toast.success('Expérience créée');
+      fetchCRO();
+    }
     return { error: error as Error | null, experiment: experiment as CROExperiment | null };
+  };
+
+  const updateExperiment = async (experimentId: string, data: Partial<CROExperiment>) => {
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.hypothesis !== undefined) updateData.hypothesis = data.hypothesis;
+    if (data.page_url !== undefined) updateData.page_url = data.page_url;
+    if (data.element_type !== undefined) updateData.element_type = data.element_type;
+    if (data.test_type !== undefined) updateData.test_type = data.test_type;
+    if (data.status !== undefined) updateData.status = data.status;
+
+    const { error } = await supabase
+      .from('cro_experiments')
+      .update(updateData)
+      .eq('id', experimentId);
+
+    if (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } else {
+      toast.success('Expérience mise à jour');
+      fetchCRO();
+    }
+    return { error: error as Error | null };
+  };
+
+  const deleteExperiment = async (experimentId: string) => {
+    // First delete related variants
+    await supabase.from('cro_variants').delete().eq('experiment_id', experimentId);
+    
+    const { error } = await supabase
+      .from('cro_experiments')
+      .delete()
+      .eq('id', experimentId);
+
+    if (error) {
+      toast.error('Erreur lors de la suppression');
+    } else {
+      toast.success('Expérience supprimée');
+      fetchCRO();
+    }
+    return { error: error as Error | null };
   };
 
   const updateExperimentStatus = async (experimentId: string, status: string) => {
@@ -122,7 +191,12 @@ export function CROProvider({ children }: { children: ReactNode }) {
       .update(updateData)
       .eq('id', experimentId);
 
-    if (!error) fetchCRO();
+    if (error) {
+      toast.error('Erreur lors de la mise à jour du statut');
+    } else {
+      toast.success(`Expérience ${status === 'running' ? 'lancée' : status === 'completed' ? 'terminée' : 'mise à jour'}`);
+      fetchCRO();
+    }
     return { error: error as Error | null };
   };
 
@@ -136,8 +210,105 @@ export function CROProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', experimentId);
 
-    if (!error) fetchCRO();
+    if (error) {
+      toast.error('Erreur lors de la déclaration du gagnant');
+    } else {
+      toast.success('Gagnant déclaré');
+      fetchCRO();
+    }
     return { error: error as Error | null };
+  };
+
+  // === VARIANT CRUD ===
+
+  const createVariant = async (experimentId: string, data: Partial<CROVariant>) => {
+    if (!currentWorkspace) {
+      return { error: new Error('No workspace selected'), variant: null };
+    }
+
+    const { data: variant, error } = await supabase
+      .from('cro_variants')
+      .insert({
+        experiment_id: experimentId,
+        name: data.name || 'Variant',
+        is_control: data.is_control || false,
+        workspace_id: currentWorkspace.id,
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      toast.error('Erreur lors de la création de la variante');
+    } else {
+      toast.success('Variante créée');
+      fetchCRO();
+    }
+    return { error: error as Error | null, variant: variant as CROVariant | null };
+  };
+
+  const updateVariant = async (variantId: string, data: Partial<CROVariant>) => {
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.changes !== undefined) updateData.changes = data.changes;
+    if (data.is_control !== undefined) updateData.is_control = data.is_control;
+
+    const { error } = await supabase
+      .from('cro_variants')
+      .update(updateData)
+      .eq('id', variantId);
+
+    if (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } else {
+      toast.success('Variante mise à jour');
+      fetchCRO();
+    }
+    return { error: error as Error | null };
+  };
+
+  const deleteVariant = async (variantId: string) => {
+    const { error } = await supabase
+      .from('cro_variants')
+      .delete()
+      .eq('id', variantId);
+
+    if (error) {
+      toast.error('Erreur lors de la suppression');
+    } else {
+      toast.success('Variante supprimée');
+      fetchCRO();
+    }
+    return { error: error as Error | null };
+  };
+
+  // === AUDIT ===
+
+  const createAudit = async (pageUrl: string, pageType?: string) => {
+    if (!currentWorkspace || !currentSite) {
+      return { error: new Error('No workspace or site selected') };
+    }
+
+    // In real implementation, this would call an edge function to analyze the page
+    const { error } = await supabase.from('cro_audits').insert({
+      page_type: pageType || 'landing',
+      friction_score: null, // Will be filled by analysis
+      findings: [],
+      recommendations: [],
+      workspace_id: currentWorkspace.id,
+      site_id: currentSite.id,
+    });
+
+    if (error) {
+      toast.error('Erreur lors de la création de l\'audit');
+    } else {
+      toast.success('Audit créé');
+      fetchCRO();
+    }
+    return { error: error as Error | null };
+  };
+
+  const getExperimentVariants = (experimentId: string): CROVariant[] => {
+    return variants.filter(v => v.experiment_id === experimentId);
   };
 
   return (
@@ -148,8 +319,15 @@ export function CROProvider({ children }: { children: ReactNode }) {
       loading,
       refetch: fetchCRO,
       createExperiment,
+      updateExperiment,
+      deleteExperiment,
       updateExperimentStatus,
       declareWinner,
+      createVariant,
+      updateVariant,
+      deleteVariant,
+      createAudit,
+      getExperimentVariants,
     }}>
       {children}
     </CROContext.Provider>
