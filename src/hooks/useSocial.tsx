@@ -54,59 +54,71 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
-    const [accountsRes, postsRes] = await Promise.all([
-      supabase
-        .from('social_accounts')
-        .select('*')
-        .eq('workspace_id', currentWorkspace.id)
-        .order('platform', { ascending: true }),
-      supabase
-        .from('social_posts')
-        .select('*')
-        .eq('workspace_id', currentWorkspace.id)
-        .order('created_at', { ascending: false }),
-    ]);
+    try {
+      const [accountsRes, postsRes] = await Promise.all([
+        supabase
+          .from('social_accounts')
+          .select('*')
+          .eq('workspace_id', currentWorkspace.id)
+          .order('platform', { ascending: true }),
+        supabase
+          .from('social_posts')
+          .select('*')
+          .eq('workspace_id', currentWorkspace.id)
+          .order('created_at', { ascending: false })
+          .limit(100), // Pagination limit
+      ]);
 
-    // Map accounts from DB using actual schema columns
-    const dbAccounts = (accountsRes.data || []).map(a => ({
-      id: a.id,
-      platform: a.platform,
-      connected: a.is_active || false,
-      handle: a.account_name,
-      followers: a.followers_count,
-    }));
+      if (accountsRes.error) {
+        console.error('[useSocial] Accounts fetch error:', accountsRes.error);
+      }
+      if (postsRes.error) {
+        console.error('[useSocial] Posts fetch error:', postsRes.error);
+      }
 
-    // Ensure all 4 platforms are represented (show disconnected if not in DB)
-    const platformList = ['instagram', 'facebook', 'linkedin', 'twitter'];
-    const allAccounts = platformList.map(platform => {
-      const existing = dbAccounts.find(a => a.platform.toLowerCase() === platform);
-      return existing || { 
-        id: platform, 
-        platform, 
-        connected: false, 
-        handle: null, 
-        followers: null 
-      };
-    });
+      // Map accounts from DB using actual schema columns
+      const dbAccounts = (accountsRes.data || []).map(a => ({
+        id: a.id,
+        platform: a.platform,
+        connected: a.is_active || false,
+        handle: a.account_name,
+        followers: a.followers_count,
+      }));
 
-    setAccounts(allAccounts);
+      // Ensure all 4 platforms are represented (show disconnected if not in DB)
+      const platformList = ['instagram', 'facebook', 'linkedin', 'twitter'];
+      const allAccounts = platformList.map(platform => {
+        const existing = dbAccounts.find(a => a.platform.toLowerCase() === platform);
+        return existing || { 
+          id: platform, 
+          platform, 
+          connected: false, 
+          handle: null, 
+          followers: null 
+        };
+      });
 
-    // Map posts from DB using actual schema columns
-    setPosts((postsRes.data || []).map(p => ({
-      id: p.id,
-      content: p.content,
-      platforms: [], // Single account per post in this schema
-      scheduled_for: null, // Not in current schema
-      published_at: p.published_at,
-      status: (p.status as 'draft' | 'scheduled' | 'published') || 'draft',
-      type: 'Post',
-      reach: p.reach,
-      likes: p.engagement_likes,
-      comments: p.engagement_comments,
-      shares: p.engagement_shares,
-    })));
+      setAccounts(allAccounts);
 
-    setLoading(false);
+      // Map posts from DB using actual schema columns
+      setPosts((postsRes.data || []).map(p => ({
+        id: p.id,
+        content: p.content,
+        platforms: [], // Single account per post in this schema
+        scheduled_for: null, // Not in current schema
+        published_at: p.published_at,
+        status: (p.status as 'draft' | 'scheduled' | 'published') || 'draft',
+        type: 'Post',
+        reach: p.reach,
+        likes: p.engagement_likes,
+        comments: p.engagement_comments,
+        shares: p.engagement_shares,
+      })));
+    } catch (error) {
+      console.error('[useSocial] Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -118,16 +130,30 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       return { error: new Error('No workspace selected') };
     }
 
+    // Validate content
+    if (!data.content?.trim()) {
+      return { error: new Error('Content is required') };
+    }
+
+    if (data.content.length > 2200) {
+      return { error: new Error('Content exceeds maximum length (2200 chars)') };
+    }
+
     const insertData = {
       workspace_id: currentWorkspace.id,
-      content: data.content || '',
+      content: data.content.trim(),
       status: 'draft',
     };
 
-    const { error } = await supabase.from('social_posts').insert(insertData as any);
+    try {
+      const { error } = await supabase.from('social_posts').insert(insertData as any);
 
-    if (!error) fetchSocial();
-    return { error: error as Error | null };
+      if (!error) fetchSocial();
+      return { error: error as Error | null };
+    } catch (err) {
+      console.error('[useSocial] Create post error:', err);
+      return { error: err as Error };
+    }
   };
 
   const updatePost = async (postId: string, data: Partial<SocialPost>) => {
