@@ -93,7 +93,7 @@ export default function Reports() {
     enabled: !!currentWorkspace?.id && !!currentSite?.id,
   });
 
-  const handleGenerateReport = async () => {
+  const handleGenerateReport = async (retryCount = 0) => {
     if (!currentWorkspace?.id || !currentSite?.id) {
       toast.error("Veuillez sélectionner un site");
       return;
@@ -111,16 +111,33 @@ export default function Reports() {
       if (error) throw error;
 
       if (data?.success) {
-        toast.success("Rapport généré avec succès");
+        toast.success("Rapport généré avec succès", {
+          action: data.url ? {
+            label: "Télécharger",
+            onClick: () => window.open(data.url, '_blank'),
+          } : undefined,
+        });
         refetch();
       } else {
-        toast.error(data?.error || "Erreur lors de la génération");
+        throw new Error(data?.error || "Erreur inconnue");
       }
     } catch (err) {
       console.error('Report generation error:', err);
-      toast.error("Erreur lors de la génération du rapport");
+      
+      // Retry logic - max 2 retries
+      if (retryCount < 2) {
+        toast.info(`Nouvelle tentative... (${retryCount + 1}/2)`);
+        setTimeout(() => handleGenerateReport(retryCount + 1), 2000);
+        return;
+      }
+      
+      toast.error("Échec de la génération après plusieurs tentatives", {
+        description: "Veuillez réessayer plus tard ou contacter le support.",
+      });
     } finally {
-      setGenerating(false);
+      if (retryCount >= 2 || retryCount === 0) {
+        setGenerating(false);
+      }
     }
   };
 
@@ -151,7 +168,7 @@ export default function Reports() {
         </div>
         <Button 
           variant="hero" 
-          onClick={handleGenerateReport}
+          onClick={() => handleGenerateReport()}
           disabled={generating || !currentSite}
         >
           {generating ? (

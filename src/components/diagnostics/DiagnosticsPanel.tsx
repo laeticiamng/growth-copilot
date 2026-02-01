@@ -137,6 +137,26 @@ export function DiagnosticsPanel() {
       message: "RLS activée sur toutes les tables",
     });
 
+    // Check Storage
+    const storageStart = performance.now();
+    try {
+      const { data: buckets, error: storageError } = await supabase.storage.listBuckets();
+      const storageLatency = performance.now() - storageStart;
+      latencies.push(storageLatency);
+      healthChecks.push({
+        name: "Storage",
+        status: storageError ? "warning" : "ok",
+        latency: Math.round(storageLatency),
+        message: storageError ? "Accès limité" : `${buckets?.length || 0} bucket(s) configuré(s)`,
+      });
+    } catch {
+      healthChecks.push({
+        name: "Storage",
+        status: "warning",
+        message: "Vérification impossible",
+      });
+    }
+
     // Check Quotas
     if (currentWorkspace) {
       try {
@@ -147,10 +167,11 @@ export function DiagnosticsPanel() {
           .single();
         
         const monthlyUsage = (data?.monthly_tokens_used || 0) / 1000000; // Convert to M
+        const crawlsUsed = data?.crawls_today || 0;
         healthChecks.push({
           name: "Quotas",
           status: monthlyUsage > 80 ? "warning" : "ok",
-          message: `${monthlyUsage.toFixed(1)}M tokens utilisés ce mois`,
+          message: `${monthlyUsage.toFixed(1)}M tokens • ${crawlsUsed} crawls aujourd'hui`,
         });
       } catch {
         healthChecks.push({
@@ -159,6 +180,20 @@ export function DiagnosticsPanel() {
           message: "Quota disponible",
         });
       }
+    }
+
+    // Check for stored errors
+    try {
+      const storedErrors = JSON.parse(localStorage.getItem('app_errors') || '[]');
+      if (storedErrors.length > 0) {
+        healthChecks.push({
+          name: "Erreurs récentes",
+          status: "warning",
+          message: `${storedErrors.length} erreur(s) enregistrée(s)`,
+        });
+      }
+    } catch {
+      // Ignore
     }
 
     const avgLatency = latencies.length > 0 

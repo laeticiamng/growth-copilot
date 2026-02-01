@@ -6,19 +6,24 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Star, MessageSquare, Send, ThumbsUp, AlertTriangle, Loader2, Mail } from "lucide-react";
+import { Star, MessageSquare, Send, ThumbsUp, AlertTriangle, Loader2, Mail, Sparkles, Bot } from "lucide-react";
 import { useReputation, Review } from "@/hooks/useReputation";
 import { useLocalSEO } from "@/hooks/useLocalSEO";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Reputation() {
   const { reviews, stats, loading, sendReviewRequest, respondToReview } = useReputation();
   const { profiles } = useLocalSEO();
+  const { currentWorkspace } = useWorkspace();
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [responseDialogOpen, setResponseDialogOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [responseText, setResponseText] = useState("");
   const [requestForm, setRequestForm] = useState({ name: "", email: "", phone: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   const handleSendRequest = async () => {
     if (!requestForm.name.trim() || !requestForm.email.trim()) return;
@@ -60,6 +65,48 @@ export default function Reputation() {
     setSelectedReview(review);
     setResponseText(review.reply || "");
     setResponseDialogOpen(true);
+  };
+
+  const handleGenerateAIResponse = async () => {
+    if (!selectedReview || !currentWorkspace) return;
+    
+    setGeneratingAI(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-gateway", {
+        body: {
+          workspace_id: currentWorkspace.id,
+          agent_name: "review_responder",
+          purpose: "copywriting",
+          input: {
+            system_prompt: "Tu es un expert en gestion de la réputation. Génère une réponse professionnelle, empathique et concise (max 3 phrases) à cet avis client. La réponse doit être en français, personnalisée et montrer que tu as bien compris le feedback.",
+            user_prompt: `Génère une réponse à cet avis client:\n\nAuteur: ${selectedReview.author_name || 'Client'}\nNote: ${selectedReview.rating}/5 étoiles\nCommentaire: "${selectedReview.comment || 'Pas de commentaire'}"`,
+            context: {
+              rating: selectedReview.rating,
+              is_negative: selectedReview.rating <= 2,
+            }
+          }
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.success && data?.artifact?.summary) {
+        setResponseText(data.artifact.summary);
+        toast.success("Réponse générée par l'IA");
+      } else {
+        // Fallback response based on rating
+        const fallback = selectedReview.rating >= 4
+          ? `Merci beaucoup ${selectedReview.author_name || ''} pour votre retour positif ! Nous sommes ravis que vous soyez satisfait. À très bientôt !`
+          : `Merci ${selectedReview.author_name || ''} pour votre retour. Nous prenons vos remarques très au sérieux et restons à votre disposition pour améliorer votre expérience.`;
+        setResponseText(fallback);
+        toast.info("Réponse par défaut générée");
+      }
+    } catch (error) {
+      console.error("AI response error:", error);
+      toast.error("Erreur lors de la génération");
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   if (loading) {
@@ -305,7 +352,22 @@ export default function Reputation() {
               </div>
             )}
             <div>
-              <Label htmlFor="response">Votre réponse</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="response">Votre réponse</Label>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleGenerateAIResponse}
+                  disabled={generatingAI}
+                >
+                  {generatingAI ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 mr-2" />
+                  )}
+                  Générer avec IA
+                </Button>
+              </div>
               <Textarea
                 id="response"
                 placeholder="Merci pour votre retour..."

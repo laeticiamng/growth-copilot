@@ -28,15 +28,29 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({ errorInfo });
     
-    // Log to analytics/monitoring service in production
+    // Log structured error for debugging
+    const errorPayload = {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+    };
+    
+    // Always log structured data
+    console.error('[Error Boundary]', errorPayload);
+    
+    // In production, could send to monitoring service
     if (import.meta.env.PROD) {
-      // Could integrate with Sentry, LogRocket, etc.
-      console.error('[Error Boundary]', {
-        error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString(),
-      });
+      // Store in localStorage for diagnostics
+      try {
+        const errors = JSON.parse(localStorage.getItem('app_errors') || '[]');
+        errors.unshift(errorPayload);
+        localStorage.setItem('app_errors', JSON.stringify(errors.slice(0, 10)));
+      } catch (e) {
+        // Ignore localStorage errors
+      }
     }
   }
 

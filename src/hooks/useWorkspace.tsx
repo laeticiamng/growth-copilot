@@ -62,7 +62,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchWorkspaces();
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const createWorkspace = async (name: string, slug: string) => {
     if (!user) return { error: new Error('Not authenticated'), workspace: null };
