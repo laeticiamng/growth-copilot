@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
   Circle,
@@ -18,9 +19,19 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const setupSteps = [
+interface SetupStep {
+  id: string;
+  title: string;
+  description: string;
+  status: "done" | "pending" | "current";
+  link: string;
+  stepNumber: number;
+}
+
+const setupSteps: SetupStep[] = [
   {
     id: "site",
+    stepNumber: 1,
     title: "Ajouter votre site",
     description: "Renseignez l'URL de votre site pour commencer l'analyse",
     status: "done",
@@ -28,6 +39,7 @@ const setupSteps = [
   },
   {
     id: "brand",
+    stepNumber: 2,
     title: "Configurer le Brand Kit",
     description: "Ton de voix, couleurs, USP, audience cible",
     status: "done",
@@ -35,13 +47,15 @@ const setupSteps = [
   },
   {
     id: "integrations",
+    stepNumber: 3,
     title: "Connecter GSC & GA4",
     description: "Synchronisez vos données Google pour des insights précis",
-    status: "pending",
+    status: "current",
     link: "/dashboard/integrations",
   },
   {
     id: "crawl",
+    stepNumber: 4,
     title: "Lancer le premier audit",
     description: "Crawl technique + audit SEO complet",
     status: "pending",
@@ -49,6 +63,7 @@ const setupSteps = [
   },
   {
     id: "content",
+    stepNumber: 5,
     title: "Importer vos mots-clés",
     description: "Depuis GSC ou manuellement",
     status: "pending",
@@ -109,10 +124,16 @@ const limits = [
 
 export default function OnboardingGuide() {
   const completedSteps = setupSteps.filter(s => s.status === "done").length;
+  const currentStepIndex = setupSteps.findIndex(s => s.status === "current");
   const progress = (completedSteps / setupSteps.length) * 100;
 
   return (
     <div className="space-y-8">
+      {/* Skip to main content for accessibility */}
+      <a href="#setup-steps" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground">
+        Passer au contenu principal
+      </a>
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -138,43 +159,94 @@ export default function OnboardingGuide() {
         </CardContent>
       </Card>
 
-      {/* Setup steps */}
-      <Card variant="feature">
+      {/* Setup steps - now with clickable stepper */}
+      <Card variant="feature" id="setup-steps">
         <CardHeader>
           <CardTitle>Étapes de configuration</CardTitle>
           <CardDescription>Complétez ces étapes pour activer toutes les fonctionnalités</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {setupSteps.map((step, i) => (
-            <div 
-              key={step.id} 
-              className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-                step.status === "done" ? "bg-green-500/10" : "bg-secondary/50"
-              }`}
-            >
-              {step.status === "done" ? (
-                <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
-              ) : (
-                <Circle className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className={`font-medium ${step.status === "done" ? "line-through text-muted-foreground" : ""}`}>
-                  {i + 1}. {step.title}
-                </p>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
-              </div>
-              <Button 
-                variant={step.status === "done" ? "ghost" : "outline"} 
-                size="sm"
-                asChild
-              >
-                <a href={step.link}>
-                  {step.status === "done" ? "Voir" : "Configurer"}
-                  <ArrowRight className="w-4 h-4 ml-1" />
+        <CardContent>
+          {/* Visual stepper */}
+          <div className="flex items-center justify-between mb-6 px-2">
+            {setupSteps.map((step, i) => (
+              <div key={step.id} className="flex items-center">
+                <a
+                  href={step.link}
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-all text-sm font-semibold",
+                    step.status === "done" 
+                      ? "bg-chart-3 text-white hover:bg-chart-3/90 cursor-pointer" 
+                      : step.status === "current"
+                        ? "gradient-bg text-primary-foreground ring-2 ring-primary/30 ring-offset-2 ring-offset-background"
+                        : "bg-secondary text-muted-foreground cursor-pointer hover:bg-secondary/80"
+                  )}
+                  aria-label={`Étape ${step.stepNumber}: ${step.title} - ${step.status === "done" ? "Terminée" : step.status === "current" ? "En cours" : "À faire"}`}
+                  aria-current={step.status === "current" ? "step" : undefined}
+                >
+                  {step.status === "done" ? (
+                    <CheckCircle2 className="w-5 h-5" />
+                  ) : (
+                    step.stepNumber
+                  )}
                 </a>
-              </Button>
-            </div>
-          ))}
+                {i < setupSteps.length - 1 && (
+                  <div className={cn(
+                    "hidden sm:block w-12 md:w-20 h-0.5 mx-1",
+                    step.status === "done" ? "bg-chart-3" : "bg-border"
+                  )} />
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* Step cards */}
+          <div className="space-y-3">
+            {setupSteps.map((step) => (
+              <a 
+                key={step.id}
+                href={step.link}
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-lg transition-all group",
+                  step.status === "done" 
+                    ? "bg-chart-3/10 hover:bg-chart-3/15" 
+                    : step.status === "current"
+                      ? "bg-primary/10 border-2 border-primary/30 hover:border-primary/50"
+                      : "bg-secondary/50 hover:bg-secondary/80"
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold",
+                  step.status === "done" 
+                    ? "bg-chart-3 text-white" 
+                    : step.status === "current"
+                      ? "gradient-bg text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                )}>
+                  {step.status === "done" ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    step.stepNumber
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    "font-medium",
+                    step.status === "done" && "text-muted-foreground"
+                  )}>
+                    {step.title}
+                    {step.status === "current" && (
+                      <Badge variant="gradient" className="ml-2 text-xs">En cours</Badge>
+                    )}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </div>
+                <ArrowRight className={cn(
+                  "w-5 h-5 transition-transform group-hover:translate-x-1",
+                  step.status === "done" ? "text-chart-3" : "text-muted-foreground"
+                )} />
+              </a>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
@@ -231,7 +303,7 @@ export default function OnboardingGuide() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{limit.name}</p>
-                  <Badge variant="outline" className="text-xs text-yellow-600">
+                  <Badge variant="outline" className="text-xs text-warning">
                     {limit.issue}
                   </Badge>
                 </div>

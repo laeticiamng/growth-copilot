@@ -1,13 +1,49 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { urlSchema } from "@/lib/validation";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
   const { t } = useTranslation();
   const [url, setUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [urlValid, setUrlValid] = useState(false);
+
+  // Real-time URL validation
+  const validateUrl = useCallback((value: string) => {
+    if (!value) {
+      setUrlError(null);
+      setUrlValid(false);
+      return false;
+    }
+    
+    // Add protocol if missing
+    let urlToValidate = value;
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+      urlToValidate = `https://${value}`;
+    }
+    
+    const result = urlSchema.safeParse(urlToValidate);
+    if (result.success) {
+      setUrlError(null);
+      setUrlValid(true);
+      return true;
+    } else {
+      setUrlError(result.error.errors[0]?.message || "URL invalide");
+      setUrlValid(false);
+      return false;
+    }
+  }, []);
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUrl(value);
+    validateUrl(value);
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
@@ -41,7 +77,7 @@ export function Hero() {
             {t("landing.hero.subtitle")}
           </p>
 
-          {/* URL Input + CTA */}
+          {/* URL Input + CTA with validation */}
           <div className="fade-in-up max-w-xl mx-auto mb-8" style={{ animationDelay: "0.3s" }}>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
@@ -49,16 +85,49 @@ export function Hero() {
                   type="url"
                   placeholder="https://yoursite.com"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className="w-full h-14 px-5 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  onChange={handleUrlChange}
+                  className={cn(
+                    "w-full h-14 px-5 pr-10 rounded-xl bg-secondary border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all",
+                    urlError 
+                      ? "border-destructive focus:ring-destructive" 
+                      : urlValid 
+                        ? "border-chart-3 focus:ring-chart-3" 
+                        : "border-border focus:ring-primary focus:border-transparent"
+                  )}
+                  aria-invalid={!!urlError}
+                  aria-describedby={urlError ? "url-error" : urlValid ? "url-valid" : undefined}
                 />
+                {url && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {urlValid ? (
+                      <CheckCircle2 className="w-5 h-5 text-chart-3" aria-hidden="true" />
+                    ) : urlError ? (
+                      <AlertCircle className="w-5 h-5 text-destructive" aria-hidden="true" />
+                    ) : null}
+                  </div>
+                )}
               </div>
               <Link to={`/onboarding${url ? `?url=${encodeURIComponent(url)}` : ''}`}>
-                <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap">
+                <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap" disabled={!!urlError && url.length > 0}>
                   {t("landing.hero.cta")}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
+            </div>
+            {/* Validation feedback */}
+            <div className="h-5 mt-2">
+              {urlError && (
+                <p id="url-error" className="text-sm text-destructive flex items-center justify-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {urlError}
+                </p>
+              )}
+              {urlValid && (
+                <p id="url-valid" className="text-sm text-chart-3 flex items-center justify-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  URL valide – prêt pour l'audit
+                </p>
+              )}
             </div>
           </div>
 
