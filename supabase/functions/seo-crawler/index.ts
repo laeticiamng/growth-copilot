@@ -720,8 +720,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // If workspace_id provided, require authentication
-    if (workspace_id) {
+    // Security: Block dangerous URLs FIRST (before any authentication)
+    if (isBlockedUrl(url)) {
+      console.error('Blocked URL attempt:', url);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'URL blocked for security reasons (private IP, localhost, or metadata endpoint)' 
+        }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create Supabase client for validation
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // SECURITY: Require workspace_id and site_id for authenticated crawls
+    // Validate that the user has access AND the URL matches the site
+    if (workspace_id && site_id) {
       const authResult = await validateWorkspaceAccess(
         req,
         workspace_id,
@@ -737,28 +753,82 @@ Deno.serve(async (req) => {
       if (!authResult.hasAccess) {
         return forbiddenResponse(authResult.error || "Access denied", corsHeaders);
       }
-    }
 
-    // Security: Block dangerous URLs
-    if (isBlockedUrl(url)) {
-      console.error('Blocked URL attempt:', url);
+      // SECURITY: Validate that URL belongs to the claimed site
+      const { data: site, error: siteError } = await supabase
+        .from('sites')
+        .select('url')
+        .eq('id', site_id)
+        .eq('workspace_id', workspace_id)
+        .single();
+
+      if (siteError || !site) {
+        console.error('Site validation failed:', siteError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Site not found or access denied' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Verify URL matches site's registered URL (same domain)
+      try {
+        const requestedDomain = new URL(url).hostname.toLowerCase();
+        const siteDomain = new URL(site.url).hostname.toLowerCase();
+        
+        if (requestedDomain !== siteDomain && !requestedDomain.endsWith('.' + siteDomain)) {
+          console.error(`URL domain mismatch: requested ${requestedDomain}, site ${siteDomain}`);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'URL does not match registered site domain' 
+            }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      } catch (urlError) {
+        console.error('URL parsing error:', urlError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Invalid URL format' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // SECURITY: Check workspace quota
+      const { data: quota } = await supabase
+        .rpc('get_workspace_quota', { p_workspace_id: workspace_id });
+
+      if (quota && quota[0]) {
+        const planLimits: Record<string, number> = {
+          free: 25,
+          starter: 50,
+          pro: 100,
+          enterprise: 500,
+        };
+        const planLimit = planLimits[quota[0].plan_tier] || 25;
+        
+        if (max_pages > planLimit) {
+          console.log(`[SEO Crawler] Limiting max_pages from ${max_pages} to ${planLimit} for ${quota[0].plan_tier} plan`);
+        }
+      }
+    } else if (workspace_id || site_id) {
+      // If only one is provided, require both
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'URL blocked for security reasons (private IP, localhost, or metadata endpoint)' 
-        }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Both workspace_id and site_id are required for authenticated crawls' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    // Note: If neither workspace_id nor site_id provided, allow public crawl (limited)
 
-    // Apply quota limits based on plan
-    const effectiveMaxPages = Math.min(max_pages, 100); // Hard limit for safety
+    // Apply quota limits based on plan (or hard limit for unauthenticated)
+    const effectiveMaxPages = workspace_id 
+      ? Math.min(max_pages, 100) 
+      : Math.min(max_pages, 10); // Strict limit for unauthenticated
     
     let result: CrawlResult;
     
     // Use Firecrawl if available and requested
     if (use_firecrawl && FIRECRAWL_API_KEY) {
-      console.log(`[SEO Crawler] Using Firecrawl for ${url}, max ${effectiveMaxPages} pages`);
+      console.log(`[SEO Crawler] Using Firecrawl for ${url}, max ${effectiveMaxPages} pages, workspace: ${workspace_id || 'public'}`);
       
       try {
         result = await firecrawlCrawlSite(url, FIRECRAWL_API_KEY, effectiveMaxPages);
@@ -769,7 +839,7 @@ Deno.serve(async (req) => {
       }
     } else {
       // Use native crawler
-      console.log(`[SEO Crawler] Using native crawler for ${url}, max ${effectiveMaxPages} pages`);
+      console.log(`[SEO Crawler] Using native crawler for ${url}, max ${effectiveMaxPages} pages, workspace: ${workspace_id || 'public'}`);
       result = await nativeCrawlSite(url, effectiveMaxPages, respect_robots);
     }
 
