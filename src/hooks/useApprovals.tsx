@@ -91,6 +91,52 @@ export function ApprovalsProvider({ children }: { children: ReactNode }) {
     fetchApprovals();
   }, [currentWorkspace]);
 
+  // Subscribe to realtime updates for approvals
+  useEffect(() => {
+    if (!currentWorkspace?.id) return;
+
+    const channel = supabase
+      .channel(`approvals:${currentWorkspace.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'approval_queue',
+          filter: `workspace_id=eq.${currentWorkspace.id}`,
+        },
+        (payload) => {
+          console.log('[Approvals] Realtime update:', payload.eventType);
+          
+          if (payload.eventType === 'INSERT') {
+            const newApproval = payload.new as ApprovalItem;
+            if (newApproval.status === 'pending') {
+              setPendingApprovals(prev => [newApproval, ...prev]);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as ApprovalItem;
+            if (updated.status === 'pending') {
+              setPendingApprovals(prev => 
+                prev.map(a => a.id === updated.id ? updated : a)
+              );
+            } else {
+              // Moved from pending to decided
+              setPendingApprovals(prev => prev.filter(a => a.id !== updated.id));
+              setRecentDecisions(prev => [updated, ...prev.slice(0, 19)]);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const deleted = payload.old as { id: string };
+            setPendingApprovals(prev => prev.filter(a => a.id !== deleted.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentWorkspace?.id]);
+
   const approveAction = async (approvalId: string) => {
     if (!user) {
       return { error: new Error('Not authenticated') };

@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.creative-export]
 verify_jwt = false
+
+[functions.api-docs]
+verify_jwt = false

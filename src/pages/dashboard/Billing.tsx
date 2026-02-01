@@ -13,8 +13,11 @@ import {
   AlertCircle,
   TrendingUp,
   Info,
+  ShieldAlert,
 } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import {
   Tooltip,
   TooltipContent,
@@ -173,6 +176,7 @@ const UsageBar = ({
 
 const Billing = () => {
   const { currentWorkspace } = useWorkspace();
+  const { isAtLeastRole } = usePermissions();
   const [currentPlan] = useState("free");
   
   // Demo usage data
@@ -183,8 +187,22 @@ const Billing = () => {
   };
 
   const currentPlanData = plans.find(p => p.id === currentPlan) || plans[0];
+  const canManageBilling = isAtLeastRole('owner');
 
   return (
+    <PermissionGuard 
+      permission="manage_billing" 
+      fallback={
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <ShieldAlert className="w-16 h-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Accès restreint</h2>
+          <p className="text-muted-foreground max-w-md">
+            Seuls les propriétaires du workspace peuvent accéder aux informations de facturation. 
+            Contactez le propriétaire pour gérer l'abonnement.
+          </p>
+        </div>
+      }
+    >
     <div className="space-y-8">
       {/* Header with better hierarchy */}
       <header>
@@ -411,6 +429,7 @@ const Billing = () => {
         </Card>
       </section>
     </div>
+    </PermissionGuard>
   );
 };
 
