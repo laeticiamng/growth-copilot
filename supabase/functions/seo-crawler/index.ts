@@ -84,9 +84,23 @@ interface CrawlResult {
   issues: SEOIssue[];
   errors: string[];
   duration_ms: number;
+  crawl_method: 'firecrawl' | 'native';
 }
 
-// Parse HTML to extract SEO data
+interface FirecrawlPage {
+  url: string;
+  markdown?: string;
+  html?: string;
+  metadata?: {
+    title?: string;
+    description?: string;
+    statusCode?: number;
+    sourceURL?: string;
+  };
+  links?: string[];
+}
+
+// Parse HTML to extract SEO data (native crawler)
 function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData> {
   const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i) ||
@@ -139,6 +153,30 @@ function parseHtml(html: string, url: string, baseUrl: string): Partial<PageData
     internal_links: [...new Set(internalLinks)].slice(0, 100),
     external_links: [...new Set(externalLinks)].slice(0, 50),
     word_count: wordCount,
+  };
+}
+
+// Parse Firecrawl HTML for SEO data
+function parseFirecrawlPage(page: FirecrawlPage, baseUrl: string): PageData {
+  const html = page.html || '';
+  const parsed = parseHtml(html, page.url, baseUrl);
+  
+  return {
+    url: page.url,
+    status_code: page.metadata?.statusCode || 200,
+    title: page.metadata?.title || parsed.title,
+    meta_description: page.metadata?.description || parsed.meta_description,
+    h1: parsed.h1,
+    h1_count: parsed.h1_count || 0,
+    canonical: parsed.canonical,
+    robots_meta: parsed.robots_meta,
+    has_schema: parsed.has_schema || false,
+    schema_types: parsed.schema_types || [],
+    internal_links: parsed.internal_links || [],
+    external_links: parsed.external_links || [],
+    word_count: parsed.word_count || 0,
+    load_time_ms: 0, // Firecrawl doesn't provide this
+    errors: [],
   };
 }
 
@@ -331,7 +369,129 @@ function analyzePages(pages: PageData[], baseUrl: string): SEOIssue[] {
   return issues;
 }
 
-// Fetch sitemap URLs
+// ============ FIRECRAWL INTEGRATION ============
+
+// Map site URLs using Firecrawl (fast sitemap discovery)
+async function firecrawlMapSite(baseUrl: string, apiKey: string, limit: number): Promise<string[]> {
+  console.log(`[Firecrawl] Mapping site: ${baseUrl}`);
+  
+  const response = await fetch('https://api.firecrawl.dev/v1/map', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url: baseUrl,
+      limit: limit,
+      includeSubdomains: false,
+    }),
+  });
+  
+  const data = await response.json();
+  
+  if (!response.ok) {
+    console.error('[Firecrawl] Map error:', data);
+    throw new Error(`Firecrawl map failed: ${data.error || response.status}`);
+  }
+  
+  console.log(`[Firecrawl] Mapped ${data.links?.length || 0} URLs`);
+  return data.links || [];
+}
+
+// Crawl site using Firecrawl (full recursive crawl)
+async function firecrawlCrawlSite(
+  baseUrl: string, 
+  apiKey: string, 
+  maxPages: number
+): Promise<CrawlResult> {
+  const startTime = Date.now();
+  
+  console.log(`[Firecrawl] Starting crawl: ${baseUrl}, max ${maxPages} pages`);
+  
+  // Start the crawl job
+  const crawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url: baseUrl,
+      limit: maxPages,
+      scrapeOptions: {
+        formats: ['html', 'markdown'],
+      },
+    }),
+  });
+  
+  const crawlData = await crawlResponse.json();
+  
+  if (!crawlResponse.ok) {
+    console.error('[Firecrawl] Crawl error:', crawlData);
+    throw new Error(`Firecrawl crawl failed: ${crawlData.error || crawlResponse.status}`);
+  }
+  
+  // Firecrawl returns results directly for small crawls, or a job ID for async
+  let crawledPages: FirecrawlPage[] = [];
+  
+  if (crawlData.data) {
+    // Direct results
+    crawledPages = crawlData.data;
+    console.log(`[Firecrawl] Direct results: ${crawledPages.length} pages`);
+  } else if (crawlData.id) {
+    // Async job - poll for results
+    console.log(`[Firecrawl] Async job started: ${crawlData.id}`);
+    
+    const maxWaitMs = 120000; // 2 minutes max
+    const pollInterval = 3000;
+    const jobStartTime = Date.now();
+    
+    while (Date.now() - jobStartTime < maxWaitMs) {
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+      
+      const statusResponse = await fetch(`https://api.firecrawl.dev/v1/crawl/${crawlData.id}`, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+      });
+      
+      const statusData = await statusResponse.json();
+      
+      if (statusData.status === 'completed') {
+        crawledPages = statusData.data || [];
+        console.log(`[Firecrawl] Job completed: ${crawledPages.length} pages`);
+        break;
+      } else if (statusData.status === 'failed') {
+        throw new Error(`Firecrawl job failed: ${statusData.error || 'Unknown error'}`);
+      }
+      
+      console.log(`[Firecrawl] Job status: ${statusData.status}, ${statusData.completed || 0}/${statusData.total || '?'} pages`);
+    }
+  }
+  
+  // Parse Firecrawl pages into our PageData format
+  const url = new URL(baseUrl);
+  const normalizedBase = `${url.protocol}//${url.hostname}`;
+  
+  const pages: PageData[] = crawledPages.map(page => parseFirecrawlPage(page, normalizedBase));
+  
+  // Analyze and generate issues
+  const issues = analyzePages(pages, normalizedBase);
+  
+  return {
+    pages_crawled: pages.length,
+    pages_total: crawlData.total || pages.length,
+    issues,
+    errors: [],
+    duration_ms: Date.now() - startTime,
+    crawl_method: 'firecrawl',
+  };
+}
+
+// ============ NATIVE CRAWLER ============
+
+// Fetch sitemap URLs (native)
 async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
   const sitemapUrls = [
     `${baseUrl}/sitemap.xml`,
@@ -371,7 +531,7 @@ async function fetchSitemapUrls(baseUrl: string): Promise<string[]> {
   return [];
 }
 
-// Check robots.txt
+// Check robots.txt (native)
 async function checkRobotsTxt(baseUrl: string): Promise<{ allowed: boolean; crawlDelay?: number }> {
   try {
     const response = await fetch(`${baseUrl}/robots.txt`, {
@@ -412,8 +572,8 @@ async function checkRobotsTxt(baseUrl: string): Promise<{ allowed: boolean; craw
   }
 }
 
-// Main crawl function
-async function crawlSite(
+// Native crawl function (fallback)
+async function nativeCrawlSite(
   baseUrl: string,
   maxPages: number,
   respectRobots: boolean
@@ -430,7 +590,7 @@ async function crawlSite(
   
   // Check robots.txt
   if (respectRobots) {
-    const { allowed, crawlDelay } = await checkRobotsTxt(normalizedBase);
+    const { allowed } = await checkRobotsTxt(normalizedBase);
     if (!allowed) {
       return {
         pages_crawled: 0,
@@ -438,6 +598,7 @@ async function crawlSite(
         issues: [],
         errors: ['Crawling blocked by robots.txt'],
         duration_ms: Date.now() - startTime,
+        crawl_method: 'native',
       };
     }
   }
@@ -526,8 +687,11 @@ async function crawlSite(
     issues,
     errors,
     duration_ms: Date.now() - startTime,
+    crawl_method: 'native',
   };
 }
+
+// ============ MAIN HANDLER ============
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -537,9 +701,17 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
   const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
   const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
 
   try {
-    const { url, max_pages = 50, respect_robots = true, workspace_id, site_id } = await req.json();
+    const { 
+      url, 
+      max_pages = 50, 
+      respect_robots = true, 
+      workspace_id, 
+      site_id,
+      use_firecrawl = true, // Default to Firecrawl if available
+    } = await req.json();
 
     if (!url) {
       return new Response(
@@ -579,14 +751,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Starting crawl for ${url}, max ${max_pages} pages, workspace: ${workspace_id}`);
-
-    // Apply quota limits based on plan (simplified - would check DB in production)
+    // Apply quota limits based on plan
     const effectiveMaxPages = Math.min(max_pages, 100); // Hard limit for safety
+    
+    let result: CrawlResult;
+    
+    // Use Firecrawl if available and requested
+    if (use_firecrawl && FIRECRAWL_API_KEY) {
+      console.log(`[SEO Crawler] Using Firecrawl for ${url}, max ${effectiveMaxPages} pages`);
+      
+      try {
+        result = await firecrawlCrawlSite(url, FIRECRAWL_API_KEY, effectiveMaxPages);
+      } catch (firecrawlError) {
+        console.error('[SEO Crawler] Firecrawl failed, falling back to native:', firecrawlError);
+        // Fallback to native crawler
+        result = await nativeCrawlSite(url, effectiveMaxPages, respect_robots);
+      }
+    } else {
+      // Use native crawler
+      console.log(`[SEO Crawler] Using native crawler for ${url}, max ${effectiveMaxPages} pages`);
+      result = await nativeCrawlSite(url, effectiveMaxPages, respect_robots);
+    }
 
-    const result = await crawlSite(url, effectiveMaxPages, respect_robots);
-
-    console.log(`Crawl completed: ${result.pages_crawled} pages, ${result.issues.length} issues`);
+    console.log(`[SEO Crawler] Completed (${result.crawl_method}): ${result.pages_crawled} pages, ${result.issues.length} issues`);
 
     return new Response(
       JSON.stringify(result),
