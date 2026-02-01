@@ -56,8 +56,13 @@ export function GoogleSuperConnector({
   const [connecting, setConnecting] = useState(false);
 
   const handleConnectAll = async () => {
-    if (!currentSite || !currentWorkspace) {
-      toast.error("Sélectionnez d'abord un site");
+    if (!currentWorkspace) {
+      toast.error("Aucun workspace actif");
+      return;
+    }
+    
+    if (!currentSite) {
+      toast.error("Sélectionnez d'abord un site dans le menu Sites");
       return;
     }
 
