@@ -149,6 +149,12 @@ const ALLOWED_REDIRECT_ORIGINS = [
   "http://localhost:3000",
 ];
 
+// Allowed domain patterns for dynamic Lovable environments
+const ALLOWED_DOMAIN_PATTERNS = [
+  /\.lovable\.app$/,
+  /\.lovableproject\.com$/,
+];
+
 /**
  * Validates that redirect_url is from an allowed origin
  */
@@ -156,9 +162,15 @@ function isValidRedirectUrl(redirectUrl: string): boolean {
   try {
     const url = new URL(redirectUrl);
     const origin = url.origin;
-    return ALLOWED_REDIRECT_ORIGINS.some(allowed => 
-      origin === allowed || origin.endsWith('.lovable.app')
-    );
+    const hostname = url.hostname;
+    
+    // Check exact match first
+    if (ALLOWED_REDIRECT_ORIGINS.includes(origin)) {
+      return true;
+    }
+    
+    // Check dynamic Lovable domain patterns
+    return ALLOWED_DOMAIN_PATTERNS.some(pattern => pattern.test(hostname));
   } catch {
     return false;
   }
