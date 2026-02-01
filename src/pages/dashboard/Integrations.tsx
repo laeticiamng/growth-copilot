@@ -28,7 +28,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MetaSuperConnector } from "@/components/integrations/MetaSuperConnector";
+import { MetaSuperConnector, GoogleSuperConnector } from "@/components/integrations";
 
 interface Integration {
   id: string;
@@ -423,7 +423,8 @@ const Integrations = () => {
         </Card>
       )}
 
-      {/* Meta Super-Connecteur - Featured */}
+      {/* Super-Connecteurs - Featured */}
+      <GoogleSuperConnector />
       <MetaSuperConnector />
 
       {/* Other Integration Categories */}
