@@ -5,14 +5,24 @@ import { useSites } from "@/hooks/useSites";
 import { SEOTechAuditor, generateDemoAuditResults } from "@/lib/agents/seo-auditor";
 import type { CrawlResult, SEOIssue } from "@/lib/agents/types";
 
+export interface AuditOptions {
+  maxPages?: number;
+  respectRobots?: boolean;
+  useFirecrawl?: boolean;
+}
+
+export interface ExtendedCrawlResult extends CrawlResult {
+  crawl_method?: 'firecrawl' | 'native';
+}
+
 export function useSEOAudit() {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CrawlResult | null>(null);
+  const [result, setResult] = useState<ExtendedCrawlResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const runAudit = useCallback(async (targetUrl?: string) => {
+  const runAudit = useCallback(async (targetUrl?: string, options: AuditOptions = {}) => {
     if (!currentWorkspace || !currentSite) {
       setError("Aucun workspace ou site sélectionné");
       return;
@@ -30,43 +40,49 @@ export function useSEOAudit() {
         return;
       }
 
-      const auditor = new SEOTechAuditor(currentWorkspace.id, currentSite.id);
-      await auditor.launchAudit(url, { maxPages: 50 });
-      
-      // Fetch the results from the database
-      const { data: crawl } = await supabase
-        .from('crawls')
-        .select('*')
-        .eq('site_id', currentSite.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      const { maxPages = 50, respectRobots = true, useFirecrawl = true } = options;
 
-      if (crawl) {
-        const { data: issues } = await supabase
-          .from('issues')
-          .select('*')
-          .eq('crawl_id', crawl.id)
-          .order('impact_score', { ascending: false });
+      // Call the edge function directly with Firecrawl option
+      const { data, error: invokeError } = await supabase.functions.invoke('seo-crawler', {
+        body: {
+          url,
+          max_pages: maxPages,
+          respect_robots: respectRobots,
+          workspace_id: currentWorkspace.id,
+          site_id: currentSite.id,
+          use_firecrawl: useFirecrawl,
+        },
+      });
 
+      if (invokeError) {
+        throw new Error(invokeError.message);
+      }
+
+      if (data && data.issues) {
         setResult({
-          pages_crawled: crawl.pages_crawled || 0,
-          pages_total: crawl.pages_total || 0,
-          issues: (issues || []).map(i => ({
+          pages_crawled: data.pages_crawled || 0,
+          pages_total: data.pages_total || 0,
+          issues: data.issues.map((i: any) => ({
             id: i.id,
-            type: i.issue_type,
+            type: i.type,
             severity: i.severity as SEOIssue['severity'],
             title: i.title,
             description: i.description || '',
-            affected_urls: [],
+            affected_urls: i.affected_urls || [],
             recommendation: i.recommendation || '',
-            ice_score: i.impact_score || 50,
+            ice_score: i.ice_score || 50,
             auto_fixable: i.auto_fixable || false,
-            fix_instructions: i.fix_instructions || undefined,
+            fix_instructions: i.fix_instructions,
           })),
-          errors: [],
-          duration_ms: 0,
+          errors: data.errors || [],
+          duration_ms: data.duration_ms || 0,
+          crawl_method: data.crawl_method,
         });
+
+        // Save issues to database for persistence
+        if (data.issues.length > 0) {
+          await saveCrawlResults(data, currentWorkspace.id, currentSite.id);
+        }
       }
     } catch (err) {
       console.error('Audit error:', err);
@@ -78,6 +94,71 @@ export function useSEOAudit() {
       setLoading(false);
     }
   }, [currentWorkspace, currentSite]);
+
+  const saveCrawlResults = async (data: any, workspaceId: string, siteId: string) => {
+    try {
+      // Create crawl record
+      const { data: crawl, error: crawlError } = await supabase
+        .from('crawls')
+        .insert({
+          workspace_id: workspaceId,
+          site_id: siteId,
+          status: 'completed',
+          pages_crawled: data.pages_crawled,
+          pages_total: data.pages_total,
+          issues_found: data.issues.length,
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (crawlError) {
+        console.error('Failed to create crawl record:', crawlError);
+        return;
+      }
+
+      // Save issues
+      for (const issue of data.issues) {
+        await supabase.from('issues').insert({
+          workspace_id: workspaceId,
+          site_id: siteId,
+          crawl_id: crawl.id,
+          issue_type: issue.type,
+          category: getCategoryFromType(issue.type),
+          title: issue.title,
+          description: issue.description,
+          severity: issue.severity,
+          status: 'open',
+          impact_score: issue.ice_score,
+          auto_fixable: issue.auto_fixable,
+          recommendation: issue.recommendation,
+          fix_instructions: issue.fix_instructions,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to save crawl results:', err);
+    }
+  };
+
+  const getCategoryFromType = (type: string): string => {
+    const categoryMap: Record<string, string> = {
+      missing_title: 'content',
+      missing_meta: 'content',
+      missing_h1: 'content',
+      duplicate_title: 'content',
+      duplicate_meta: 'content',
+      multiple_h1: 'content',
+      http_error: 'indexation',
+      redirect: 'indexation',
+      noindex: 'indexation',
+      canonical_issue: 'indexation',
+      missing_schema: 'structured_data',
+      orphan_page: 'architecture',
+      slow_page: 'performance',
+    };
+    return categoryMap[type] || 'other';
+  };
 
   const runDemoAudit = useCallback(() => {
     setLoading(true);
