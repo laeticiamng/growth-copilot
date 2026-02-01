@@ -1,73 +1,178 @@
-# Welcome to your Lovable project
+# Growth OS - Plateforme Marketing IA
 
-## Project info
+> Plateforme marketing tout-en-un propulsée par 12 agents IA spécialisés pour automatiser SEO, Ads, CRM, Social et CRO.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Aperçu
 
-## How can I edit this code?
+Growth OS est une plateforme SaaS complète qui centralise et automatise l'ensemble des opérations marketing digitales. Grâce à des agents IA spécialisés, elle permet aux équipes marketing de gérer efficacement leur croissance sur tous les canaux.
 
-There are several ways of editing your application.
+## ✨ Fonctionnalités Principales
 
-**Use Lovable**
+### 📊 SEO & Contenu
+- **SEO Technique** : Audits automatisés, crawl de site, détection d'erreurs (404, redirections, Core Web Vitals)
+- **Stratégie Contenu** : Briefs IA, clustering de mots-clés, planification éditoriale
+- **SEO Local** : Gestion Google Business Profile, suivi des avis, posts locaux
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 📈 Publicité & Acquisition
+- **Google Ads** : Synchronisation des campagnes, optimisation des enchères, mots-clés négatifs
+- **Meta Ads** : Gestion Facebook/Instagram Ads, CAPI intégré, audiences personnalisées
+- **Analytics** : Tableaux de bord GA4, GSC, YouTube Analytics
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎯 CRM & Lifecycle
+- **Gestion Leads** : Pipeline Kanban, scoring automatique, nurturing
+- **Offres & Pricing** : Générateur d'offres, tiers de prix, validation IA
+- **Automations** : Workflows déclencheurs, actions automatiques
 
-**Use your preferred IDE**
+### 📱 Social & Réputation
+- **Social Media** : Planification multi-plateforme, calendrier éditorial
+- **Réputation** : Monitoring des avis, réponses IA, alertes temps réel
+- **Concurrence** : Veille concurrentielle, analyse des gaps
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🧪 CRO & Expérimentation
+- **A/B Testing** : Tests statistiques, calcul de significativité
+- **Variants** : Gestion des expériences, tracking des conversions
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🤖 Agents IA (12 agents spécialisés)
+| Agent | Rôle |
+|-------|------|
+| SEO Auditor | Audit technique et recommandations |
+| Content Strategist | Génération de briefs et contenus |
+| Analytics Agent | Analyse des données et insights |
+| Ads Optimizer | Optimisation des campagnes publicitaires |
+| Meta Ads Agent | Gestion spécifique Meta/Facebook |
+| Copywriting Agent | Rédaction publicitaire et landing pages |
+| Competitive Intel | Veille concurrentielle |
+| Media Promotion | Distribution et promotion média |
+| CGO Agent | Chief Growth Officer virtuel |
+| QCO Agent | Quality Control & Compliance |
+| Report Generator | Rapports automatisés |
+| Approval Engine | Validation et workflows d'approbation |
 
-Follow these steps:
+## 🛠️ Stack Technique
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### Frontend
+- **React 18** + TypeScript
+- **Vite** - Build tool ultra-rapide
+- **Tailwind CSS** + **shadcn/ui** - Design system moderne
+- **TanStack Query** - Gestion d'état serveur
+- **React Router** - Navigation SPA
+- **i18next** - Internationalisation (FR/EN)
+
+### Backend (Lovable Cloud)
+- **Supabase** - Base de données PostgreSQL
+- **Edge Functions** (Deno) - API serverless
+- **Row Level Security** - Isolation multi-tenant
+- **Realtime** - WebSockets pour mises à jour live
+
+### Intégrations
+- **Google APIs** : Analytics, Search Console, Ads, YouTube, Business Profile
+- **Meta APIs** : Marketing API, Instagram, Conversions API
+- **AI Gateway** : Accès aux modèles Gemini, GPT-5
+
+## 📁 Structure du Projet
+
+```
+src/
+├── components/          # Composants UI réutilisables
+│   ├── ai/             # Assistant IA
+│   ├── auth/           # Auth guards, protection routes
+│   ├── diagnostics/    # Panel de debug
+│   ├── integrations/   # Connecteurs Google/Meta
+│   ├── kpi/            # Cartes et graphiques KPI
+│   ├── landing/        # Page d'accueil
+│   ├── layout/         # Layout dashboard
+│   └── ui/             # Composants shadcn/ui
+├── hooks/              # Custom hooks (useWorkspace, useAds, etc.)
+├── lib/
+│   ├── agents/         # Définitions des 12 agents IA
+│   ├── validation/     # Schémas Zod, sanitization
+│   └── statistics.ts   # Calculs A/B testing
+├── pages/
+│   ├── dashboard/      # 20+ pages dashboard
+│   └── Auth.tsx        # Authentification
+└── i18n/               # Traductions FR/EN
+
+supabase/
+├── functions/          # 25+ Edge Functions
+│   ├── oauth-init/     # Initialisation OAuth
+│   ├── oauth-callback/ # Callback OAuth sécurisé
+│   ├── ai-gateway/     # Proxy IA multi-modèles
+│   ├── seo-crawler/    # Crawler SEO
+│   └── ...
+└── migrations/         # Migrations SQL
+```
+
+## 🔐 Sécurité
+
+- **RLS (Row Level Security)** : Isolation des données par workspace
+- **Chiffrement AES-GCM 256-bit** : Tokens OAuth chiffrés at-rest
+- **HMAC-SHA256** : Protection anti-rejeu des états OAuth
+- **Validation Zod** : Sanitization de toutes les entrées
+- **Protection XSS** : Échappement automatique du HTML
+- **Rate Limiting** : Protection anti-abus côté client et serveur
+
+## 🚀 Démarrage Rapide
+
+### Prérequis
+- Node.js 18+ 
+- npm ou bun
+
+### Installation
+
+```bash
+# Cloner le repo
 git clone <YOUR_GIT_URL>
+cd growth-os
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Installer les dépendances
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Lancer en développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Variables d'Environnement
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Les variables sont gérées automatiquement par Lovable Cloud :
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-**Use GitHub Codespaces**
+### Secrets (Backend)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Configurés dans Lovable Cloud :
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+- `META_APP_ID` / `META_APP_SECRET`
+- `TOKEN_ENCRYPTION_KEY` (64 caractères hex)
+- `OAUTH_STATE_SECRET`
 
-## What technologies are used for this project?
+## 📊 Tests
 
-This project is built with:
+```bash
+# Tests unitaires
+npm run test
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Tests avec couverture
+npm run test -- --coverage
+```
 
-## How can I deploy this project?
+**Couverture actuelle** : 64 tests (modules, hooks, sécurité, smoke tests)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 🌐 Déploiement
 
-## Can I connect a custom domain to my Lovable project?
+1. Ouvrir [Lovable](https://lovable.dev)
+2. Cliquer sur **Share → Publish**
+3. (Optionnel) Configurer un domaine personnalisé dans **Settings → Domains**
 
-Yes, you can!
+## 📖 Documentation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- [Documentation Lovable](https://docs.lovable.dev)
+- [Supabase Docs](https://supabase.com/docs)
+- [shadcn/ui](https://ui.shadcn.com)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📄 Licence
+
+Propriétaire - Tous droits réservés
+
+---
+
+**Construit avec ❤️ sur [Lovable](https://lovable.dev)**
