@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useSites, Site } from "@/hooks/useSites";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const sectors = [
   "E-commerce", "SaaS / Tech", "Agence / Services", "Restaurant / Local",
@@ -50,8 +51,8 @@ const sectors = [
 ];
 
 const Sites = () => {
+  const { t } = useTranslation();
   const { sites, currentSite, setCurrentSite, createSite, updateSite, deleteSite, loading } = useSites();
-  const { toast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
@@ -79,7 +80,7 @@ const Sites = () => {
 
   const handleCreate = async () => {
     if (!formData.url) {
-      toast({ title: "URL requise", variant: "destructive" });
+      toast.error(t("common.error"), { description: "URL requise" });
       return;
     }
 
@@ -88,9 +89,9 @@ const Sites = () => {
     setIsSubmitting(false);
 
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(t("common.error"), { description: error.message });
     } else {
-      toast({ title: "Site créé", description: `${site?.name || site?.url} ajouté avec succès.` });
+      toast.success(t("dashboard.sites.title"), { description: `${site?.name || site?.url} ajouté avec succès.` });
       setIsCreateOpen(false);
       resetForm();
     }
@@ -104,9 +105,9 @@ const Sites = () => {
     setIsSubmitting(false);
 
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(t("common.error"), { description: error.message });
     } else {
-      toast({ title: "Site modifié" });
+      toast.success(t("common.save"));
       setIsEditOpen(false);
       setEditingSite(null);
       resetForm();
@@ -116,9 +117,9 @@ const Sites = () => {
   const handleDelete = async (siteId: string) => {
     const { error } = await deleteSite(siteId);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast.error(t("common.error"), { description: error.message });
     } else {
-      toast({ title: "Site supprimé" });
+      toast.success(t("common.delete"));
     }
   };
 
@@ -148,8 +149,8 @@ const Sites = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Sites</h1>
-          <p className="text-muted-foreground">Gérez vos sites et sélectionnez le site actif.</p>
+          <h1 className="text-3xl font-bold">{t("dashboard.sites.title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.sites.addSite")}</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
