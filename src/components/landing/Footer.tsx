@@ -42,7 +42,7 @@ export function Footer() {
               <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg">Growth OS</span>
+              <span className="font-bold text-lg">EmotionsCare</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               {t("landing.footer.description")}
@@ -81,7 +81,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 Growth OS. {t("landing.footer.rights")}.
+            © 2026 EmotionsCare Sasu. {t("landing.footer.rights")}.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
