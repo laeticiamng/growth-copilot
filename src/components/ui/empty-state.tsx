@@ -1,6 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -14,6 +15,8 @@ interface EmptyStateProps {
     label: string;
     onClick: () => void;
   };
+  className?: string;
+  compact?: boolean;
 }
 
 export function EmptyState({
@@ -22,15 +25,23 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
+  className,
+  compact = false,
 }: EmptyStateProps) {
   return (
-    <Card className="border-dashed">
-      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="p-4 rounded-full bg-primary/10 mb-4">
-          <Icon className="w-8 h-8 text-primary" />
+    <Card className={cn("border-dashed", className)}>
+      <CardContent className={cn(
+        "flex flex-col items-center justify-center text-center",
+        compact ? "py-8" : "py-12"
+      )}>
+        <div className={cn(
+          "rounded-full bg-primary/10 mb-4",
+          compact ? "p-3" : "p-4"
+        )}>
+          <Icon className={cn("text-primary", compact ? "w-6 h-6" : "w-8 h-8")} />
         </div>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground max-w-md mb-6">{description}</p>
+        <h3 className={cn("font-semibold mb-2", compact ? "text-base" : "text-lg")}>{title}</h3>
+        <p className={cn("text-muted-foreground max-w-md", compact ? "text-sm mb-4" : "mb-6")}>{description}</p>
         <div className="flex items-center gap-3">
           {action && (
             <Button onClick={action.onClick} variant="hero">
@@ -52,11 +63,12 @@ interface NoDataRowProps {
   icon: LucideIcon;
   message: string;
   subMessage?: string;
+  className?: string;
 }
 
-export function NoDataRow({ icon: Icon, message, subMessage }: NoDataRowProps) {
+export function NoDataRow({ icon: Icon, message, subMessage, className }: NoDataRowProps) {
   return (
-    <div className="text-center py-12 text-muted-foreground">
+    <div className={cn("text-center py-12 text-muted-foreground", className)}>
       <Icon className="w-12 h-12 mx-auto mb-4 opacity-50" />
       <p className="font-medium">{message}</p>
       {subMessage && <p className="text-sm mt-1">{subMessage}</p>}
@@ -68,9 +80,10 @@ interface ConnectionRequiredProps {
   provider: string;
   icon: LucideIcon;
   onConnect?: () => void;
+  description?: string;
 }
 
-export function ConnectionRequired({ provider, icon: Icon, onConnect }: ConnectionRequiredProps) {
+export function ConnectionRequired({ provider, icon: Icon, onConnect, description }: ConnectionRequiredProps) {
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardContent className="flex items-center gap-4 py-4">
@@ -80,7 +93,7 @@ export function ConnectionRequired({ provider, icon: Icon, onConnect }: Connecti
         <div className="flex-1">
           <p className="font-medium">Connexion requise</p>
           <p className="text-sm text-muted-foreground">
-            Connectez votre compte {provider} pour accéder à ces fonctionnalités
+            {description || `Connectez votre compte ${provider} pour accéder à ces fonctionnalités`}
           </p>
         </div>
         {onConnect && (
@@ -95,20 +108,55 @@ export function ConnectionRequired({ provider, icon: Icon, onConnect }: Connecti
 
 interface SiteRequiredProps {
   onNavigate: () => void;
+  message?: string;
 }
 
-export function SiteRequired({ onNavigate }: SiteRequiredProps) {
+export function SiteRequired({ onNavigate, message }: SiteRequiredProps) {
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardContent className="flex items-center gap-4 py-4">
         <p className="flex-1 text-sm">
           <span className="font-medium">Site requis.</span>{" "}
-          Sélectionnez ou créez un site pour accéder à ces données.
+          {message || "Sélectionnez ou créez un site pour accéder à ces données."}
         </p>
         <Button size="sm" onClick={onNavigate}>
           Gérer les sites
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+interface DataLoadingErrorProps {
+  message?: string;
+  onRetry?: () => void;
+}
+
+export function DataLoadingError({ message, onRetry }: DataLoadingErrorProps) {
+  return (
+    <Card className="border-destructive/50 bg-destructive/5">
+      <CardContent className="flex items-center gap-4 py-4">
+        <p className="flex-1 text-sm text-destructive">
+          {message || "Erreur lors du chargement des données"}
+        </p>
+        {onRetry && (
+          <Button size="sm" variant="outline" onClick={onRetry}>
+            Réessayer
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface DemoModeBannerProps {
+  message?: string;
+}
+
+export function DemoModeBanner({ message }: DemoModeBannerProps) {
+  return (
+    <div className="text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-lg border border-border/50">
+      ⚠️ {message || "Mode démo - Connectez vos outils pour voir vos vraies données"}
+    </div>
   );
 }

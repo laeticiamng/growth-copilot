@@ -104,6 +104,52 @@ export const reviewResponseSchema = z.object({
   response: z.string().min(1, 'Réponse requise').max(1000, 'Réponse trop longue'),
 });
 
+// Site validation schema
+export const siteFormSchema = z.object({
+  url: urlSchema,
+  name: z.string().max(100, 'Nom trop long').optional().or(z.literal('')),
+  sector: z.string().optional(),
+  geographic_zone: z.string().max(100).optional(),
+  language: z.enum(['fr', 'en', 'es', 'de']).default('fr'),
+  business_type: z.enum(['local', 'ecommerce', 'service', 'saas', '']).optional(),
+});
+
+// Social post validation schema
+export const socialPostSchema = z.object({
+  content: z.string()
+    .min(1, 'Contenu requis')
+    .max(2200, 'Contenu trop long (max 2200 caractères)'),
+  platforms: z.array(z.string()).min(1, 'Sélectionnez au moins une plateforme'),
+  type: z.enum(['Post', 'Carrousel', 'Reel', 'Story']).default('Post'),
+  scheduled_for: z.string().optional().nullable(),
+});
+
+// GBP Post validation schema
+export const gbpPostSchema = z.object({
+  title: z.string()
+    .min(1, 'Titre requis')
+    .max(100, 'Titre trop long'),
+  content: z.string()
+    .min(1, 'Contenu requis')
+    .max(1500, 'Contenu trop long'),
+  post_type: z.enum(['update', 'offer', 'event', 'product']).default('update'),
+});
+
+// Negative keyword schema
+export const negativeKeywordSchema = z.object({
+  keyword: z.string().min(1, 'Mot-clé requis').max(100),
+  match_type: z.enum(['exact', 'phrase', 'broad']).default('exact'),
+  level: z.enum(['campaign', 'adgroup', 'account']).default('account'),
+});
+
+// Content brief schema
+export const contentBriefSchema = z.object({
+  title: z.string().min(1, 'Titre requis').max(200),
+  target_keyword: z.string().max(100).optional(),
+  word_count_target: z.number().min(100).max(10000).optional(),
+  status: z.enum(['draft', 'review', 'approved', 'published']).default('draft'),
+});
+
 // ============ UTILITY FUNCTIONS ============
 
 export type LeadFormData = z.infer<typeof leadFormSchema>;
@@ -113,6 +159,11 @@ export type ExperimentFormData = z.infer<typeof experimentFormSchema>;
 export type OfferFormData = z.infer<typeof offerFormSchema>;
 export type AutomationRuleData = z.infer<typeof automationRuleSchema>;
 export type WebhookFormData = z.infer<typeof webhookFormSchema>;
+export type SiteFormData = z.infer<typeof siteFormSchema>;
+export type SocialPostFormData = z.infer<typeof socialPostSchema>;
+export type GbpPostFormData = z.infer<typeof gbpPostSchema>;
+export type NegativeKeywordData = z.infer<typeof negativeKeywordSchema>;
+export type ContentBriefData = z.infer<typeof contentBriefSchema>;
 
 /**
  * Validates form data against a schema
@@ -145,4 +196,12 @@ export function getFieldError(
   field: string
 ): string | undefined {
   return errors?.[field];
+}
+
+/**
+ * Gets the first error message from errors object
+ */
+export function getFirstError(errors: Record<string, string>): string {
+  const keys = Object.keys(errors);
+  return keys.length > 0 ? errors[keys[0]] : 'Erreur de validation';
 }
