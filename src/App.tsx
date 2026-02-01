@@ -52,6 +52,8 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import SmartLink from "./pages/SmartLink";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 // Dashboard pages - Foundation
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -178,6 +180,8 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/link/:slug" element={<SmartLink />} />
