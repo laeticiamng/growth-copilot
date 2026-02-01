@@ -14,6 +14,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Target,
   TrendingUp,
   AlertTriangle,
@@ -27,11 +33,13 @@ import {
   Loader2,
   Play,
   Pause,
+  Info,
 } from "lucide-react";
 import { useCRO } from "@/hooks/useCRO";
 import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
+import { calculateConfidence, getTestRecommendation, calculateUplift } from "@/lib/statistics";
 
 export default function CRO() {
   const { currentSite } = useSites();
@@ -74,11 +82,27 @@ export default function CRO() {
     { page: "Page contact", url: "/contact", frictionScore: 62, issues: 8, opportunities: 6, status: "needs_work" },
   ];
 
-  // Demo experiments fallback
+  // Demo experiments fallback with real confidence calculation
   const displayExperiments = experiments.length > 0 ? experiments.map(exp => {
     const expVariants = variants.filter(v => v.experiment_id === exp.id);
     const controlVariant = expVariants.find(v => v.is_control);
     const testVariant = expVariants.find(v => !v.is_control);
+    
+    // Calculate real confidence
+    const confidence = controlVariant && testVariant
+      ? calculateConfidence(
+          controlVariant.visitors || 0,
+          controlVariant.conversions || 0,
+          testVariant.visitors || 0,
+          testVariant.conversions || 0
+        )
+      : 0;
+    
+    const rateA = controlVariant?.conversion_rate || 0;
+    const rateB = testVariant?.conversion_rate || 0;
+    const uplift = calculateUplift(rateA, rateB);
+    const recommendation = getTestRecommendation(confidence, rateA, rateB);
+    
     return {
       id: exp.id,
       name: exp.name,
@@ -86,15 +110,17 @@ export default function CRO() {
       status: exp.status || "draft",
       variants: expVariants.length,
       visitors: expVariants.reduce((a, v) => a + (v.visitors || 0), 0),
-      conversionA: controlVariant?.conversion_rate || 0,
-      conversionB: testVariant?.conversion_rate || 0,
-      confidence: 0, // Would need statistical calculation
+      conversionA: rateA,
+      conversionB: rateB,
+      confidence,
+      uplift,
+      recommendation,
       winner: exp.winner_variant_id ? "B" : undefined,
     };
   }) : [
-    { id: "1", name: "Hero CTA - Couleur", page: "Homepage", status: "running", variants: 2, visitors: 1245, conversionA: 3.2, conversionB: 4.1, confidence: 87 },
-    { id: "2", name: "Pricing - Mise en page", page: "Pricing", status: "completed", variants: 2, visitors: 2890, conversionA: 2.8, conversionB: 3.5, confidence: 95, winner: "B" },
-    { id: "3", name: "Form - Champs réduits", page: "Contact", status: "draft", variants: 2, visitors: 0, conversionA: 0, conversionB: 0, confidence: 0 },
+    { id: "1", name: "Hero CTA - Couleur", page: "Homepage", status: "running", variants: 2, visitors: 1245, conversionA: 3.2, conversionB: 4.1, confidence: 87, uplift: 28.1, recommendation: { status: 'inconclusive' as const, message: 'Continuez le test' } },
+    { id: "2", name: "Pricing - Mise en page", page: "Pricing", status: "completed", variants: 2, visitors: 2890, conversionA: 2.8, conversionB: 3.5, confidence: 95, uplift: 25, recommendation: { status: 'winner' as const, message: 'Déployez la variante B' }, winner: "B" },
+    { id: "3", name: "Form - Champs réduits", page: "Contact", status: "draft", variants: 2, visitors: 0, conversionA: 0, conversionB: 0, confidence: 0, uplift: 0, recommendation: { status: 'inconclusive' as const, message: 'Pas encore de données' } },
   ];
 
   const croBacklog = [
@@ -246,7 +272,7 @@ export default function CRO() {
                       </div>
                     </div>
                     {exp.status !== "draft" && (
-                      <div className="grid grid-cols-4 gap-4 mt-4">
+                      <div className="grid grid-cols-5 gap-4 mt-4">
                         <div>
                           <p className="text-xs text-muted-foreground">Visiteurs</p>
                           <p className="font-medium">{exp.visitors.toLocaleString()}</p>
@@ -262,9 +288,28 @@ export default function CRO() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Confiance</p>
-                          <p className={`font-medium ${exp.confidence >= 95 ? 'text-green-500' : ''}`}>
-                            {exp.confidence}%
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="cursor-help">
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                    Confiance <Info className="w-3 h-3" />
+                                  </p>
+                                  <p className={`font-medium ${exp.confidence >= 95 ? 'text-green-500' : exp.confidence >= 80 ? 'text-amber-500' : ''}`}>
+                                    {exp.confidence}%
+                                  </p>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="max-w-xs text-xs">{exp.recommendation?.message}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Uplift</p>
+                          <p className={`font-medium ${(exp.uplift || 0) > 0 ? 'text-green-500' : (exp.uplift || 0) < 0 ? 'text-destructive' : ''}`}>
+                            {(exp.uplift || 0) > 0 ? '+' : ''}{(exp.uplift || 0).toFixed(1)}%
                           </p>
                         </div>
                       </div>
