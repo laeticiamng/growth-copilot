@@ -107,15 +107,12 @@ export function DiagnosticsPanel() {
       });
     }
 
-    // Check Edge Functions
+    // Check Edge Functions (simple ping without AI gateway)
     const edgeStart = performance.now();
     try {
-      const { data, error } = await supabase.functions.invoke("ai-gateway", {
-        body: { 
-          agent_name: "health_check", 
-          purpose: "ping",
-          messages: [{ role: "user", content: "ping" }]
-        },
+      // Use a lightweight function check instead of ai-gateway
+      const { error } = await supabase.functions.invoke("webhooks", {
+        body: { action: "ping" },
       });
       const edgeLatency = performance.now() - edgeStart;
       latencies.push(edgeLatency);
@@ -125,7 +122,7 @@ export function DiagnosticsPanel() {
         latency: Math.round(edgeLatency),
         message: error ? "Disponibilité limitée" : "Fonctionnel",
       });
-    } catch (error) {
+    } catch {
       healthChecks.push({
         name: "Edge Functions",
         status: "warning",
