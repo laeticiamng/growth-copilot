@@ -85,23 +85,43 @@ export default function Content() {
             variant="hero"
             onClick={async () => {
               if (!currentSite) {
+                toast.error("Sélectionnez un site d'abord");
                 return;
               }
               setSyncing(true);
               try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                  toast.error("Veuillez vous connecter");
+                  setSyncing(false);
+                  return;
+                }
+                
                 const { data, error } = await supabase.functions.invoke("ai-gateway", {
                   body: {
+                    workspace_id: currentSite.workspace_id,
                     agent_name: "content_strategist",
-                    purpose: "generate_brief",
-                    messages: [
-                      { role: "system", content: "Tu es un stratège de contenu SEO. Génère un brief de contenu détaillé en français." },
-                      { role: "user", content: `Génère un brief pour un article optimisé SEO pour le site ${currentSite.url}. Inclus: titre, H2s, mots-clés cibles, longueur recommandée.` }
-                    ]
+                    purpose: "copywriting",
+                    input: {
+                      system_prompt: "Tu es un stratège de contenu SEO. Génère un brief de contenu détaillé en français avec un format JSON structuré.",
+                      user_prompt: `Génère un brief pour un article optimisé SEO pour le site ${currentSite.url}. Inclus: titre, H2s suggérés, mots-clés cibles, longueur recommandée.`,
+                      context: {
+                        site_url: currentSite.url,
+                        site_name: currentSite.name,
+                        sector: currentSite.sector,
+                      }
+                    }
                   }
                 });
                 if (error) throw error;
-                toast.success("Brief généré avec succès");
+                if (data?.success) {
+                  toast.success("Brief généré avec succès");
+                  refetch();
+                } else {
+                  toast.error(data?.error || "Erreur lors de la génération");
+                }
               } catch (err) {
+                console.error("Brief generation error:", err);
                 toast.error("Erreur lors de la génération du brief");
               } finally {
                 setSyncing(false);
