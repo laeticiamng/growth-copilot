@@ -379,12 +379,9 @@ function AgentCard({ agent, isLeader, isSupport }: AgentCardProps) {
           <h3 className={`font-semibold ${isLeader ? "text-lg" : "text-sm"}`}>
             {agent.name}
           </h3>
-          <Badge
-            variant="secondary"
-            className="mt-1 text-xs font-normal"
-          >
+          <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-normal text-secondary-foreground mt-1">
             {agent.role}
-          </Badge>
+          </span>
           <p
             className={`text-muted-foreground mt-2 ${
               isLeader ? "text-sm" : "text-xs"
