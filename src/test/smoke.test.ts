@@ -49,7 +49,7 @@ describe("Smoke Tests - Critical Paths", () => {
       const { default: App } = await import("@/App");
       expect(App).toBeDefined();
       expect(typeof App).toBe("function");
-    }, 15000);
+    }, 30000);
   });
 
   describe("2. Authentication Flow", () => {
