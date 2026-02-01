@@ -6,6 +6,68 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Anti-SSRF: Block private IPs, localhost, and metadata endpoints
+const BLOCKED_PATTERNS = [
+  /^127\./,
+  /^10\./,
+  /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^0\./,
+  /^localhost$/i,
+  /^::1$/,
+  /^fc00:/i,
+  /^fe80:/i,
+  /metadata\.google/i,
+  /169\.254\.169\.254/,
+  /metadata\.aws/i,
+  /instance-data/i,
+];
+
+function isBlockedUrl(urlString: string): boolean {
+  try {
+    const url = new URL(urlString);
+    const hostname = url.hostname.toLowerCase();
+    
+    for (const pattern of BLOCKED_PATTERNS) {
+      if (pattern.test(hostname)) {
+        return true;
+      }
+    }
+    
+    // Block non-HTTP(S) protocols
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return true;
+    }
+    
+    return false;
+  } catch {
+    return true; // Block malformed URLs
+  }
+}
+
+// Rate limiting: simple in-memory tracker
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 100; // requests per minute per workspace
+const RATE_WINDOW_MS = 60000;
+
+function checkRateLimit(workspaceId: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(workspaceId);
+  
+  if (!record || now > record.resetAt) {
+    rateLimitMap.set(workspaceId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 interface WebhookPayload {
   event_type: string;
   workspace_id: string;
@@ -41,9 +103,18 @@ async function triggerWebhooks(
     return { triggered: 0, success: 0, failed: 0 };
   }
 
-  // Filter webhooks that match the event
+  // Filter webhooks that match the event + validate URL security
   const matchingWebhooks = (webhooks as WebhookRow[]).filter(
-    (w) => w.events.includes(payload.event_type) || w.events.includes("*")
+    (w) => {
+      // Check event match
+      const eventMatch = w.events.includes(payload.event_type) || w.events.includes("*");
+      // Security: block SSRF-vulnerable URLs
+      const urlSafe = !isBlockedUrl(w.url);
+      if (!urlSafe) {
+        console.warn(`[Webhooks] Blocked SSRF-vulnerable URL: ${w.url}`);
+      }
+      return eventMatch && urlSafe;
+    }
   );
 
   if (!matchingWebhooks.length) {
@@ -160,6 +231,13 @@ serve(async (req) => {
       }
 
       case "trigger": {
+        // Rate limiting
+        if (!checkRateLimit(params.workspace_id)) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Max 100 webhooks/minute." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         const result = await triggerWebhooks(supabaseUrl, supabaseServiceKey, params as WebhookPayload);
         return new Response(JSON.stringify(result), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },

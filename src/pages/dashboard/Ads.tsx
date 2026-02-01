@@ -427,6 +427,97 @@ export default function Ads() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Campaign Dialog */}
+      <Dialog open={showCampaignDialog} onOpenChange={setShowCampaignDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Nouvelle campagne</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Nom de la campagne *</label>
+              <Input 
+                placeholder="Ex: Brand - Exact Match"
+                value={campaignForm.name}
+                onChange={(e) => setCampaignForm({ ...campaignForm, name: e.target.value })}
+                maxLength={100}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Budget quotidien (€)</label>
+                <Input 
+                  type="number"
+                  min={1}
+                  max={10000}
+                  value={campaignForm.budget_daily}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, budget_daily: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Stratégie</label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={campaignForm.strategy}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, strategy: e.target.value })}
+                >
+                  <option value="maximize_conversions">Maximiser conversions</option>
+                  <option value="maximize_clicks">Maximiser clics</option>
+                  <option value="target_cpa">CPA cible</option>
+                  <option value="target_roas">ROAS cible</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowCampaignDialog(false)}>Annuler</Button>
+            <Button onClick={handleCreateCampaign} disabled={submitting || !campaignForm.name}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Negative Keyword Dialog */}
+      <Dialog open={showNegativeDialog} onOpenChange={setShowNegativeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter mot-clé négatif</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Mot-clé *</label>
+              <Input 
+                placeholder="Ex: gratuit, emploi..."
+                value={negativeForm.keyword}
+                onChange={(e) => setNegativeForm({ ...negativeForm, keyword: e.target.value })}
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Type de correspondance</label>
+              <select 
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                value={negativeForm.match_type}
+                onChange={(e) => setNegativeForm({ ...negativeForm, match_type: e.target.value })}
+              >
+                <option value="exact">Exact</option>
+                <option value="phrase">Expression</option>
+                <option value="broad">Large</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowNegativeDialog(false)}>Annuler</Button>
+            <Button onClick={handleAddNegative} disabled={submitting || !negativeForm.keyword}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
