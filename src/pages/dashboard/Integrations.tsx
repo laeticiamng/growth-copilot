@@ -1,9 +1,5 @@
-import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import { 
   Search, 
   BarChart3, 
@@ -14,132 +10,140 @@ import {
   ShoppingCart,
   FileCode,
   Palette,
-  Check,
-  X,
-  ExternalLink,
-  Loader2,
-  AlertCircle,
+  CheckCircle2,
   Clock,
-  Info,
+  Zap,
   Shield,
+  Youtube,
+  Instagram,
+  MessageCircle,
 } from "lucide-react";
-import { useSites } from "@/hooks/useSites";
-import { useWorkspace } from "@/hooks/useWorkspace";
-import { usePermissions } from "@/hooks/usePermissions";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { MetaSuperConnector, GoogleSuperConnector } from "@/components/integrations";
 
-interface Integration {
+interface PlatformTool {
   id: string;
   name: string;
   description: string;
   icon: React.ElementType;
-  status: "connected" | "disconnected" | "pending" | "coming_soon";
-  category: "analytics" | "ads" | "local" | "social" | "cms" | "crm";
-  required?: boolean;
-  provider?: string;
-  comingSoonNote?: string;
+  status: "active" | "coming_soon";
+  category: "google" | "meta" | "cms" | "crm";
+  capabilities: string[];
 }
 
-const integrations: Integration[] = [
-  // Analytics - Active
-  { 
-    id: "gsc", 
-    name: "Google Search Console", 
-    description: "Données SEO officielles et positionnement", 
-    icon: Search, 
-    status: "disconnected", 
-    category: "analytics", 
-    required: true,
-    provider: "google_search_console",
-  },
+const platformTools: PlatformTool[] = [
+  // Google Suite - Active
   { 
     id: "ga4", 
     name: "Google Analytics 4", 
-    description: "Tracking et conversions", 
+    description: "Analyse du trafic, comportement utilisateur et conversions", 
     icon: BarChart3, 
-    status: "disconnected", 
-    category: "analytics", 
-    required: true,
-    provider: "google_analytics",
+    status: "active", 
+    category: "google",
+    capabilities: ["Sessions & utilisateurs", "Sources de trafic", "Taux de rebond", "Conversions"],
   },
-  
-  // Ads - Active
+  { 
+    id: "gsc", 
+    name: "Google Search Console", 
+    description: "Positions SEO, clics et impressions organiques", 
+    icon: Search, 
+    status: "active", 
+    category: "google",
+    capabilities: ["Positions mots-clés", "CTR organique", "Pages indexées", "Erreurs techniques"],
+  },
   { 
     id: "gads", 
     name: "Google Ads", 
-    description: "Campagnes publicitaires Search & Display", 
+    description: "Analyse des campagnes publicitaires Search & Display", 
     icon: Megaphone, 
-    status: "disconnected", 
-    category: "ads",
-    required: true,
-    provider: "google_ads",
+    status: "active", 
+    category: "google",
+    capabilities: ["CPC & ROAS", "Quality Score", "Conversions", "Budgets"],
   },
-  
-  // Local - Active
   { 
     id: "gbp", 
     name: "Google Business Profile", 
-    description: "Fiche locale, avis et posts", 
+    description: "Visibilité locale, avis clients et fiches établissements", 
     icon: MapPin, 
-    status: "disconnected", 
-    category: "local",
-    required: true,
-    provider: "google_business_profile",
+    status: "active", 
+    category: "google",
+    capabilities: ["Note moyenne", "Nombre d'avis", "Vues fiche", "Posts GBP"],
   },
-  
-  // Social - YouTube Active, Meta Coming Soon
   { 
     id: "youtube", 
-    name: "YouTube", 
-    description: "Analytics vidéo et chaîne", 
-    icon: BarChart3, 
-    status: "disconnected", 
-    category: "social",
-    required: true,
-    provider: "youtube",
+    name: "YouTube Analytics", 
+    description: "Performance vidéo et analytics de chaîne", 
+    icon: Youtube, 
+    status: "active", 
+    category: "google",
+    capabilities: ["Vues & durée", "Abonnés", "Engagement", "Sources de trafic"],
   },
-  // Meta is now handled by MetaSuperConnector component
+  
+  // Meta Suite - Active
+  { 
+    id: "meta-ads", 
+    name: "Meta Ads", 
+    description: "Analyse des campagnes Facebook & Instagram Ads", 
+    icon: Megaphone, 
+    status: "active", 
+    category: "meta",
+    capabilities: ["ROAS & CPA", "Reach & fréquence", "Créatives", "Audiences"],
+  },
+  { 
+    id: "instagram", 
+    name: "Instagram Insights", 
+    description: "Analytics du compte Instagram et engagement", 
+    icon: Instagram, 
+    status: "active", 
+    category: "meta",
+    capabilities: ["Followers", "Engagement rate", "Reach posts", "Stories"],
+  },
+  { 
+    id: "messenger", 
+    name: "Messaging Insights", 
+    description: "Analytics Messenger & WhatsApp Business", 
+    icon: MessageCircle, 
+    status: "active", 
+    category: "meta",
+    capabilities: ["Temps de réponse", "Conversations", "Satisfaction", "Automatisations"],
+  },
   
   // CMS - Coming Soon
   {
     id: "wordpress",
     name: "WordPress",
-    description: "Modifications et corrections automatiques",
+    description: "Modifications et corrections automatiques du site",
     icon: FileCode,
     status: "coming_soon",
     category: "cms",
-    comingSoonNote: "Intégration WordPress en cours de développement.",
+    capabilities: ["Édition contenu", "SEO on-page", "Plugins", "Thèmes"],
   },
   {
     id: "shopify",
     name: "Shopify",
-    description: "Optimisation e-commerce",
+    description: "Optimisation e-commerce et catalogue produits",
     icon: ShoppingCart,
     status: "coming_soon",
     category: "cms",
-    comingSoonNote: "Intégration Shopify en cours de développement.",
+    capabilities: ["Produits", "Collections", "Checkout", "Analytics"],
   },
   {
     id: "webflow",
     name: "Webflow",
-    description: "Design et contenu",
+    description: "Design et contenu responsive",
     icon: Palette,
     status: "coming_soon",
     category: "cms",
-    comingSoonNote: "Intégration Webflow en cours de développement.",
+    capabilities: ["CMS items", "Pages", "Assets", "Forms"],
   },
 
   // CRM - Coming Soon
   {
     id: "email",
-    name: "Email Provider",
+    name: "Email Marketing",
     description: "Sendgrid, Mailchimp, Brevo...",
     icon: Mail,
     status: "coming_soon",
     category: "crm",
-    comingSoonNote: "Intégrations email en cours de développement.",
+    capabilities: ["Campagnes", "Automations", "Listes", "Analytics"],
   },
   {
     id: "calendar",
@@ -148,263 +152,41 @@ const integrations: Integration[] = [
     icon: Calendar,
     status: "coming_soon",
     category: "crm",
-    comingSoonNote: "Intégration calendrier en cours de développement.",
+    capabilities: ["RDV", "Disponibilités", "Rappels", "Sync"],
   },
 ];
 
-const categoryLabels: Record<string, string> = {
-  analytics: "Analytics & Données",
-  ads: "Publicité",
-  local: "Local SEO",
-  social: "Réseaux Sociaux",
-  cms: "CMS & Site",
-  crm: "CRM & Email",
+const categoryConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  google: { label: "Google Suite", color: "from-blue-500 to-red-500", icon: Search },
+  meta: { label: "Meta Suite", color: "from-blue-600 to-purple-600", icon: Instagram },
+  cms: { label: "CMS & Site", color: "from-emerald-500 to-teal-500", icon: FileCode },
+  crm: { label: "CRM & Email", color: "from-orange-500 to-amber-500", icon: Mail },
 };
 
 const Integrations = () => {
-  const { currentSite } = useSites();
-  const { currentWorkspace } = useWorkspace();
-  const { isAtLeastRole } = usePermissions();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [localIntegrations, setLocalIntegrations] = useState(integrations);
-  const [connecting, setConnecting] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
-
-  // Route guard: redirect if not admin+
-  useEffect(() => {
-    if (!isAtLeastRole("admin")) {
-      navigate("/dashboard/connections", { replace: true });
-    }
-  }, [isAtLeastRole, navigate]);
-
-  // Handle OAuth callback
-  useEffect(() => {
-    const oauthStatus = searchParams.get("oauth");
-    const provider = searchParams.get("provider");
-    const errorType = searchParams.get("error_type");
-
-    if (oauthStatus === "success" && provider) {
-      toast.success("Connexion réussie !", {
-        description: `${provider === "google_analytics" ? "Google Analytics" : "Search Console"} est maintenant connecté.`,
-      });
-      // Clear URL params
-      setSearchParams({});
-      // Refresh integration status
-      loadIntegrationStatus();
-    } else if (oauthStatus === "error") {
-      toast.error("Erreur de connexion OAuth", {
-        description: errorType || "Une erreur s'est produite lors de la connexion.",
-      });
-      setSearchParams({});
-    }
-  }, [searchParams, setSearchParams]);
-
-  // Load actual integration status from DB
-  const loadIntegrationStatus = async () => {
-    if (!currentWorkspace) {
-      setInitialLoading(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("integrations")
-        .select("*")
-        .eq("workspace_id", currentWorkspace.id);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        setLocalIntegrations(prev => prev.map(integration => {
-          // Find DB record matching this integration's provider and with active status
-          const dbIntegration = data.find(d =>
-            d.provider === integration.provider &&
-            (d.status as string) === "active"
-          );
-          if (dbIntegration) {
-            return { ...integration, status: "connected" as const };
-          }
-          return integration;
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to load integration status:", error);
-    } finally {
-      setInitialLoading(false);
-    }
-  };
-
-  // Load integration status on mount
-  useEffect(() => {
-    loadIntegrationStatus();
-  }, [currentWorkspace?.id]);
-
-  const handleConnect = async (integration: Integration) => {
-    if (!currentSite || !currentWorkspace) {
-      toast.error("Sélectionnez d'abord un site");
-      return;
-    }
-
-    if (integration.status === "coming_soon") {
-      toast.info(integration.comingSoonNote || "Cette intégration sera disponible prochainement");
-      return;
-    }
-
-    // If already connected, disconnect
-    if (integration.status === "connected") {
-      setConnecting(integration.id);
-      try {
-        // Delete integration record (or set to pending for reconnection)
-        const { error } = await supabase
-          .from("integrations")
-          .delete()
-          .eq("workspace_id", currentWorkspace.id)
-          .eq("provider", integration.provider as any);
-        
-        if (error) throw error;
-        
-        setLocalIntegrations(prev => prev.map(i => 
-          i.id === integration.id ? { ...i, status: "disconnected" as const } : i
-        ));
-        toast.success("Intégration désactivée");
-      } catch (error) {
-        console.error("Disconnect error:", error);
-        toast.error("Erreur lors de la déconnexion");
-      } finally {
-        setConnecting(null);
-      }
-      return;
-    }
-
-    // For Google integrations, use OAuth flow
-    const googleProviders = ["google_analytics", "google_search_console", "google_ads", "youtube", "google_business_profile"];
-    if (integration.provider && googleProviders.includes(integration.provider)) {
-      setConnecting(integration.id);
-      try {
-        const { data, error } = await supabase.functions.invoke("oauth-init", {
-          body: {
-            workspace_id: currentWorkspace.id,
-            provider: integration.provider,
-            redirect_url: window.location.href,
-          },
-        });
-
-        if (error) throw error;
-
-        if (data.auth_url) {
-          // Redirect to Google OAuth
-          window.location.href = data.auth_url;
-        } else {
-          toast.error(data.error || "Erreur OAuth");
-        }
-      } catch (error) {
-        console.error("OAuth init error:", error);
-        toast.error("Erreur lors de l'initialisation OAuth. Vérifiez la configuration Google Cloud.");
-      } finally {
-        setConnecting(null);
-      }
-      return;
-    }
-
-    // For other integrations, show configuration message
-    setConnecting(integration.id);
-    try {
-      setLocalIntegrations(prev => prev.map(i => 
-        i.id === integration.id ? { ...i, status: "pending" as const } : i
-      ));
-      toast.success("Configuration requise", { 
-        description: "Cette intégration nécessite une configuration manuelle." 
-      });
-    } finally {
-      setConnecting(null);
-    }
-  };
-
-  const handleSync = async (integrationId: string) => {
-    if (!currentWorkspace) return;
-
-    setSyncing(integrationId);
-    
-    try {
-      let endpoint = "";
-      let payload: Record<string, unknown> = { workspace_id: currentWorkspace.id };
-
-      switch (integrationId) {
-        case "gsc":
-          endpoint = "sync-gsc";
-          payload.site_id = currentSite?.id;
-          payload.site_url = currentSite?.url;
-          break;
-        case "ga4":
-          endpoint = "sync-ga4";
-          payload.site_id = currentSite?.id;
-          break;
-        case "gads":
-          endpoint = "sync-ads";
-          break;
-        case "gbp":
-          endpoint = "sync-gbp";
-          break;
-        case "youtube":
-          endpoint = "sync-youtube-analytics";
-          break;
-        default:
-          toast.error("Sync non supporté pour cette intégration");
-          setSyncing(null);
-          return;
-      }
-
-      const { data, error } = await supabase.functions.invoke(endpoint, {
-        body: payload,
-      });
-
-      if (error) throw error;
-      
-      if (data.success) {
-        toast.success("Synchronisation terminée", { description: data.message });
-      } else {
-        toast.error(data.error || "Échec de la synchronisation");
-      }
-    } catch (error) {
-      console.error("Sync error:", error);
-      toast.error("Erreur lors de la synchronisation");
-    } finally {
-      setSyncing(null);
-    }
-  };
-
-  const groupedIntegrations = localIntegrations.reduce((acc, integration) => {
-    if (!acc[integration.category]) acc[integration.category] = [];
-    acc[integration.category].push(integration);
+  const groupedTools = platformTools.reduce((acc, tool) => {
+    if (!acc[tool.category]) acc[tool.category] = [];
+    acc[tool.category].push(tool);
     return acc;
-  }, {} as Record<string, Integration[]>);
+  }, {} as Record<string, PlatformTool[]>);
 
-  const connectedCount = localIntegrations.filter(i => i.status === "connected").length;
-  const comingSoonCount = localIntegrations.filter(i => i.status === "coming_soon").length;
-
-  if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const activeCount = platformTools.filter(t => t.status === "active").length;
+  const comingSoonCount = platformTools.filter(t => t.status === "coming_soon").length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Intégrations</h1>
+          <h1 className="text-3xl font-bold">Outils d'Analyse</h1>
           <p className="text-muted-foreground">
-            Connectez vos outils pour débloquer toutes les fonctionnalités.
+            Nos outils internes analysent automatiquement votre site et vos performances.
           </p>
         </div>
         <div className="flex gap-2">
-          <Badge variant={connectedCount > 0 ? "success" : "secondary"}>
-            {connectedCount} connectées
+          <Badge variant="success" className="gap-1">
+            <Zap className="w-3 h-3" />
+            {activeCount} actifs
           </Badge>
           <Badge variant="secondary">
             {comingSoonCount} à venir
@@ -412,144 +194,122 @@ const Integrations = () => {
         </div>
       </div>
 
-      {/* Token Setup Instructions */}
-      <Card className="border-primary/50 bg-primary/5">
-        <CardContent className="flex items-start gap-4 py-4">
-          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+      {/* How it works */}
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+        <CardContent className="flex items-start gap-4 py-5">
+          <div className="p-2.5 rounded-xl bg-primary/20">
+            <Shield className="w-5 h-5 text-primary" />
+          </div>
           <div className="flex-1">
-            <p className="font-medium">Configuration OAuth</p>
-            <p className="text-sm text-muted-foreground">
-              GSC et GA4 nécessitent des tokens OAuth. Après connexion :
+            <p className="font-semibold text-lg">Comment ça fonctionne ?</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Entrez simplement l'URL de votre site. Nos outils analysent automatiquement vos données publiques 
+              et génèrent des recommandations personnalisées. <strong>Aucune connexion de votre part n'est requise.</strong>
             </p>
-            <ol className="text-sm text-muted-foreground mt-2 list-decimal list-inside space-y-1">
-              <li>Configurez vos credentials dans Google Cloud Console</li>
-              <li>Ajoutez les tokens via les secrets Lovable Cloud</li>
-              <li>Cliquez "Sync Now" pour récupérer les données</li>
-            </ol>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Badge variant="outline" className="bg-background">
+                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                Analyse automatique
+              </Badge>
+              <Badge variant="outline" className="bg-background">
+                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                Données en temps réel
+              </Badge>
+              <Badge variant="outline" className="bg-background">
+                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                Recommandations IA
+              </Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Site Selection Warning */}
-      {!currentSite && (
-        <Card className="border-destructive/50 bg-destructive/5">
-          <CardContent className="flex items-center gap-4 py-4">
-            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
-            <p className="text-sm">
-              Sélectionnez d'abord un site dans la page <strong>Sites</strong> pour configurer les intégrations.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Super-Connecteurs - Featured */}
-      <GoogleSuperConnector />
-      <MetaSuperConnector />
-
-      {/* Other Integration Categories */}
+      {/* Tool Categories */}
       <div className="space-y-8">
-        {Object.entries(groupedIntegrations).map(([category, items]) => (
-          <div key={category}>
-            <h2 className="text-lg font-semibold mb-4">{categoryLabels[category]}</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {items.map((integration) => {
-                const Icon = integration.icon;
-                const isConnected = integration.status === "connected";
-                const isPending = integration.status === "pending";
-                const isComingSoon = integration.status === "coming_soon";
-                const isConnecting = connecting === integration.id;
-                const isSyncing = syncing === integration.id;
-                const syncableIntegrations = ["gsc", "ga4", "gads", "gbp", "youtube"];
-                const canSync = syncableIntegrations.includes(integration.id) && (isConnected || isPending);
-                
-                return (
-                  <Card 
-                    key={integration.id} 
-                    variant={isConnected ? "gradient" : isComingSoon ? "default" : "feature"}
-                    className={isComingSoon ? "opacity-75" : ""}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${isConnected ? 'bg-primary/20' : isComingSoon ? 'bg-muted' : 'bg-secondary'}`}>
-                          <Icon className={`w-6 h-6 ${isComingSoon ? 'text-muted-foreground' : ''}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{integration.name}</h3>
-                            {integration.required && !isComingSoon && (
-                              <Badge variant="outline" className="text-xs">Recommandé</Badge>
-                            )}
+        {Object.entries(groupedTools).map(([category, tools]) => {
+          const config = categoryConfig[category];
+          const CategoryIcon = config.icon;
+          const activeInCategory = tools.filter(t => t.status === "active").length;
+          
+          return (
+            <div key={category}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-2 rounded-lg bg-gradient-to-br ${config.color} text-white`}>
+                  <CategoryIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{config.label}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {activeInCategory} outil{activeInCategory > 1 ? 's' : ''} actif{activeInCategory > 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {tools.map((tool) => {
+                  const Icon = tool.icon;
+                  const isActive = tool.status === "active";
+                  
+                  return (
+                    <Card 
+                      key={tool.id} 
+                      className={`transition-all ${
+                        isActive 
+                          ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/40" 
+                          : "opacity-60"
+                      }`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2.5 rounded-lg ${
+                            isActive ? 'bg-primary/15' : 'bg-muted'
+                          }`}>
+                            <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {integration.description}
-                          </p>
-                          
-                          {isComingSoon && integration.comingSoonNote && (
-                            <p className="text-xs text-muted-foreground bg-muted p-2 rounded mb-3">
-                              {integration.comingSoonNote}
-                            </p>
-                          )}
-
-                          <div className="flex items-center justify-between">
-                            <Badge 
-                              variant={isConnected ? "success" : isPending ? "secondary" : isComingSoon ? "outline" : "secondary"}
-                              className="text-xs"
-                            >
-                              {isConnected ? (
-                                <><Check className="w-3 h-3 mr-1" /> Connecté</>
-                              ) : isPending ? (
-                                <><Clock className="w-3 h-3 mr-1" /> En attente</>
-                              ) : isComingSoon ? (
-                                <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
-                              ) : (
-                                <><X className="w-3 h-3 mr-1" /> Non connecté</>
-                              )}
-                            </Badge>
-                            <div className="flex gap-2">
-                              {canSync && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleSync(integration.id)}
-                                  disabled={isSyncing}
-                                >
-                                  {isSyncing ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    "Sync Now"
-                                  )}
-                                </Button>
-                              )}
-                              <Button 
-                                variant={isConnected ? "outline" : isComingSoon ? "ghost" : "default"} 
-                                size="sm"
-                                onClick={() => handleConnect(integration)}
-                                disabled={isConnecting || !currentSite || isComingSoon}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-medium">{tool.name}</h3>
+                              <Badge 
+                                variant={isActive ? "success" : "outline"} 
+                                className="text-xs"
                               >
-                                {isConnecting ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : isComingSoon ? (
-                                  "Bientôt"
-                                ) : isConnected ? (
-                                  "Déconnecter"
+                                {isActive ? (
+                                  <><CheckCircle2 className="w-3 h-3 mr-1" /> Actif</>
                                 ) : (
-                                  <>
-                                    Connecter
-                                    <ExternalLink className="w-3 h-3 ml-1" />
-                                  </>
+                                  <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
                                 )}
-                              </Button>
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-3">
+                              {tool.description}
+                            </p>
+                            
+                            {/* Capabilities */}
+                            <div className="flex flex-wrap gap-1">
+                              {tool.capabilities.slice(0, 3).map((cap, idx) => (
+                                <span 
+                                  key={idx} 
+                                  className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                                >
+                                  {cap}
+                                </span>
+                              ))}
+                              {tool.capabilities.length > 3 && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                  +{tool.capabilities.length - 3}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
