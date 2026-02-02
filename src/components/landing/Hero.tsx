@@ -107,7 +107,7 @@ export function Hero() {
                   </div>
                 )}
               </div>
-              <Link to={`/onboarding${url ? `?url=${encodeURIComponent(url)}` : ''}`}>
+              <Link to="/auth">
                 <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap" disabled={!!urlError && url.length > 0}>
                   {t("landing.hero.cta")}
                   <ArrowRight className="w-5 h-5 ml-2" />

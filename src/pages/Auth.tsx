@@ -617,9 +617,9 @@ export default function Auth() {
             
             <p className="text-xs text-center text-muted-foreground mt-6">
               En continuant, vous acceptez nos{" "}
-              <a href="#" className="text-primary hover:underline">Conditions d'utilisation</a>
+              <Link to="/terms" className="text-primary hover:underline">Conditions d'utilisation</Link>
               {" "}et notre{" "}
-              <a href="#" className="text-primary hover:underline">Politique de confidentialité</a>
+              <Link to="/privacy" className="text-primary hover:underline">Politique de confidentialité</Link>
             </p>
           </CardContent>
         </Card>

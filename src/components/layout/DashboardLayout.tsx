@@ -51,6 +51,7 @@ interface NavItem {
   requiresRole?: "admin" | "manager" | "owner";
   hideForClients?: boolean;
   category?: "main" | "advanced";
+  comingSoon?: boolean;
 }
 
 // Simplified navigation - Main items visible, technical items in "Advanced"
@@ -76,9 +77,9 @@ const allNavItems: NavItem[] = [
   { path: "/dashboard/reputation", label: "Réputation", icon: () => <span className="text-base">⭐</span>, category: "advanced" },
   { path: "/dashboard/competitors", label: "Concurrents", icon: () => <span className="text-base">👥</span>, category: "advanced" },
   { path: "/dashboard/brand-kit", label: "Brand Kit", icon: () => <span className="text-base">🎨</span>, category: "advanced" },
-  { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span>, category: "advanced" },
-  { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span>, category: "advanced" },
-  { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span>, category: "advanced" },
+  { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span>, category: "advanced", comingSoon: true },
+  { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span>, category: "advanced", comingSoon: true },
+  { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span>, category: "advanced", comingSoon: true },
   { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, category: "advanced", requiresRole: "admin" },
   { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, category: "advanced", requiresRole: "manager" },
   { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, category: "advanced", requiresRole: "admin" },
@@ -151,6 +152,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const NavLink = ({ item }: { item: NavItem }) => {
     const Icon = item.icon;
     const isActive = location.pathname === item.path;
+
+    if (item.comingSoon) {
+      return (
+        <span
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/50 cursor-default"
+        >
+          <Icon className="w-4 h-4" />
+          {item.label}
+          <span className="ml-auto text-[10px] uppercase tracking-wide opacity-60">soon</span>
+        </span>
+      );
+    }
+
     return (
       <Link
         to={item.path}

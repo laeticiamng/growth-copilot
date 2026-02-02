@@ -32,7 +32,7 @@ import {
 
 export default function SEOTech() {
   const { currentSite } = useSites();
-  const { loading, result, error, runDemoAudit, exportResults } = useSEOAudit();
+  const { loading, result, error, runAudit, runDemoAudit, exportResults } = useSEOAudit();
   const [selectedIssue, setSelectedIssue] = useState<SEOIssue | null>(null);
   const [showPatchDialog, setShowPatchDialog] = useState(false);
 
@@ -148,7 +148,7 @@ export default function SEOTech() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={runDemoAudit} disabled={loading}>
+          <Button variant="outline" onClick={() => currentSite?.url ? runAudit() : runDemoAudit()} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Crawl en cours...' : 'Nouveau crawl'}
           </Button>
@@ -398,9 +398,9 @@ export default function SEOTech() {
             <p className="text-muted-foreground mb-6">
               Analysez votre site pour détecter les problèmes SEO techniques
             </p>
-            <Button variant="hero" onClick={runDemoAudit}>
+            <Button variant="hero" onClick={() => currentSite?.url ? runAudit() : runDemoAudit()}>
               <Play className="w-4 h-4 mr-2" />
-              Lancer l'audit démo
+              {currentSite?.url ? "Lancer l'audit" : "Lancer l'audit démo"}
             </Button>
           </CardContent>
         </Card>

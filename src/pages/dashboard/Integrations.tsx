@@ -102,48 +102,53 @@ const integrations: Integration[] = [
   },
   // Meta is now handled by MetaSuperConnector component
   
-  // CMS
-  { 
-    id: "wordpress", 
-    name: "WordPress", 
-    description: "Modifications et corrections automatiques", 
-    icon: FileCode, 
-    status: "disconnected", 
+  // CMS - Coming Soon
+  {
+    id: "wordpress",
+    name: "WordPress",
+    description: "Modifications et corrections automatiques",
+    icon: FileCode,
+    status: "coming_soon",
     category: "cms",
+    comingSoonNote: "Intégration WordPress en cours de développement.",
   },
-  { 
-    id: "shopify", 
-    name: "Shopify", 
-    description: "Optimisation e-commerce", 
-    icon: ShoppingCart, 
-    status: "disconnected", 
+  {
+    id: "shopify",
+    name: "Shopify",
+    description: "Optimisation e-commerce",
+    icon: ShoppingCart,
+    status: "coming_soon",
     category: "cms",
+    comingSoonNote: "Intégration Shopify en cours de développement.",
   },
-  { 
-    id: "webflow", 
-    name: "Webflow", 
-    description: "Design et contenu", 
-    icon: Palette, 
-    status: "disconnected", 
+  {
+    id: "webflow",
+    name: "Webflow",
+    description: "Design et contenu",
+    icon: Palette,
+    status: "coming_soon",
     category: "cms",
+    comingSoonNote: "Intégration Webflow en cours de développement.",
   },
-  
-  // CRM
-  { 
-    id: "email", 
-    name: "Email Provider", 
-    description: "Sendgrid, Mailchimp, Brevo...", 
-    icon: Mail, 
-    status: "disconnected", 
+
+  // CRM - Coming Soon
+  {
+    id: "email",
+    name: "Email Provider",
+    description: "Sendgrid, Mailchimp, Brevo...",
+    icon: Mail,
+    status: "coming_soon",
     category: "crm",
+    comingSoonNote: "Intégrations email en cours de développement.",
   },
-  { 
-    id: "calendar", 
-    name: "Calendrier", 
-    description: "Google Calendar, Calendly...", 
-    icon: Calendar, 
-    status: "disconnected", 
+  {
+    id: "calendar",
+    name: "Calendrier",
+    description: "Google Calendar, Calendly...",
+    icon: Calendar,
+    status: "coming_soon",
     category: "crm",
+    comingSoonNote: "Intégration calendrier en cours de développement.",
   },
 ];
 
@@ -165,6 +170,7 @@ const Integrations = () => {
   const [localIntegrations, setLocalIntegrations] = useState(integrations);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // Route guard: redirect if not admin+
   useEffect(() => {
@@ -197,7 +203,10 @@ const Integrations = () => {
 
   // Load actual integration status from DB
   const loadIntegrationStatus = async () => {
-    if (!currentWorkspace) return;
+    if (!currentWorkspace) {
+      setInitialLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -210,8 +219,8 @@ const Integrations = () => {
       if (data && data.length > 0) {
         setLocalIntegrations(prev => prev.map(integration => {
           // Find DB record matching this integration's provider and with active status
-          const dbIntegration = data.find(d => 
-            d.provider === integration.provider && 
+          const dbIntegration = data.find(d =>
+            d.provider === integration.provider &&
             (d.status as string) === "active"
           );
           if (dbIntegration) {
@@ -222,6 +231,8 @@ const Integrations = () => {
       }
     } catch (error) {
       console.error("Failed to load integration status:", error);
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -372,6 +383,14 @@ const Integrations = () => {
 
   const connectedCount = localIntegrations.filter(i => i.status === "connected").length;
   const comingSoonCount = localIntegrations.filter(i => i.status === "coming_soon").length;
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
