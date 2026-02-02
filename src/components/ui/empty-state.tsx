@@ -91,14 +91,14 @@ export function ConnectionRequired({ provider, icon: Icon, onConnect, descriptio
           <Icon className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1">
-          <p className="font-medium">Connexion requise</p>
+          <p className="font-medium">Autorisation requise</p>
           <p className="text-sm text-muted-foreground">
-            {description || `Connectez votre compte ${provider} pour accéder à ces fonctionnalités`}
+            {description || `Autorisez l'accès à ${provider} pour activer ces fonctionnalités`}
           </p>
         </div>
         {onConnect && (
           <Button size="sm" onClick={onConnect}>
-            Connecter
+            Autoriser
           </Button>
         )}
       </CardContent>
@@ -156,7 +156,7 @@ interface DemoModeBannerProps {
 export function DemoModeBanner({ message }: DemoModeBannerProps) {
   return (
     <div className="text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-lg border border-border/50">
-      ⚠️ {message || "Mode démo - Connectez vos outils pour voir vos vraies données"}
+      ⚠️ {message || "Autorisez l'accès à vos outils pour voir vos vraies données"}
     </div>
   );
 }
