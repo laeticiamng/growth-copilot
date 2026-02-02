@@ -50,10 +50,11 @@ export default function SEOTech() {
   ] : [];
 
   const crawlStats = {
-    pagesTotal: result?.pages_total || 156,
-    pagesIndexed: result?.pages_crawled || 142,
-    errors404: result?.issues.filter(i => i.type === 'http_error').length || 12,
+    pagesTotal: result?.pages_total || 0,
+    pagesIndexed: result?.pages_crawled || 0,
+    errors404: result?.issues?.filter(i => i.type === 'http_error').length || 0,
     lastCrawl: result ? "À l'instant" : "Aucun crawl",
+    crawlMethod: result?.crawl_method || 'none',
   };
 
   const filteredIssues = (severity?: string) => {
