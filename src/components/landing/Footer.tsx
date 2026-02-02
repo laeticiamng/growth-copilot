@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Zap } from "lucide-react";
+import { Zap, Twitter, Linkedin, Youtube } from "lucide-react";
 
 export function Footer() {
   const { t } = useTranslation();
@@ -81,17 +81,17 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 EmotionsCare Sasu. {t("landing.footer.rights")}.
+            © 2026 Growth OS. {t("landing.footer.rights")}.
           </p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Twitter
+          <div className="flex items-center gap-4">
+            <a href="https://x.com/growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
+              <Twitter className="w-5 h-5" />
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              LinkedIn
+            <a href="https://linkedin.com/company/growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+              <Linkedin className="w-5 h-5" />
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              YouTube
+            <a href="https://youtube.com/@growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="YouTube">
+              <Youtube className="w-5 h-5" />
             </a>
           </div>
         </div>
