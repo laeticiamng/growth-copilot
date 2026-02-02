@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
+import { useApprovals } from "@/hooks/useApprovals";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   TrendingUp,
@@ -13,11 +16,9 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Zap,
   Target,
   Search,
   FileText,
-  Megaphone,
   BarChart3,
   Bot,
   ChevronRight,
@@ -33,75 +34,16 @@ const CGO_PERSONA = {
   avatar: "👩‍💼",
 };
 
-// Mock KPIs - In production, these would come from actual data
-const EXECUTIVE_KPIS = [
-  {
-    id: "traffic",
-    label: "Trafic organique",
-    value: "12.4K",
-    change: +15.3,
-    trend: "up" as const,
-    icon: TrendingUp,
-  },
-  {
-    id: "leads",
-    label: "Leads générés",
-    value: "234",
-    change: +8.2,
-    trend: "up" as const,
-    icon: Target,
-  },
-  {
-    id: "positions",
-    label: "Mots-clés Top 10",
-    value: "47",
-    change: -3,
-    trend: "down" as const,
-    icon: Search,
-  },
-  {
-    id: "score",
-    label: "Score SEO global",
-    value: "72/100",
-    change: +5,
-    trend: "up" as const,
-    icon: BarChart3,
-  },
+// Quick actions - static
+const QUICK_ACTIONS = [
+  { label: "Lancer un audit SEO", icon: Search, link: "/dashboard/seo" },
+  { label: "Créer du contenu", icon: FileText, link: "/dashboard/content" },
+  { label: "Voir les rapports", icon: BarChart3, link: "/dashboard/reports" },
+  { label: "Gérer les approbations", icon: CheckCircle2, link: "/dashboard/approvals" },
 ];
 
-// Priority alerts from agents
-const PRIORITY_ALERTS = [
-  {
-    id: "1",
-    severity: "high" as const,
-    agent: "Emma Lefebvre",
-    agentRole: "SEO Tech",
-    title: "15 pages avec Core Web Vitals dégradés",
-    action: "Voir les corrections",
-    link: "/dashboard/seo",
-  },
-  {
-    id: "2",
-    severity: "medium" as const,
-    agent: "Thomas Duval",
-    agentRole: "Content",
-    title: "5 articles prêts pour publication",
-    action: "Approuver",
-    link: "/dashboard/approvals",
-  },
-  {
-    id: "3",
-    severity: "low" as const,
-    agent: "Marc Rousseau",
-    agentRole: "Ads",
-    title: "Budget Ads sous-utilisé de 23%",
-    action: "Optimiser",
-    link: "/dashboard/ads",
-  },
-];
-
-// CGO Recommendations
-const CGO_RECOMMENDATIONS = [
+// Static recommendations for new users
+const ONBOARDING_RECOMMENDATIONS = [
   {
     id: "1",
     priority: "critical" as const,
@@ -134,18 +76,128 @@ const CGO_RECOMMENDATIONS = [
   },
 ];
 
-// Quick actions
-const QUICK_ACTIONS = [
-  { label: "Lancer un audit SEO", icon: Search, link: "/dashboard/seo" },
-  { label: "Créer du contenu", icon: FileText, link: "/dashboard/content" },
-  { label: "Voir les rapports", icon: BarChart3, link: "/dashboard/reports" },
-  { label: "Gérer les approbations", icon: CheckCircle2, link: "/dashboard/approvals" },
-];
-
 export default function DashboardHome() {
   const { currentWorkspace, loading: wsLoading } = useWorkspace();
   const { currentSite, loading: sitesLoading } = useSites();
+  const { pendingApprovals } = useApprovals();
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
+
+  // Fetch real KPI data from database
+  const { data: kpiData, isLoading: kpiLoading } = useQuery({
+    queryKey: ['dashboard-kpis', currentSite?.id],
+    queryFn: async () => {
+      if (!currentSite?.id) return null;
+      
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { data: kpis } = await supabase
+        .from('kpis_daily')
+        .select('organic_clicks, organic_impressions, total_conversions, avg_position')
+        .eq('site_id', currentSite.id)
+        .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+      
+      if (!kpis || kpis.length === 0) return null;
+      
+      const totalClicks = kpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0);
+      const totalConversions = kpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0);
+      const avgPosition = kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.length;
+      
+      return {
+        organicClicks: totalClicks,
+        conversions: totalConversions,
+        avgPosition: avgPosition.toFixed(1),
+        daysTracked: kpis.length,
+      };
+    },
+    enabled: !!currentSite?.id,
+  });
+
+  // Fetch recent agent actions for alerts
+  const { data: recentActions } = useQuery({
+    queryKey: ['dashboard-actions', currentWorkspace?.id],
+    queryFn: async () => {
+      if (!currentWorkspace?.id) return [];
+      
+      const { data } = await supabase
+        .from('action_log')
+        .select('id, action_type, description, actor_type, created_at')
+        .eq('workspace_id', currentWorkspace.id)
+        .eq('actor_type', 'agent')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      return data || [];
+    },
+    enabled: !!currentWorkspace?.id,
+  });
+
+  // Build dynamic KPIs based on real data
+  const executiveKpis = kpiData ? [
+    {
+      id: "traffic",
+      label: "Trafic organique",
+      value: kpiData.organicClicks.toLocaleString(),
+      change: 0, // Would need previous period for comparison
+      trend: "up" as const,
+      icon: TrendingUp,
+    },
+    {
+      id: "leads",
+      label: "Conversions",
+      value: kpiData.conversions.toString(),
+      change: 0,
+      trend: "up" as const,
+      icon: Target,
+    },
+    {
+      id: "positions",
+      label: "Position moyenne",
+      value: kpiData.avgPosition,
+      change: 0,
+      trend: "up" as const,
+      icon: Search,
+    },
+    {
+      id: "score",
+      label: "Jours de données",
+      value: kpiData.daysTracked.toString(),
+      change: 0,
+      trend: "up" as const,
+      icon: BarChart3,
+    },
+  ] : null;
+
+  // Build alerts from pending approvals and recent actions
+  const priorityAlerts: Array<{
+    id: string;
+    severity: "high" | "medium" | "low";
+    agent: string;
+    agentRole: string;
+    title: string;
+    action: string;
+    link: string;
+  }> = [
+    ...(pendingApprovals.length > 0 ? [{
+      id: "approvals",
+      severity: "medium" as const,
+      agent: "Système",
+      agentRole: "Approbations",
+      title: `${pendingApprovals.length} action(s) en attente d'approbation`,
+      action: "Voir",
+      link: "/dashboard/approvals",
+    }] : []),
+    ...(recentActions?.slice(0, 2).map(action => ({
+      id: action.id,
+      severity: "low" as const,
+      agent: "Agent IA",
+      agentRole: action.action_type,
+      title: action.description,
+      action: "Voir",
+      link: "/dashboard/logs",
+    })) || []),
+  ];
 
   const isLoading = wsLoading || sitesLoading;
 
@@ -204,8 +256,11 @@ export default function DashboardHome() {
                   <span className="font-medium text-foreground">
                     {currentSite?.name || currentWorkspace?.name || "votre site"}
                   </span>
-                  . J'ai identifié <span className="font-medium text-primary">3 actions prioritaires</span> pour
-                  améliorer votre croissance cette semaine.
+                  {pendingApprovals.length > 0 ? (
+                    <>. Vous avez <span className="font-medium text-primary">{pendingApprovals.length} action(s) en attente</span> d'approbation.</>
+                  ) : (
+                    <>. Tout est à jour pour le moment.</>
+                  )}
                 </p>
               </div>
             </div>
@@ -225,32 +280,44 @@ export default function DashboardHome() {
         </CardContent>
       </Card>
 
-      {/* Executive KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {EXECUTIVE_KPIS.map((kpi) => (
-          <Card key={kpi.id} className="relative overflow-hidden">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center justify-between mb-2">
-                <kpi.icon className={cn(
-                  "w-5 h-5",
-                  kpi.trend === "up" ? "text-chart-3" : "text-destructive"
-                )} />
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    "text-xs",
-                    kpi.trend === "up" ? "text-chart-3" : "text-destructive"
-                  )}
-                >
-                  {kpi.trend === "up" ? "+" : ""}{kpi.change}%
-                </Badge>
-              </div>
-              <p className="text-2xl font-bold">{kpi.value}</p>
-              <p className="text-xs text-muted-foreground">{kpi.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Executive KPIs - Real data or empty state */}
+      {kpiLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      ) : executiveKpis ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {executiveKpis.map((kpi) => (
+            <Card key={kpi.id} className="relative overflow-hidden">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <kpi.icon className="w-5 h-5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold">{kpi.value}</p>
+                <p className="text-xs text-muted-foreground">{kpi.label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card variant="feature" className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="font-medium mb-2">Aucune donnée disponible</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Connectez vos intégrations pour voir vos KPIs en temps réel.
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/dashboard/integrations">
+                Configurer les intégrations
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Priority Alerts */}
@@ -259,48 +326,57 @@ export default function DashboardHome() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-warning" />
-                Alertes prioritaires
+                Activité récente
               </CardTitle>
-              <Badge variant="secondary">{PRIORITY_ALERTS.length}</Badge>
+              {priorityAlerts.length > 0 && (
+                <Badge variant="secondary">{priorityAlerts.length}</Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {PRIORITY_ALERTS.map((alert) => (
-              <div
-                key={alert.id}
-                className={cn(
-                  "flex items-start gap-3 p-3 rounded-lg border",
-                  alert.severity === "high"
-                    ? "border-destructive/30 bg-destructive/5"
-                    : alert.severity === "medium"
-                    ? "border-warning/30 bg-warning/5"
-                    : "border-border bg-secondary/30"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-2 h-2 rounded-full mt-2 flex-shrink-0",
-                    alert.severity === "high"
-                      ? "bg-destructive"
-                      : alert.severity === "medium"
-                      ? "bg-warning"
-                      : "bg-muted-foreground"
-                  )}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{alert.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {alert.agent} • {alert.agentRole}
-                  </p>
-                </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to={alert.link}>
-                    {alert.action}
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </Button>
+            {priorityAlerts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-chart-3/50" />
+                <p className="text-sm">Aucune alerte pour le moment</p>
               </div>
-            ))}
+            ) : (
+              priorityAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className={cn(
+                    "flex items-start gap-3 p-3 rounded-lg border",
+                    alert.severity === "high"
+                      ? "border-destructive/30 bg-destructive/5"
+                      : alert.severity === "medium"
+                      ? "border-warning/30 bg-warning/5"
+                      : "border-border bg-secondary/30"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-2 h-2 rounded-full mt-2 flex-shrink-0",
+                      alert.severity === "high"
+                        ? "bg-destructive"
+                        : alert.severity === "medium"
+                        ? "bg-warning"
+                        : "bg-muted-foreground"
+                    )}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{alert.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {alert.agent} • {alert.agentRole}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to={alert.link}>
+                      {alert.action}
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  </Button>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -310,7 +386,7 @@ export default function DashboardHome() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                Recommandations IA
+                Recommandations
               </CardTitle>
               <Badge variant="gradient">ICE Score</Badge>
             </div>
@@ -319,7 +395,7 @@ export default function DashboardHome() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {CGO_RECOMMENDATIONS.slice(0, showAllRecommendations ? undefined : 2).map((rec) => (
+            {ONBOARDING_RECOMMENDATIONS.slice(0, showAllRecommendations ? undefined : 2).map((rec) => (
               <div
                 key={rec.id}
                 className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-primary/30 transition-colors"
@@ -359,13 +435,13 @@ export default function DashboardHome() {
                 </Button>
               </div>
             ))}
-            {CGO_RECOMMENDATIONS.length > 2 && (
+            {ONBOARDING_RECOMMENDATIONS.length > 2 && (
               <Button
                 variant="ghost"
                 className="w-full"
                 onClick={() => setShowAllRecommendations(!showAllRecommendations)}
               >
-                {showAllRecommendations ? "Voir moins" : `Voir les ${CGO_RECOMMENDATIONS.length - 2} autres`}
+                {showAllRecommendations ? "Voir moins" : `Voir les ${ONBOARDING_RECOMMENDATIONS.length - 2} autres`}
                 <Eye className="w-4 h-4 ml-2" />
               </Button>
             )}
