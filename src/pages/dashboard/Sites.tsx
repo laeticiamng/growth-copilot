@@ -78,14 +78,34 @@ const Sites = () => {
     });
   };
 
+  // Normalize URL to ensure it has a protocol
+  const normalizeUrl = (url: string): string => {
+    url = url.trim();
+    if (!url) return url;
+    if (!/^https?:\/\//i.test(url)) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
   const handleCreate = async () => {
     if (!formData.url) {
       toast.error(t("common.error"), { description: "URL requise" });
       return;
     }
 
+    const normalizedUrl = normalizeUrl(formData.url);
+    
+    // Validate URL format
+    try {
+      new URL(normalizedUrl);
+    } catch {
+      toast.error(t("common.error"), { description: "URL invalide" });
+      return;
+    }
+
     setIsSubmitting(true);
-    const { error, site } = await createSite(formData);
+    const { error, site } = await createSite({ ...formData, url: normalizedUrl });
     setIsSubmitting(false);
 
     if (error) {
@@ -283,7 +303,12 @@ const Sites = () => {
                       <Globe className="w-5 h-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">{site.name || new URL(site.url).hostname}</CardTitle>
+                      <CardTitle className="text-base">
+                        {site.name || (() => {
+                          try { return new URL(site.url).hostname; } 
+                          catch { return site.url; }
+                        })()}
+                      </CardTitle>
                       <p className="text-xs text-muted-foreground truncate max-w-[180px]">{site.url}</p>
                     </div>
                   </div>
