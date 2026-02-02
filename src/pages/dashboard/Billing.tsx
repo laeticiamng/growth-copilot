@@ -212,7 +212,7 @@ const Billing = () => {
         </p>
       </header>
 
-      {/* TODO Notice - More prominent with better visual hierarchy */}
+      {/* Stripe integration notice */}
       <Card className="border-primary/50 bg-primary/5" role="alert" aria-live="polite">
         <CardContent className="flex items-start gap-4 py-4">
           <div className="p-2 rounded-full bg-primary/10 mt-0.5" aria-hidden="true">

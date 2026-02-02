@@ -3,11 +3,11 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  FileText, Image, GitBranch, Plus, Search, 
+import {
+  FileText, Image, GitBranch, Plus, Search,
   MoreHorizontal, Trash2, Eye, Edit, Send,
   CheckCircle, XCircle, Clock, Filter,
-  FolderOpen, Upload, Tag, Download
+  FolderOpen, Upload, Tag, Download, Save, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,7 @@ export default function CMS() {
   const [statusFilter, setStatusFilter] = useState<PageStatus | 'all'>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [editingPage, setEditingPage] = useState<CMSPage | null>(null);
   const [newPage, setNewPage] = useState({ title: '', slug: '', page_type: 'page' as PageType });
   const [uploadingFiles, setUploadingFiles] = useState(false);
 
@@ -227,7 +228,7 @@ export default function CMS() {
                 <PageCard
                   key={page.id}
                   page={page}
-                  onEdit={() => {/* TODO: Open editor */}}
+                  onEdit={() => setEditingPage(page)}
                   onDelete={() => deletePage.mutate(page.id)}
                   onPublish={() => publishPage.mutate(page.id)}
                   onSubmitReview={() => submitForReview.mutate(page.id)}
@@ -368,6 +369,19 @@ export default function CMS() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Page Editor Dialog */}
+      {editingPage && (
+        <PageEditorDialog
+          page={editingPage}
+          onClose={() => setEditingPage(null)}
+          onSave={async (updates) => {
+            await updatePage.mutateAsync({ id: editingPage.id, ...updates });
+            setEditingPage(null);
+          }}
+          isSaving={updatePage.isPending}
+        />
+      )}
     </div>
   );
 }
@@ -449,6 +463,121 @@ function PageCard({
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+function PageEditorDialog({
+  page,
+  onClose,
+  onSave,
+  isSaving,
+}: {
+  page: CMSPage;
+  onClose: () => void;
+  onSave: (updates: Partial<CMSPage>) => Promise<void>;
+  isSaving: boolean;
+}) {
+  const [title, setTitle] = useState(page.title);
+  const [slug, setSlug] = useState(page.slug);
+  const [excerpt, setExcerpt] = useState(page.excerpt || '');
+  const [metaTitle, setMetaTitle] = useState(page.meta_title || '');
+  const [metaDescription, setMetaDescription] = useState(page.meta_description || '');
+  const [bodyContent, setBodyContent] = useState(
+    Array.isArray(page.content) && page.content.length > 0
+      ? page.content.map((b: any) => b.text || '').join('\n\n')
+      : ''
+  );
+
+  const handleSave = async () => {
+    const contentBlocks = bodyContent
+      .split('\n\n')
+      .filter(Boolean)
+      .map((text) => ({ type: 'paragraph', text }));
+
+    await onSave({
+      title,
+      slug,
+      excerpt: excerpt || undefined,
+      meta_title: metaTitle || undefined,
+      meta_description: metaDescription || undefined,
+      content: contentBlocks,
+    });
+  };
+
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Modifier la page</DialogTitle>
+          <DialogDescription>
+            Modifiez le contenu et les métadonnées de votre page
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre de la page" />
+            </div>
+            <div className="space-y-2">
+              <Label>Slug</Label>
+              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug-de-la-page" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Extrait</Label>
+            <Textarea
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="Résumé court de la page..."
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Contenu</Label>
+            <Textarea
+              value={bodyContent}
+              onChange={(e) => setBodyContent(e.target.value)}
+              placeholder="Rédigez le contenu de votre page... (séparez les paragraphes par une ligne vide)"
+              rows={10}
+              className="font-mono text-sm"
+            />
+          </div>
+          <div className="border-t pt-4 space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground">SEO & Métadonnées</h4>
+            <div className="space-y-2">
+              <Label>Meta Title</Label>
+              <Input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder="Titre pour les moteurs de recherche" />
+            </div>
+            <div className="space-y-2">
+              <Label>Meta Description</Label>
+              <Textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="Description pour les moteurs de recherche (max 160 caractères)"
+                rows={2}
+              />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSave} disabled={!title || isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Enregistrement...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Enregistrer
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
