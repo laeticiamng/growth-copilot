@@ -236,8 +236,8 @@ export function TeamOrgChart() {
   const level3 = agents.filter((a) => a.level === 3);
 
   const labels = isEn 
-    ? { team: "AI Team", title: "Your 100% automated marketing team", subtitle: "12 specialized AI agents work in synergy to optimize your growth, 24/7", coreOps: "Core Operations", acquisition: "Acquisition & Distribution", quality: "Quality & Control", availability: "Availability", agents: "Specialized agents", responseTime: "Response time", scalability: "Scalability" }
-    : { team: "Équipe IA", title: "Votre équipe marketing 100% automatisée", subtitle: "12 agents IA spécialisés travaillent en synergie pour optimiser votre croissance, 24h/24", coreOps: "Opérations Core", acquisition: "Acquisition & Distribution", quality: "Qualité & Contrôle", availability: "Disponibilité", agents: "Agents spécialisés", responseTime: "Temps de réponse", scalability: "Scalabilité" };
+    ? { team: "AI Team", title: "Your 100% automated marketing team", subtitle: "14 specialized AI agents work in synergy to optimize your growth, 24/7", coreOps: "Core Operations", acquisition: "Acquisition & Distribution", quality: "Quality & Control", availability: "Availability", agents: "Specialized agents", responseTime: "Response time", scalability: "Scalability" }
+    : { team: "Équipe IA", title: "Votre équipe marketing 100% automatisée", subtitle: "14 agents IA spécialisés travaillent en synergie pour optimiser votre croissance, 24h/24", coreOps: "Opérations Core", acquisition: "Acquisition & Distribution", quality: "Qualité & Contrôle", availability: "Disponibilité", agents: "Agents spécialisés", responseTime: "Temps de réponse", scalability: "Scalabilité" };
 
   return (
     <section className="py-20 px-4 bg-secondary/30">
@@ -321,7 +321,7 @@ export function TeamOrgChart() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
           {[
             { value: "24/7", label: labels.availability },
-            { value: "12", label: labels.agents },
+            { value: "14", label: labels.agents },
             { value: "<1s", label: labels.responseTime },
             { value: "∞", label: labels.scalability },
           ].map((stat, i) => (
