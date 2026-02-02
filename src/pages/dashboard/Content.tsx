@@ -31,38 +31,29 @@ export default function Content() {
     setSyncing(false);
   };
 
-  // Demo data fallback
-  const displayKeywords = keywords.length > 0 ? keywords.slice(0, 5).map(k => ({
+  // Real data only - no demo fallback (Zero Fake Data policy)
+  const displayKeywords = keywords.slice(0, 5).map(k => ({
     keyword: k.keyword,
     volume: k.search_volume || 0,
     position: Math.round(k.position_avg || 0),
-    change: Math.floor(Math.random() * 10) - 3,
+    change: 0, // Would need historical data to calculate
     intent: k.intent || 'info',
-  })) : [
-    { keyword: "agence seo paris", volume: 2400, position: 8, change: +3, intent: "commercial" },
-    { keyword: "audit seo gratuit", volume: 1900, position: 12, change: -2, intent: "transactional" },
-    { keyword: "consultant seo", volume: 3200, position: 15, change: +5, intent: "commercial" },
-  ];
+  }));
 
-  const displayClusters = clusters.length > 0 ? clusters.map(c => ({
+  const displayClusters = clusters.map(c => ({
     name: c.name,
     keywords: c.keywords_count || 0,
     volume: c.total_volume || 0,
     status: c.main_intent || 'new',
-  })) : [
-    { name: "Services SEO", keywords: 24, volume: 12400, status: "mapped" },
-    { name: "Audit & Diagnostic", keywords: 18, volume: 8200, status: "partial" },
-  ];
+  }));
 
-  const displayBriefs = briefs.length > 0 ? briefs.map(b => ({
+  const displayBriefs = briefs.map(b => ({
     id: b.id,
     title: b.title,
     keyword: b.target_keyword || '',
     status: b.status || 'draft',
     wordCount: b.word_count_target || 0,
-  })) : [
-    { id: '1', title: "Guide complet du SEO", keyword: "guide seo", status: "draft", wordCount: 3200 },
-  ];
+  }));
 
   if (loading) {
     return <LoadingState message="Chargement du contenu..." />;
@@ -74,7 +65,7 @@ export default function Content() {
         <div>
           <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
           <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Mode démo</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleSync} disabled={syncing}>
