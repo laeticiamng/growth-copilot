@@ -34,7 +34,7 @@ export function FAQ() {
     },
     {
       question: "Comment fonctionnent les agents IA ?",
-      answer: "12 agents spécialisés (SEO, Ads, Local, CRO, etc.) travaillent en parallèle, orchestrés par un 'Directeur' qui priorise selon tes objectifs. Un agent Vérificateur contrôle la qualité et la conformité de chaque action avant exécution.",
+      answer: "14 agents spécialisés (SEO, Ads, Local, CRO, etc.) travaillent en parallèle, orchestrés par un 'Directeur' qui priorise selon tes objectifs. Un agent Vérificateur contrôle la qualité et la conformité de chaque action avant exécution.",
     },
     {
       question: "Puis-je annuler à tout moment ?",
@@ -65,7 +65,7 @@ export function FAQ() {
     },
     {
       question: "How do AI agents work?",
-      answer: "12 specialized agents (SEO, Ads, Local, CRO, etc.) work in parallel, orchestrated by a 'Director' who prioritizes according to your objectives. A Verifier agent controls the quality and compliance of each action before execution.",
+      answer: "14 specialized agents (SEO, Ads, Local, CRO, etc.) work in parallel, orchestrated by a 'Director' who prioritizes according to your objectives. A Verifier agent controls the quality and compliance of each action before execution.",
     },
     {
       question: "Can I cancel anytime?",
