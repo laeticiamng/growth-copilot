@@ -114,10 +114,10 @@ const ConnectionStatus = () => {
 
   const getStatusBadge = (status: ConnectionInfo["status"]) => {
     switch (status) {
-      case "connected": return <Badge variant="success">Connecté</Badge>;
+      case "connected": return <Badge variant="success">Autorisé</Badge>;
       case "error": return <Badge variant="destructive">Erreur</Badge>;
       case "pending": return <Badge variant="secondary">En attente</Badge>;
-      default: return <Badge variant="outline">Non connecté</Badge>;
+      default: return <Badge variant="outline">Non autorisé</Badge>;
     }
   };
 
@@ -126,9 +126,9 @@ const ConnectionStatus = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">État des Connexions</h1>
+          <h1 className="text-3xl font-bold">Mes Accès</h1>
           <p className="text-muted-foreground">
-            Aperçu en lecture seule de vos intégrations actives.
+            Ressources que vous avez autorisées pour l'analyse et l'optimisation.
           </p>
         </div>
         <div className="flex gap-2">
@@ -153,10 +153,10 @@ const ConnectionStatus = () => {
               <RefreshCw className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="font-medium text-sm">Gestion automatique</p>
+              <p className="font-medium text-sm">Vos données, votre contrôle</p>
               <p className="text-sm text-muted-foreground">
-                Les connexions sont gérées par l'équipe agence. Contactez votre gestionnaire 
-                si vous constatez une erreur ou un besoin de reconnexion.
+                Vous avez autorisé l'accès à certaines de vos ressources. Nos agents IA les utilisent 
+                pour analyser et optimiser. Vous pouvez révoquer l'accès à tout moment.
               </p>
             </div>
           </div>

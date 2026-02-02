@@ -57,11 +57,11 @@ const ONBOARDING_RECOMMENDATIONS = [
   {
     id: "2",
     priority: "high" as const,
-    title: "Connecter Google Search Console",
-    description: "Accédez aux données de performance réelles pour des recommandations personnalisées.",
+    title: "Autoriser l'accès Google Search Console",
+    description: "Donnez accès à vos données de performance pour des recommandations personnalisées.",
     iceScore: 78,
     effort: "5 min",
-    action: "Connecter",
+    action: "Autoriser",
     link: "/dashboard/integrations",
   },
   {
@@ -307,11 +307,11 @@ export default function DashboardHome() {
             <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
             <h3 className="font-medium mb-2">Aucune donnée disponible</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Connectez vos intégrations pour voir vos KPIs en temps réel.
+              Autorisez l'accès à vos comptes Google/Meta pour voir vos KPIs en temps réel.
             </p>
             <Button variant="outline" asChild>
               <Link to="/dashboard/integrations">
-                Configurer les intégrations
+                Autoriser les accès
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
