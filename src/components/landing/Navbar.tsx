@@ -53,7 +53,7 @@ export function Navbar() {
                 {t("landing.navbar.login")}
               </Button>
             </Link>
-            <Link to="/onboarding">
+            <Link to="/auth">
               <Button variant="gradient" size="sm">
                 {t("landing.navbar.getStarted")}
               </Button>
@@ -93,7 +93,7 @@ export function Navbar() {
                     {t("landing.navbar.login")}
                   </Button>
                 </Link>
-                <Link to="/onboarding">
+                <Link to="/auth">
                   <Button variant="gradient" className="w-full">
                     {t("landing.navbar.getStarted")}
                   </Button>
