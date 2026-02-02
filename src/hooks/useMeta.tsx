@@ -58,17 +58,20 @@ interface MetaInsight {
   campaign_id: string | null;
   adset_id: string | null;
   ad_id: string | null;
-  date_start: string | null;
-  date_stop: string | null;
+  date: string | null;
+  level: string | null;
   impressions: number | null;
   clicks: number | null;
   spend: number | null;
   reach: number | null;
+  frequency: number | null;
   cpc: number | null;
   cpm: number | null;
   ctr: number | null;
   conversions: number | null;
+  conversion_value: number | null;
   cost_per_conversion: number | null;
+  roas: number | null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -300,7 +303,7 @@ export function MetaProvider({ children }: { children: ReactNode }) {
         supabase.from('meta_campaigns').select('*').eq('workspace_id', currentWorkspace.id).order('created_at', { ascending: false }),
         supabase.from('meta_adsets').select('*').eq('workspace_id', currentWorkspace.id),
         supabase.from('meta_ads').select('*').eq('workspace_id', currentWorkspace.id),
-        supabase.from('meta_insights').select('*').eq('workspace_id', currentWorkspace.id).order('date_start', { ascending: false }).limit(100),
+        supabase.from('meta_insights').select('*').eq('workspace_id', currentWorkspace.id).order('date', { ascending: false }).limit(100),
         supabase.from('meta_ig_accounts').select('*').eq('workspace_id', currentWorkspace.id),
         supabase.from('meta_ig_media').select('*').eq('workspace_id', currentWorkspace.id).order('timestamp', { ascending: false }).limit(50),
         supabase.from('meta_conversations').select('*').eq('workspace_id', currentWorkspace.id).order('last_message_at', { ascending: false }),

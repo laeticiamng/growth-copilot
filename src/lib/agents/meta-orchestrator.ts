@@ -78,17 +78,19 @@ export function transformToMetaAdsInput(
     campaign_id: string | null;
     adset_id: string | null;
     ad_id: string | null;
-    date_start: string | null;
-    date_stop: string | null;
+    date: string | null;
+    level: string | null;
     impressions: number | null;
     clicks: number | null;
     spend: number | null;
     reach: number | null;
+    frequency: number | null;
     cpc: number | null;
     cpm: number | null;
     ctr: number | null;
     conversions: number | null;
     cost_per_conversion: number | null;
+    roas: number | null;
   }>,
   options: {
     budgetCap?: number;
@@ -145,8 +147,8 @@ export function transformToMetaAdsInput(
   const mappedInsights: MetaInsight[] = insights.map(i => ({
     objectId: i.campaign_id || i.adset_id || i.ad_id || i.ad_account_id,
     objectType: i.ad_id ? "ad" : i.adset_id ? "adset" : i.campaign_id ? "campaign" : "account",
-    dateStart: i.date_start || "",
-    dateStop: i.date_stop || "",
+    dateStart: i.date || "",
+    dateStop: i.date || "",
     impressions: i.impressions || 0,
     clicks: i.clicks || 0,
     spend: (i.spend || 0) / 100, // Convert from cents
@@ -156,6 +158,7 @@ export function transformToMetaAdsInput(
     ctr: i.ctr || 0,
     conversions: i.conversions || undefined,
     costPerConversion: i.cost_per_conversion ? i.cost_per_conversion / 100 : undefined,
+    roas: i.roas || undefined,
   }));
 
   return {
