@@ -32,7 +32,7 @@ import {
 
 export default function SEOTech() {
   const { currentSite } = useSites();
-  const { loading, result, error, runAudit, runDemoAudit, exportResults } = useSEOAudit();
+  const { loading, result, error, runAudit, exportResults } = useSEOAudit();
   const [selectedIssue, setSelectedIssue] = useState<SEOIssue | null>(null);
   const [showPatchDialog, setShowPatchDialog] = useState(false);
 
@@ -144,12 +144,12 @@ export default function SEOTech() {
           </p>
           {!currentSite && (
             <p className="text-sm text-warning mt-1">
-              ⚠️ Aucun site sélectionné - Mode démo activé
+              ⚠️ Veuillez sélectionner un site pour lancer l'audit
             </p>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => currentSite?.url ? runAudit() : runDemoAudit()} disabled={loading}>
+          <Button variant="outline" onClick={() => runAudit()} disabled={loading || !currentSite?.url}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Crawl en cours...' : 'Nouveau crawl'}
           </Button>
@@ -394,15 +394,27 @@ export default function SEOTech() {
       {!loading && !result && (
         <Card variant="feature">
           <CardContent className="py-12 text-center">
-            <Play className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Lancez votre premier audit</h3>
-            <p className="text-muted-foreground mb-6">
-              Analysez votre site pour détecter les problèmes SEO techniques
-            </p>
-            <Button variant="hero" onClick={() => currentSite?.url ? runAudit() : runDemoAudit()}>
-              <Play className="w-4 h-4 mr-2" />
-              {currentSite?.url ? "Lancer l'audit" : "Lancer l'audit démo"}
-            </Button>
+            {currentSite?.url ? (
+              <>
+                <Play className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Lancez votre premier audit</h3>
+                <p className="text-muted-foreground mb-6">
+                  Analysez {currentSite.name || currentSite.url} pour détecter les problèmes SEO techniques
+                </p>
+                <Button variant="hero" onClick={() => runAudit()}>
+                  <Play className="w-4 h-4 mr-2" />
+                  Lancer l'audit
+                </Button>
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-warning" />
+                <h3 className="text-lg font-medium mb-2">Aucun site sélectionné</h3>
+                <p className="text-muted-foreground mb-6">
+                  Ajoutez un site dans la section "Sites" pour lancer un audit SEO.
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

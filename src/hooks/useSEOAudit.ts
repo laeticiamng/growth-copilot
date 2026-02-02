@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
-import { SEOTechAuditor, generateDemoAuditResults } from "@/lib/agents/seo-auditor";
+import { SEOTechAuditor } from "@/lib/agents/seo-auditor";
 import type { CrawlResult, SEOIssue } from "@/lib/agents/types";
 
 export interface AuditOptions {
@@ -34,9 +34,7 @@ export function useSEOAudit() {
     try {
       const url = targetUrl || currentSite.url;
       if (!url) {
-        // Use demo data if no URL
-        const demoResult = generateDemoAuditResults();
-        setResult(demoResult);
+        setError("Aucune URL de site définie");
         return;
       }
 
@@ -86,9 +84,6 @@ export function useSEOAudit() {
       }
     } catch (err) {
       console.error('Audit error:', err);
-      // Fallback to demo data
-      const demoResult = generateDemoAuditResults();
-      setResult(demoResult);
       setError(err instanceof Error ? err.message : 'Erreur lors de l\'audit');
     } finally {
       setLoading(false);
@@ -160,17 +155,8 @@ export function useSEOAudit() {
     return categoryMap[type] || 'other';
   };
 
-  const runDemoAudit = useCallback(() => {
-    setLoading(true);
-    setError(null);
-    
-    // Simulate loading
-    setTimeout(() => {
-      const demoResult = generateDemoAuditResults();
-      setResult(demoResult);
-      setLoading(false);
-    }, 2000);
-  }, []);
+  // Removed: runDemoAudit - Zero Fake Data policy
+  // Users must have a real site to run an audit
 
   const exportResults = useCallback((format: 'json' | 'csv') => {
     if (!result) return;
@@ -210,7 +196,6 @@ export function useSEOAudit() {
     result,
     error,
     runAudit,
-    runDemoAudit,
     exportResults,
   };
 }
