@@ -70,37 +70,28 @@ export default function Ads() {
     { label: "Impressions", value: "45.2K", icon: Eye, change: "+15%" },
   ];
 
-  // Demo data fallback
-  const displayCampaigns = campaigns.length > 0 ? campaigns.map(c => ({
+  // Real data only - no demo fallback (Zero Fake Data policy)
+  const displayCampaigns = campaigns.map(c => ({
     id: c.id,
     name: c.name,
     type: c.campaign_type || "Search",
     status: c.status || "active",
-    budget: c.budget_daily || 500,
+    budget: c.budget_daily || 0,
     spent: c.cost_30d || 0,
     clicks: c.clicks_30d || 0,
     conversions: c.conversions_30d || 0,
     cpa: c.conversions_30d && c.cost_30d ? (c.cost_30d / c.conversions_30d).toFixed(1) : "—",
     roas: c.target_roas || 0,
-  })) : [
-    { id: "1", name: "Brand - Exact", type: "Search", status: "active", budget: 500, spent: 423, clicks: 1245, conversions: 45, cpa: "9.4", roas: 4.2 },
-    { id: "2", name: "Non-Brand - Services", type: "Search", status: "active", budget: 1500, spent: 1287, clicks: 1876, conversions: 32, cpa: "40.2", roas: 2.1 },
-    { id: "3", name: "Local - Paris", type: "Search", status: "paused", budget: 800, spent: 654, clicks: 543, conversions: 12, cpa: "54.5", roas: 1.5 },
-  ];
+  }));
 
-  const displayNegatives = negatives.length > 0 ? negatives.map(n => ({
+  const displayNegatives = negatives.map(n => ({
     keyword: n.keyword,
     level: n.level || "compte",
     added: n.created_at ? new Date(n.created_at).toLocaleDateString('fr') : "Récent"
-  })) : [
-    { keyword: "gratuit", level: "compte", added: "Il y a 2 jours" },
-    { keyword: "emploi", level: "compte", added: "Il y a 1 semaine" },
-  ];
+  }));
 
-  const alerts = [
-    { type: "warning", message: "Budget quotidien atteint sur 'Non-Brand'", action: "Augmenter" },
-    { type: "info", message: "5 nouveaux termes de recherche à analyser", action: "Voir" },
-  ];
+  // Real alerts - only show if there's actual data
+  const alerts = campaigns.length > 0 ? [] : [];
 
   const handleCreateCampaign = async () => {
     if (!campaignForm.name) {

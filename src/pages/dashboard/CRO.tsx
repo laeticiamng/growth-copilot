@@ -54,36 +54,26 @@ export default function CRO() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Calculate metrics from real data or use demo
-  const conversionMetrics = experiments.length > 0 ? [
-    { label: "Taux de conversion", value: `${(variants.reduce((a, v) => a + (v.conversion_rate || 0), 0) / Math.max(variants.length, 1)).toFixed(1)}%`, change: "+0.4%", trend: "up" },
-    { label: "Visiteurs", value: variants.reduce((a, v) => a + (v.visitors || 0), 0).toLocaleString(), change: "+18%", trend: "up" },
-    { label: "Conversions", value: variants.reduce((a, v) => a + (v.conversions || 0), 0).toString(), change: "+24%", trend: "up" },
+  // Calculate metrics from real data only
+  const conversionMetrics = [
+    { label: "Taux de conversion", value: experiments.length > 0 ? `${(variants.reduce((a, v) => a + (v.conversion_rate || 0), 0) / Math.max(variants.length, 1)).toFixed(1)}%` : "—", change: "", trend: "up" },
+    { label: "Visiteurs", value: variants.reduce((a, v) => a + (v.visitors || 0), 0).toLocaleString() || "0", change: "", trend: "up" },
+    { label: "Conversions", value: variants.reduce((a, v) => a + (v.conversions || 0), 0).toString(), change: "", trend: "up" },
     { label: "Tests actifs", value: experiments.filter(e => e.status === 'running').length.toString(), change: "", trend: "up" },
-  ] : [
-    { label: "Taux de conversion", value: "3.2%", change: "+0.4%", trend: "up" },
-    { label: "Visiteurs", value: "12,847", change: "+18%", trend: "up" },
-    { label: "Leads", value: "411", change: "+24%", trend: "up" },
-    { label: "Taux rebond", value: "42%", change: "-5%", trend: "up" },
   ];
 
-  // Demo page audits fallback
-  const pageAudits = audits.length > 0 ? audits.map(a => ({
+  // Real page audits only - no demo data
+  const pageAudits = audits.map(a => ({
     page: a.page_type || "Page",
     url: "/",
     frictionScore: a.friction_score || 50,
     issues: (a.findings as unknown[])?.length || 0,
     opportunities: (a.recommendations as unknown[])?.length || 0,
     status: (a.friction_score || 50) < 40 ? "optimized" : (a.friction_score || 50) < 60 ? "in_progress" : "needs_work",
-  })) : [
-    { page: "Page d'accueil", url: "/", frictionScore: 35, issues: 4, opportunities: 3, status: "optimized" },
-    { page: "Page services", url: "/services", frictionScore: 58, issues: 7, opportunities: 5, status: "needs_work" },
-    { page: "Page pricing", url: "/pricing", frictionScore: 45, issues: 5, opportunities: 4, status: "in_progress" },
-    { page: "Page contact", url: "/contact", frictionScore: 62, issues: 8, opportunities: 6, status: "needs_work" },
-  ];
+  }));
 
-  // Demo experiments fallback with real confidence calculation
-  const displayExperiments = experiments.length > 0 ? experiments.map(exp => {
+  // Real experiments only - no demo data
+  const displayExperiments = experiments.map(exp => {
     const expVariants = variants.filter(v => v.experiment_id === exp.id);
     const controlVariant = expVariants.find(v => v.is_control);
     const testVariant = expVariants.find(v => !v.is_control);
@@ -117,19 +107,17 @@ export default function CRO() {
       recommendation,
       winner: exp.winner_variant_id ? "B" : undefined,
     };
-  }) : [
-    { id: "1", name: "Hero CTA - Couleur", page: "Homepage", status: "running", variants: 2, visitors: 1245, conversionA: 3.2, conversionB: 4.1, confidence: 87, uplift: 28.1, recommendation: { status: 'inconclusive' as const, message: 'Continuez le test' } },
-    { id: "2", name: "Pricing - Mise en page", page: "Pricing", status: "completed", variants: 2, visitors: 2890, conversionA: 2.8, conversionB: 3.5, confidence: 95, uplift: 25, recommendation: { status: 'winner' as const, message: 'Déployez la variante B' }, winner: "B" },
-    { id: "3", name: "Form - Champs réduits", page: "Contact", status: "draft", variants: 2, visitors: 0, conversionA: 0, conversionB: 0, confidence: 0, uplift: 0, recommendation: { status: 'inconclusive' as const, message: 'Pas encore de données' } },
-  ];
+  });
 
-  const croBacklog = [
-    { task: "Ajouter preuves sociales hero", impact: 85, effort: "Faible", status: "todo" },
-    { task: "Réduire champs formulaire contact", impact: 78, effort: "Faible", status: "todo" },
-    { task: "Ajouter FAQ section pricing", impact: 72, effort: "Moyen", status: "in_progress" },
-    { task: "Optimiser CTA couleur/texte", impact: 68, effort: "Faible", status: "testing" },
-    { task: "Ajouter chat live", impact: 65, effort: "Élevé", status: "todo" },
-  ];
+  // CRO backlog - derived from audits recommendations (no hardcoded demo data)
+  const croBacklog = audits.flatMap(a => 
+    (a.recommendations as Array<{ title?: string; impact?: number; effort?: string; status?: string }> || []).map((rec, i) => ({
+      task: rec.title || `Recommandation ${i + 1}`,
+      impact: rec.impact || 50,
+      effort: rec.effort || "Moyen",
+      status: rec.status || "todo",
+    }))
+  ).slice(0, 10);
 
   const handleCreateExperiment = async () => {
     if (!experimentForm.name) {
@@ -171,7 +159,7 @@ export default function CRO() {
           <p className="text-muted-foreground">
             Optimisation du taux de conversion
           </p>
-          {!currentSite && <p className="text-sm text-warning mt-1">⚠️ Mode démo</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">
@@ -336,51 +324,55 @@ export default function CRO() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {pageAudits.map((audit, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{audit.page}</p>
-                      <Badge
-                        variant={
-                          audit.status === "optimized"
-                            ? "gradient"
+              {pageAudits.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Aucun audit de page. Lancez un audit pour voir les opportunités d'optimisation.</p>
+              ) : (
+                pageAudits.map((audit, i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{audit.page}</p>
+                        <Badge
+                          variant={
+                            audit.status === "optimized"
+                              ? "gradient"
+                              : audit.status === "in_progress"
+                              ? "secondary"
+                              : "destructive"
+                          }
+                        >
+                          {audit.status === "optimized"
+                            ? "Optimisé"
                             : audit.status === "in_progress"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {audit.status === "optimized"
-                          ? "Optimisé"
-                          : audit.status === "in_progress"
-                          ? "En cours"
-                          : "À améliorer"}
-                      </Badge>
+                            ? "En cours"
+                            : "À améliorer"}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{audit.url}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{audit.url}</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Friction</span>
-                      <Progress value={100 - audit.frictionScore} className="w-20 h-2" />
+                    <div className="text-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Friction</span>
+                        <Progress value={100 - audit.frictionScore} className="w-20 h-2" />
+                      </div>
+                      <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-primary'}`}>
+                        {audit.frictionScore}/100
+                      </p>
                     </div>
-                    <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-green-500'}`}>
-                      {audit.frictionScore}/100
-                    </p>
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">Issues</p>
+                      <p className="font-medium">{audit.issues}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground">Opportunités</p>
+                      <p className="font-medium text-primary">{audit.opportunities}</p>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Issues</p>
-                    <p className="font-medium">{audit.issues}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">Opportunités</p>
-                    <p className="font-medium text-primary">{audit.opportunities}</p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -400,28 +392,32 @@ export default function CRO() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {croBacklog.map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
-                  <div className="flex-shrink-0">
-                    {item.status === "testing" ? (
-                      <div className="w-3 h-3 rounded-full bg-green-500 agent-pulse" />
-                    ) : item.status === "in_progress" ? (
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    ) : (
-                      <div className="w-3 h-3 rounded-full border-2 border-muted-foreground" />
-                    )}
+              {croBacklog.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Aucune recommandation CRO. Lancez un audit de page pour obtenir des suggestions.</p>
+              ) : (
+                croBacklog.map((item, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
+                    <div className="flex-shrink-0">
+                      {item.status === "testing" ? (
+                        <div className="w-3 h-3 rounded-full bg-primary agent-pulse" />
+                      ) : item.status === "in_progress" ? (
+                        <div className="w-3 h-3 rounded-full bg-warning" />
+                      ) : (
+                        <div className="w-3 h-3 rounded-full border-2 border-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">{item.task}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Impact</span>
+                      <Progress value={item.impact} className="w-16 h-1.5" />
+                      <span className="text-xs font-medium">{item.impact}</span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">{item.effort}</Badge>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">{item.task}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Impact</span>
-                    <Progress value={item.impact} className="w-16 h-1.5" />
-                    <span className="text-xs font-medium">{item.impact}</span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">{item.effort}</Badge>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>

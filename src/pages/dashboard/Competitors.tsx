@@ -42,8 +42,8 @@ export default function Competitors() {
   const [submitting, setSubmitting] = useState(false);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
-  // Demo competitors fallback
-  const displayCompetitors = competitors.length > 0 ? competitors.map(c => ({
+  // Real data only - no demo fallback (Zero Fake Data policy)
+  const displayCompetitors = competitors.map(c => ({
     id: c.id,
     name: c.competitor_name || "Concurrent",
     url: c.competitor_url,
@@ -52,31 +52,17 @@ export default function Competitors() {
     organicKeywords: (c.keyword_gaps as unknown[])?.length || 0,
     traffic: "—",
     trend: "up" as const,
-  })) : [
-    { id: "1", name: "Concurrent A", url: "concurrent-a.fr", lastAnalyzed: "Il y a 2 jours", domainAuthority: 45, organicKeywords: 1250, traffic: "25K", trend: "up" as const },
-    { id: "2", name: "Concurrent B", url: "concurrent-b.com", lastAnalyzed: "Il y a 5 jours", domainAuthority: 52, organicKeywords: 2100, traffic: "42K", trend: "up" as const },
-    { id: "3", name: "Concurrent C", url: "concurrent-c.fr", lastAnalyzed: "Il y a 1 semaine", domainAuthority: 38, organicKeywords: 890, traffic: "18K", trend: "down" as const },
-  ];
+  }));
 
-  // Demo keyword gaps
+  // Real keyword gaps from database
   const keywordGaps = competitors.length > 0 
     ? (competitors[0]?.keyword_gaps as Array<{keyword: string; competitor_rank: number; your_rank: number; volume: number; difficulty: number}>) || []
-    : [
-        { keyword: "audit seo gratuit", competitor_rank: 3, your_rank: 0, volume: 2400, difficulty: 45 },
-        { keyword: "agence seo lyon", competitor_rank: 5, your_rank: 0, volume: 1800, difficulty: 52 },
-        { keyword: "prix référencement", competitor_rank: 2, your_rank: 18, volume: 1200, difficulty: 38 },
-        { keyword: "consultant seo freelance", competitor_rank: 4, your_rank: 22, volume: 880, difficulty: 35 },
-      ];
+    : [];
 
-  // Demo content gaps
+  // Real content gaps from database
   const contentGaps = competitors.length > 0
     ? (competitors[0]?.content_gaps as Array<{topic: string; competitors: number; you_have: boolean; priority: string}>) || []
-    : [
-        { topic: "Guide complet E-commerce SEO", competitors: 3, you_have: false, priority: "high" },
-        { topic: "Templates audits SEO", competitors: 2, you_have: false, priority: "high" },
-        { topic: "Case studies clients", competitors: 3, you_have: true, priority: "medium" },
-        { topic: "Calculateur ROI SEO", competitors: 2, you_have: false, priority: "medium" },
-      ];
+    : [];
 
   const handleAddCompetitor = async () => {
     if (!competitorForm.url) {
@@ -140,7 +126,7 @@ export default function Competitors() {
           <p className="text-muted-foreground">
             Analysez vos concurrents et identifiez les opportunités
           </p>
-          {!currentSite && <p className="text-sm text-warning mt-1">⚠️ Mode démo</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={refetch}>

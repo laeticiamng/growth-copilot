@@ -221,7 +221,7 @@ export default function Social() {
           <p className="text-muted-foreground">
             Calendrier social et distribution de contenu
           </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Mode démo</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleExportCalendar}>

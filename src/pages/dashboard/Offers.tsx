@@ -52,75 +52,17 @@ export default function Offers() {
   const [submitting, setSubmitting] = useState(false);
   const [generatingObjections, setGeneratingObjections] = useState(false);
 
-  // Demo fallback if no offers exist
-  const displayOffers = offers.length > 0 ? offers : [
-    {
-      id: "demo-1",
-      workspace_id: "",
-      site_id: null,
-      name: "Starter",
-      tier: "starter",
-      price: 490,
-      price_period: "/mois",
-      features: ["Audit SEO complet", "Suivi 50 mots-clés", "Rapport mensuel", "Support email"],
-      benefits: [],
-      guarantees: [],
-      objections_answers: {},
-      is_active: true,
-      created_at: null,
-      updated_at: null,
-    },
-    {
-      id: "demo-2",
-      workspace_id: "",
-      site_id: null,
-      name: "Growth",
-      tier: "growth",
-      price: 990,
-      price_period: "/mois",
-      features: ["Tout Starter +", "Stratégie contenu", "Google Ads inclus", "Local SEO", "CRO mensuel", "Support prioritaire"],
-      benefits: [],
-      guarantees: [],
-      objections_answers: {},
-      is_active: true,
-      created_at: null,
-      updated_at: null,
-    },
-    {
-      id: "demo-3",
-      workspace_id: "",
-      site_id: null,
-      name: "Scale",
-      tier: "premium",
-      price: 2490,
-      price_period: "/mois",
-      features: ["Tout Growth +", "Multi-sites illimité", "Équipe dédiée", "Stratégie sur-mesure", "Reporting avancé", "SLA garanti"],
-      benefits: [],
-      guarantees: [],
-      objections_answers: {},
-      is_active: true,
-      created_at: null,
-      updated_at: null,
-    },
-  ];
+  // Real data only - no demo fallback (Zero Fake Data policy)
+  const displayOffers = offers;
 
-  // Extract USP and objections from first offer if available
+  // Extract USP and objections from first offer if available - no demo fallback
   const usp = offers.length > 0 && offers[0].benefits.length > 0 
     ? offers[0].benefits 
-    : [
-        "ROI moyen de 340% sur 12 mois",
-        "Équipe d'experts certifiés Google",
-        "Technologie propriétaire d'audit",
-        "Accompagnement personnalisé",
-      ];
+    : [];
 
   const objections = offers.length > 0 && Object.keys(offers[0].objections_answers).length > 0
     ? Object.entries(offers[0].objections_answers).map(([objection, response]) => ({ objection, response }))
-    : [
-        { objection: "C'est trop cher", response: "Notre ROI moyen est de 340%. C'est un investissement, pas une dépense." },
-        { objection: "Je peux le faire moi-même", response: "Le temps passé a un coût. Nos experts font en 1h ce qui prend 10h en interne." },
-        { objection: "Pas de résultats garantis", response: "On ne promet pas #1 Google, mais on garantit un process rigoureux et de la transparence." },
-      ];
+    : [];
 
   const guarantees = offers.length > 0 && offers[0].guarantees.length > 0
     ? offers[0].guarantees.map(g => ({ title: g, description: "" }))
@@ -259,7 +201,7 @@ export default function Offers() {
           <p className="text-muted-foreground">
             Packaging, pricing et pages de vente
           </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Mode démo</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">

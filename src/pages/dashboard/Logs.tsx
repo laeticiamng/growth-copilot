@@ -186,27 +186,10 @@ const Logs = () => {
     return <User className="w-4 h-4 text-muted-foreground" />;
   };
 
-  // Demo data
-  const demoActionLogs: ActionLog[] = [
-    { id: "1", actor_type: "agent", actor_id: "tech_auditor", action_type: "AI_RUN", action_category: "ai_gateway", description: "AI run for seo_audit by seo_tech_auditor", details: { provider: "lovable", model: "google/gemini-2.5-flash", tokens_in: 1250, tokens_out: 890, cost_estimate: 0.00015 }, result: "success", is_automated: true, created_at: new Date().toISOString() },
-    { id: "2", actor_type: "agent", actor_id: "tech_auditor", action_type: "crawl_complete", action_category: "seo", description: "Crawl terminé : 145 pages analysées, 23 issues détectées", details: null, result: "success", is_automated: true, created_at: new Date(Date.now() - 60000).toISOString() },
-    { id: "3", actor_type: "user", actor_id: "user_123", action_type: "site_created", action_category: "config", description: "Nouveau site ajouté : example.com", details: null, result: "success", is_automated: false, created_at: new Date(Date.now() - 3600000).toISOString() },
-  ];
-
-  const demoAgentRuns: AgentRun[] = [
-    { id: "1", agent_type: "tech_auditor", status: "completed", inputs: { url: "https://example.com" }, outputs: { issues: 23, pages: 145 }, started_at: new Date(Date.now() - 60000).toISOString(), completed_at: new Date().toISOString(), duration_ms: 45000, cost_estimate: 0.02, error_message: null, provider_name: "lovable", model_name: "google/gemini-2.5-flash", ai_request_id: "req_1", created_at: new Date().toISOString() },
-    { id: "2", agent_type: "keyword_strategist", status: "running", inputs: { site_id: "abc" }, outputs: null, started_at: new Date().toISOString(), completed_at: null, duration_ms: null, cost_estimate: null, error_message: null, provider_name: null, model_name: null, ai_request_id: null, created_at: new Date().toISOString() },
-  ];
-
-  const demoAiRequests: AIRequest[] = [
-    { id: "req_1", agent_name: "seo_tech_auditor", purpose: "seo_audit", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: { system_prompt: "You are the SEO Tech Auditor...", user_prompt: "Analyze the following..." }, output_json: { summary: "Analysis complete", actions: [], risks: [], dependencies: [], metrics_to_watch: [], requires_approval: false }, status: "success", error_message: null, tokens_in: 1250, tokens_out: 890, cost_estimate: 0.00015, duration_ms: 2340, created_at: new Date().toISOString() },
-    { id: "req_2", agent_name: "quality_compliance", purpose: "qa_review", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: { system_prompt: "You are the QCO..." }, output_json: { summary: "Review complete", actions: [], risks: [], dependencies: [], metrics_to_watch: [], requires_approval: true }, status: "success", error_message: null, tokens_in: 980, tokens_out: 650, cost_estimate: 0.00012, duration_ms: 1890, created_at: new Date(Date.now() - 120000).toISOString() },
-    { id: "req_3", agent_name: "chief_growth_officer", purpose: "cgo_plan", provider_name: "lovable", model_name: "google/gemini-2.5-flash", input_json: {}, output_json: null, status: "fallback", error_message: "Failed to parse JSON after retry", tokens_in: 1500, tokens_out: 200, cost_estimate: 0.0002, duration_ms: 5200, created_at: new Date(Date.now() - 300000).toISOString() },
-  ];
-
-  const displayActionLogs = actionLogs.length > 0 ? filteredActionLogs : demoActionLogs;
-  const displayAgentRuns = agentRuns.length > 0 ? filteredAgentRuns : demoAgentRuns;
-  const displayAiRequests = aiRequests.length > 0 ? filteredAiRequests : demoAiRequests;
+  // Real data only - no demo fallback (Zero Fake Data policy)
+  const displayActionLogs = filteredActionLogs;
+  const displayAgentRuns = filteredAgentRuns;
+  const displayAiRequests = filteredAiRequests;
 
   // Pagination for each tab
   const aiPagination = usePagination(displayAiRequests, { initialPageSize: 10 });
