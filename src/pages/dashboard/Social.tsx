@@ -253,7 +253,7 @@ export default function Social() {
                         {account.handle || account.followers?.toLocaleString() + " followers"}
                       </p>
                     ) : (
-                      <Button variant="link" className="p-0 h-auto text-sm">Connecter</Button>
+                      <Button variant="link" className="p-0 h-auto text-sm">Autoriser l'accès</Button>
                     )}
                   </div>
                 </div>

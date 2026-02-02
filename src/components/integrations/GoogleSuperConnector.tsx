@@ -176,10 +176,10 @@ export function GoogleSuperConnector({
               {connecting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : anyConnected ? (
-                "Reconnecter tout"
+                "Modifier les accès"
               ) : (
                 <>
-                  Connecter Google
+                  Autoriser l'accès
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </>
               )}
@@ -193,8 +193,12 @@ export function GoogleSuperConnector({
         <div className="flex items-start gap-3 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-foreground mb-1">Connexion unifiée</p>
-            <p>Un seul OAuth connecte tous les services Google. Les données sont synchronisées automatiquement.</p>
+            <p className="font-medium text-foreground mb-1">Comment ça fonctionne ?</p>
+            <p>
+              <strong>Nos outils</strong> analysent déjà votre site automatiquement. 
+              Pour des données enrichies ou des actions d'optimisation, <strong>autorisez l'accès</strong> à vos comptes Google. 
+              Vous gardez le contrôle total et pouvez révoquer l'accès à tout moment.
+            </p>
           </div>
         </div>
 

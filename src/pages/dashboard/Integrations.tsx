@@ -180,7 +180,7 @@ const Integrations = () => {
         <div>
           <h1 className="text-3xl font-bold">Outils d'Analyse</h1>
           <p className="text-muted-foreground">
-            Nos outils internes analysent automatiquement votre site et vos performances.
+            Nos outils internes analysent automatiquement vos contenus — aucune clé API requise de votre part.
           </p>
         </div>
         <div className="flex gap-2">
@@ -202,22 +202,30 @@ const Integrations = () => {
           </div>
           <div className="flex-1">
             <p className="font-semibold text-lg">Comment ça fonctionne ?</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Entrez simplement l'URL de votre site. Nos outils analysent automatiquement vos données publiques 
-              et génèrent des recommandations personnalisées. <strong>Aucune connexion de votre part n'est requise.</strong>
-            </p>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="text-sm text-muted-foreground mt-2 space-y-2">
+              <p>
+                <strong>1. Vous entrez une URL ou un contenu</strong> — c'est tout ce dont nous avons besoin pour démarrer l'analyse.
+              </p>
+              <p>
+                <strong>2. Nos agents IA analysent automatiquement</strong> — SEO, performance, opportunités de croissance.
+              </p>
+              <p>
+                <strong>3. Pour des actions sur vos comptes</strong> — autorisez l'accès à vos ressources (Google, Meta) 
+                quand vous souhaitez que nos agents modifient ou optimisent directement.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Badge variant="outline" className="bg-background">
+                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                Aucune API à fournir
+              </Badge>
               <Badge variant="outline" className="bg-background">
                 <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
                 Analyse automatique
               </Badge>
               <Badge variant="outline" className="bg-background">
                 <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
-                Données en temps réel
-              </Badge>
-              <Badge variant="outline" className="bg-background">
-                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
-                Recommandations IA
+                Vous gardez le contrôle
               </Badge>
             </div>
           </div>

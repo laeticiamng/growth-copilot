@@ -124,10 +124,10 @@ export function MetaSuperConnector({ onConnect, isConnected = false }: MetaSuper
               {connecting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : anyConnected ? (
-                "Reconnecter"
+                "Modifier les accès"
               ) : (
                 <>
-                  Connecter
+                  Autoriser l'accès
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </>
               )}
@@ -141,9 +141,12 @@ export function MetaSuperConnector({ onConnect, isConnected = false }: MetaSuper
         <div className="flex items-start gap-3 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-foreground mb-1">Architecture Progressive Enhancement</p>
-            <p>Mode connecté → automatisation complète. Mode déconnecté → export et recommandations.</p>
-            <p className="mt-1">Toutes les actions d'écriture passent par l'Approval Center.</p>
+            <p className="font-medium text-foreground mb-1">Comment ça fonctionne ?</p>
+            <p>
+              <strong>Nos outils</strong> analysent vos contenus Meta automatiquement.
+              Pour des actions d'optimisation (publication, ads), <strong>autorisez l'accès</strong> à vos comptes.
+            </p>
+            <p className="mt-1">Toutes les actions passent par l'Approval Center. Vous gardez le contrôle total.</p>
           </div>
         </div>
 

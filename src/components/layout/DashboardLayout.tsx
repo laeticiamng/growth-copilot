@@ -64,8 +64,8 @@ const allNavItems: NavItem[] = [
   
   // Advanced - Technical tools (collapsible)
   { path: "/dashboard/sites", label: "Sites", icon: Building2, category: "advanced" },
-  { path: "/dashboard/integrations", label: "Intégrations", icon: () => <span className="text-base">🔌</span>, category: "advanced", requiresRole: "admin", hideForClients: true },
-  { path: "/dashboard/connections", label: "Connexions", icon: () => <span className="text-base">📡</span>, category: "advanced" },
+  { path: "/dashboard/integrations", label: "Outils", icon: () => <span className="text-base">🔧</span>, category: "advanced", requiresRole: "admin", hideForClients: true },
+  { path: "/dashboard/connections", label: "Mes accès", icon: () => <span className="text-base">🔑</span>, category: "advanced" },
   { path: "/dashboard/seo", label: "SEO Tech", icon: () => <span className="text-base">🔍</span>, category: "advanced" },
   { path: "/dashboard/content", label: "Contenu", icon: () => <span className="text-base">📝</span>, category: "advanced" },
   { path: "/dashboard/local", label: "Local SEO", icon: () => <span className="text-base">📍</span>, category: "advanced" },

@@ -305,8 +305,8 @@ export default function Ads() {
               {keywords.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Aucun mot-clé</p>
-                  <p className="text-sm mt-1">Connectez Google Ads pour synchroniser</p>
+                  <p className="font-medium">Aucun mot-clé importé</p>
+                  <p className="text-sm mt-1">Autorisez l'accès à votre compte Google Ads pour synchroniser</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
