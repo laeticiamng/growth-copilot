@@ -88,6 +88,7 @@ const allNavItems: NavItem[] = [
   { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span>, category: "advanced" },
   { path: "/dashboard/legal", label: "Juridique", icon: () => <span className="text-base">⚖️</span>, category: "advanced" },
   { path: "/dashboard/access-review", label: "Revue accès", icon: () => <span className="text-base">🔐</span>, category: "advanced" },
+  { path: "/dashboard/audit-log", label: "Audit Log", icon: () => <span className="text-base">📜</span>, category: "advanced", requiresRole: "manager" },
   { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, category: "advanced", requiresRole: "admin" },
   { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, category: "advanced", requiresRole: "manager" },
   { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, category: "advanced", requiresRole: "admin" },
