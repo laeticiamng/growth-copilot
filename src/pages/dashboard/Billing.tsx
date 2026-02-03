@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Check, 
   Zap, 
@@ -14,6 +16,7 @@ import {
   TrendingUp,
   Info,
   ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -179,13 +182,47 @@ const Billing = () => {
   const { isAtLeastRole } = usePermissions();
   const [currentPlan] = useState("free");
   
-  // Demo usage data
-  const usage = {
-    sites: 1,
-    crawls: 7,
-    agentRuns: 23,
-  };
+  // Fetch real usage data from database
+  const { data: usageData, isLoading: usageLoading } = useQuery({
+    queryKey: ['billing-usage', currentWorkspace?.id],
+    queryFn: async () => {
+      if (!currentWorkspace?.id) return { sites: 0, crawls: 0, agentRuns: 0 };
+      
+      // Get sites count
+      const { count: sitesCount } = await supabase
+        .from('sites')
+        .select('*', { count: 'exact', head: true })
+        .eq('workspace_id', currentWorkspace.id);
+      
+      // Get crawls this month (from action_log with SEO crawler actions)
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      
+      const { count: crawlsCount } = await supabase
+        .from('action_log')
+        .select('*', { count: 'exact', head: true })
+        .eq('workspace_id', currentWorkspace.id)
+        .eq('action_type', 'seo_crawl')
+        .gte('created_at', startOfMonth.toISOString());
+      
+      // Get agent runs this month
+      const { count: agentRunsCount } = await supabase
+        .from('agent_runs')
+        .select('*', { count: 'exact', head: true })
+        .eq('workspace_id', currentWorkspace.id)
+        .gte('created_at', startOfMonth.toISOString());
+      
+      return {
+        sites: sitesCount || 0,
+        crawls: crawlsCount || 0,
+        agentRuns: agentRunsCount || 0,
+      };
+    },
+    enabled: !!currentWorkspace?.id,
+  });
 
+  const usage = usageData || { sites: 0, crawls: 0, agentRuns: 0 };
   const currentPlanData = plans.find(p => p.id === currentPlan) || plans[0];
   const canManageBilling = isAtLeastRole('owner');
 
