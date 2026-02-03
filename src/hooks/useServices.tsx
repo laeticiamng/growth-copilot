@@ -35,6 +35,8 @@ export interface Subscription {
   status: 'active' | 'cancelled' | 'past_due' | 'trialing';
   trial_ends_at: string | null;
   is_full_company: boolean;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
 }
 
 interface ServicesContextType {

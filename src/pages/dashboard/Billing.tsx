@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useServices, Service } from "@/hooks/useServices";
-import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Crown,
@@ -24,8 +24,9 @@ import {
   Settings,
   Building2,
   Sparkles,
-  AlertCircle,
   Loader2,
+  ExternalLink,
+  Bot,
 } from "lucide-react";
 
 // Service icons mapping
@@ -42,20 +43,28 @@ const SERVICE_ICONS: Record<string, React.ElementType> = {
   "core-os": Zap,
 };
 
-// Service prices (matching landing page)
-const SERVICE_PRICES: Record<string, number> = {
-  marketing: 49,
-  sales: 39,
-  finance: 29,
-  security: 29,
-  product: 29,
-  engineering: 29,
-  data: 39,
-  support: 19,
-  governance: 49,
+// Real pricing (matching landing page)
+const PRICE_PER_DEPT = 1900;
+const FULL_COMPANY_PRICE = 9000;
+
+// Stripe price IDs
+const STRIPE_PRICES = {
+  fullCompany: "price_1SwlDUDFa5Y9NR1IzLwG74ue",
+  department: "price_1SwlDXDFa5Y9NR1IRhOpv4ET",
 };
 
-const FULL_COMPANY_PRICE = 299;
+// Employees per department
+const DEPT_EMPLOYEES: Record<string, number> = {
+  marketing: 5,
+  sales: 4,
+  finance: 3,
+  security: 3,
+  product: 4,
+  engineering: 5,
+  data: 4,
+  support: 3,
+  governance: 3,
+};
 
 export default function Billing() {
   const { currentWorkspace } = useWorkspace();
@@ -70,20 +79,21 @@ export default function Billing() {
     isFullCompany,
     hasService,
   } = useServices();
-  const { isAtLeastRole } = usePermissions();
   
   const [togglingService, setTogglingService] = useState<string | null>(null);
-  const [upgradingToFull, setUpgradingToFull] = useState(false);
+  const [creatingCheckout, setCreatingCheckout] = useState<string | null>(null);
 
   // Filter out core services (they're always free)
   const paidServices = catalog.filter(s => !s.is_core);
   
   // Calculate current "à la carte" total
-  const alaCarteTotal = paidServices
+  const enabledPaidCount = paidServices.filter(s => hasService(s.slug)).length;
+  const alaCarteTotal = enabledPaidCount * PRICE_PER_DEPT;
+  const totalEmployees = paidServices
     .filter(s => hasService(s.slug))
-    .reduce((sum, s) => sum + (SERVICE_PRICES[s.slug] || 29), 0);
+    .reduce((sum, s) => sum + (DEPT_EMPLOYEES[s.slug] || 3), 0);
 
-  // Toggle a service
+  // Toggle a service (for demo/trial mode)
   const handleToggleService = async (service: Service, enabled: boolean) => {
     if (isFullCompany) {
       toast.info("Tous les services sont inclus dans Full Company");
@@ -108,15 +118,66 @@ export default function Billing() {
     }
   };
 
-  // Upgrade to Full Company
-  const handleUpgradeToFull = async () => {
-    setUpgradingToFull(true);
-    // TODO: Integrate with Stripe for actual payment
-    toast.info("L'intégration Stripe arrive bientôt !");
-    setUpgradingToFull(false);
+  // Create Stripe Checkout session
+  const handleCheckout = async (type: "full" | "department") => {
+    if (!currentWorkspace) {
+      toast.error("Aucun workspace sélectionné");
+      return;
+    }
+
+    setCreatingCheckout(type);
+    try {
+      const { data, error } = await supabase.functions.invoke("stripe-checkout", {
+        body: {
+          priceId: type === "full" ? STRIPE_PRICES.fullCompany : STRIPE_PRICES.department,
+          workspaceId: currentWorkspace.id,
+          successUrl: `${window.location.origin}/dashboard/billing?success=true`,
+          cancelUrl: `${window.location.origin}/dashboard/billing?canceled=true`,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Erreur lors de la création du paiement. L'intégration Stripe sera bientôt disponible.");
+    } finally {
+      setCreatingCheckout(null);
+    }
+  };
+
+  // Manage billing (customer portal)
+  const handleManageBilling = async () => {
+    if (!subscription?.stripe_customer_id) {
+      toast.info("Aucun abonnement actif");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("stripe-portal", {
+        body: {
+          customerId: subscription.stripe_customer_id,
+          returnUrl: `${window.location.origin}/dashboard/billing`,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      toast.error("Erreur lors de l'ouverture du portail de facturation");
+    }
   };
 
   const isLoading = catalogLoading || subscriptionLoading;
+  const isPaid = subscription?.status === "active" && subscription?.plan !== "free";
 
   if (isLoading) {
     return (
@@ -142,21 +203,6 @@ export default function Billing() {
           </p>
         </header>
 
-        {/* Stripe notice */}
-        <Card className="border-primary/50 bg-primary/5">
-          <CardContent className="flex items-start gap-4 py-4">
-            <div className="p-2 rounded-full bg-primary/10 mt-0.5">
-              <AlertCircle className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-foreground">Intégration Stripe en cours</p>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Les paiements réels seront activés prochainement. Activez/désactivez les services librement pour tester.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Current Plan Overview */}
         <div className="grid lg:grid-cols-3 gap-6">
           <Card variant="gradient" className="lg:col-span-2">
@@ -176,22 +222,28 @@ export default function Billing() {
                     </CardTitle>
                     <CardDescription className="mt-0.5">
                       {isFullCompany 
-                        ? "Tous les départements inclus" 
-                        : `${enabledServices.filter(s => !s.is_core).length} département(s) activé(s)`
+                        ? "37 employés IA • 9 départements" 
+                        : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
                       }
                     </CardDescription>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold">
-                    {isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal}€
+                    {(isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal).toLocaleString()}€
                     <span className="text-sm font-normal text-muted-foreground">/mois</span>
                   </div>
                   {!isFullCompany && alaCarteTotal > FULL_COMPANY_PRICE && (
                     <p className="text-xs text-destructive mt-1">
-                      Économisez {alaCarteTotal - FULL_COMPANY_PRICE}€ avec Full Company
+                      Économisez {(alaCarteTotal - FULL_COMPANY_PRICE).toLocaleString()}€ avec Full Company
                     </p>
                   )}
+                  <Badge 
+                    variant={isPaid ? "success" : subscription?.status === "trialing" ? "secondary" : "outline"} 
+                    className="mt-2"
+                  >
+                    {isPaid ? "Actif" : subscription?.status === "trialing" ? "Essai" : "Gratuit"}
+                  </Badge>
                 </div>
               </div>
             </CardHeader>
@@ -199,17 +251,30 @@ export default function Billing() {
               <div className="flex flex-wrap gap-2">
                 {enabledServices.map(service => {
                   const Icon = SERVICE_ICONS[service.slug] || Puzzle;
+                  const employees = DEPT_EMPLOYEES[service.slug] || 0;
                   return (
                     <Badge key={service.id} variant="secondary" className="gap-1.5 py-1">
                       <Icon className="w-3 h-3" />
                       {service.name}
-                      {service.is_core && (
-                        <span className="text-xs opacity-60">(Core)</span>
+                      {!service.is_core && employees > 0 && (
+                        <span className="text-xs opacity-60 flex items-center gap-0.5">
+                          <Bot className="w-2.5 h-2.5" />
+                          {employees}
+                        </span>
                       )}
                     </Badge>
                   );
                 })}
               </div>
+              
+              {isPaid && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <Button variant="outline" size="sm" onClick={handleManageBilling}>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Gérer mon abonnement
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -222,7 +287,7 @@ export default function Billing() {
                 </div>
                 <CardTitle>Full Company</CardTitle>
                 <div className="text-2xl font-bold mt-2">
-                  {FULL_COMPANY_PRICE}€
+                  {FULL_COMPANY_PRICE.toLocaleString()}€
                   <span className="text-sm font-normal text-muted-foreground">/mois</span>
                 </div>
               </CardHeader>
@@ -230,24 +295,24 @@ export default function Billing() {
                 <ul className="space-y-2 text-sm text-left">
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
+                    37 employés IA inclus
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
                     Tous les 9 départements
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
-                    Support prioritaire
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    Économies garanties
+                    Économisez {((9 * PRICE_PER_DEPT) - FULL_COMPANY_PRICE).toLocaleString()}€/mois
                   </li>
                 </ul>
                 <Button 
-                  variant="gradient" 
+                  variant="hero" 
                   className="w-full" 
-                  onClick={handleUpgradeToFull}
-                  disabled={upgradingToFull}
+                  onClick={() => handleCheckout("full")}
+                  disabled={creatingCheckout === "full"}
                 >
-                  {upgradingToFull ? (
+                  {creatingCheckout === "full" ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
                     <Sparkles className="w-4 h-4 mr-2" />
@@ -265,7 +330,7 @@ export default function Billing() {
             <div>
               <h2 className="text-xl font-semibold">Départements disponibles</h2>
               <p className="text-sm text-muted-foreground">
-                Activez les services dont vous avez besoin
+                {PRICE_PER_DEPT.toLocaleString()}€/mois par département
               </p>
             </div>
             {isFullCompany && (
@@ -279,7 +344,7 @@ export default function Billing() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {paidServices.map(service => {
               const Icon = SERVICE_ICONS[service.slug] || Puzzle;
-              const price = SERVICE_PRICES[service.slug] || 29;
+              const employees = DEPT_EMPLOYEES[service.slug] || 3;
               const isEnabled = hasService(service.slug);
               const isToggling = togglingService === service.id;
 
@@ -296,8 +361,9 @@ export default function Billing() {
                         </div>
                         <div>
                           <p className="font-medium">{service.name}</p>
-                          <p className="text-sm text-muted-foreground mt-0.5">
-                            {price}€/mois
+                          <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
+                            <Bot className="w-3 h-3" />
+                            {employees} employés IA
                           </p>
                         </div>
                       </div>
@@ -327,12 +393,21 @@ export default function Billing() {
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
             Core OS
-            <Badge variant="outline">Toujours inclus</Badge>
+            <Badge variant="outline">Toujours inclus gratuitement</Badge>
           </h2>
           <Card variant="feature">
             <CardContent className="pt-6">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                {["Workspace & Sites", "RBAC & Permissions", "Audit Log", "Scheduler & Approvals"].map(item => (
+                {[
+                  "Workspace & Sites",
+                  "RBAC & Permissions", 
+                  "Audit Log immuable",
+                  "Scheduler & Approbations",
+                  "AI Gateway",
+                  "Integrations Hub",
+                  "Voice Commands",
+                  "Executive Cockpit"
+                ].map(item => (
                   <div key={item} className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
                     <span>{item}</span>
@@ -349,20 +424,37 @@ export default function Billing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CreditCard className="w-5 h-5" />
-                Moyen de paiement
+                Paiement sécurisé
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
-                <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground mb-3">Aucune carte enregistrée</p>
-                <Button variant="outline" size="sm" disabled>
-                  Ajouter une carte
-                </Button>
-                <p className="text-xs text-muted-foreground mt-4">
-                  🔒 Paiements sécurisés via Stripe
-                </p>
-              </div>
+              {isPaid && subscription?.stripe_customer_id ? (
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <CreditCard className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Carte enregistrée</p>
+                      <p className="text-sm text-muted-foreground">Gérez vos informations via le portail Stripe</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleManageBilling}>
+                    Modifier
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
+                  <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground mb-3">Aucune carte enregistrée</p>
+                  <p className="text-xs text-muted-foreground">
+                    Votre carte sera demandée lors du premier paiement
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-4 text-center">
+                🔒 Paiements sécurisés via Stripe • Pas d'engagement • Annulez à tout moment
+              </p>
             </CardContent>
           </Card>
         </section>

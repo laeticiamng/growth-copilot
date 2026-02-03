@@ -89,3 +89,12 @@ verify_jwt = false
 
 [functions.perplexity-research]
 verify_jwt = false
+
+[functions.stripe-webhooks]
+verify_jwt = false
+
+[functions.stripe-checkout]
+verify_jwt = false
+
+[functions.stripe-portal]
+verify_jwt = false

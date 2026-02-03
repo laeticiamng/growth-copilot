@@ -16,8 +16,9 @@
 | Intégrations Google/Meta | ✅ Implémenté | 80% |
 | AI Gateway | ✅ Implémenté | 90% |
 | Cockpit Exécutif | ✅ Implémenté | 85% |
+| **Facturation Stripe** | ✅ Implémenté | 85% |
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
-| Facturation Stripe | ❌ Manquant | 0% |
+| Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
 | Départements RH/Juridique | ❌ Manquant | 0% |
 | Support Multilingue (3+) | ⚠️ Partiel (FR/EN) | 50% |
 | Monitoring & Observabilité | ⚠️ Partiel | 60% |
