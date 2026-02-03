@@ -128,7 +128,7 @@ const DEPARTMENTS = [
     nameFr: "RH",
     descEn: "Onboarding, Team Management, Talent",
     descFr: "Onboarding, Gestion d'équipe, Talents",
-    employees: 2,
+    employees: 3,
     features: ["Team Onboarding", "Role Management", "Talent Tracking"]
   },
   { 
