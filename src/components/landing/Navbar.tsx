@@ -10,13 +10,14 @@ import { useState } from "react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 
 export function Navbar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const isEn = i18n.language === "en";
 
   const navLinks = [
     { href: "#features", label: t("landing.navbar.features") },
+    { href: "#departments", label: isEn ? "Departments" : "Départements" },
     { href: "#tools", label: t("landing.tools.title") },
-    { href: "#how-it-works", label: t("landing.navbar.howItWorks") },
     { href: "#pricing", label: t("landing.navbar.pricing") },
   ];
 

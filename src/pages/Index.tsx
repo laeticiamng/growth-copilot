@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
+import { Services } from "@/components/landing/Services";
 import { TeamOrgChart } from "@/components/landing/TeamOrgChart";
 import { Tools } from "@/components/landing/Tools";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -15,6 +16,7 @@ const Index = () => {
       <Navbar />
       <Hero />
       <Features />
+      <Services />
       <TeamOrgChart />
       <Tools />
       <HowItWorks />
@@ -27,3 +29,4 @@ const Index = () => {
 };
 
 export default Index;
+

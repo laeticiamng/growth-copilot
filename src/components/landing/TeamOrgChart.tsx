@@ -236,11 +236,33 @@ export function TeamOrgChart() {
   const level3 = agents.filter((a) => a.level === 3);
 
   const labels = isEn 
-    ? { team: "AI Team", title: "Your 100% automated marketing team", subtitle: "14 specialized AI agents work in synergy to optimize your growth, 24/7", coreOps: "Core Operations", acquisition: "Acquisition & Distribution", quality: "Quality & Control", availability: "Availability", agents: "Specialized agents", responseTime: "Response time", scalability: "Scalability" }
-    : { team: "Équipe IA", title: "Votre équipe marketing 100% automatisée", subtitle: "14 agents IA spécialisés travaillent en synergie pour optimiser votre croissance, 24h/24", coreOps: "Opérations Core", acquisition: "Acquisition & Distribution", quality: "Qualité & Contrôle", availability: "Disponibilité", agents: "Agents spécialisés", responseTime: "Temps de réponse", scalability: "Scalabilité" };
+    ? { 
+        team: "Execution Engine", 
+        title: "Your 100% automated execution team", 
+        subtitle: "Premium specialists work behind the scenes to deliver structured, evidence-based outputs — no technical complexity for you.",
+        coreOps: "Core Operations", 
+        acquisition: "Acquisition & Distribution", 
+        quality: "Quality & Control", 
+        availability: "Availability", 
+        agents: "Specialists", 
+        responseTime: "Response time", 
+        scalability: "Scalability" 
+      }
+    : { 
+        team: "Moteur d'exécution", 
+        title: "Votre équipe d'exécution 100% automatisée", 
+        subtitle: "Des spécialistes premium travaillent en coulisses pour vous livrer des outputs structurés et basés sur les données — aucune complexité technique pour vous.",
+        coreOps: "Opérations Core", 
+        acquisition: "Acquisition & Distribution", 
+        quality: "Qualité & Contrôle", 
+        availability: "Disponibilité", 
+        agents: "Spécialistes", 
+        responseTime: "Temps de réponse", 
+        scalability: "Scalabilité" 
+      };
 
   return (
-    <section className="py-20 px-4 bg-secondary/30">
+    <section id="services" className="py-20 px-4 bg-secondary/30">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">

@@ -13,59 +13,59 @@ export function FAQ() {
 
   const faqsFr = [
     {
-      question: "Comment fonctionne l'audit gratuit ?",
-      answer: "Tu entres ton URL, on analyse automatiquement ton site (technique, contenu, performance, concurrence). En 2 minutes, tu reçois un rapport détaillé avec les opportunités prioritaires et un plan d'action. Aucune carte bancaire requise.",
+      question: "Qu'est-ce que la 'Portable Company' ?",
+      answer: "C'est une entreprise digitale complète que vous pouvez 'porter' avec vous. 9 départements spécialisés (Marketing, Commercial, Finance, Sécurité...) travaillent en coulisses pour vous livrer des outputs professionnels. Vous n'avez qu'à valider les décisions clés.",
+    },
+    {
+      question: "Quelle est la différence entre Full Company et À la carte ?",
+      answer: "Full Company vous donne accès aux 9 départements pour 299€/mois. À la carte vous permet de choisir uniquement les départements dont vous avez besoin (à partir de 19€/mois par département). Le Core OS (Workspace, Approbations, Audit) est toujours inclus.",
     },
     {
       question: "Mes données sont-elles sécurisées ?",
-      answer: "Absolument. Nous utilisons OAuth pour les connexions (Google, Meta), tes tokens sont chiffrés, et nous ne stockons jamais tes mots de passe. Conformité RGPD garantie avec export et suppression sur demande.",
+      answer: "Absolument. Nous utilisons OAuth pour les connexions (Google, Meta), vos tokens sont chiffrés, et nous ne stockons jamais vos mots de passe. Conformité RGPD garantie avec export et suppression sur demande. Chaque action est consignée dans un audit log immuable.",
     },
     {
-      question: "Qu'est-ce que le mode Autopilot ?",
-      answer: "Le mode Autopilot permet aux agents IA d'exécuter automatiquement certaines actions (corrections SEO, ajustements Ads, posts locaux). Il est OFF par défaut et tu gardes toujours le contrôle avec des garde-fous stricts (budgets max, validation humaine pour actions à risque).",
+      question: "Comment fonctionne le système d'approbation ?",
+      answer: "Toute action à risque (publication, modification de budget, envoi d'emails) passe par votre inbox d'approbations. Vous voyez exactement ce qui sera fait, le niveau de risque, et vous validez ou refusez en un clic. Rien n'est exécuté sans votre accord explicite.",
     },
     {
-      question: "Puis-je connecter mon CMS (WordPress, Shopify) ?",
-      answer: "Oui ! Si ton CMS est connecté, nos agents peuvent appliquer automatiquement les corrections SEO techniques. Sinon, on génère des patchs et instructions à copier-coller.",
+      question: "Dois-je configurer des outils techniques ?",
+      answer: "Non. Tout est géré en coulisses. Vous répondez à quelques questions business simples, vous autorisez l'accès à vos comptes (Google, Meta) si souhaité, et c'est tout. Aucun jargon technique, aucune configuration complexe.",
     },
     {
-      question: "Garantissez-vous des résultats SEO ?",
-      answer: "Non, personne ne peut garantir un ranking Google spécifique (et méfie-toi de ceux qui le promettent). Ce qu'on garantit : un processus d'optimisation continue, des actions basées sur les meilleures pratiques, et une transparence totale sur ce qui est fait et les résultats obtenus.",
-    },
-    {
-      question: "Comment fonctionnent les agents IA ?",
-      answer: "14 agents spécialisés (SEO, Ads, Local, CRO, etc.) travaillent en parallèle, orchestrés par un 'Directeur' qui priorise selon tes objectifs. Un agent Vérificateur contrôle la qualité et la conformité de chaque action avant exécution.",
+      question: "Qu'est-ce que le 'Premium Competence Standard' ?",
+      answer: "C'est notre engagement qualité. Chaque output est structuré, basé sur des données concrètes, et prêt pour la décision. Pas de suppositions : si une information manque, on vous le dit clairement et on vous demande le minimum nécessaire.",
     },
     {
       question: "Puis-je annuler à tout moment ?",
-      answer: "Oui, sans engagement. Tu peux annuler ton abonnement à tout moment depuis ton dashboard. Tes données restent accessibles pendant 30 jours après annulation.",
+      answer: "Oui, sans engagement. Vous pouvez annuler votre abonnement à tout moment depuis votre dashboard. Vos données restent accessibles pendant 30 jours après annulation.",
     },
   ];
 
   const faqsEn = [
     {
-      question: "How does the free audit work?",
-      answer: "You enter your URL, we automatically analyze your site (technical, content, performance, competition). In 2 minutes, you receive a detailed report with priority opportunities and an action plan. No credit card required.",
+      question: "What is the 'Portable Company'?",
+      answer: "It's a complete digital company you can 'carry' with you. 9 specialized departments (Marketing, Sales, Finance, Security...) work behind the scenes to deliver professional outputs. You just validate key decisions.",
+    },
+    {
+      question: "What's the difference between Full Company and À la carte?",
+      answer: "Full Company gives you access to all 9 departments for €299/month. À la carte lets you choose only the departments you need (starting at €19/month per department). Core OS (Workspace, Approvals, Audit) is always included.",
     },
     {
       question: "Is my data secure?",
-      answer: "Absolutely. We use OAuth for connections (Google, Meta), your tokens are encrypted, and we never store your passwords. GDPR compliance guaranteed with export and deletion on request.",
+      answer: "Absolutely. We use OAuth for connections (Google, Meta), your tokens are encrypted, and we never store your passwords. GDPR compliance guaranteed with export and deletion on request. Every action is logged in an immutable audit log.",
     },
     {
-      question: "What is Autopilot mode?",
-      answer: "Autopilot mode allows AI agents to automatically execute certain actions (SEO fixes, Ads adjustments, local posts). It's OFF by default and you always keep control with strict guardrails (max budgets, human validation for risky actions).",
+      question: "How does the approval system work?",
+      answer: "Any risky action (publishing, budget changes, sending emails) goes through your approvals inbox. You see exactly what will be done, the risk level, and you validate or reject with one click. Nothing is executed without your explicit agreement.",
     },
     {
-      question: "Can I connect my CMS (WordPress, Shopify)?",
-      answer: "Yes! If your CMS is connected, our agents can automatically apply technical SEO fixes. Otherwise, we generate patches and copy-paste instructions.",
+      question: "Do I need to configure technical tools?",
+      answer: "No. Everything is managed behind the scenes. You answer a few simple business questions, authorize access to your accounts (Google, Meta) if desired, and that's it. No technical jargon, no complex setup.",
     },
     {
-      question: "Do you guarantee SEO results?",
-      answer: "No, nobody can guarantee a specific Google ranking (and beware of those who promise it). What we guarantee: a continuous optimization process, actions based on best practices, and total transparency on what is done and results obtained.",
-    },
-    {
-      question: "How do AI agents work?",
-      answer: "14 specialized agents (SEO, Ads, Local, CRO, etc.) work in parallel, orchestrated by a 'Director' who prioritizes according to your objectives. A Verifier agent controls the quality and compliance of each action before execution.",
+      question: "What is the 'Premium Competence Standard'?",
+      answer: "It's our quality commitment. Every output is structured, based on concrete data, and ready for decision-making. No guessing: if information is missing, we tell you clearly and ask for the minimum required.",
     },
     {
       question: "Can I cancel anytime?",
