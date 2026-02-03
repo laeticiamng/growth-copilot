@@ -59,40 +59,25 @@ export default function LocalSEO() {
   const [submittingPost, setSubmittingPost] = useState(false);
 
   const currentProfile = profiles[0]; // First profile for current site
-  const gbpScore = currentProfile?.audit_score || 78;
+  const gbpScore = currentProfile?.audit_score || 0;
+  const hasProfile = !!currentProfile;
 
   const gbpMetrics = [
-    { label: "Note moyenne", value: currentProfile?.rating_avg?.toFixed(1) || "4.8", icon: Star },
-    { label: "Avis", value: currentProfile?.reviews_count?.toString() || "127", icon: MessageSquare },
-    { label: "Photos", value: currentProfile?.photos_count?.toString() || "24", icon: Eye },
-    { label: "Catégories", value: (currentProfile?.categories as string[])?.length?.toString() || "3", icon: MapPin },
+    { label: "Note moyenne", value: currentProfile?.rating_avg?.toFixed(1) || "-", icon: Star },
+    { label: "Avis", value: currentProfile?.reviews_count?.toString() || "0", icon: MessageSquare },
+    { label: "Photos", value: currentProfile?.photos_count?.toString() || "0", icon: Eye },
+    { label: "Catégories", value: (currentProfile?.categories as string[])?.length?.toString() || "0", icon: MapPin },
   ];
 
-  // Demo reviews if no real data
-  const reviews = [
-    { id: 1, author: "Marie D.", rating: 5, comment: "Excellente prestation, équipe très professionnelle !", date: "Il y a 2 jours", replied: true, requiresAttention: false },
-    { id: 2, author: "Pierre L.", rating: 4, comment: "Bon travail dans l'ensemble.", date: "Il y a 5 jours", replied: false, requiresAttention: false },
-    { id: 3, author: "Sophie M.", rating: 2, comment: "Déçue par le suivi client.", date: "Il y a 1 semaine", replied: false, requiresAttention: true },
-  ];
-
-  // Demo scheduled posts fallback
-  const scheduledPosts = posts.length > 0 ? posts.filter(p => p.status === 'scheduled').map(p => ({
+  // Real scheduled posts from database only
+  const scheduledPosts = posts.filter(p => p.status === 'scheduled').map(p => ({
     title: p.title || 'Sans titre',
     type: p.post_type || 'Update',
     scheduledFor: p.scheduled_at ? new Date(p.scheduled_at).toLocaleDateString('fr') : 'Non planifié',
-  })) : [
-    { title: "Offre spéciale Janvier", type: "Offre", scheduledFor: "25 Jan 2026" },
-    { title: "Nouveaux services 2026", type: "Actualité", scheduledFor: "28 Jan 2026" },
-  ];
+  }));
 
-  // GBP audit tasks
-  const gbpTasks = [
-    { task: "Ajouter photos récentes", status: "pending", priority: "high" },
-    { task: "Compléter les services", status: "done", priority: "medium" },
-    { task: "Mettre à jour horaires", status: "pending", priority: "low" },
-    { task: "Répondre aux questions", status: "pending", priority: "high" },
-    { task: "Créer un post hebdo", status: "pending", priority: "medium" },
-  ];
+  // GBP audit tasks - empty by default, would come from database in production
+  const gbpTasks: Array<{ task: string; status: string; priority: string }> = [];
 
   const handleSyncGBP = async () => {
     const { error } = await syncGBP();
@@ -225,8 +210,10 @@ export default function LocalSEO() {
             </div>
             <p className="font-medium">Score GBP</p>
             <div className="flex items-center justify-center gap-1 mt-1">
-              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-              <span className="text-sm">4.8 (127 avis)</span>
+              <Star className="w-4 h-4 fill-primary text-primary" />
+              <span className="text-sm">
+                {currentProfile?.rating_avg?.toFixed(1) || "-"} ({currentProfile?.reviews_count || 0} avis)
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -267,63 +254,26 @@ export default function LocalSEO() {
                       <CardTitle>Avis récents</CardTitle>
                       <CardDescription>Gérer et répondre aux avis clients</CardDescription>
                     </div>
-                    <Badge variant="destructive">1 à traiter</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {reviews.map((review) => (
-                    <div
-                      key={review.id}
-                      className={`p-4 rounded-lg ${
-                        review.requiresAttention ? "bg-destructive/10 border border-destructive/30" : "bg-secondary/50"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{review.author}</span>
-                            <div className="flex">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${
-                                    i < review.rating
-                                      ? "fill-yellow-500 text-yellow-500"
-                                      : "text-muted-foreground"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{review.date}</p>
-                        </div>
-                        {review.replied ? (
-                          <Badge variant="secondary">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Répondu
-                          </Badge>
-                        ) : review.requiresAttention ? (
-                          <Badge variant="destructive">
-                            <AlertTriangle className="w-3 h-3 mr-1" />
-                            Urgent
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <p className="text-sm">{review.comment}</p>
-                      {!review.replied && (
-                        <div className="flex gap-2 mt-3">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => openReplyDialog({ author: review.author, comment: review.comment })}
-                          >
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            Répondre avec IA
-                          </Button>
-                        </div>
-                      )}
+                  {!hasProfile ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Star className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">Aucun profil GBP configuré</p>
+                      <p className="text-sm mt-1">Autorisez l'accès à Google Business Profile pour voir vos avis.</p>
+                      <Button variant="outline" className="mt-4" onClick={handleSyncGBP}>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Synchroniser GBP
+                      </Button>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="font-medium">Aucun avis synchronisé</p>
+                      <p className="text-sm mt-1">Les avis de votre fiche GBP apparaîtront ici après synchronisation.</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -353,25 +303,26 @@ export default function LocalSEO() {
                   <CardTitle className="text-base">Stats avis</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Taux de réponse</span>
-                    <span className="font-medium">92%</span>
-                  </div>
-                  <Progress value={92} className="h-2" />
-                  <div className="flex items-center justify-between text-sm mt-4">
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="w-4 h-4 text-green-500" />
-                      Positifs
-                    </span>
-                    <span>89%</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-1">
-                      <ThumbsDown className="w-4 h-4 text-destructive" />
-                      Négatifs
-                    </span>
-                    <span>11%</span>
-                  </div>
+                  {hasProfile && currentProfile?.reviews_count ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Total avis</span>
+                        <span className="font-medium">{currentProfile.reviews_count}</span>
+                      </div>
+                      <Progress value={currentProfile.rating_avg ? (currentProfile.rating_avg / 5) * 100 : 0} className="h-2" />
+                      <div className="flex items-center justify-between text-sm mt-4">
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="w-4 h-4 text-chart-3" />
+                          Note moyenne
+                        </span>
+                        <span>{currentProfile.rating_avg?.toFixed(1) || "-"}/5</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p className="text-sm">Aucune statistique disponible</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -416,34 +367,42 @@ export default function LocalSEO() {
               <CardDescription>Optimisations recommandées pour votre fiche GBP</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {gbpTasks.map((task, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <div className="flex items-center gap-3">
-                    {task.status === "done" ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border-2 border-muted-foreground" />
-                    )}
-                    <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>
-                      {task.task}
-                    </span>
-                  </div>
-                  <Badge
-                    variant={
-                      task.priority === "high"
-                        ? "destructive"
-                        : task.priority === "medium"
-                        ? "secondary"
-                        : "outline"
-                    }
+              {gbpTasks.length > 0 ? (
+                gbpTasks.map((task, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
                   >
-                    {task.priority === "high" ? "Prioritaire" : task.priority === "medium" ? "Moyen" : "Faible"}
-                  </Badge>
+                    <div className="flex items-center gap-3">
+                      {task.status === "done" ? (
+                        <CheckCircle2 className="w-5 h-5 text-chart-3" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-muted-foreground" />
+                      )}
+                      <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>
+                        {task.task}
+                      </span>
+                    </div>
+                    <Badge
+                      variant={
+                        task.priority === "high"
+                          ? "destructive"
+                          : task.priority === "medium"
+                          ? "secondary"
+                          : "outline"
+                      }
+                    >
+                      {task.priority === "high" ? "Prioritaire" : task.priority === "medium" ? "Moyen" : "Faible"}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle2 className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">Aucune tâche d'optimisation</p>
+                  <p className="text-xs mt-1">Synchronisez votre fiche GBP pour obtenir des recommandations.</p>
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </TabsContent>
