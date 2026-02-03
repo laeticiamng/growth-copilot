@@ -52,7 +52,14 @@ const FULL_COMPANY_PRICE = 9000;
 const STRIPE_PRICES = {
   fullCompany: "price_1SwlDUDFa5Y9NR1IzLwG74ue",
   department: "price_1SwlDXDFa5Y9NR1IRhOpv4ET",
-  starter: "price_starter_490", // To be created in Stripe
+  starter: "price_1SwnyuDFa5Y9NR1IEQaigAaY",
+};
+
+// Starter plan limits
+const STARTER_LIMITS = {
+  runs: 50,
+  sites: 1,
+  users: 2,
 };
 
 // Employees per department
@@ -84,6 +91,9 @@ export default function Billing() {
   
   const [togglingService, setTogglingService] = useState<string | null>(null);
   const [creatingCheckout, setCreatingCheckout] = useState<string | null>(null);
+
+  // Check if current plan is Starter
+  const isStarter = subscription?.plan === "starter";
 
   // Filter out core services (they're always free)
   const paidServices = catalog.filter(s => !s.is_core);
@@ -121,17 +131,23 @@ export default function Billing() {
   };
 
   // Create Stripe Checkout session
-  const handleCheckout = async (type: "full" | "department") => {
+  const handleCheckout = async (type: "full" | "department" | "starter") => {
     if (!currentWorkspace) {
       toast.error("Aucun workspace sélectionné");
       return;
     }
 
+    const priceMap = {
+      full: STRIPE_PRICES.fullCompany,
+      department: STRIPE_PRICES.department,
+      starter: STRIPE_PRICES.starter,
+    };
+
     setCreatingCheckout(type);
     try {
       const { data, error } = await supabase.functions.invoke("stripe-checkout", {
         body: {
-          priceId: type === "full" ? STRIPE_PRICES.fullCompany : STRIPE_PRICES.department,
+          priceId: priceMap[type],
           workspaceId: currentWorkspace.id,
           successUrl: `${window.location.origin}/dashboard/billing?success=true`,
           cancelUrl: `${window.location.origin}/dashboard/billing?canceled=true`,
@@ -280,16 +296,16 @@ export default function Billing() {
             </CardContent>
           </Card>
 
-          {/* Full Company Upgrade Card */}
-          {!isFullCompany && (
-            <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+        {/* Starter Plan Card */}
+          {!isFullCompany && !isStarter && (
+            <Card className="border border-border">
               <CardHeader className="text-center pb-2">
-                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-primary to-accent shadow-lg">
-                  <Crown className="w-7 h-7 text-primary-foreground" />
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-secondary">
+                  <Zap className="w-7 h-7 text-primary" />
                 </div>
-                <CardTitle>Full Company</CardTitle>
+                <CardTitle>Starter</CardTitle>
                 <div className="text-2xl font-bold mt-2">
-                  {FULL_COMPANY_PRICE.toLocaleString()}€
+                  {STARTER_PRICE.toLocaleString()}€
                   <span className="text-sm font-normal text-muted-foreground">/mois</span>
                 </div>
               </CardHeader>
@@ -297,34 +313,78 @@ export default function Billing() {
                 <ul className="space-y-2 text-sm text-left">
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
-                    37 employés IA inclus
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
                     Tous les 9 départements
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
-                    Économisez {((9 * PRICE_PER_DEPT) - FULL_COMPANY_PRICE).toLocaleString()}€/mois
+                    {STARTER_LIMITS.runs} runs/mois
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    {STARTER_LIMITS.sites} site • {STARTER_LIMITS.users} utilisateurs
                   </li>
                 </ul>
                 <Button 
-                  variant="hero" 
+                  variant="outline" 
                   className="w-full" 
-                  onClick={() => handleCheckout("full")}
-                  disabled={creatingCheckout === "full"}
+                  onClick={() => handleCheckout("starter")}
+                  disabled={creatingCheckout === "starter"}
                 >
-                  {creatingCheckout === "full" ? (
+                  {creatingCheckout === "starter" ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Sparkles className="w-4 h-4 mr-2" />
+                    <Zap className="w-4 h-4 mr-2" />
                   )}
-                  Passer à Full Company
+                  Commencer avec Starter
                 </Button>
               </CardContent>
             </Card>
           )}
         </div>
+
+        {/* Full Company Upgrade Card - only show if not full company */}
+        {!isFullCompany && (
+          <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg">
+                    <Crown className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Passez à Full Company</h3>
+                    <p className="text-sm text-muted-foreground">
+                      37 employés IA • 9 départements • Runs illimités
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">
+                      {FULL_COMPANY_PRICE.toLocaleString()}€
+                      <span className="text-sm font-normal text-muted-foreground">/mois</span>
+                    </div>
+                    <Badge variant="success" className="text-xs">
+                      Économisez {((9 * PRICE_PER_DEPT) - FULL_COMPANY_PRICE).toLocaleString()}€
+                    </Badge>
+                  </div>
+                  <Button 
+                    variant="hero" 
+                    onClick={() => handleCheckout("full")}
+                    disabled={creatingCheckout === "full"}
+                  >
+                    {creatingCheckout === "full" ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 mr-2" />
+                    )}
+                    Upgrade
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Services Grid */}
         <section>
