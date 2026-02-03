@@ -1,33 +1,33 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Zap, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Zap, Twitter, Linkedin, Youtube, Mail } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
 
   const footerLinks = {
-    [t("landing.footer.product")]: [
+    [isEn ? "Product" : "Produit"]: [
       { label: t("landing.footer.features"), href: "#features" },
       { label: t("landing.footer.pricing"), href: "#pricing" },
-      { label: t("landing.footer.integrations"), href: "#tools" },
-      { label: t("landing.footer.changelog"), href: "#" },
+      { label: isEn ? "Departments" : "Départements", href: "#services" },
+      { label: isEn ? "Integrations" : "Intégrations", href: "#tools" },
     ],
-    [t("landing.footer.resources")]: [
-      { label: t("landing.footer.documentation"), href: "#" },
-      { label: t("landing.footer.blog"), href: "#" },
-      { label: t("landing.footer.community"), href: "#" },
+    [isEn ? "Resources" : "Ressources"]: [
+      { label: isEn ? "Documentation" : "Documentation", href: "#" },
+      { label: isEn ? "Help Center" : "Centre d'aide", href: "#" },
+      { label: isEn ? "Status" : "Statut", href: "#" },
       { label: "API", href: "#" },
     ],
-    [t("landing.footer.company")]: [
-      { label: t("landing.footer.about"), href: "#" },
-      { label: t("landing.footer.contact"), href: "#" },
-      { label: t("landing.footer.careers"), href: "#" },
-      { label: t("landing.footer.partners"), href: "#" },
+    [isEn ? "Company" : "Entreprise"]: [
+      { label: isEn ? "About" : "À propos", href: "#" },
+      { label: isEn ? "Contact" : "Contact", href: "mailto:m.laeticia@hotmail.fr" },
+      { label: isEn ? "Blog" : "Blog", href: "#" },
     ],
-    [t("landing.footer.legal")]: [
+    [isEn ? "Legal" : "Légal"]: [
       { label: t("landing.footer.privacy"), href: "/privacy" },
       { label: t("landing.footer.terms"), href: "/terms" },
-      { label: t("landing.footer.cookies"), href: "#" },
       { label: "GDPR", href: "#" },
     ],
   };
@@ -44,9 +44,17 @@ export function Footer() {
               </div>
               <span className="font-bold text-lg">Growth OS</span>
             </Link>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              {t("landing.footer.description")}
+            <p className="text-sm text-muted-foreground max-w-xs mb-4">
+              {isEn 
+                ? "The complete digital company. Subscribe to all departments or choose only what you need."
+                : "L'entreprise digitale complète. Abonnez-vous à tous les départements ou choisissez uniquement ce dont vous avez besoin."
+              }
             </p>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {isEn ? "Premium Competence" : "Compétence Premium"}
+              </Badge>
+            </div>
           </div>
 
           {/* Links */}
@@ -56,7 +64,7 @@ export function Footer() {
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.label}>
-                    {link.href.startsWith('/') ? (
+                    {link.href.startsWith('/') || link.href.startsWith('mailto:') ? (
                       <Link
                         to={link.href}
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -80,17 +88,25 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2026 Growth OS. {t("landing.footer.rights")}.
-          </p>
+          <div className="text-center md:text-left">
+            <p className="text-sm text-muted-foreground">
+              © 2026 EmotionsCare Sasu. {isEn ? "All rights reserved." : "Tous droits réservés."}
+            </p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              Growth OS {isEn ? "is a product of" : "est un produit de"} EmotionsCare Sasu
+            </p>
+          </div>
           <div className="flex items-center gap-4">
-            <a href="https://x.com/growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
+            <a href="mailto:m.laeticia@hotmail.fr" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Email">
+              <Mail className="w-5 h-5" />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="https://linkedin.com/company/growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
               <Linkedin className="w-5 h-5" />
             </a>
-            <a href="https://youtube.com/@growthosapp" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="YouTube">
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="YouTube">
               <Youtube className="w-5 h-5" />
             </a>
           </div>
