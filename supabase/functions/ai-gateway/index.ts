@@ -143,19 +143,19 @@ function hashInput(input: unknown): string {
   return Math.abs(hash).toString(16);
 }
 
-// Model mapping by agent/purpose - OpenAI GPT-5 series by default
-// CGO: orchestrator (needs deep reasoning) → gpt-5.2
-// QCO: validator (needs precision) → gpt-5.2 (low temp)
-// SEO Auditor: worker (bulk analysis) → gpt-5-mini (cheaper)
-// Copywriting: creative → gpt-5.2 (quality matters)
-// Cheap tasks: gemini-2.5-flash-lite when budget is tight
+// Model mapping by agent/purpose - Using Lovable AI Gateway models
+// CGO: orchestrator (needs deep reasoning) → google/gemini-3-pro-preview (strongest reasoning)
+// QCO: validator (needs precision) → google/gemini-3-pro-preview (low temp)
+// SEO Auditor: worker (bulk analysis) → google/gemini-3-flash-preview (balanced)
+// Copywriting: creative → google/gemini-2.5-pro (quality + multimodal)
+// Cheap tasks: google/gemini-2.5-flash-lite when budget is tight
 function getModelConfig(purpose: string): { model: string; temperature: number; max_tokens: number } {
   const configs: Record<string, { model: string; temperature: number; max_tokens: number }> = {
-    cgo_plan: { model: "openai/gpt-5.2", temperature: 0.3, max_tokens: 8192 },
-    qa_review: { model: "openai/gpt-5.2", temperature: 0.1, max_tokens: 4096 },
-    seo_audit: { model: "openai/gpt-5-mini", temperature: 0.2, max_tokens: 4096 },
-    copywriting: { model: "openai/gpt-5.2", temperature: 0.7, max_tokens: 4096 },
-    analysis: { model: "openai/gpt-5-mini", temperature: 0.3, max_tokens: 4096 },
+    cgo_plan: { model: "google/gemini-3-pro-preview", temperature: 0.3, max_tokens: 8192 },
+    qa_review: { model: "google/gemini-3-pro-preview", temperature: 0.1, max_tokens: 4096 },
+    seo_audit: { model: "google/gemini-3-flash-preview", temperature: 0.2, max_tokens: 4096 },
+    copywriting: { model: "google/gemini-2.5-pro", temperature: 0.7, max_tokens: 4096 },
+    analysis: { model: "google/gemini-3-flash-preview", temperature: 0.3, max_tokens: 4096 },
     // Cheap fallback for high-volume/low-priority tasks
     bulk_cheap: { model: "google/gemini-2.5-flash-lite", temperature: 0.2, max_tokens: 2048 },
   };

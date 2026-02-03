@@ -45,12 +45,14 @@ const SERVICE_ICONS: Record<string, React.ElementType> = {
 
 // Real pricing (matching landing page)
 const PRICE_PER_DEPT = 1900;
+const STARTER_PRICE = 490;
 const FULL_COMPANY_PRICE = 9000;
 
 // Stripe price IDs
 const STRIPE_PRICES = {
   fullCompany: "price_1SwlDUDFa5Y9NR1IzLwG74ue",
   department: "price_1SwlDXDFa5Y9NR1IRhOpv4ET",
+  starter: "price_starter_490", // To be created in Stripe
 };
 
 // Employees per department
