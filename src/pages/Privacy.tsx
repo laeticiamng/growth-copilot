@@ -116,7 +116,75 @@ export default function Privacy() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold">10. Modifications</h2>
+            <h2 className="text-2xl font-semibold">10. Data Processing Agreement (DPA)</h2>
+            <p>
+              Pour les clients B2B, nous proposons un accord de traitement des données (DPA) conforme 
+              au RGPD. Ce document encadre nos obligations en tant que sous-traitant de vos données.
+            </p>
+            <p>Points clés du DPA :</p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li><strong>Finalité du traitement</strong> : Exclusivement pour fournir les services de la plateforme</li>
+              <li><strong>Mesures techniques</strong> : Chiffrement AES-256, audit logs immuables, sauvegardes quotidiennes</li>
+              <li><strong>Sous-traitants</strong> : Supabase (hébergement), Stripe (paiements), Google/Meta (via OAuth)</li>
+              <li><strong>Localisation</strong> : Données hébergées dans l'UE (région eu-central-1)</li>
+              <li><strong>Notification de violation</strong> : Dans les 72h suivant la découverte</li>
+              <li><strong>Suppression</strong> : Sur demande sous 30 jours maximum</li>
+            </ul>
+            <p>
+              Pour obtenir une copie signée du DPA, contactez-nous à{" "}
+              <a href="mailto:legal@growthOS.io" className="text-primary hover:underline">legal@growthOS.io</a>
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold">11. Rétention des données par service</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 pr-4">Service</th>
+                    <th className="text-left py-2 pr-4">Type de données</th>
+                    <th className="text-left py-2">Durée de rétention</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr>
+                    <td className="py-2 pr-4">Google Analytics</td>
+                    <td className="py-2 pr-4">Métriques agrégées</td>
+                    <td className="py-2">24 mois</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Google Search Console</td>
+                    <td className="py-2 pr-4">Positions, clics</td>
+                    <td className="py-2">16 mois</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Meta Ads</td>
+                    <td className="py-2 pr-4">Performances campagnes</td>
+                    <td className="py-2">24 mois</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Agent Runs</td>
+                    <td className="py-2 pr-4">Logs d'exécution IA</td>
+                    <td className="py-2">12 mois</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Audit Log</td>
+                    <td className="py-2 pr-4">Actions utilisateur</td>
+                    <td className="py-2">36 mois (légal)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Enregistrements vocaux</td>
+                    <td className="py-2 pr-4">Commandes ElevenLabs</td>
+                    <td className="py-2">24h (non stockés)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold">12. Modifications</h2>
             <p>
               Nous pouvons mettre à jour cette politique de confidentialité. Les modifications 
               importantes vous seront notifiées par email ou via la plateforme.

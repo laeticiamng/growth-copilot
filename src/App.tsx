@@ -103,6 +103,8 @@ import HR from "./pages/dashboard/HR";
 import Legal from "./pages/dashboard/Legal";
 import AccessReview from "./pages/dashboard/AccessReview";
 import AuditLogPage from "./pages/dashboard/AuditLog";
+import StatusPage from "./pages/dashboard/StatusPage";
+import ROIDashboard from "./pages/dashboard/ROIDashboard";
 
 const queryClient = new QueryClient();
 
@@ -248,6 +250,8 @@ function App() {
               <Route path="/dashboard/legal" element={<DashboardRoute service="legal"><Legal /></DashboardRoute>} />
               <Route path="/dashboard/access-review" element={<DashboardRoute service="security"><AccessReview /></DashboardRoute>} />
               <Route path="/dashboard/audit-log" element={<DashboardRoute><AuditLogPage /></DashboardRoute>} />
+              <Route path="/dashboard/status" element={<DashboardRoute><StatusPage /></DashboardRoute>} />
+              <Route path="/dashboard/roi" element={<DashboardRoute><ROIDashboard /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
