@@ -98,6 +98,7 @@ import Ops from "./pages/dashboard/Ops";
 import ApprovalsV2 from "./pages/dashboard/ApprovalsV2";
 import Agents from "./pages/dashboard/Agents";
 import CMS from "./pages/dashboard/CMS";
+import Research from "./pages/dashboard/Research";
 
 const queryClient = new QueryClient();
 
@@ -236,6 +237,7 @@ function App() {
               <Route path="/dashboard/approvals-v2" element={<DashboardRoute><ApprovalsV2 /></DashboardRoute>} />
               <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
               <Route path="/dashboard/cms" element={<DashboardRoute service="marketing"><CMS /></DashboardRoute>} />
+              <Route path="/dashboard/research" element={<DashboardRoute><Research /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
