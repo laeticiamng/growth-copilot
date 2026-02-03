@@ -49,16 +49,16 @@ Growth OS est un **système d'exploitation d'entreprise portable** qui remplace 
 
 | Formule | Prix | Inclus |
 |---------|------|--------|
-| **Full Company** | 9 000€/mois | 37 employés IA, 10 départements, Core OS |
+| **Full Company** | 9 000€/mois | 38 employés IA, 11 départements, Core OS |
 | **À la carte** | 1 900€/dept/mois | 3-5 employés IA par département + Core OS |
 | **Core OS** | Gratuit | Workspace, RBAC, Approbations, Audit Log, Scheduler |
 
-> **Comparaison** : Une équipe de 37 employés traditionnels coûte ~166 500€/mois (salaire moyen 4 500€).  
-> **Économie : 157 500€/mois**.
+> **Comparaison** : Une équipe de 38 employés traditionnels coûte ~171 000€/mois (salaire moyen 4 500€).  
+> **Économie : 162 000€/mois**.
 
 ---
 
-## 🏛️ Départements (10)
+## 🏛️ Départements (11)
 
 | Département | Employés IA | Rôles clés | Status |
 |-------------|-------------|------------|--------|
@@ -72,8 +72,9 @@ Growth OS est un **système d'exploitation d'entreprise portable** qui remplace 
 | **Support** | 3 | Head of Support IA, Customer Success, Technical Support | ✅ Complet |
 | **Governance** | 3 | Chief of Staff IA, Project Manager, Operations Analyst | ✅ Complet |
 | **RH** | 3 | DRH IA, HR Business Partner, Talent Acquisition | ✅ Complet |
+| **Juridique** | 1 | DPO IA, Contract Manager | ✅ Complet |
 
-**Total : 37 employés IA** répartis dans 10 départements fonctionnels.
+**Total : 38 employés IA** répartis dans 11 départements fonctionnels.
 
 ---
 
