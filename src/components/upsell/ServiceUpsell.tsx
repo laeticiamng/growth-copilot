@@ -45,7 +45,7 @@ export function ServiceUpsell({
   serviceName, 
   description,
   features = [],
-  price = "29"
+  price = "1 900"
 }: ServiceUpsellProps) {
   const Icon = SERVICE_ICONS[serviceSlug] || Puzzle;
   const color = SERVICE_COLORS[serviceSlug] || "text-muted-foreground";
