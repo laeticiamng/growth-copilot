@@ -38,6 +38,8 @@ const SERVICE_COLORS: Record<string, string> = {
   data: "text-cyan-500",
   support: "text-pink-500",
   governance: "text-gray-500",
+  hr: "text-indigo-500",
+  legal: "text-slate-500",
 };
 
 export function ServiceUpsell({ 
