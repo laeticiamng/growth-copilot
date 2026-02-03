@@ -135,8 +135,8 @@ export function Pricing() {
           </h2>
           <p className="text-lg text-muted-foreground">
             {isEn 
-              ? `${TOTAL_EMPLOYEES} AI employees across 9 departments. Premium expertise, instant deployment.`
-              : `${TOTAL_EMPLOYEES} employés IA répartis dans 9 départements. Expertise premium, déploiement instantané.`
+              ? `${TOTAL_EMPLOYEES} AI employees across ${TOTAL_DEPARTMENTS} departments. Premium expertise, instant deployment.`
+              : `${TOTAL_EMPLOYEES} employés IA répartis dans ${TOTAL_DEPARTMENTS} départements. Expertise premium, déploiement instantané.`
             }
           </p>
         </div>
@@ -167,10 +167,10 @@ export function Pricing() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Badge variant="secondary" className="text-sm">
                   <Bot className="w-3 h-3 mr-1" />
-                  9 {isEn ? "AI Employees" : "Employés IA"}
+                  {TOTAL_DEPARTMENTS} {isEn ? "AI Employees" : "Employés IA"}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
-                  9 {isEn ? "Departments" : "Départements"}
+                  {TOTAL_DEPARTMENTS} {isEn ? "Departments" : "Départements"}
                 </Badge>
               </div>
 
@@ -183,7 +183,7 @@ export function Pricing() {
 
               <ul className="space-y-2 mb-8 text-left">
                 {[
-                  isEn ? "All 9 departments (lite)" : "Les 9 départements (allégé)",
+                  isEn ? `All ${TOTAL_DEPARTMENTS} departments (lite)` : `Les ${TOTAL_DEPARTMENTS} départements (allégé)`,
                   isEn ? "1 AI employee per dept" : "1 employé IA par département",
                   isEn ? "50 runs/month" : "50 exécutions/mois",
                   isEn ? "1 site, 2 users" : "1 site, 2 utilisateurs",
