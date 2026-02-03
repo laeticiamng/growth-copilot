@@ -26,6 +26,7 @@ import { LifecycleProvider } from "@/hooks/useLifecycle";
 import { AgencyProvider } from "@/hooks/useAgency";
 import { ReputationProvider } from "@/hooks/useReputation";
 import { OffersProvider } from "@/hooks/useOffers";
+import { ServicesProvider } from "@/hooks/useServices";
 
 // AI providers
 import { MetaProvider } from "@/hooks/useMeta";
@@ -111,6 +112,7 @@ const CoreProviders = createProviderGroup('Core', [
   SitesProvider,
   PermissionsProvider,
   FeatureFlagsProvider,
+  ServicesProvider,
 ]);
 
 // Feature data providers - Business domain data
