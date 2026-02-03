@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.kpi-sync]
 verify_jwt = false
+
+[functions.monitoring-metrics]
+verify_jwt = false
