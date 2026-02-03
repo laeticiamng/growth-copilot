@@ -63,6 +63,7 @@ const allNavItems: NavItem[] = [
   // Main navigation - CEO-level
   { path: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard, category: "main" },
   { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot, category: "main" },
+  { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span>, category: "main" },
   { path: "/dashboard/approvals", label: "À valider", icon: () => <span className="text-base">✓</span>, category: "main" },
   { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span>, category: "main" },
   

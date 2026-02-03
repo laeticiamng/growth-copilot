@@ -26,6 +26,8 @@ import {
   ApprovalsWidget,
   RunsHistory,
 } from "@/components/cockpit";
+import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
+import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
 
 // CGO Agent Persona
 const CGO_PERSONA = {
@@ -279,6 +281,27 @@ export default function DashboardHome() {
 
         {/* Runs History */}
         <RunsHistory maxItems={4} />
+      </div>
+
+      {/* Voice Assistant & Real-Time Alerts */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Voice-First AI */}
+        <Card className="overflow-hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              🎙️ Assistant Vocal IA
+            </CardTitle>
+            <CardDescription>
+              Pilotez votre entreprise par la voix
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <VoiceAssistant />
+          </CardContent>
+        </Card>
+
+        {/* Smart Alerts */}
+        <SmartAlertsPanel />
       </div>
     </div>
   );
