@@ -1779,6 +1779,71 @@ export type Database = {
           },
         ]
       }
+      compliance_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          evidence_urls: string[] | null
+          id: string
+          notes: string | null
+          priority: string | null
+          regulation: string | null
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          regulation?: string | null
+          status?: string
+          task_type: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          regulation?: string | null
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_briefs: {
         Row: {
           assigned_to: string | null
@@ -1915,6 +1980,114 @@ export type Database = {
           },
           {
             foreignKeyName: "content_drafts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          assigned_to: string | null
+          auto_renew: boolean | null
+          contract_number: string | null
+          contract_type: string
+          counterparty_email: string | null
+          counterparty_name: string | null
+          created_at: string
+          description: string | null
+          document_url: string | null
+          effective_date: string | null
+          expiry_date: string | null
+          id: string
+          key_clauses: string[] | null
+          obligations: Json | null
+          payment_terms: string | null
+          related_employee_id: string | null
+          renewal_notice_days: number | null
+          risk_assessment: string | null
+          risk_level: string | null
+          signed_at: string | null
+          signed_by: string | null
+          signed_document_url: string | null
+          status: string
+          title: string
+          updated_at: string
+          value_amount: number | null
+          value_currency: string | null
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          auto_renew?: boolean | null
+          contract_number?: string | null
+          contract_type: string
+          counterparty_email?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          description?: string | null
+          document_url?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          id?: string
+          key_clauses?: string[] | null
+          obligations?: Json | null
+          payment_terms?: string | null
+          related_employee_id?: string | null
+          renewal_notice_days?: number | null
+          risk_assessment?: string | null
+          risk_level?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          signed_document_url?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          value_amount?: number | null
+          value_currency?: string | null
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          auto_renew?: boolean | null
+          contract_number?: string | null
+          contract_type?: string
+          counterparty_email?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          description?: string | null
+          document_url?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
+          id?: string
+          key_clauses?: string[] | null
+          obligations?: Json | null
+          payment_terms?: string | null
+          related_employee_id?: string | null
+          renewal_notice_days?: number | null
+          risk_assessment?: string | null
+          risk_level?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          signed_document_url?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          value_amount?: number | null
+          value_currency?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_related_employee_id_fkey"
+            columns: ["related_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -2570,6 +2743,96 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "email_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          contract_type: string
+          created_at: string
+          department: string | null
+          email: string
+          end_date: string | null
+          first_name: string
+          hire_date: string
+          id: string
+          job_title: string
+          last_name: string
+          last_review_at: string | null
+          manager_id: string | null
+          notes: string | null
+          performance_score: number | null
+          phone: string | null
+          salary_annual: number | null
+          skills: string[] | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          work_location: string | null
+          workspace_id: string
+        }
+        Insert: {
+          contract_type?: string
+          created_at?: string
+          department?: string | null
+          email: string
+          end_date?: string | null
+          first_name: string
+          hire_date?: string
+          id?: string
+          job_title: string
+          last_name: string
+          last_review_at?: string | null
+          manager_id?: string | null
+          notes?: string | null
+          performance_score?: number | null
+          phone?: string | null
+          salary_annual?: number | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          work_location?: string | null
+          workspace_id: string
+        }
+        Update: {
+          contract_type?: string
+          created_at?: string
+          department?: string | null
+          email?: string
+          end_date?: string | null
+          first_name?: string
+          hire_date?: string
+          id?: string
+          job_title?: string
+          last_name?: string
+          last_review_at?: string | null
+          manager_id?: string | null
+          notes?: string | null
+          performance_score?: number | null
+          phone?: string | null
+          salary_annual?: number | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          work_location?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -3343,6 +3606,65 @@ export type Database = {
           },
           {
             foreignKeyName: "gbp_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gdpr_requests: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deadline: string
+          export_url: string | null
+          id: string
+          request_details: string | null
+          request_type: string
+          requester_email: string
+          requester_name: string | null
+          response_notes: string | null
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          deadline: string
+          export_url?: string | null
+          id?: string
+          request_details?: string | null
+          request_type: string
+          requester_email: string
+          requester_name?: string | null
+          response_notes?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          deadline?: string
+          export_url?: string | null
+          id?: string
+          request_details?: string | null
+          request_type?: string
+          requester_email?: string
+          requester_name?: string | null
+          response_notes?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gdpr_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
