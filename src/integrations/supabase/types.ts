@@ -7443,6 +7443,8 @@ export type Database = {
         | "data"
         | "support"
         | "governance"
+        | "hr"
+        | "legal"
       subscription_plan: "free" | "starter" | "growth" | "agency"
     }
     CompositeTypes: {
@@ -7696,6 +7698,8 @@ export const Constants = {
         "data",
         "support",
         "governance",
+        "hr",
+        "legal",
       ],
       subscription_plan: ["free", "starter", "growth", "agency"],
     },

@@ -19,7 +19,7 @@
 | **Facturation Stripe** | ✅ Implémenté | 85% |
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
-| Départements RH/Juridique | ❌ Manquant | 0% |
+| Départements RH/Juridique | ✅ Implémenté | 80% |
 | Support Multilingue (3+) | ⚠️ Partiel (FR/EN) | 50% |
 | Monitoring & Observabilité | ⚠️ Partiel | 60% |
 
