@@ -1,116 +1,205 @@
 # Growth OS - Your Portable Company
 
-> L'entreprise digitale complète. Abonnez-vous à la full company ou sélectionnez uniquement les départements dont vous avez besoin.
+> La première entreprise digitale complète en abonnement. Abonnez-vous à la Full Company ou sélectionnez uniquement les départements dont vous avez besoin.
+
+[![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
+[![Tests](https://img.shields.io/badge/Tests-64%2B%20passing-brightgreen)](./src/test)
+[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE-blue)](./src/i18n)
+[![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
+
+---
+
+## 🚀 Démo Live
+
+**👉 [agent-growth-automator.lovable.app](https://agent-growth-automator.lovable.app)**
+
+---
 
 ## 🏢 Vision
 
-Growth OS est un système d'exploitation d'entreprise portable qui remplace les équipes traditionnelles par des employés IA premium. Chaque département (Marketing, Commercial, Finance, Sécurité, etc.) est composé d'agents IA spécialisés qui travaillent 24/7 avec un standard de compétence premium.
+Growth OS est un **système d'exploitation d'entreprise portable** qui remplace les équipes traditionnelles par des **employés IA premium**. Chaque département (Marketing, Commercial, Finance, Sécurité, etc.) est composé d'agents IA spécialisés qui travaillent 24/7 avec un standard de compétence premium.
 
 **Philosophie** : Compétence premium, livrée simplement. Zéro jargon technique.
+
+---
+
+## 📸 Captures d'Écran
+
+### Landing Page
+![Landing Page](./docs/screenshots/landing-hero.png)
+*Page d'accueil avec présentation des départements*
+
+### Cockpit Exécutif
+![Executive Cockpit](./docs/screenshots/cockpit.png)
+*Tableau de bord exécutif avec semaphores RAG, actions prioritaires et approbations*
+
+### Module RH
+![HR Module](./docs/screenshots/hr.png)
+*Gestion des employés, onboarding et performance*
+
+### Module Juridique
+![Legal Module](./docs/screenshots/legal.png)
+*Contrats, conformité RGPD et alertes légales*
+
+> **Note** : Les captures d'écran sont dans `docs/screenshots/`. Pour les générer, exécutez l'application et prenez des captures des pages principales.
+
+---
 
 ## 💼 Modèle Tarifaire
 
 | Formule | Prix | Inclus |
 |---------|------|--------|
-| **Full Company** | 9 000€/mois | 37 employés IA, 9 départements, Core OS |
+| **Full Company** | 9 000€/mois | 37 employés IA, 10 départements, Core OS |
 | **À la carte** | 1 900€/dept/mois | 3-5 employés IA par département + Core OS |
 | **Core OS** | Gratuit | Workspace, RBAC, Approbations, Audit Log, Scheduler |
 
-> Comparaison : Une équipe de 37 employés traditionnels coûte ~166 500€/mois (salaire moyen 4 500€). Économie : **157 500€/mois**.
+> **Comparaison** : Une équipe de 37 employés traditionnels coûte ~166 500€/mois (salaire moyen 4 500€).  
+> **Économie : 157 500€/mois**.
 
-## 🏛️ Départements (9)
+---
 
-| Département | Employés IA | Rôles clés |
-|-------------|-------------|------------|
-| **Marketing** | 5 | Directeur Marketing IA, SEO Strategist, Content Manager, Ads Optimizer, Social Media Manager |
-| **Commercial** | 4 | Directeur Commercial IA, Lead Qualifier, Sales Closer, Account Manager |
-| **Finance** | 3 | DAF IA, Comptable Analytique, Contrôleur de Gestion |
-| **Sécurité** | 3 | RSSI IA, Compliance Officer, Auditeur Sécurité |
-| **Produit** | 4 | CPO IA, Product Manager, UX Researcher, Product Analyst |
-| **Ingénierie** | 5 | CTO IA, Lead Developer, DevOps Engineer, QA Specialist, Technical Writer |
-| **Data** | 4 | CDO IA, Data Engineer, Data Analyst, ML Engineer |
-| **Support** | 3 | Head of Support IA, Customer Success Manager, Technical Support |
-| **Gouvernance** | 3 | Chief of Staff IA, Project Manager, Operations Analyst |
+## 🏛️ Départements (10)
+
+| Département | Employés IA | Rôles clés | Status |
+|-------------|-------------|------------|--------|
+| **Marketing** | 5 | SEO Strategist, Content Manager, Ads Optimizer, Social Media | ✅ Complet |
+| **Commercial** | 4 | Lead Qualifier, Sales Closer, Account Manager, Pipeline Analyst | ✅ Complet |
+| **Finance** | 3 | DAF IA, Comptable Analytique, Contrôleur de Gestion | ✅ Complet |
+| **Sécurité** | 3 | RSSI IA, Compliance Officer, Auditeur Sécurité | ✅ Complet |
+| **Produit** | 4 | CPO IA, Product Manager, UX Researcher, Product Analyst | ✅ Complet |
+| **Ingénierie** | 5 | CTO IA, Lead Developer, DevOps, QA Specialist, Tech Writer | ✅ Complet |
+| **Data** | 4 | CDO IA, Data Engineer, Data Analyst, ML Engineer | ✅ Complet |
+| **Support** | 3 | Head of Support IA, Customer Success, Technical Support | ✅ Complet |
+| **Governance** | 3 | Chief of Staff IA, Project Manager, Operations Analyst | ✅ Complet |
+| **RH** | 3 | DRH IA, HR Business Partner, Talent Acquisition | ✅ Complet |
+
+**Total : 37 employés IA** répartis dans 10 départements fonctionnels.
+
+---
 
 ## ✨ Core OS (Toujours inclus)
 
-- **Workspace** : Isolation multi-tenant complète
-- **RBAC** : 5 niveaux de permissions (Owner → Viewer)
-- **Approval Gate** : Validation humaine des actions critiques
-- **Audit Log** : Traçabilité complète de toutes les actions
-- **Scheduler** : Planification des tâches et automations
-- **Integrations Hub** : Connecteurs Google, Meta, et plus
-- **Voice Commands** : Commandes vocales via ElevenLabs
+| Feature | Description |
+|---------|-------------|
+| **Workspace** | Isolation multi-tenant complète |
+| **RBAC** | 5 niveaux de permissions (Owner → Viewer) |
+| **Approval Gate** | Validation humaine des actions critiques |
+| **Audit Log** | Traçabilité immuable de toutes les actions |
+| **Scheduler** | Planification des tâches (pg_cron) |
+| **Evidence Bundles** | Transparence IA avec sources de données |
+| **Integrations Hub** | Connecteurs Google, Meta, Stripe |
+| **Voice Commands** | Commandes vocales via ElevenLabs |
+| **i18n** | 4 langues (FR, EN, ES, DE) |
+
+---
+
+## 🤖 Agents IA
+
+### Architecture
+
+L'AI Gateway centralise tous les appels IA avec :
+- **Validation stricte** : Schema JSON standardisé pour tous les agents
+- **Retry automatique** : Réparation des réponses malformées
+- **Traçabilité** : Logging complet dans `ai_requests` et `agent_runs`
+- **Rate limiting** : Quotas par plan (Free → Agency)
+
+### Modèles Utilisés
+
+| Purpose | Modèle | Cas d'usage |
+|---------|--------|-------------|
+| `cgo_plan` | openai/gpt-5.2 | Orchestration stratégique |
+| `qa_review` | openai/gpt-5.2 | Validation compliance |
+| `seo_audit` | openai/gpt-5-mini | Analyse SEO bulk |
+| `copywriting` | openai/gpt-5.2 | Création de contenu |
+| `analysis` | openai/gpt-5-mini | Analyses génériques |
+
+> **Documentation complète** : [docs/AI_AGENTS.md](./docs/AI_AGENTS.md)
+
+### Agents Clés
+
+| Agent | Rôle | Responsabilités |
+|-------|------|-----------------|
+| **Sophie Marchand** | Chief Growth Officer | Orchestration, priorisation ICE, coordination |
+| **Lucas Bertrand** | Quality & Compliance Officer | Validation éthique, anti-spam, anti-plagiat |
+| **Marie Dupont** | SEO Tech Auditor | Audit technique, indexation, performance |
+| **Thomas Laurent** | Content Strategist | Stratégie contenu, briefs, clusters |
+
+---
 
 ## 🛠️ Stack Technique
 
 ### Frontend
 - **React 18** + TypeScript
-- **Vite** - Build tool ultra-rapide
-- **Tailwind CSS** + **shadcn/ui** - Design system moderne
-- **TanStack Query** - Gestion d'état serveur
+- **Vite** - Build ultra-rapide
+- **Tailwind CSS** + **shadcn/ui** - Design system moderne (50+ composants)
+- **TanStack Query** - State management serveur
 - **React Router** - Navigation SPA
-- **i18next** - Internationalisation (FR/EN)
+- **i18next** - Internationalisation (4 langues, 551 clés chacune)
 
 ### Backend (Lovable Cloud)
-- **Supabase** - Base de données PostgreSQL
-- **Edge Functions** (Deno) - API serverless
+- **Supabase** - PostgreSQL avec 120+ tables
+- **Edge Functions** (Deno) - 38 fonctions serverless
 - **Row Level Security** - Isolation multi-tenant stricte
-- **Realtime** - WebSockets pour mises à jour live
+- **pg_cron** - Exécutions planifiées
 
 ### Intégrations
 - **Google APIs** : Analytics, Search Console, Ads, YouTube, Business Profile
 - **Meta APIs** : Marketing API, Instagram, Conversions API
-- **AI Gateway** : Modèles Gemini, GPT-5 via Lovable AI
+- **Stripe** : Checkout, Webhooks, Customer Portal
+- **Lovable AI Gateway** : GPT-5, Gemini
+
+> **Documentation architecture** : [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+
+---
 
 ## 📁 Structure du Projet
 
 ```
 src/
-├── components/          # Composants UI réutilisables
-│   ├── ai/             # Assistant IA & Voice
+├── components/          # 50+ composants UI réutilisables
+│   ├── ai/             # AIAssistant, VoiceAssistant
 │   ├── auth/           # Guards, ProtectedRoute, ServiceGuard
-│   ├── cockpit/        # Widgets dashboard exécutif
-│   ├── diagnostics/    # Panel de debug
-│   ├── integrations/   # Connecteurs Google/Meta
-│   ├── kpi/            # Cartes et graphiques KPI
-│   ├── landing/        # Page d'accueil publique
-│   ├── layout/         # DashboardLayout
-│   ├── upsell/         # Écrans d'upsell modulaires
-│   └── ui/             # Composants shadcn/ui
-├── hooks/              # Custom hooks (useWorkspace, useServices, etc.)
-├── lib/
-│   ├── agents/         # Définitions des agents IA
-│   ├── validation/     # Schémas Zod, sanitization, business rules
-│   └── statistics.ts   # Calculs A/B testing
-├── pages/
-│   ├── dashboard/      # 25+ pages dashboard
-│   └── Auth.tsx        # Authentification
-└── i18n/               # Traductions FR/EN
+│   ├── cockpit/        # ExecutiveSummary, PriorityActions, QuickLaunchers
+│   ├── evidence/       # EvidenceBundleCard, EvidenceBundleViewer
+│   └── ui/             # shadcn/ui components
+├── hooks/              # 40+ custom hooks (useWorkspace, useServices, etc.)
+├── lib/agents/         # Définitions des agents IA
+├── pages/dashboard/    # 37 pages dashboard
+└── i18n/locales/       # Traductions (FR, EN, ES, DE)
 
 supabase/
-├── functions/          # 25+ Edge Functions
-│   ├── ai-gateway/     # Proxy IA multi-modèles
-│   ├── oauth-init/     # Initialisation OAuth
-│   ├── oauth-callback/ # Callback OAuth sécurisé
-│   ├── seo-crawler/    # Crawler SEO
-│   └── ...
+├── functions/          # 38 Edge Functions
+│   ├── ai-gateway/     # Proxy IA centralisé
+│   ├── run-executor/   # Orchestrateur des runs
+│   ├── oauth-*/        # OAuth sécurisé
+│   └── stripe-*/       # Intégration Stripe
 └── migrations/         # Migrations SQL
+
+docs/
+├── PLATFORM_AUDIT.md   # Statut et roadmap
+├── AI_AGENTS.md        # Documentation IA
+└── ARCHITECTURE.md     # Architecture technique
 ```
+
+---
 
 ## 🔐 Sécurité
 
-- **RLS (Row Level Security)** : Isolation des données par workspace
-- **Chiffrement AES-GCM 256-bit** : Tokens OAuth chiffrés at-rest
-- **HMAC-SHA256** : Protection anti-rejeu des états OAuth
-- **Validation Zod** : Sanitization de toutes les entrées
-- **Protection XSS** : Échappement automatique du HTML
-- **Service Gating** : Accès modulaire par département activé
+| Feature | Implementation |
+|---------|----------------|
+| **RLS** | 120+ tables avec Row Level Security |
+| **Encryption** | AES-GCM 256-bit pour tokens OAuth |
+| **HMAC** | Protection anti-rejeu des états OAuth |
+| **Validation** | Zod schemas + sanitization XSS |
+| **Audit Trail** | Trigger immuable sur audit_log |
+| **Rate Limiting** | Par workspace et plan |
+
+---
 
 ## 🚀 Démarrage Rapide
 
 ### Prérequis
-- Node.js 18+ 
+- Node.js 18+
 - npm ou bun
 
 ### Installation
@@ -136,12 +225,15 @@ Les variables sont gérées automatiquement par Lovable Cloud :
 
 ### Secrets (Backend)
 
-Configurés dans Lovable Cloud :
+Configurés dans Lovable Cloud Secrets :
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
 - `META_APP_ID` / `META_APP_SECRET`
 - `TOKEN_ENCRYPTION_KEY` (64 caractères hex)
 - `OAUTH_STATE_SECRET`
-- `ELEVENLABS_API_KEY`
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
+- `LOVABLE_API_KEY` (auto-généré)
+
+---
 
 ## 📊 Tests
 
@@ -151,27 +243,100 @@ npm run test
 
 # Tests avec couverture
 npm run test -- --coverage
+
+# Smoke tests
+npm run test src/test/smoke.test.ts
 ```
 
-**Couverture actuelle** : 64+ tests (modules, hooks, sécurité, smoke tests, E2E)
+**Suite de tests** : 64+ tests couvrant :
+- ✅ Auth et permissions
+- ✅ RLS et sécurité
+- ✅ Hooks et composants
+- ✅ Agents IA
+- ✅ Edge Functions
+- ✅ Workflows critiques
+
+---
 
 ## 🌐 Déploiement
+
+### Via Lovable
 
 1. Ouvrir [Lovable](https://lovable.dev)
 2. Cliquer sur **Share → Publish**
 3. (Optionnel) Configurer un domaine personnalisé dans **Settings → Domains**
 
+### URLs
+
+- **Production** : https://agent-growth-automator.lovable.app
+- **Preview** : https://id-preview--c548a033-0937-4830-bc84-bb2548968cd3.lovable.app
+
+---
+
 ## 📖 Documentation
 
-- [Documentation Lovable](https://docs.lovable.dev)
-- [Supabase Docs](https://supabase.com/docs)
-- [shadcn/ui](https://ui.shadcn.com)
+| Document | Description |
+|----------|-------------|
+| [PLATFORM_AUDIT.md](./docs/PLATFORM_AUDIT.md) | Statut complet et roadmap |
+| [AI_AGENTS.md](./docs/AI_AGENTS.md) | Documentation des agents IA |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture technique |
+| [Lovable Docs](https://docs.lovable.dev) | Documentation Lovable |
+| [Supabase Docs](https://supabase.com/docs) | Documentation Supabase |
+
+---
+
+## 🏗️ Diagramme d'Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         FRONTEND                                 │
+│  React 18 + Vite + Tailwind CSS + shadcn/ui                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
+│  │ Landing  │  │ Cockpit  │  │ 37 Pages │  │ AI Assistant     │ │
+│  │ Page     │  │ Exécutif │  │ Dashboard│  │ Voice Commands   │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │ Supabase Client
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    LOVABLE CLOUD                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                 38 EDGE FUNCTIONS                          │  │
+│  │  ai-gateway │ run-executor │ oauth-* │ stripe-* │ sync-*  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                 POSTGRESQL (120+ tables)                   │  │
+│  │  workspaces │ user_roles │ agent_runs │ audit_log         │  │
+│  │  + RLS (Row Level Security) + pg_cron (Scheduler)         │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────┐
+│                    EXTERNAL SERVICES                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
+│  │ Google   │  │ Meta     │  │ Stripe   │  │ Lovable AI       │ │
+│  │ APIs     │  │ APIs     │  │ Payments │  │ GPT-5 + Gemini   │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## 📄 Licence
 
-Propriétaire - © 2026 EmotionsCare Sasu - Tous droits réservés
+**Propriétaire** - © 2026 EmotionsCare Sasu - Tous droits réservés
+
+Ce logiciel est propriétaire et ne peut être copié, modifié ou redistribué sans autorisation écrite explicite.
 
 **Contact** : m.laeticia@hotmail.fr
+
+---
+
+## 🤝 Support
+
+- **Email** : m.laeticia@hotmail.fr
+- **Documentation** : [docs/](./docs/)
+- **Issues** : Via le dépôt GitHub
 
 ---
 
