@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   Clock,
@@ -11,6 +12,7 @@ import {
   ChevronRight,
   Eye,
   RefreshCw,
+  Shield,
 } from "lucide-react";
 import { useExecutiveRuns, RUN_TYPE_LABELS, RUN_TYPE_ICONS, RunStatus } from "@/hooks/useExecutiveRuns";
 import { formatDistanceToNow } from "date-fns";
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { EvidenceBundleViewer } from "@/components/evidence";
 
 interface RunsHistoryProps {
   maxItems?: number;
@@ -144,51 +147,68 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
           </DialogHeader>
 
           {selectedRun && (
-            <div className="space-y-4">
-              {/* Status */}
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const status = STATUS_CONFIG[selectedRun.status as RunStatus] || STATUS_CONFIG.queued;
-                  const StatusIcon = status.icon;
-                  return (
-                    <Badge
-                      variant={selectedRun.status === "completed" ? "success" : selectedRun.status === "failed" ? "destructive" : "secondary"}
-                    >
-                      <StatusIcon className={cn("w-3 h-3 mr-1", selectedRun.status === "running" && "animate-spin")} />
-                      {status.label}
-                    </Badge>
-                  );
-                })()}
-              </div>
+            <Tabs defaultValue="summary" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="summary">Résumé</TabsTrigger>
+                <TabsTrigger value="evidence" className="flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  Preuves
+                </TabsTrigger>
+              </TabsList>
 
-              {/* Executive Summary */}
-              {selectedRun.executive_summary && (
-                <div>
-                  <p className="text-sm font-medium mb-1">Résumé</p>
-                  <p className="text-sm text-muted-foreground">{selectedRun.executive_summary}</p>
+              <TabsContent value="summary" className="space-y-4">
+                {/* Status */}
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const status = STATUS_CONFIG[selectedRun.status as RunStatus] || STATUS_CONFIG.queued;
+                    const StatusIcon = status.icon;
+                    return (
+                      <Badge
+                        variant={selectedRun.status === "completed" ? "success" : selectedRun.status === "failed" ? "destructive" : "secondary"}
+                      >
+                        <StatusIcon className={cn("w-3 h-3 mr-1", selectedRun.status === "running" && "animate-spin")} />
+                        {status.label}
+                      </Badge>
+                    );
+                  })()}
                 </div>
-              )}
 
-              {/* Outputs */}
-              {selectedRun.outputs && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Résultats</p>
-                  <ScrollArea className="h-48 rounded-lg border bg-muted/30 p-3">
-                    <pre className="text-xs whitespace-pre-wrap">
-                      {JSON.stringify(selectedRun.outputs, null, 2)}
-                    </pre>
-                  </ScrollArea>
-                </div>
-              )}
+                {/* Executive Summary */}
+                {selectedRun.executive_summary && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Résumé</p>
+                    <p className="text-sm text-muted-foreground">{selectedRun.executive_summary}</p>
+                  </div>
+                )}
 
-              {/* Error */}
-              {selectedRun.error_message && (
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm font-medium text-destructive mb-1">Erreur</p>
-                  <p className="text-xs text-destructive/80">{selectedRun.error_message}</p>
-                </div>
-              )}
-            </div>
+                {/* Outputs */}
+                {selectedRun.outputs && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Résultats</p>
+                    <ScrollArea className="h-48 rounded-lg border bg-muted/30 p-3">
+                      <pre className="text-xs whitespace-pre-wrap">
+                        {JSON.stringify(selectedRun.outputs, null, 2)}
+                      </pre>
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {/* Error */}
+                {selectedRun.error_message && (
+                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <p className="text-sm font-medium text-destructive mb-1">Erreur</p>
+                    <p className="text-xs text-destructive/80">{selectedRun.error_message}</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="evidence">
+                <EvidenceBundleViewer 
+                  executiveRunId={selectedRun.id}
+                  defaultExpanded={true}
+                />
+              </TabsContent>
+            </Tabs>
           )}
         </DialogContent>
       </Dialog>
