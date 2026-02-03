@@ -27,6 +27,7 @@ import {
   Sparkles,
   Trash2,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { useCompetitors } from "@/hooks/useCompetitors";
 import { useSites } from "@/hooks/useSites";
@@ -340,18 +341,87 @@ export default function Competitors() {
 
         <TabsContent value="backlinks" className="space-y-6">
           <Card variant="feature">
-            <CardContent className="pt-6">
-              <div className="text-center py-8 text-muted-foreground">
-                <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium mb-2">Analyse backlinks</p>
-                <p className="text-sm">
-                  Comparez les profils de backlinks pour identifier des opportunités
-                </p>
-                <Button variant="outline" className="mt-4">
-                  <Search className="w-4 h-4 mr-2" />
-                  Lancer l'analyse
-                </Button>
-              </div>
+            <CardHeader>
+              <CardTitle>Analyse de backlinks</CardTitle>
+              <CardDescription>
+                Comparez les profils de liens entrants pour identifier des opportunités de link building
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {competitors.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium mb-2">Ajoutez des concurrents</p>
+                  <p className="text-sm">
+                    Comparez les profils de backlinks une fois vos concurrents configurés
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Backlink comparison table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Concurrent</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Domaines référents</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Backlinks</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">DA moyen</th>
+                          <th className="text-center py-3 px-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {competitors.map(comp => {
+                          const backlinkData = comp.backlink_comparison as { referring_domains?: number; total_backlinks?: number; avg_da?: number } | null;
+                          return (
+                            <tr key={comp.id} className="border-b border-border/50 hover:bg-secondary/50">
+                              <td className="py-3 px-2">
+                                <div>
+                                  <p className="font-medium">{comp.competitor_name || 'Sans nom'}</p>
+                                  <p className="text-xs text-muted-foreground truncate max-w-[200px]">{comp.competitor_url}</p>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2 text-right font-medium">
+                                {backlinkData?.referring_domains?.toLocaleString() || '—'}
+                              </td>
+                              <td className="py-3 px-2 text-right">
+                                {backlinkData?.total_backlinks?.toLocaleString() || '—'}
+                              </td>
+                              <td className="py-3 px-2 text-right">
+                                <Badge variant={backlinkData?.avg_da && backlinkData.avg_da >= 40 ? "success" : "secondary"}>
+                                  {backlinkData?.avg_da || '—'}
+                                </Badge>
+                              </td>
+                              <td className="py-3 px-2 text-center">
+                                <Button variant="ghost" size="sm" onClick={() => handleAnalyze(comp.id)} disabled={analyzingId === comp.id}>
+                                  {analyzingId === comp.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Opportunities section */}
+                  <Card className="bg-primary/5 border-primary/20">
+                    <CardContent className="pt-4">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        Opportunités de link building
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Analysez vos concurrents pour découvrir des sites qui pointent vers eux mais pas vers vous.
+                      </p>
+                      <Button variant="outline" size="sm" className="mt-3">
+                        <Search className="w-4 h-4 mr-2" />
+                        Trouver des opportunités
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

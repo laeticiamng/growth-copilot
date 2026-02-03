@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
   BarChart3, 
@@ -17,7 +20,17 @@ import {
   Youtube,
   Instagram,
   MessageCircle,
+  ExternalLink,
+  Lock,
+  Unlock,
+  Loader2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { GoogleSuperConnector } from "@/components/integrations/GoogleSuperConnector";
+import { MetaSuperConnector } from "@/components/integrations/MetaSuperConnector";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PlatformTool {
   id: string;
@@ -27,6 +40,7 @@ interface PlatformTool {
   status: "active" | "coming_soon";
   category: "google" | "meta" | "cms" | "crm";
   capabilities: string[];
+  authRoute?: string;
 }
 
 const platformTools: PlatformTool[] = [
@@ -39,6 +53,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "google",
     capabilities: ["Sessions & utilisateurs", "Sources de trafic", "Taux de rebond", "Conversions"],
+    authRoute: "/dashboard/integrations/google",
   },
   { 
     id: "gsc", 
@@ -48,6 +63,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "google",
     capabilities: ["Positions mots-clés", "CTR organique", "Pages indexées", "Erreurs techniques"],
+    authRoute: "/dashboard/integrations/google",
   },
   { 
     id: "gads", 
@@ -57,6 +73,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "google",
     capabilities: ["CPC & ROAS", "Quality Score", "Conversions", "Budgets"],
+    authRoute: "/dashboard/integrations/google",
   },
   { 
     id: "gbp", 
@@ -66,6 +83,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "google",
     capabilities: ["Note moyenne", "Nombre d'avis", "Vues fiche", "Posts GBP"],
+    authRoute: "/dashboard/integrations/google",
   },
   { 
     id: "youtube", 
@@ -75,6 +93,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "google",
     capabilities: ["Vues & durée", "Abonnés", "Engagement", "Sources de trafic"],
+    authRoute: "/dashboard/integrations/google",
   },
   
   // Meta Suite - Active
@@ -86,6 +105,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "meta",
     capabilities: ["ROAS & CPA", "Reach & fréquence", "Créatives", "Audiences"],
+    authRoute: "/dashboard/integrations/meta",
   },
   { 
     id: "instagram", 
@@ -95,6 +115,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "meta",
     capabilities: ["Followers", "Engagement rate", "Reach posts", "Stories"],
+    authRoute: "/dashboard/integrations/meta",
   },
   { 
     id: "messenger", 
@@ -104,6 +125,7 @@ const platformTools: PlatformTool[] = [
     status: "active", 
     category: "meta",
     capabilities: ["Temps de réponse", "Conversations", "Satisfaction", "Automatisations"],
+    authRoute: "/dashboard/integrations/meta",
   },
   
   // CMS - Coming Soon
@@ -164,6 +186,10 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
 };
 
 const Integrations = () => {
+  const { currentWorkspace } = useWorkspace();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [authorizing, setAuthorizing] = useState<string | null>(null);
+
   const groupedTools = platformTools.reduce((acc, tool) => {
     if (!acc[tool.category]) acc[tool.category] = [];
     acc[tool.category].push(tool);
@@ -173,14 +199,45 @@ const Integrations = () => {
   const activeCount = platformTools.filter(t => t.status === "active").length;
   const comingSoonCount = platformTools.filter(t => t.status === "coming_soon").length;
 
+  // Handle OAuth authorization
+  const handleAuthorize = async (provider: string) => {
+    if (!currentWorkspace?.id) {
+      toast.error("Workspace non sélectionné");
+      return;
+    }
+
+    setAuthorizing(provider);
+    try {
+      const { data, error } = await supabase.functions.invoke("oauth-init", {
+        body: {
+          provider,
+          workspace_id: currentWorkspace.id,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.authUrl) {
+        window.location.href = data.authUrl;
+      } else {
+        throw new Error("URL d'autorisation manquante");
+      }
+    } catch (err) {
+      console.error("OAuth init error:", err);
+      toast.error("Erreur lors de l'autorisation");
+    } finally {
+      setAuthorizing(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Outils d'Analyse</h1>
+          <h1 className="text-3xl font-bold">Outils & Intégrations</h1>
           <p className="text-muted-foreground">
-            Nos outils internes analysent automatiquement vos contenus — aucune clé API requise de votre part.
+            Connectez vos comptes pour permettre aux agents d'agir sur vos ressources.
           </p>
         </div>
         <div className="flex gap-2">
@@ -194,131 +251,188 @@ const Integrations = () => {
         </div>
       </div>
 
-      {/* How it works */}
-      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
-        <CardContent className="flex items-start gap-4 py-5">
-          <div className="p-2.5 rounded-xl bg-primary/20">
-            <Shield className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-lg">Comment ça fonctionne ?</p>
-            <div className="text-sm text-muted-foreground mt-2 space-y-2">
-              <p>
-                <strong>1. Vous entrez une URL ou un contenu</strong> — c'est tout ce dont nous avons besoin pour démarrer l'analyse.
-              </p>
-              <p>
-                <strong>2. Nos agents IA analysent automatiquement</strong> — SEO, performance, opportunités de croissance.
-              </p>
-              <p>
-                <strong>3. Pour des actions sur vos comptes</strong> — autorisez l'accès à vos ressources (Google, Meta) 
-                quand vous souhaitez que nos agents modifient ou optimisent directement.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Badge variant="outline" className="bg-background">
-                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
-                Aucune API à fournir
-              </Badge>
-              <Badge variant="outline" className="bg-background">
-                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
-                Analyse automatique
-              </Badge>
-              <Badge variant="outline" className="bg-background">
-                <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
-                Vous gardez le contrôle
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="google">Google Suite</TabsTrigger>
+          <TabsTrigger value="meta">Meta Suite</TabsTrigger>
+        </TabsList>
 
-      {/* Tool Categories */}
-      <div className="space-y-8">
-        {Object.entries(groupedTools).map(([category, tools]) => {
-          const config = categoryConfig[category];
-          const CategoryIcon = config.icon;
-          const activeInCategory = tools.filter(t => t.status === "active").length;
-          
-          return (
-            <div key={category}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${config.color} text-white`}>
-                  <CategoryIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{config.label}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {activeInCategory} outil{activeInCategory > 1 ? 's' : ''} actif{activeInCategory > 1 ? 's' : ''}
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          {/* How it works */}
+          <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="flex items-start gap-4 py-5">
+              <div className="p-2.5 rounded-xl bg-primary/20">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-lg">Comment ça fonctionne ?</p>
+                <div className="text-sm text-muted-foreground mt-2 space-y-2">
+                  <p>
+                    <strong>1. Vous entrez une URL ou un contenu</strong> — c'est tout ce dont nous avons besoin pour démarrer l'analyse.
+                  </p>
+                  <p>
+                    <strong>2. Nos agents IA analysent automatiquement</strong> — SEO, performance, opportunités de croissance.
+                  </p>
+                  <p>
+                    <strong>3. Pour des actions sur vos comptes</strong> — autorisez l'accès à vos ressources (Google, Meta) 
+                    quand vous souhaitez que nos agents modifient ou optimisent directement.
                   </p>
                 </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Badge variant="outline" className="bg-background">
+                    <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                    Aucune API à fournir
+                  </Badge>
+                  <Badge variant="outline" className="bg-background">
+                    <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                    Analyse automatique
+                  </Badge>
+                  <Badge variant="outline" className="bg-background">
+                    <CheckCircle2 className="w-3 h-3 mr-1 text-primary" />
+                    Vous gardez le contrôle
+                  </Badge>
+                </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Access Cards */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-red-500/5 hover:border-blue-500/50 transition-colors cursor-pointer" onClick={() => setActiveTab("google")}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-red-500">
+                    <Search className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">Google Super-Connecteur</h3>
+                    <p className="text-sm text-muted-foreground">GA4, GSC, Ads, GBP, YouTube</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("google"); }} disabled={authorizing === "google"}>
+                    {authorizing === "google" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
+                    Autoriser
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-500/30 bg-gradient-to-br from-blue-600/5 to-purple-600/5 hover:border-purple-500/50 transition-colors cursor-pointer" onClick={() => setActiveTab("meta")}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600">
+                    <Instagram className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">Meta Super-Connecteur</h3>
+                    <p className="text-sm text-muted-foreground">Ads, Instagram, Messenger, CAPI</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("meta"); }} disabled={authorizing === "meta"}>
+                    {authorizing === "meta" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
+                    Autoriser
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tool Categories */}
+          <div className="space-y-8">
+            {Object.entries(groupedTools).map(([category, tools]) => {
+              const config = categoryConfig[category];
+              const CategoryIcon = config.icon;
+              const activeInCategory = tools.filter(t => t.status === "active").length;
               
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {tools.map((tool) => {
-                  const Icon = tool.icon;
-                  const isActive = tool.status === "active";
+              return (
+                <div key={category}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${config.color} text-white`}>
+                      <CategoryIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold">{config.label}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {activeInCategory} outil{activeInCategory > 1 ? 's' : ''} actif{activeInCategory > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
                   
-                  return (
-                    <Card 
-                      key={tool.id} 
-                      className={`transition-all ${
-                        isActive 
-                          ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/40" 
-                          : "opacity-60"
-                      }`}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2.5 rounded-lg ${
-                            isActive ? 'bg-primary/15' : 'bg-muted'
-                          }`}>
-                            <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium">{tool.name}</h3>
-                              <Badge 
-                                variant={isActive ? "success" : "outline"} 
-                                className="text-xs"
-                              >
-                                {isActive ? (
-                                  <><CheckCircle2 className="w-3 h-3 mr-1" /> Actif</>
-                                ) : (
-                                  <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
-                                )}
-                              </Badge>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {tools.map((tool) => {
+                      const Icon = tool.icon;
+                      const isActive = tool.status === "active";
+                      
+                      return (
+                        <Card 
+                          key={tool.id} 
+                          className={`transition-all ${
+                            isActive 
+                              ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/40" 
+                              : "opacity-60"
+                          }`}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2.5 rounded-lg ${
+                                isActive ? 'bg-primary/15' : 'bg-muted'
+                              }`}>
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-medium">{tool.name}</h3>
+                                  <Badge 
+                                    variant={isActive ? "success" : "outline"} 
+                                    className="text-xs"
+                                  >
+                                    {isActive ? (
+                                      <><CheckCircle2 className="w-3 h-3 mr-1" /> Actif</>
+                                    ) : (
+                                      <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
+                                    )}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground mb-3">
+                                  {tool.description}
+                                </p>
+                                
+                                {/* Capabilities */}
+                                <div className="flex flex-wrap gap-1">
+                                  {tool.capabilities.slice(0, 3).map((cap, idx) => (
+                                    <span 
+                                      key={idx} 
+                                      className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                                    >
+                                      {cap}
+                                    </span>
+                                  ))}
+                                  {tool.capabilities.length > 3 && (
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                      +{tool.capabilities.length - 3}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground mb-3">
-                              {tool.description}
-                            </p>
-                            
-                            {/* Capabilities */}
-                            <div className="flex flex-wrap gap-1">
-                              {tool.capabilities.slice(0, 3).map((cap, idx) => (
-                                <span 
-                                  key={idx} 
-                                  className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
-                                >
-                                  {cap}
-                                </span>
-                              ))}
-                              {tool.capabilities.length > 3 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                                  +{tool.capabilities.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="google" className="mt-6">
+          <GoogleSuperConnector />
+        </TabsContent>
+
+        <TabsContent value="meta" className="mt-6">
+          <MetaSuperConnector />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
