@@ -6,6 +6,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSessionExpiry } from "@/hooks/useSessionExpiry";
+import { useServices, getRouteService } from "@/hooks/useServices";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,12 +34,14 @@ import {
   X,
   Bot,
   Wrench,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { OfflineBanner } from "@/components/ui/offline-banner";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -52,6 +55,7 @@ interface NavItem {
   hideForClients?: boolean;
   category?: "main" | "advanced";
   comingSoon?: boolean;
+  isLocked?: boolean;
 }
 
 // Simplified navigation - Main items visible, technical items in "Advanced"
@@ -93,6 +97,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { workspaces, currentWorkspace, setCurrentWorkspace, loading: wsLoading } = useWorkspace();
   const { isAtLeastRole, loading: permLoading } = usePermissions();
+  const { hasService, servicesLoading, catalog } = useServices();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -108,17 +113,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname]);
 
-  // Filter nav items based on user role
+  // Filter nav items based on user role AND enabled services
   const { mainItems, advancedItems } = useMemo(() => {
     const filtered = allNavItems.filter((item) => {
-      if (!item.requiresRole) return true;
-      return isAtLeastRole(item.requiresRole);
+      // Check role requirements
+      if (item.requiresRole && !isAtLeastRole(item.requiresRole)) {
+        return false;
+      }
+      return true;
     });
+    
+    // Mark items as locked if service not enabled
+    const withServiceStatus = filtered.map((item) => {
+      const requiredService = getRouteService(item.path);
+      const isLocked = requiredService ? !hasService(requiredService) : false;
+      return { ...item, isLocked };
+    });
+    
     return {
-      mainItems: filtered.filter((item) => item.category === "main"),
-      advancedItems: filtered.filter((item) => item.category === "advanced"),
+      mainItems: withServiceStatus.filter((item) => item.category === "main"),
+      advancedItems: withServiceStatus.filter((item) => item.category === "advanced"),
     };
-  }, [isAtLeastRole]);
+  }, [isAtLeastRole, hasService]);
 
   // Monitor session expiry
   useSessionExpiry({
@@ -153,6 +169,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     const Icon = item.icon;
     const isActive = location.pathname === item.path;
 
+    // Coming soon items
     if (item.comingSoon) {
       return (
         <span
@@ -161,6 +178,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Icon className="w-4 h-4" />
           {item.label}
           <span className="ml-auto text-[10px] uppercase tracking-wide opacity-60">soon</span>
+        </span>
+      );
+    }
+
+    // Locked items (service not enabled) - show but disabled with upgrade hint
+    if (item.isLocked) {
+      return (
+        <span
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/40 cursor-default group"
+          title="Service non activé - Mise à niveau requise"
+        >
+          <Icon className="w-4 h-4" />
+          <span className="flex-1">{item.label}</span>
+          <Lock className="w-3 h-3 opacity-50" />
         </span>
       );
     }

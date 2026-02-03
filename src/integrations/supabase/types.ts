@@ -2437,6 +2437,78 @@ export type Database = {
           },
         ]
       }
+      executive_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          evidence_bundle: Json | null
+          executive_summary: string | null
+          id: string
+          inputs: Json | null
+          outputs: Json | null
+          proposed_actions: Json | null
+          run_type: string
+          scheduled_run_id: string | null
+          service_slug: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["run_status"] | null
+          triggered_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          evidence_bundle?: Json | null
+          executive_summary?: string | null
+          id?: string
+          inputs?: Json | null
+          outputs?: Json | null
+          proposed_actions?: Json | null
+          run_type: string
+          scheduled_run_id?: string | null
+          service_slug?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["run_status"] | null
+          triggered_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          evidence_bundle?: Json | null
+          executive_summary?: string | null
+          id?: string
+          inputs?: Json | null
+          outputs?: Json | null
+          proposed_actions?: Json | null
+          run_type?: string
+          scheduled_run_id?: string | null
+          service_slug?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["run_status"] | null
+          triggered_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executive_runs_scheduled_run_id_fkey"
+            columns: ["scheduled_run_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executive_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_results: {
         Row: {
           clicks: number | null
@@ -6094,6 +6166,98 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_runs: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          last_run_at: string | null
+          next_run_at: string | null
+          run_type: string
+          schedule_cron: string
+          service_slug: string | null
+          timezone: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          run_type: string
+          schedule_cron: string
+          service_slug?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_run_at?: string | null
+          next_run_at?: string | null
+          run_type?: string
+          schedule_cron?: string
+          service_slug?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services_catalog: {
+        Row: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          icon: string | null
+          id: string
+          is_core: boolean | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_core?: boolean | null
+          name: string
+          slug: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_core?: boolean | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       site_roles: {
         Row: {
           created_at: string
@@ -6830,6 +6994,113 @@ export type Database = {
           },
         ]
       }
+      workspace_services: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          enabled: boolean | null
+          enabled_at: string | null
+          enabled_by: string | null
+          expires_at: string | null
+          id: string
+          service_id: string
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          expires_at?: string | null
+          id?: string
+          service_id: string
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          enabled?: boolean | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          expires_at?: string | null
+          id?: string
+          service_id?: string
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_services_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          is_full_company: boolean | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          is_full_company?: boolean | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          is_full_company?: boolean | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           created_at: string | null
@@ -6987,6 +7258,10 @@ export type Database = {
           _user_id: string
           _workspace_id: string
         }
+        Returns: boolean
+      }
+      has_service: {
+        Args: { _service_slug: string; _workspace_id: string }
         Returns: boolean
       }
       has_workspace_access: {
@@ -7150,6 +7425,24 @@ export type Database = {
         | "manage_experiments"
         | "view_audit"
       risk_level: "low" | "medium" | "high" | "critical"
+      run_status:
+        | "queued"
+        | "running"
+        | "blocked"
+        | "requires_approval"
+        | "done"
+        | "failed"
+      service_category:
+        | "core"
+        | "marketing"
+        | "sales"
+        | "finance"
+        | "security"
+        | "product"
+        | "engineering"
+        | "data"
+        | "support"
+        | "governance"
       subscription_plan: "free" | "starter" | "growth" | "agency"
     }
     CompositeTypes: {
@@ -7384,6 +7677,26 @@ export const Constants = {
         "view_audit",
       ],
       risk_level: ["low", "medium", "high", "critical"],
+      run_status: [
+        "queued",
+        "running",
+        "blocked",
+        "requires_approval",
+        "done",
+        "failed",
+      ],
+      service_category: [
+        "core",
+        "marketing",
+        "sales",
+        "finance",
+        "security",
+        "product",
+        "engineering",
+        "data",
+        "support",
+        "governance",
+      ],
       subscription_plan: ["free", "starter", "growth", "agency"],
     },
   },
