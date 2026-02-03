@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, Briefcase, BarChart3, Shield, Puzzle, 
   Code, HeadphonesIcon, Settings, ArrowRight, CheckCircle2,
-  Building2
+  Building2, Bot
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ const DEPARTMENTS = [
     nameFr: "Marketing",
     descEn: "SEO, Content, Ads, Social Media, CRO",
     descFr: "SEO, Contenu, Ads, Réseaux sociaux, CRO",
-    price: 49,
+    employees: 5,
     features: ["SEO Audit", "Content Calendar", "Ad Optimization", "Social Distribution"]
   },
   { 
@@ -32,7 +32,7 @@ const DEPARTMENTS = [
     nameFr: "Commercial",
     descEn: "Pipeline, Outreach, CRM, Lead Scoring",
     descFr: "Pipeline, Prospection, CRM, Lead Scoring",
-    price: 39,
+    employees: 4,
     features: ["Pipeline Review", "Outreach Sequences", "Lead Qualification"]
   },
   { 
@@ -44,7 +44,7 @@ const DEPARTMENTS = [
     nameFr: "Finance",
     descEn: "ROI Tracking, Budget Alerts, Reporting",
     descFr: "Suivi ROI, Alertes budget, Reporting",
-    price: 29,
+    employees: 3,
     features: ["ROI Summaries", "Budget Alerts", "Monthly Reports"]
   },
   { 
@@ -56,7 +56,7 @@ const DEPARTMENTS = [
     nameFr: "Sécurité",
     descEn: "Access Review, Compliance, Audit Logs",
     descFr: "Revue des accès, Conformité, Audit logs",
-    price: 29,
+    employees: 3,
     features: ["Access Review", "Secrets Hygiene", "Compliance Checks"]
   },
   { 
@@ -68,7 +68,7 @@ const DEPARTMENTS = [
     nameFr: "Produit",
     descEn: "Roadmap, OKRs, Prioritization",
     descFr: "Roadmap, OKRs, Priorisation",
-    price: 39,
+    employees: 4,
     features: ["Roadmap Planning", "OKR Drafts", "Priority Scoring"]
   },
   { 
@@ -80,7 +80,7 @@ const DEPARTMENTS = [
     nameFr: "Ingénierie",
     descEn: "Release Gates, QA, Delivery Health",
     descFr: "Release Gates, QA, Santé delivery",
-    price: 39,
+    employees: 5,
     features: ["Release Gates", "QA Summaries", "Delivery Reports"]
   },
   { 
@@ -92,7 +92,7 @@ const DEPARTMENTS = [
     nameFr: "Data",
     descEn: "Analytics, Funnels, Cohorts",
     descFr: "Analytics, Funnels, Cohortes",
-    price: 29,
+    employees: 4,
     features: ["Funnel Diagnostics", "Cohort Analysis", "Tracking Setup"]
   },
   { 
@@ -104,7 +104,7 @@ const DEPARTMENTS = [
     nameFr: "Support",
     descEn: "Tickets, Knowledge Base, Reviews",
     descFr: "Tickets, Base de connaissances, Avis",
-    price: 29,
+    employees: 3,
     features: ["Ticket Triage", "KB Updates", "Review Management"]
   },
   { 
@@ -116,16 +116,21 @@ const DEPARTMENTS = [
     nameFr: "Gouvernance",
     descEn: "Policies, IT Hygiene, Access Control",
     descFr: "Politiques, Hygiène IT, Contrôle d'accès",
-    price: 19,
+    employees: 3,
     features: ["Policy Management", "IT Hygiene", "Access Governance"]
   },
 ];
+
+const PRICE_PER_DEPT = 1900;
+const FULL_COMPANY_PRICE = 9000;
+const TOTAL_EMPLOYEES = DEPARTMENTS.reduce((sum, d) => sum + d.employees, 0);
 
 export function Services() {
   const { i18n } = useTranslation();
   const isEn = i18n.language === "en";
 
-  const totalPrice = DEPARTMENTS.reduce((sum, d) => sum + d.price, 0);
+  const totalSeparatePrice = DEPARTMENTS.length * PRICE_PER_DEPT;
+  const savings = totalSeparatePrice - FULL_COMPANY_PRICE;
 
   return (
     <section id="departments" className="py-24 bg-background relative">
@@ -141,8 +146,8 @@ export function Services() {
           </h2>
           <p className="text-lg text-muted-foreground">
             {isEn 
-              ? "Choose the Full Company for everything, or select only the departments you need. Core OS is always included."
-              : "Choisissez Full Company pour tout avoir, ou sélectionnez uniquement les départements dont vous avez besoin. Le Core OS est toujours inclus."
+              ? `${TOTAL_EMPLOYEES} AI employees across 9 departments. Choose Full Company or select only what you need.`
+              : `${TOTAL_EMPLOYEES} employés IA répartis dans 9 départements. Choisissez Full Company ou sélectionnez uniquement ce dont vous avez besoin.`
             }
           </p>
         </div>
@@ -163,8 +168,9 @@ export function Services() {
                     <div className={cn("p-3 rounded-xl", dept.bgColor)}>
                       <Icon className={cn("w-6 h-6", dept.color)} />
                     </div>
-                    <Badge variant="secondary" className="text-xs font-semibold">
-                      {dept.price}€/mo
+                    <Badge variant="secondary" className="text-xs font-semibold flex items-center gap-1">
+                      <Bot className="w-3 h-3" />
+                      {dept.employees} {isEn ? "AI" : "IA"}
                     </Badge>
                   </div>
                   
@@ -213,14 +219,29 @@ export function Services() {
           </CardContent>
         </Card>
 
+        {/* Pricing Summary */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <Card variant="feature" className="p-6">
+              <p className="text-3xl font-bold">{PRICE_PER_DEPT.toLocaleString()}€</p>
+              <p className="text-sm text-muted-foreground">
+                {isEn ? "per department/month" : "par département/mois"}
+              </p>
+            </Card>
+            <Card variant="gradient" className="p-6 border-primary/30">
+              <p className="text-3xl font-bold gradient-text">{FULL_COMPANY_PRICE.toLocaleString()}€</p>
+              <p className="text-sm text-muted-foreground">
+                {isEn ? "Full Company/month" : "Full Company/mois"}
+              </p>
+              <Badge variant="outline" className="mt-2 text-xs text-green-600">
+                {isEn ? `Save ${savings.toLocaleString()}€/mo` : `Économisez ${savings.toLocaleString()}€/mois`}
+              </Badge>
+            </Card>
+          </div>
+        </div>
+
         {/* CTA */}
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            {isEn 
-              ? `All 9 departments separately: ${totalPrice}€/mo — or get Full Company for just 299€/mo`
-              : `Les 9 départements séparément : ${totalPrice}€/mois — ou optez pour Full Company à seulement 299€/mois`
-            }
-          </p>
           <Link to="/onboarding">
             <Button variant="hero" size="lg">
               {isEn ? "Build Your Package" : "Composer votre offre"}
