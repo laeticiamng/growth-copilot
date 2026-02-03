@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, Briefcase, BarChart3, Shield, Puzzle, 
   Code, HeadphonesIcon, Settings, ArrowRight, CheckCircle2,
-  Building2, Bot
+  Building2, Bot, Users, Scale
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -119,6 +119,30 @@ const DEPARTMENTS = [
     employees: 3,
     features: ["Policy Management", "IT Hygiene", "Access Governance"]
   },
+  { 
+    id: "hr", 
+    icon: Users, 
+    color: "text-indigo-500", 
+    bgColor: "bg-indigo-500/10",
+    nameEn: "HR",
+    nameFr: "RH",
+    descEn: "Onboarding, Team Management, Talent",
+    descFr: "Onboarding, Gestion d'équipe, Talents",
+    employees: 2,
+    features: ["Team Onboarding", "Role Management", "Talent Tracking"]
+  },
+  { 
+    id: "legal", 
+    icon: Scale, 
+    color: "text-slate-500", 
+    bgColor: "bg-slate-500/10",
+    nameEn: "Legal",
+    nameFr: "Juridique",
+    descEn: "Contracts, GDPR, Compliance",
+    descFr: "Contrats, RGPD, Conformité",
+    employees: 1,
+    features: ["Contract Tracking", "GDPR Requests", "Legal Alerts"]
+  },
 ];
 
 const PRICE_PER_DEPT = 1900;
@@ -146,8 +170,8 @@ export function Services() {
           </h2>
           <p className="text-lg text-muted-foreground">
             {isEn 
-              ? `${TOTAL_EMPLOYEES} AI employees across 9 departments. Choose Full Company or select only what you need.`
-              : `${TOTAL_EMPLOYEES} employés IA répartis dans 9 départements. Choisissez Full Company ou sélectionnez uniquement ce dont vous avez besoin.`
+              ? `${TOTAL_EMPLOYEES} AI employees across ${DEPARTMENTS.length} departments. Choose Full Company or select only what you need.`
+              : `${TOTAL_EMPLOYEES} employés IA répartis dans ${DEPARTMENTS.length} départements. Choisissez Full Company ou sélectionnez uniquement ce dont vous avez besoin.`
             }
           </p>
         </div>
