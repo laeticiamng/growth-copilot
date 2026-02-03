@@ -8114,7 +8114,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_integration_health: {
+        Row: {
+          expires_in_hours: number | null
+          hours_since_sync: number | null
+          last_sync_at: string | null
+          needs_attention: boolean | null
+          provider: Database["public"]["Enums"]["integration_provider"] | null
+          refresh_failure_count: number | null
+          status_text: string | null
+          token_expires_at: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          expires_in_hours?: never
+          hours_since_sync?: never
+          last_sync_at?: string | null
+          needs_attention?: never
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          refresh_failure_count?: number | null
+          status_text?: never
+          token_expires_at?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          expires_in_hours?: never
+          hours_since_sync?: never
+          last_sync_at?: string | null
+          needs_attention?: never
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          refresh_failure_count?: number | null
+          status_text?: never
+          token_expires_at?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_team_invitation: { Args: { _token: string }; Returns: Json }
