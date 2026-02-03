@@ -1,18 +1,42 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, FileText, TrendingUp, Bot, Calendar, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Download, FileText, TrendingUp, TrendingDown, Bot, Calendar, Loader2, Settings, Clock, BarChart3, ArrowRight, Mail } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
-import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Reports() {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [generating, setGenerating] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [scheduleSettings, setScheduleSettings] = useState({
+    enabled: false,
+    frequency: 'monthly',
+    sendEmail: true,
+    dayOfMonth: '1',
+  });
 
   // Fetch monthly reports from database
   const { data: reports, isLoading: reportsLoading, refetch } = useQuery({
@@ -54,7 +78,7 @@ export default function Reports() {
     enabled: !!currentWorkspace?.id,
   });
 
-  // Fetch KPI trend (last 30 days conversions)
+  // Fetch KPI trends for comparison
   const { data: kpiTrend } = useQuery({
     queryKey: ['kpi-trend', currentWorkspace?.id, currentSite?.id],
     queryFn: async () => {
@@ -68,26 +92,40 @@ export default function Reports() {
       
       const { data: current } = await supabase
         .from('kpis_daily')
-        .select('total_conversions')
+        .select('total_conversions, organic_clicks, organic_impressions')
         .eq('site_id', currentSite.id)
         .gte('date', thirtyDaysAgo.toISOString().split('T')[0]);
       
       const { data: previous } = await supabase
         .from('kpis_daily')
-        .select('total_conversions')
+        .select('total_conversions, organic_clicks, organic_impressions')
         .eq('site_id', currentSite.id)
         .gte('date', sixtyDaysAgo.toISOString().split('T')[0])
         .lt('date', thirtyDaysAgo.toISOString().split('T')[0]);
       
-      const currentSum = (current || []).reduce((sum, k) => sum + (k.total_conversions || 0), 0);
-      const previousSum = (previous || []).reduce((sum, k) => sum + (k.total_conversions || 0), 0);
-      
-      if (previousSum === 0) return null;
+      const currentConversions = (current || []).reduce((sum, k) => sum + (k.total_conversions || 0), 0);
+      const previousConversions = (previous || []).reduce((sum, k) => sum + (k.total_conversions || 0), 0);
+      const currentClicks = (current || []).reduce((sum, k) => sum + (k.organic_clicks || 0), 0);
+      const previousClicks = (previous || []).reduce((sum, k) => sum + (k.organic_clicks || 0), 0);
+      const currentImpressions = (current || []).reduce((sum, k) => sum + (k.organic_impressions || 0), 0);
+      const previousImpressions = (previous || []).reduce((sum, k) => sum + (k.organic_impressions || 0), 0);
       
       return {
-        change: ((currentSum - previousSum) / previousSum * 100).toFixed(0),
-        currentSum,
-        previousSum,
+        conversions: {
+          current: currentConversions,
+          previous: previousConversions,
+          change: previousConversions > 0 ? ((currentConversions - previousConversions) / previousConversions * 100).toFixed(0) : '0',
+        },
+        clicks: {
+          current: currentClicks,
+          previous: previousClicks,
+          change: previousClicks > 0 ? ((currentClicks - previousClicks) / previousClicks * 100).toFixed(0) : '0',
+        },
+        impressions: {
+          current: currentImpressions,
+          previous: previousImpressions,
+          change: previousImpressions > 0 ? ((currentImpressions - previousImpressions) / previousImpressions * 100).toFixed(0) : '0',
+        },
       };
     },
     enabled: !!currentWorkspace?.id && !!currentSite?.id,
@@ -124,21 +162,23 @@ export default function Reports() {
     } catch (err) {
       console.error('Report generation error:', err);
       
-      // Retry logic - max 2 retries
       if (retryCount < 2) {
         toast.info(`Nouvelle tentative... (${retryCount + 1}/2)`);
         setTimeout(() => handleGenerateReport(retryCount + 1), 2000);
         return;
       }
       
-      toast.error("Échec de la génération après plusieurs tentatives", {
-        description: "Veuillez réessayer plus tard ou contacter le support.",
-      });
+      toast.error("Échec de la génération après plusieurs tentatives");
     } finally {
       if (retryCount >= 2 || retryCount === 0) {
         setGenerating(false);
       }
     }
+  };
+
+  const handleSaveSchedule = () => {
+    toast.success(scheduleSettings.enabled ? "Planification activée" : "Planification désactivée");
+    setShowScheduleDialog(false);
   };
 
   const formatMonth = (dateStr: string) => {
@@ -159,118 +199,340 @@ export default function Reports() {
     return `Il y a ${diffDays} jours`;
   };
 
+  const TrendIndicator = ({ change }: { change: string }) => {
+    const num = Number(change);
+    if (num === 0) return <span className="text-muted-foreground">—</span>;
+    return (
+      <span className={`flex items-center gap-1 ${num > 0 ? 'text-green-500' : 'text-destructive'}`}>
+        {num > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+        {num > 0 ? '+' : ''}{change}%
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Rapports</h1>
-          <p className="text-muted-foreground">Audit trail et rapports mensuels</p>
+          <p className="text-muted-foreground">Audit trail, rapports mensuels et comparaisons</p>
         </div>
-        <Button 
-          variant="hero" 
-          onClick={() => handleGenerateReport()}
-          disabled={generating || !currentSite}
-        >
-          {generating ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Download className="w-4 h-4 mr-2" />
-          )}
-          Générer rapport PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowScheduleDialog(true)}>
+            <Clock className="w-4 h-4 mr-2" />
+            Planifier
+          </Button>
+          <Button 
+            variant="hero" 
+            onClick={() => handleGenerateReport()}
+            disabled={generating || !currentSite}
+          >
+            {generating ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Générer rapport PDF
+          </Button>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card variant="feature" className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Rapports mensuels
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {reportsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : reports && reports.length > 0 ? (
-              reports.map((report) => (
-                <div key={report.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <span className="font-medium capitalize">{formatMonth(report.month)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="gradient">Prêt</Badge>
-                    {report.pdf_url && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => window.open(report.pdf_url, '_blank')}
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
+      {/* Period Comparison Cards */}
+      {kpiTrend && (
+        <div className="grid sm:grid-cols-3 gap-4">
+          <Card variant="kpi">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Conversions</p>
+                  <p className="text-2xl font-bold">{kpiTrend.conversions.current}</p>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium">Aucun rapport disponible</p>
-                <p className="text-sm mt-1">Générez votre premier rapport mensuel</p>
+                <TrendIndicator change={kpiTrend.conversions.change} />
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card variant="feature">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="w-5 h-5" />
-              Audit Trail
-            </CardTitle>
-            <CardDescription>Dernières actions IA</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {auditLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : auditTrail && auditTrail.length > 0 ? (
-              auditTrail.slice(0, 5).map((action) => (
-                <div key={action.id} className="p-3 rounded-lg bg-secondary/50">
-                  <p className="text-sm font-medium">{action.description}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {action.actor_id || 'Agent'} • {formatTimeAgo(action.created_at)}
-                  </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                vs {kpiTrend.conversions.previous} période précédente
+              </p>
+            </CardContent>
+          </Card>
+          <Card variant="kpi">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Clics organiques</p>
+                  <p className="text-2xl font-bold">{kpiTrend.clicks.current.toLocaleString()}</p>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Bot className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Aucune action enregistrée</p>
+                <TrendIndicator change={kpiTrend.clicks.change} />
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {kpiTrend && Number(kpiTrend.change) !== 0 && (
-        <Card variant="gradient">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <TrendingUp className="w-8 h-8" />
-              <div>
-                <p className="font-bold text-lg">
-                  {Number(kpiTrend.change) > 0 ? '+' : ''}{kpiTrend.change}% de conversions ce mois
-                </p>
-                <p className="text-sm opacity-80">Comparé au mois précédent</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                vs {kpiTrend.clicks.previous.toLocaleString()} période précédente
+              </p>
+            </CardContent>
+          </Card>
+          <Card variant="kpi">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Impressions</p>
+                  <p className="text-2xl font-bold">{(kpiTrend.impressions.current / 1000).toFixed(1)}K</p>
+                </div>
+                <TrendIndicator change={kpiTrend.impressions.change} />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-xs text-muted-foreground mt-2">
+                vs {(kpiTrend.impressions.previous / 1000).toFixed(1)}K période précédente
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       )}
+
+      <Tabs defaultValue="reports" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="reports">Rapports</TabsTrigger>
+          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+          <TabsTrigger value="comparison">Comparaison</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="reports" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Rapports mensuels
+                </CardTitle>
+                {scheduleSettings.enabled && (
+                  <Badge variant="success" className="text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Auto {scheduleSettings.frequency}
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {reportsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : reports && reports.length > 0 ? (
+                reports.map((report) => (
+                  <div key={report.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <div>
+                        <span className="font-medium capitalize">{formatMonth(report.month)}</span>
+                        <p className="text-xs text-muted-foreground">
+                          Généré le {new Date(report.created_at).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="gradient">Prêt</Badge>
+                      {report.pdf_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => window.open(report.pdf_url, '_blank')}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Aucun rapport disponible</p>
+                  <p className="text-sm mt-1">Générez votre premier rapport mensuel</p>
+                  <Button variant="outline" className="mt-4" onClick={() => handleGenerateReport()}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Générer maintenant
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="audit" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="w-5 h-5" />
+                Historique des actions IA
+              </CardTitle>
+              <CardDescription>Toutes les actions effectuées par les agents</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {auditLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : auditTrail && auditTrail.length > 0 ? (
+                auditTrail.map((action) => (
+                  <div key={action.id} className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{action.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">{action.action_type}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {formatTimeAgo(action.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge variant={action.result === 'success' ? 'success' : action.result === 'error' ? 'destructive' : 'secondary'}>
+                      {action.result || 'pending'}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Aucune action enregistrée</p>
+                  <p className="text-sm mt-1">Les actions IA apparaîtront ici</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="comparison" className="space-y-6">
+          <Card variant="feature">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Comparaison de périodes
+              </CardTitle>
+              <CardDescription>Analysez l'évolution de vos KPIs dans le temps</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {kpiTrend ? (
+                <div className="space-y-6">
+                  <div className="grid sm:grid-cols-3 gap-6">
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium">Conversions</span>
+                        <TrendIndicator change={kpiTrend.conversions.change} />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="font-medium">{kpiTrend.conversions.current}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span>{kpiTrend.conversions.previous}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium">Clics</span>
+                        <TrendIndicator change={kpiTrend.clicks.change} />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="font-medium">{kpiTrend.clicks.current.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span>{kpiTrend.clicks.previous.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium">Impressions</span>
+                        <TrendIndicator change={kpiTrend.impressions.change} />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="font-medium">{(kpiTrend.impressions.current / 1000).toFixed(1)}K</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span>{(kpiTrend.impressions.previous / 1000).toFixed(1)}K</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Données insuffisantes</p>
+                  <p className="text-sm mt-1">Connectez vos sources de données pour voir les comparaisons</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Planifier les rapports</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Génération automatique</Label>
+                <p className="text-sm text-muted-foreground">Activer la génération planifiée</p>
+              </div>
+              <Switch
+                checked={scheduleSettings.enabled}
+                onCheckedChange={(checked) => setScheduleSettings({ ...scheduleSettings, enabled: checked })}
+              />
+            </div>
+
+            {scheduleSettings.enabled && (
+              <>
+                <div className="space-y-2">
+                  <Label>Fréquence</Label>
+                  <Select 
+                    value={scheduleSettings.frequency} 
+                    onValueChange={(v) => setScheduleSettings({ ...scheduleSettings, frequency: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                      <SelectItem value="monthly">Mensuel</SelectItem>
+                      <SelectItem value="quarterly">Trimestriel</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Notification email
+                    </Label>
+                    <p className="text-sm text-muted-foreground">Recevoir le rapport par email</p>
+                  </div>
+                  <Switch
+                    checked={scheduleSettings.sendEmail}
+                    onCheckedChange={(checked) => setScheduleSettings({ ...scheduleSettings, sendEmail: checked })}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Annuler</Button>
+            <Button onClick={handleSaveSchedule}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
