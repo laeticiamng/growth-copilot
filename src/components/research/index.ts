@@ -1,0 +1,1 @@
+export { SmartResearchHub } from './SmartResearchHub';
