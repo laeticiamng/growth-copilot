@@ -4486,6 +4486,59 @@ export type Database = {
           },
         ]
       }
+      legal_templates: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          template_type: string
+          updated_at: string | null
+          variables: Json | null
+          version: number | null
+          workspace_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          template_type: string
+          updated_at?: string | null
+          variables?: Json | null
+          version?: number | null
+          workspace_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          template_type?: string
+          updated_at?: string | null
+          variables?: Json | null
+          version?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_assets: {
         Row: {
           artist_name: string | null
@@ -6444,6 +6497,81 @@ export type Database = {
           },
         ]
       }
+      performance_reviews: {
+        Row: {
+          acknowledged_at: string | null
+          areas_for_improvement: string[] | null
+          comments: string | null
+          created_at: string | null
+          employee_id: string
+          goals_met: Json | null
+          id: string
+          next_period_goals: Json | null
+          overall_score: number | null
+          review_period_end: string
+          review_period_start: string
+          reviewer_id: string | null
+          status: string | null
+          strengths: string[] | null
+          submitted_at: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          areas_for_improvement?: string[] | null
+          comments?: string | null
+          created_at?: string | null
+          employee_id: string
+          goals_met?: Json | null
+          id?: string
+          next_period_goals?: Json | null
+          overall_score?: number | null
+          review_period_end: string
+          review_period_start: string
+          reviewer_id?: string | null
+          status?: string | null
+          strengths?: string[] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          areas_for_improvement?: string[] | null
+          comments?: string | null
+          created_at?: string | null
+          employee_id?: string
+          goals_met?: Json | null
+          id?: string
+          next_period_goals?: Json | null
+          overall_score?: number | null
+          review_period_end?: string
+          review_period_start?: string
+          reviewer_id?: string | null
+          status?: string | null
+          strengths?: string[] | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pipeline_stages: {
         Row: {
           color: string | null
@@ -7681,6 +7809,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "team_invitations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_off_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          employee_id: string
+          end_date: string
+          id: string
+          reason: string | null
+          rejection_reason: string | null
+          request_type: string
+          start_date: string
+          status: string | null
+          total_days: number
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          employee_id: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          request_type: string
+          start_date: string
+          status?: string | null
+          total_days: number
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          employee_id?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          request_type?: string
+          start_date?: string
+          status?: string | null
+          total_days?: number
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_off_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
