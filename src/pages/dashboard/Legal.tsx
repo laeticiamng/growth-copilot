@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useContracts, CreateContractInput, ContractStatus } from "@/hooks/useContracts";
 import { useCompliance } from "@/hooks/useCompliance";
+import { useLegalTemplates, TemplateType, CreateTemplateInput } from "@/hooks/useLegalTemplates";
 import { 
   Scale, 
   FileText, 
@@ -405,20 +406,238 @@ export default function Legal() {
         </TabsContent>
 
         <TabsContent value="templates">
-          <Card>
-            <CardHeader>
-              <CardTitle>Templates juridiques</CardTitle>
-              <CardDescription>
-                CGU, CGV, NDA, contrats types
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center py-8 text-muted-foreground">
-              <FileCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Module de templates en cours de développement</p>
-            </CardContent>
-          </Card>
+          <LegalTemplatesTab />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// ===== Legal Templates Tab Component =====
+function LegalTemplatesTab() {
+  const { 
+    templates, 
+    loading, 
+    statsByType, 
+    TEMPLATE_TYPE_LABELS,
+    createTemplate, 
+    deleteTemplate,
+    duplicateTemplate,
+    isCreating 
+  } = useLegalTemplates();
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newTemplate, setNewTemplate] = useState<CreateTemplateInput>({
+    name: "",
+    template_type: "nda",
+    description: "",
+    content: "",
+    variables: [],
+    is_default: false,
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  const filteredTemplates = templates.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (t.description?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === "all" || t.template_type === typeFilter;
+    return matchesSearch && matchesType;
+  });
+
+  const handleCreate = async () => {
+    if (!newTemplate.name || !newTemplate.content) return;
+    await createTemplate(newTemplate);
+    setIsDialogOpen(false);
+    setNewTemplate({
+      name: "",
+      template_type: "nda",
+      description: "",
+      content: "",
+      variables: [],
+      is_default: false,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Stats by type */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {statsByType.filter(s => s.count > 0 || ["nda", "cgu", "cgv", "privacy"].includes(s.type)).slice(0, 4).map((stat) => (
+          <Card key={stat.type} className="cursor-pointer hover:border-primary/50" onClick={() => setTypeFilter(stat.type)}>
+            <CardContent className="pt-4 pb-3 text-center">
+              <p className="text-2xl font-bold">{stat.count}</p>
+              <p className="text-xs text-muted-foreground">{stat.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un template..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Tous les types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les types</SelectItem>
+            {Object.entries(TEMPLATE_TYPE_LABELS).map(([key, label]) => (
+              <SelectItem key={key} value={key}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau template
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Créer un template juridique</DialogTitle>
+              <DialogDescription>
+                Créez un modèle de document réutilisable
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="template-name">Nom du template</Label>
+                  <Input
+                    id="template-name"
+                    value={newTemplate.name}
+                    onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                    placeholder="NDA Standard"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template-type">Type</Label>
+                  <Select
+                    value={newTemplate.template_type}
+                    onValueChange={(value) => setNewTemplate({ ...newTemplate, template_type: value as TemplateType })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TEMPLATE_TYPE_LABELS).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-desc">Description</Label>
+                <Input
+                  id="template-desc"
+                  value={newTemplate.description || ""}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
+                  placeholder="Accord de confidentialité standard..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-content">Contenu</Label>
+                <Textarea
+                  id="template-content"
+                  value={newTemplate.content}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
+                  placeholder="Entre les soussignés : {{PARTY_A}}..."
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Utilisez {"{{VARIABLE}}"} pour les champs dynamiques
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+              <Button onClick={handleCreate} disabled={isCreating || !newTemplate.name || !newTemplate.content}>
+                {isCreating ? "Création..." : "Créer"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Templates list */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileCheck className="w-5 h-5" />
+            Templates juridiques
+          </CardTitle>
+          <CardDescription>{filteredTemplates.length} template(s)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {filteredTemplates.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="font-medium">Aucun template</p>
+              <p className="text-sm mt-1">Créez votre premier modèle de document</p>
+              <Button variant="outline" className="mt-4" onClick={() => setIsDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Créer un template
+              </Button>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {filteredTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className="py-4 flex items-center justify-between hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <FileCheck className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium flex items-center gap-2">
+                        {template.name}
+                        {template.is_default && (
+                          <Badge variant="secondary" className="text-xs">Par défaut</Badge>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {TEMPLATE_TYPE_LABELS[template.template_type]} • v{template.version}
+                        {template.description && ` • ${template.description.slice(0, 40)}...`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => duplicateTemplate(template.id)}>
+                      Dupliquer
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => deleteTemplate(template.id)}>
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
