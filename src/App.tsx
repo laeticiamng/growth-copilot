@@ -56,6 +56,7 @@ import NotFound from "./pages/NotFound";
 import SmartLink from "./pages/SmartLink";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Roadmap from "./pages/Roadmap";
 
 // Dashboard pages - Foundation
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -105,6 +106,8 @@ import AccessReview from "./pages/dashboard/AccessReview";
 import AuditLogPage from "./pages/dashboard/AuditLog";
 import StatusPage from "./pages/dashboard/StatusPage";
 import ROIDashboard from "./pages/dashboard/ROIDashboard";
+import ServiceCatalog from "./pages/dashboard/ServiceCatalog";
+import AICostDashboard from "./pages/dashboard/AICostDashboard";
 
 const queryClient = new QueryClient();
 
@@ -198,6 +201,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/link/:slug" element={<SmartLink />} />
@@ -252,6 +256,8 @@ function App() {
               <Route path="/dashboard/audit-log" element={<DashboardRoute><AuditLogPage /></DashboardRoute>} />
               <Route path="/dashboard/status" element={<DashboardRoute><StatusPage /></DashboardRoute>} />
               <Route path="/dashboard/roi" element={<DashboardRoute><ROIDashboard /></DashboardRoute>} />
+              <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
+              <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
