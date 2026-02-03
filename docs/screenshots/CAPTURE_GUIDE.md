@@ -74,15 +74,34 @@
 
 ## Statut des Captures
 
-| Page | Capturé | Date |
-|------|---------|------|
-| Landing | ⏳ | - |
-| Cockpit | ⏳ | - |
-| HR | ⏳ | - |
-| Legal | ⏳ | - |
-| SEO | ⏳ | - |
-| Agents | ⏳ | - |
-| Approvals | ⏳ | - |
-| Billing | ⏳ | - |
-| Ops | ⏳ | - |
-| Audit Log | ⏳ | - |
+| Page | Capturé | Contenu observé |
+|------|---------|-----------------|
+| Landing | ✅ | Hero, départements visibles, CTA |
+| Cockpit | ✅ | Executive Summary, Priority Actions, Quick Launchers, Alerts |
+| HR | ⚠️ | Upsell (service payant) |
+| Legal | ⚠️ | Upsell (service payant) |
+| SEO | ✅ | Interface d'audit SEO technique |
+| Agents | ✅ | Mon équipe IA - roster visible |
+| Approvals | ✅ | Queue d'approbation (vide actuellement) |
+| Billing | ✅ | Plans Stripe, souscription |
+| Ops | ✅ | Métriques système, santé |
+| Audit Log | ✅ | Traçabilité des actions |
+
+## Modules Accessibles Confirmés
+
+Les screenshots confirment que les modules suivants sont **fonctionnels et accessibles** :
+- ✅ **Cockpit Exécutif** - Tableau de bord principal avec widgets
+- ✅ **Mon équipe IA (Agents)** - Roster des agents disponibles
+- ✅ **SEO Tech** - Audit technique disponible
+- ✅ **Approbations** - Queue de validation
+- ✅ **Billing** - Gestion de l'abonnement
+- ✅ **Ops** - Monitoring système
+- ✅ **Audit Log** - Historique des actions
+
+## Modules avec Upgrade Requis
+
+Certains modules nécessitent un plan payant :
+- ⚠️ **RH** - Département Ressources Humaines
+- ⚠️ **Legal** - Département Juridique
+
+> Note : Les captures ont été réalisées le 2026-02-03 via le navigateur automatisé Lovable.
