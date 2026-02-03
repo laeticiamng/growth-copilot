@@ -122,8 +122,69 @@ export function Pricing() {
         </div>
 
         {/* Main Plans */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           
+          {/* Starter Plan - NEW */}
+          <Card variant="feature" className="relative">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto p-3 rounded-xl bg-green-500/10 w-fit mb-4">
+                <TrendingUp className="w-8 h-8 text-green-500" />
+              </div>
+              <CardTitle className="text-2xl">Starter</CardTitle>
+              <CardDescription className="text-base">
+                {isEn 
+                  ? "Perfect for small businesses and solo entrepreneurs."
+                  : "Parfait pour les TPE et entrepreneurs solo."
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="mb-4">
+                <span className="text-5xl font-bold">490€</span>
+                <span className="text-muted-foreground">/{isEn ? "month" : "mois"}</span>
+              </div>
+              
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Badge variant="secondary" className="text-sm">
+                  <Bot className="w-3 h-3 mr-1" />
+                  5 {isEn ? "AI Employees" : "Employés IA"}
+                </Badge>
+                <Badge variant="outline" className="text-sm">
+                  1 {isEn ? "Department" : "Département"}
+                </Badge>
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-6">
+                {isEn 
+                  ? "Choose Marketing, Sales, or any single department"
+                  : "Choisissez Marketing, Commercial ou un autre département"
+                }
+              </p>
+
+              <ul className="space-y-2 mb-8 text-left">
+                {[
+                  isEn ? "1 department of your choice" : "1 département au choix",
+                  isEn ? "Up to 5 AI employees" : "Jusqu'à 5 employés IA",
+                  isEn ? "1 site included" : "1 site inclus",
+                  isEn ? "Core OS features" : "Fonctionnalités Core OS",
+                  isEn ? "Email support" : "Support par email",
+                  isEn ? "Monthly reports" : "Rapports mensuels",
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link to="/onboarding">
+                <Button variant="outline" className="w-full" size="lg">
+                  {isEn ? "Start with Starter" : "Commencer avec Starter"}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
           {/* Full Company Plan */}
           <Card variant="gradient" className="relative overflow-hidden border-2 border-primary/30">
             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
