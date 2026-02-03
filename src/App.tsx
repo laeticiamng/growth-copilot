@@ -101,6 +101,7 @@ import CMS from "./pages/dashboard/CMS";
 import Research from "./pages/dashboard/Research";
 import HR from "./pages/dashboard/HR";
 import Legal from "./pages/dashboard/Legal";
+import AccessReview from "./pages/dashboard/AccessReview";
 
 const queryClient = new QueryClient();
 
@@ -244,6 +245,7 @@ function App() {
               {/* Dashboard - HR & Legal (New Departments) */}
               <Route path="/dashboard/hr" element={<DashboardRoute service="hr"><HR /></DashboardRoute>} />
               <Route path="/dashboard/legal" element={<DashboardRoute service="legal"><Legal /></DashboardRoute>} />
+              <Route path="/dashboard/access-review" element={<DashboardRoute service="security"><AccessReview /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.stripe-portal]
 verify_jwt = false
+
+[functions.kpi-sync]
+verify_jwt = false

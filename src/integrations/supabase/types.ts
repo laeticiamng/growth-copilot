@@ -14,6 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_review_entries: {
+        Row: {
+          action_taken: string | null
+          action_taken_at: string | null
+          action_taken_by: string | null
+          created_at: string
+          id: string
+          inactive_days: number | null
+          integrations_access: Json | null
+          is_inactive: boolean | null
+          last_action_at: string | null
+          last_login_at: string | null
+          permissions: Json | null
+          recommended_action: string | null
+          review_id: string
+          risk_level: string | null
+          risk_reasons: string[] | null
+          role: string | null
+          sites_access: Json | null
+          user_email: string | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          action_taken_at?: string | null
+          action_taken_by?: string | null
+          created_at?: string
+          id?: string
+          inactive_days?: number | null
+          integrations_access?: Json | null
+          is_inactive?: boolean | null
+          last_action_at?: string | null
+          last_login_at?: string | null
+          permissions?: Json | null
+          recommended_action?: string | null
+          review_id: string
+          risk_level?: string | null
+          risk_reasons?: string[] | null
+          role?: string | null
+          sites_access?: Json | null
+          user_email?: string | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          action_taken_at?: string | null
+          action_taken_by?: string | null
+          created_at?: string
+          id?: string
+          inactive_days?: number | null
+          integrations_access?: Json | null
+          is_inactive?: boolean | null
+          last_action_at?: string | null
+          last_login_at?: string | null
+          permissions?: Json | null
+          recommended_action?: string | null
+          review_id?: string
+          risk_level?: string | null
+          risk_reasons?: string[] | null
+          role?: string | null
+          sites_access?: Json | null
+          user_email?: string | null
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_review_entries_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "access_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "access_review_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_reviews: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          findings: Json | null
+          id: string
+          initiated_by: string | null
+          issues_found: number | null
+          recommendations: Json | null
+          review_date: string
+          status: string
+          total_integrations: number | null
+          total_roles: number | null
+          total_users: number | null
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          findings?: Json | null
+          id?: string
+          initiated_by?: string | null
+          issues_found?: number | null
+          recommendations?: Json | null
+          review_date?: string
+          status?: string
+          total_integrations?: number | null
+          total_roles?: number | null
+          total_users?: number | null
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          findings?: Json | null
+          id?: string
+          initiated_by?: string | null
+          issues_found?: number | null
+          recommendations?: Json | null
+          review_date?: string
+          status?: string
+          total_integrations?: number | null
+          total_roles?: number | null
+          total_users?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       action_log: {
         Row: {
           action_category: string | null
@@ -3702,6 +3842,154 @@ export type Database = {
           },
         ]
       }
+      kpi_aggregates: {
+        Row: {
+          ads_clicks: number | null
+          ads_conversions: number | null
+          ads_cpc: number | null
+          ads_ctr: number | null
+          ads_impressions: number | null
+          ads_roas: number | null
+          ads_spend: number | null
+          created_at: string
+          date: string
+          growth_score: number | null
+          health_score: number | null
+          id: string
+          nps_score: number | null
+          period_type: string
+          roi_score: number | null
+          sales_aov: number | null
+          sales_new_customers: number | null
+          sales_orders: number | null
+          sales_revenue: number | null
+          seo_avg_position: number | null
+          seo_clicks: number | null
+          seo_impressions: number | null
+          seo_sessions: number | null
+          support_resolution_time_hrs: number | null
+          support_tickets: number | null
+          synced_at: string
+          workspace_id: string
+        }
+        Insert: {
+          ads_clicks?: number | null
+          ads_conversions?: number | null
+          ads_cpc?: number | null
+          ads_ctr?: number | null
+          ads_impressions?: number | null
+          ads_roas?: number | null
+          ads_spend?: number | null
+          created_at?: string
+          date: string
+          growth_score?: number | null
+          health_score?: number | null
+          id?: string
+          nps_score?: number | null
+          period_type: string
+          roi_score?: number | null
+          sales_aov?: number | null
+          sales_new_customers?: number | null
+          sales_orders?: number | null
+          sales_revenue?: number | null
+          seo_avg_position?: number | null
+          seo_clicks?: number | null
+          seo_impressions?: number | null
+          seo_sessions?: number | null
+          support_resolution_time_hrs?: number | null
+          support_tickets?: number | null
+          synced_at?: string
+          workspace_id: string
+        }
+        Update: {
+          ads_clicks?: number | null
+          ads_conversions?: number | null
+          ads_cpc?: number | null
+          ads_ctr?: number | null
+          ads_impressions?: number | null
+          ads_roas?: number | null
+          ads_spend?: number | null
+          created_at?: string
+          date?: string
+          growth_score?: number | null
+          health_score?: number | null
+          id?: string
+          nps_score?: number | null
+          period_type?: string
+          roi_score?: number | null
+          sales_aov?: number | null
+          sales_new_customers?: number | null
+          sales_orders?: number | null
+          sales_revenue?: number | null
+          seo_avg_position?: number | null
+          seo_clicks?: number | null
+          seo_impressions?: number | null
+          seo_sessions?: number | null
+          support_resolution_time_hrs?: number | null
+          support_tickets?: number | null
+          synced_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_aggregates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kpi_sync_jobs: {
+        Row: {
+          created_at: string
+          enabled: boolean | null
+          id: string
+          job_type: string
+          last_run_at: string | null
+          last_run_error: string | null
+          last_run_status: string | null
+          next_run_at: string | null
+          schedule_cron: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          job_type: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at?: string | null
+          schedule_cron?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          job_type?: string
+          last_run_at?: string | null
+          last_run_error?: string | null
+          last_run_status?: string | null
+          next_run_at?: string | null
+          schedule_cron?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_sync_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kpis_daily: {
         Row: {
           ads_clicks: number | null
@@ -5564,6 +5852,59 @@ export type Database = {
             foreignKeyName: "offers_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_priorities: {
+        Row: {
+          company_size: string | null
+          completed_at: string | null
+          created_at: string
+          current_tools: string[] | null
+          focus_channels: string[] | null
+          id: string
+          industry: string | null
+          monthly_budget: string | null
+          objectives: string[] | null
+          timeline: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          company_size?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_tools?: string[] | null
+          focus_channels?: string[] | null
+          id?: string
+          industry?: string | null
+          monthly_budget?: string | null
+          objectives?: string[] | null
+          timeline?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          company_size?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_tools?: string[] | null
+          focus_channels?: string[] | null
+          id?: string
+          industry?: string | null
+          monthly_budget?: string | null
+          objectives?: string[] | null
+          timeline?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_priorities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -7467,6 +7808,10 @@ export type Database = {
           _workspace_id: string
         }
         Returns: string
+      }
+      calculate_health_score: {
+        Args: { _workspace_id: string }
+        Returns: number
       }
       check_claim_guardrail: {
         Args: {
