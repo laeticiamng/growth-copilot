@@ -9,7 +9,8 @@ import {
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-// Service modules with detailed AI employee roster
+// Service modules with detailed AI employee roster (11 departments total)
+// Total employees = 5+4+3+3+4+5+4+3+3+2+1 = 37
 const SERVICE_MODULES = [
   { 
     id: "marketing", 
@@ -92,11 +93,30 @@ const SERVICE_MODULES = [
     employees: 3,
     roles: ["Chief of Staff IA", "Project Manager", "Operations Analyst"]
   },
+  { 
+    id: "hr", 
+    name: "RH", 
+    icon: Users, 
+    price: "1 900", 
+    color: "text-indigo-500",
+    employees: 2,
+    roles: ["DRH IA", "Talent Manager"]
+  },
+  { 
+    id: "legal", 
+    name: "Juridique", 
+    icon: Shield, 
+    price: "1 900", 
+    color: "text-slate-500",
+    employees: 1,
+    roles: ["Directeur Juridique IA"]
+  },
 ];
 
-// Calculate totals
-const TOTAL_EMPLOYEES = SERVICE_MODULES.reduce((sum, s) => sum + s.employees, 0);
-const TOTAL_SEPARATE_PRICE = SERVICE_MODULES.length * 1900;
+// Calculate totals - 37 employees across 11 departments
+const TOTAL_EMPLOYEES = SERVICE_MODULES.reduce((sum, s) => sum + s.employees, 0); // = 37
+const TOTAL_DEPARTMENTS = SERVICE_MODULES.length; // = 11
+const TOTAL_SEPARATE_PRICE = TOTAL_DEPARTMENTS * 1900; // = 20,900€
 
 export function Pricing() {
   const { t, i18n } = useTranslation();
@@ -124,7 +144,7 @@ export function Pricing() {
         {/* Main Plans */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           
-          {/* Starter Plan - NEW */}
+          {/* Starter Plan - Lite version of all departments */}
           <Card variant="feature" className="relative">
             <CardHeader className="text-center pb-2">
               <div className="mx-auto p-3 rounded-xl bg-green-500/10 w-fit mb-4">
@@ -133,8 +153,8 @@ export function Pricing() {
               <CardTitle className="text-2xl">Starter</CardTitle>
               <CardDescription className="text-base">
                 {isEn 
-                  ? "Perfect for small businesses and solo entrepreneurs."
-                  : "Parfait pour les TPE et entrepreneurs solo."
+                  ? "Lite access to all departments. Perfect for small businesses."
+                  : "Accès allégé à tous les départements. Parfait pour les TPE."
                 }
               </CardDescription>
             </CardHeader>
@@ -147,28 +167,28 @@ export function Pricing() {
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Badge variant="secondary" className="text-sm">
                   <Bot className="w-3 h-3 mr-1" />
-                  5 {isEn ? "AI Employees" : "Employés IA"}
+                  9 {isEn ? "AI Employees" : "Employés IA"}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
-                  1 {isEn ? "Department" : "Département"}
+                  9 {isEn ? "Departments" : "Départements"}
                 </Badge>
               </div>
 
               <p className="text-sm text-muted-foreground mb-6">
                 {isEn 
-                  ? "Choose Marketing, Sales, or any single department"
-                  : "Choisissez Marketing, Commercial ou un autre département"
+                  ? "1 AI employee per department (lite version)"
+                  : "1 employé IA par département (version allégée)"
                 }
               </p>
 
               <ul className="space-y-2 mb-8 text-left">
                 {[
-                  isEn ? "1 department of your choice" : "1 département au choix",
-                  isEn ? "Up to 5 AI employees" : "Jusqu'à 5 employés IA",
-                  isEn ? "1 site included" : "1 site inclus",
+                  isEn ? "All 9 departments (lite)" : "Les 9 départements (allégé)",
+                  isEn ? "1 AI employee per dept" : "1 employé IA par département",
+                  isEn ? "50 runs/month" : "50 exécutions/mois",
+                  isEn ? "1 site, 2 users" : "1 site, 2 utilisateurs",
                   isEn ? "Core OS features" : "Fonctionnalités Core OS",
                   isEn ? "Email support" : "Support par email",
-                  isEn ? "Monthly reports" : "Rapports mensuels",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -218,7 +238,7 @@ export function Pricing() {
                   {TOTAL_EMPLOYEES} {isEn ? "AI Employees" : "Employés IA"}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
-                  {isEn ? "9 Departments" : "9 Départements"}
+                  {TOTAL_DEPARTMENTS} {isEn ? "Departments" : "Départements"}
                 </Badge>
               </div>
 
@@ -249,7 +269,7 @@ export function Pricing() {
               <ul className="space-y-2 mb-8 text-left">
                 {[
                   isEn ? `${TOTAL_EMPLOYEES} AI employees included` : `${TOTAL_EMPLOYEES} employés IA inclus`,
-                  isEn ? "All 9 departments" : "Les 9 départements",
+                  isEn ? `All ${TOTAL_DEPARTMENTS} departments` : `Les ${TOTAL_DEPARTMENTS} départements`,
                   isEn ? "Unlimited sites & projects" : "Sites & projets illimités",
                   isEn ? "Full automation & autopilot" : "Automatisation complète & autopilot",
                   isEn ? "Executive voice briefings" : "Briefs exécutifs vocaux",

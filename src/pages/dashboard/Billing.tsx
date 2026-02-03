@@ -55,14 +55,17 @@ const STRIPE_PRICES = {
   starter: "price_1SwnyuDFa5Y9NR1IEQaigAaY",
 };
 
-// Starter plan limits
+// Starter plan limits (lite version: 1 AI employee per department)
 const STARTER_LIMITS = {
   runs: 50,
   sites: 1,
   users: 2,
+  employeesPerDept: 1,
+  totalEmployees: 9, // 1 per department
 };
 
-// Employees per department
+// Employees per department (Full version)
+// Total = 5+4+3+3+4+5+4+3+3+2+1 = 37 (with HR and Legal)
 const DEPT_EMPLOYEES: Record<string, number> = {
   marketing: 5,
   sales: 4,
@@ -73,6 +76,8 @@ const DEPT_EMPLOYEES: Record<string, number> = {
   data: 4,
   support: 3,
   governance: 3,
+  hr: 2,
+  legal: 1,
 };
 
 export default function Billing() {
@@ -313,7 +318,11 @@ export default function Billing() {
                 <ul className="space-y-2 text-sm text-left">
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
-                    Tous les 9 départements
+                    9 départements (version allégée)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    {STARTER_LIMITS.totalEmployees} employés IA (1/dept)
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
