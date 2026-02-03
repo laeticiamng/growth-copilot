@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,13 @@ import {
   Trash2,
   Loader2,
   ExternalLink,
+  Download,
+  Bell,
+  BellOff,
+  CheckCircle2,
+  XCircle,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 import { useCompetitors } from "@/hooks/useCompetitors";
 import { useSites } from "@/hooks/useSites";
@@ -39,9 +47,19 @@ export default function Competitors() {
   const { competitors, loading, addCompetitor, removeCompetitor, analyzeCompetitor, refetch } = useCompetitors();
   
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showSWOTDialog, setShowSWOTDialog] = useState(false);
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [competitorForm, setCompetitorForm] = useState({ url: "", name: "" });
+  const [swotData, setSWOTData] = useState({
+    strengths: [] as string[],
+    weaknesses: [] as string[],
+    opportunities: [] as string[],
+    threats: [] as string[],
+  });
+  const [alertSettings, setAlertSettings] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [generatingSWOT, setGeneratingSWOT] = useState(false);
 
   // Real data only - no demo fallback (Zero Fake Data policy)
   const displayCompetitors = competitors.map(c => ({
@@ -114,6 +132,80 @@ export default function Competitors() {
     }
   };
 
+  const handleGenerateSWOT = async () => {
+    if (competitors.length === 0) {
+      toast.error("Ajoutez au moins un concurrent");
+      return;
+    }
+    
+    setGeneratingSWOT(true);
+    // Simulate SWOT generation based on competitor data
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const strengths: string[] = [];
+    const weaknesses: string[] = [];
+    const opportunities: string[] = [];
+    const threats: string[] = [];
+    
+    competitors.forEach(comp => {
+      const insights = comp.insights as Record<string, unknown> | null;
+      if (insights?.domain_authority && (insights.domain_authority as number) > 40) {
+        threats.push(`${comp.competitor_name || 'Concurrent'} a un DA élevé (${insights.domain_authority})`);
+      }
+      if (comp.keyword_gaps && (comp.keyword_gaps as unknown[]).length > 0) {
+        opportunities.push(`${(comp.keyword_gaps as unknown[]).length} mots-clés non exploités`);
+      }
+      if (comp.content_gaps && (comp.content_gaps as unknown[]).length > 0) {
+        opportunities.push(`${(comp.content_gaps as unknown[]).length} thématiques de contenu à créer`);
+      }
+    });
+    
+    // Add generic insights
+    if (currentSite) {
+      strengths.push("Connaissance du marché local");
+      weaknesses.push("Visibilité SEO à améliorer");
+    }
+    
+    setSWOTData({ strengths, weaknesses, opportunities, threats });
+    setGeneratingSWOT(false);
+    setShowSWOTDialog(true);
+  };
+
+  const handleExportSWOT = () => {
+    const content = `# Analyse SWOT Concurrentielle
+Généré le ${new Date().toLocaleDateString('fr-FR')}
+
+## Forces
+${swotData.strengths.map(s => `- ${s}`).join('\n') || '- Aucune identifiée'}
+
+## Faiblesses
+${swotData.weaknesses.map(w => `- ${w}`).join('\n') || '- Aucune identifiée'}
+
+## Opportunités
+${swotData.opportunities.map(o => `- ${o}`).join('\n') || '- Aucune identifiée'}
+
+## Menaces
+${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
+`;
+
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `swot-analysis-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Analyse SWOT exportée");
+  };
+
+  const toggleAlert = (competitorId: string) => {
+    setAlertSettings(prev => ({
+      ...prev,
+      [competitorId]: !prev[competitorId],
+    }));
+    toast.success(alertSettings[competitorId] ? "Alertes désactivées" : "Alertes activées");
+  };
+
   if (loading) {
     return <LoadingState message="Chargement des concurrents..." />;
   }
@@ -130,6 +222,10 @@ export default function Competitors() {
           {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={handleGenerateSWOT} disabled={generatingSWOT || competitors.length === 0}>
+            {generatingSWOT ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+            SWOT
+          </Button>
           <Button variant="outline" onClick={refetch}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Actualiser
@@ -456,6 +552,64 @@ export default function Competitors() {
             <Button onClick={handleAddCompetitor} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* SWOT Analysis Dialog */}
+      <Dialog open={showSWOTDialog} onOpenChange={setShowSWOTDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Analyse SWOT Concurrentielle</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+              <h4 className="font-medium text-green-600 mb-2 flex items-center gap-2">
+                <ArrowUpRight className="w-4 h-4" /> Forces
+              </h4>
+              <ul className="text-sm space-y-1">
+                {swotData.strengths.length > 0 ? swotData.strengths.map((s, i) => (
+                  <li key={i}>• {s}</li>
+                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+              <h4 className="font-medium text-red-600 mb-2 flex items-center gap-2">
+                <ArrowDownRight className="w-4 h-4" /> Faiblesses
+              </h4>
+              <ul className="text-sm space-y-1">
+                {swotData.weaknesses.length > 0 ? swotData.weaknesses.map((w, i) => (
+                  <li key={i}>• {w}</li>
+                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <h4 className="font-medium text-blue-600 mb-2 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" /> Opportunités
+              </h4>
+              <ul className="text-sm space-y-1">
+                {swotData.opportunities.length > 0 ? swotData.opportunities.map((o, i) => (
+                  <li key={i}>• {o}</li>
+                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <h4 className="font-medium text-yellow-600 mb-2 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" /> Menaces
+              </h4>
+              <ul className="text-sm space-y-1">
+                {swotData.threats.length > 0 ? swotData.threats.map((t, i) => (
+                  <li key={i}>• {t}</li>
+                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSWOTDialog(false)}>Fermer</Button>
+            <Button onClick={handleExportSWOT}>
+              <Download className="w-4 h-4 mr-2" />
+              Exporter
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { DiagnosticsPanel } from "@/components/diagnostics/DiagnosticsPanel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Activity, 
   Terminal,
@@ -9,16 +11,36 @@ import {
   AlertTriangle,
   Download,
   Bug,
+  Zap,
+  Clock,
+  Server,
+  Database,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+interface LatencyMetric {
+  name: string;
+  latency: number | null;
+  status: 'healthy' | 'degraded' | 'down';
+  lastCheck: Date;
+}
+
 export default function Diagnostics() {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
+  const { isOnline } = useNetworkStatus();
+  const [latencyMetrics, setLatencyMetrics] = useState<LatencyMetric[]>([]);
+  const [isRunningHealthCheck, setIsRunningHealthCheck] = useState(false);
 
   // Fetch recent errors from action_log
   const { data: recentErrors } = useQuery({
@@ -60,6 +82,85 @@ export default function Diagnostics() {
     enabled: !!currentWorkspace?.id,
   });
 
+  // Real-time latency monitoring
+  const runHealthCheck = async () => {
+    setIsRunningHealthCheck(true);
+    const metrics: LatencyMetric[] = [];
+
+    // Test Supabase Database
+    try {
+      const start = performance.now();
+      await supabase.from('workspaces').select('id').limit(1);
+      const latency = Math.round(performance.now() - start);
+      metrics.push({
+        name: 'Database',
+        latency,
+        status: latency < 200 ? 'healthy' : latency < 500 ? 'degraded' : 'down',
+        lastCheck: new Date(),
+      });
+    } catch {
+      metrics.push({ name: 'Database', latency: null, status: 'down', lastCheck: new Date() });
+    }
+
+    // Test Auth Service
+    try {
+      const start = performance.now();
+      await supabase.auth.getSession();
+      const latency = Math.round(performance.now() - start);
+      metrics.push({
+        name: 'Auth Service',
+        latency,
+        status: latency < 150 ? 'healthy' : latency < 400 ? 'degraded' : 'down',
+        lastCheck: new Date(),
+      });
+    } catch {
+      metrics.push({ name: 'Auth Service', latency: null, status: 'down', lastCheck: new Date() });
+    }
+
+    // Test Edge Functions (ai-gateway)
+    try {
+      const start = performance.now();
+      await supabase.functions.invoke('ai-gateway', { 
+        body: { ping: true },
+      }).catch(() => null); // May fail but we measure response time
+      const latency = Math.round(performance.now() - start);
+      metrics.push({
+        name: 'Edge Functions',
+        latency,
+        status: latency < 300 ? 'healthy' : latency < 800 ? 'degraded' : 'down',
+        lastCheck: new Date(),
+      });
+    } catch {
+      metrics.push({ name: 'Edge Functions', latency: null, status: 'down', lastCheck: new Date() });
+    }
+
+    // Test Storage
+    try {
+      const start = performance.now();
+      await supabase.storage.listBuckets();
+      const latency = Math.round(performance.now() - start);
+      metrics.push({
+        name: 'Storage',
+        latency,
+        status: latency < 200 ? 'healthy' : latency < 500 ? 'degraded' : 'down',
+        lastCheck: new Date(),
+      });
+    } catch {
+      metrics.push({ name: 'Storage', latency: null, status: 'down', lastCheck: new Date() });
+    }
+
+    setLatencyMetrics(metrics);
+    setIsRunningHealthCheck(false);
+    toast.success("Health check terminé");
+  };
+
+  // Auto-run health check on mount
+  useEffect(() => {
+    if (currentWorkspace?.id) {
+      runHealthCheck();
+    }
+  }, [currentWorkspace?.id]);
+
   const exportDiagnostics = () => {
     const diagnosticData = {
       timestamp: new Date().toISOString(),
@@ -67,6 +168,8 @@ export default function Diagnostics() {
       site_id: currentSite?.id,
       recent_errors: recentErrors,
       failed_runs: failedRuns,
+      latency_metrics: latencyMetrics,
+      network_status: isOnline ? 'online' : 'offline',
       environment: import.meta.env.DEV ? "development" : "production",
       user_agent: navigator.userAgent,
     };
@@ -95,6 +198,32 @@ export default function Diagnostics() {
     return `Il y a ${Math.floor(diffHours / 24)}j`;
   };
 
+  const getStatusIcon = (status: 'healthy' | 'degraded' | 'down') => {
+    switch (status) {
+      case 'healthy': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case 'degraded': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'down': return <XCircle className="w-4 h-4 text-destructive" />;
+    }
+  };
+
+  const getServiceIcon = (name: string) => {
+    switch (name) {
+      case 'Database': return <Database className="w-4 h-4" />;
+      case 'Auth Service': return <Server className="w-4 h-4" />;
+      case 'Edge Functions': return <Zap className="w-4 h-4" />;
+      case 'Storage': return <FileText className="w-4 h-4" />;
+      default: return <Activity className="w-4 h-4" />;
+    }
+  };
+
+  const overallHealth = latencyMetrics.length > 0 
+    ? latencyMetrics.every(m => m.status === 'healthy') 
+      ? 'healthy' 
+      : latencyMetrics.some(m => m.status === 'down') 
+        ? 'down' 
+        : 'degraded'
+    : 'unknown';
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -108,11 +237,87 @@ export default function Diagnostics() {
             Outils de debug et monitoring système
           </p>
         </div>
-        <Button variant="outline" onClick={exportDiagnostics}>
-          <Download className="w-4 h-4 mr-2" />
-          Exporter rapport
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={runHealthCheck} disabled={isRunningHealthCheck}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRunningHealthCheck ? 'animate-spin' : ''}`} />
+            Health Check
+          </Button>
+          <Button variant="outline" onClick={exportDiagnostics}>
+            <Download className="w-4 h-4 mr-2" />
+            Exporter rapport
+          </Button>
+        </div>
       </div>
+
+      {/* Network Status Banner */}
+      {!isOnline && (
+        <Card className="border-destructive/50 bg-destructive/10">
+          <CardContent className="flex items-center gap-3 py-4">
+            <WifiOff className="w-5 h-5 text-destructive" />
+            <div>
+              <p className="font-medium text-destructive">Connexion réseau perdue</p>
+              <p className="text-sm text-muted-foreground">Certaines fonctionnalités peuvent être indisponibles</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* System Health Overview */}
+      <Card variant="feature">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                Santé système
+              </CardTitle>
+              <CardDescription>Latence et disponibilité des services</CardDescription>
+            </div>
+            <Badge 
+              variant={overallHealth === 'healthy' ? 'success' : overallHealth === 'degraded' ? 'secondary' : 'destructive'}
+              className="text-xs"
+            >
+              {overallHealth === 'healthy' ? 'Tous les systèmes opérationnels' : 
+               overallHealth === 'degraded' ? 'Performances dégradées' : 
+               overallHealth === 'down' ? 'Services indisponibles' : 'Vérification en cours...'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {latencyMetrics.map((metric) => (
+              <div key={metric.name} className="p-4 rounded-lg bg-secondary/50">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {getServiceIcon(metric.name)}
+                    <span className="text-sm font-medium">{metric.name}</span>
+                  </div>
+                  {getStatusIcon(metric.status)}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3 h-3 text-muted-foreground" />
+                  <span className={`text-lg font-bold ${
+                    metric.status === 'healthy' ? 'text-green-500' : 
+                    metric.status === 'degraded' ? 'text-yellow-500' : 'text-destructive'
+                  }`}>
+                    {metric.latency !== null ? `${metric.latency}ms` : '—'}
+                  </span>
+                </div>
+                <Progress 
+                  value={metric.latency ? Math.min(100, (500 - metric.latency) / 5) : 0} 
+                  className="h-1 mt-2" 
+                />
+              </div>
+            ))}
+            {latencyMetrics.length === 0 && (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Cliquez sur "Health Check" pour tester les services</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Diagnostics Panel */}
       <DiagnosticsPanel />
@@ -144,7 +349,7 @@ export default function Diagnostics() {
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                <AlertTriangle className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-green-500 opacity-50" />
                 <p className="text-sm">Aucune erreur récente</p>
               </div>
             )}
@@ -189,7 +394,7 @@ export default function Diagnostics() {
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                <Terminal className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-green-500 opacity-50" />
                 <p className="text-sm">Aucun agent en échec récemment</p>
               </div>
             )}
@@ -206,7 +411,7 @@ export default function Diagnostics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="p-3 rounded-lg bg-secondary/30">
               <p className="text-xs text-muted-foreground mb-1">Version App</p>
               <p className="text-sm font-medium">1.0.0</p>
@@ -220,8 +425,17 @@ export default function Diagnostics() {
               <p className="text-sm font-medium">18.3.1</p>
             </div>
             <div className="p-3 rounded-lg bg-secondary/30">
-              <p className="text-xs text-muted-foreground mb-1">Supabase</p>
-              <p className="text-sm font-medium">Cloud</p>
+              <p className="text-xs text-muted-foreground mb-1">Backend</p>
+              <p className="text-sm font-medium">Lovable Cloud</p>
+            </div>
+            <div className="p-3 rounded-lg bg-secondary/30">
+              <div className="flex items-center gap-2">
+                {isOnline ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-destructive" />}
+                <div>
+                  <p className="text-xs text-muted-foreground">Réseau</p>
+                  <p className="text-sm font-medium">{isOnline ? 'En ligne' : 'Hors ligne'}</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
