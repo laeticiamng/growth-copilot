@@ -296,7 +296,41 @@ La plateforme Growth OS est maintenant un **"Portable Company OS"** complet avec
 | Tests limités | ✅ 64+ tests couvrant auth, RLS, permissions, workflows |
 | Transparence IA | ✅ Evidence Bundles avec sources, métriques, raisonnement |
 | Support multilingue | ✅ FR, EN, ES, DE (551 clés par langue) |
+| **Audit Log UI absent** | ✅ Page dédiée `/dashboard/audit-log` avec filtres, export, incidents |
+| **Accessibilité** | ✅ Attributs ARIA, navigation clavier, rôles sémantiques |
 
 ---
 
-*Document généré automatiquement - Growth OS Platform Audit v4.0 - 100% COMPLETE* 🎉
+## ♿ Accessibilité (WCAG 2.1)
+
+### Implémenté :
+- Attributs ARIA (`aria-label`, `role`, `aria-describedby`)
+- Navigation clavier sur tous les composants interactifs
+- Contrastes de couleurs conformes (design system avec tokens HSL)
+- Textes alternatifs sur les icônes et images
+- Rôles sémantiques (`role="table"`, `role="search"`, etc.)
+- Labels sur tous les formulaires
+
+### Recommandations futures :
+- Audit Lighthouse complet
+- Tests avec lecteurs d'écran (NVDA, VoiceOver)
+- Documentation des raccourcis clavier
+
+---
+
+## 📚 Documentation
+
+### Disponible :
+- `README.md` - Guide complet d'installation et architecture
+- `docs/PLATFORM_AUDIT.md` - Ce document (roadmap et statut)
+- Commentaires JSDoc dans le code critique
+- Types TypeScript stricts sur toutes les interfaces
+
+### Recommandations futures :
+- Storybook pour les composants UI
+- Tutoriels vidéo d'onboarding
+- Diagrammes d'architecture (Mermaid)
+
+---
+
+*Document généré automatiquement - Growth OS Platform Audit v4.1 - 100% COMPLETE* 🎉
