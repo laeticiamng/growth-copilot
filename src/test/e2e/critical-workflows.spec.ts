@@ -52,9 +52,9 @@ describe('Critical Workflows - Smoke Tests', () => {
 
     it('should navigate to all main modules', () => {
       const modules = [
-        '/dashboard/seo-tech',
+        '/dashboard/seo',
         '/dashboard/content',
-        '/dashboard/local-seo',
+        '/dashboard/local',
         '/dashboard/ads',
         '/dashboard/social',
         '/dashboard/cro',
