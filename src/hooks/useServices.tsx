@@ -293,6 +293,12 @@ export const SERVICE_ROUTES: Record<string, string[]> = {
     '/dashboard/integrations',
     '/dashboard/automations',
     '/dashboard/agency'
+  ],
+  'hr': [
+    '/dashboard/hr'
+  ],
+  'legal': [
+    '/dashboard/legal'
   ]
 };
 

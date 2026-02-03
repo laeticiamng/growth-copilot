@@ -99,6 +99,8 @@ import ApprovalsV2 from "./pages/dashboard/ApprovalsV2";
 import Agents from "./pages/dashboard/Agents";
 import CMS from "./pages/dashboard/CMS";
 import Research from "./pages/dashboard/Research";
+import HR from "./pages/dashboard/HR";
+import Legal from "./pages/dashboard/Legal";
 
 const queryClient = new QueryClient();
 
@@ -238,6 +240,10 @@ function App() {
               <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
               <Route path="/dashboard/cms" element={<DashboardRoute service="marketing"><CMS /></DashboardRoute>} />
               <Route path="/dashboard/research" element={<DashboardRoute><Research /></DashboardRoute>} />
+              
+              {/* Dashboard - HR & Legal (New Departments) */}
+              <Route path="/dashboard/hr" element={<DashboardRoute service="hr"><HR /></DashboardRoute>} />
+              <Route path="/dashboard/legal" element={<DashboardRoute service="legal"><Legal /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
