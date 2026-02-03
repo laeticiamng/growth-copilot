@@ -46,6 +46,7 @@ import { composeProviders, createProviderGroup } from "@/lib/compose-providers";
 // Layout & Auth components
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth/ProtectedRoute";
+import { ServiceGuard } from "@/components/auth/ServiceGuard";
 
 // Pages
 import Index from "./pages/Index";
@@ -162,10 +163,16 @@ const InnerProviders = composeProviders([
 /**
  * Dashboard route wrapper for cleaner route definitions
  */
-function DashboardRoute({ children }: { children: React.ReactNode }) {
+function DashboardRoute({ children, service }: { children: React.ReactNode; service?: string }) {
   return (
     <ProtectedRoute>
-      <DashboardLayout>{children}</DashboardLayout>
+      <DashboardLayout>
+        {service ? (
+          <ServiceGuard service={service}>{children}</ServiceGuard>
+        ) : (
+          children
+        )}
+      </DashboardLayout>
     </ProtectedRoute>
   );
 }
@@ -197,38 +204,38 @@ function App() {
               <Route path="/dashboard/logs" element={<DashboardRoute><Logs /></DashboardRoute>} />
               <Route path="/dashboard/billing" element={<DashboardRoute><Billing /></DashboardRoute>} />
               
-              {/* Dashboard - Modules */}
-              <Route path="/dashboard/seo" element={<DashboardRoute><SEOTech /></DashboardRoute>} />
-              <Route path="/dashboard/content" element={<DashboardRoute><Content /></DashboardRoute>} />
-              <Route path="/dashboard/local" element={<DashboardRoute><LocalSEO /></DashboardRoute>} />
-              <Route path="/dashboard/ads" element={<DashboardRoute><Ads /></DashboardRoute>} />
-              <Route path="/dashboard/social" element={<DashboardRoute><Social /></DashboardRoute>} />
-              <Route path="/dashboard/cro" element={<DashboardRoute><CRO /></DashboardRoute>} />
-              <Route path="/dashboard/offers" element={<DashboardRoute><Offers /></DashboardRoute>} />
-              <Route path="/dashboard/lifecycle" element={<DashboardRoute><Lifecycle /></DashboardRoute>} />
-              <Route path="/dashboard/reputation" element={<DashboardRoute><Reputation /></DashboardRoute>} />
-              <Route path="/dashboard/reports" element={<DashboardRoute><Reports /></DashboardRoute>} />
+              {/* Dashboard - Modules (Service-Gated) */}
+              <Route path="/dashboard/seo" element={<DashboardRoute service="marketing"><SEOTech /></DashboardRoute>} />
+              <Route path="/dashboard/content" element={<DashboardRoute service="marketing"><Content /></DashboardRoute>} />
+              <Route path="/dashboard/local" element={<DashboardRoute service="marketing"><LocalSEO /></DashboardRoute>} />
+              <Route path="/dashboard/ads" element={<DashboardRoute service="marketing"><Ads /></DashboardRoute>} />
+              <Route path="/dashboard/social" element={<DashboardRoute service="marketing"><Social /></DashboardRoute>} />
+              <Route path="/dashboard/cro" element={<DashboardRoute service="marketing"><CRO /></DashboardRoute>} />
+              <Route path="/dashboard/offers" element={<DashboardRoute service="sales"><Offers /></DashboardRoute>} />
+              <Route path="/dashboard/lifecycle" element={<DashboardRoute service="sales"><Lifecycle /></DashboardRoute>} />
+              <Route path="/dashboard/reputation" element={<DashboardRoute service="support"><Reputation /></DashboardRoute>} />
+              <Route path="/dashboard/reports" element={<DashboardRoute service="finance"><Reports /></DashboardRoute>} />
               
-              {/* Dashboard - Advanced */}
+              {/* Dashboard - Advanced (Service-Gated) */}
               <Route path="/dashboard/approvals" element={<DashboardRoute><Approvals /></DashboardRoute>} />
-              <Route path="/dashboard/competitors" element={<DashboardRoute><Competitors /></DashboardRoute>} />
-              <Route path="/dashboard/agency" element={<DashboardRoute><Agency /></DashboardRoute>} />
+              <Route path="/dashboard/competitors" element={<DashboardRoute service="marketing"><Competitors /></DashboardRoute>} />
+              <Route path="/dashboard/agency" element={<DashboardRoute service="governance"><Agency /></DashboardRoute>} />
               <Route path="/dashboard/guide" element={<DashboardRoute><OnboardingGuide /></DashboardRoute>} />
-              <Route path="/dashboard/automations" element={<DashboardRoute><Automations /></DashboardRoute>} />
+              <Route path="/dashboard/automations" element={<DashboardRoute service="governance"><Automations /></DashboardRoute>} />
               
-              {/* Dashboard - Media Launch */}
-              <Route path="/dashboard/media" element={<DashboardRoute><MediaAssets /></DashboardRoute>} />
-              <Route path="/dashboard/media/launch" element={<DashboardRoute><LaunchPlan /></DashboardRoute>} />
-              <Route path="/dashboard/media/creatives" element={<DashboardRoute><CreativesStudio /></DashboardRoute>} />
-              <Route path="/dashboard/media/kpis" element={<DashboardRoute><MediaKPIs /></DashboardRoute>} />
-              <Route path="/dashboard/media/ads-factory" element={<DashboardRoute><TemplateAdsFactory /></DashboardRoute>} />
+              {/* Dashboard - Media Launch (Marketing-Gated) */}
+              <Route path="/dashboard/media" element={<DashboardRoute service="marketing"><MediaAssets /></DashboardRoute>} />
+              <Route path="/dashboard/media/launch" element={<DashboardRoute service="marketing"><LaunchPlan /></DashboardRoute>} />
+              <Route path="/dashboard/media/creatives" element={<DashboardRoute service="marketing"><CreativesStudio /></DashboardRoute>} />
+              <Route path="/dashboard/media/kpis" element={<DashboardRoute service="marketing"><MediaKPIs /></DashboardRoute>} />
+              <Route path="/dashboard/media/ads-factory" element={<DashboardRoute service="marketing"><TemplateAdsFactory /></DashboardRoute>} />
               
-              {/* Dashboard - Diagnostics & Ops */}
-              <Route path="/dashboard/diagnostics" element={<DashboardRoute><Diagnostics /></DashboardRoute>} />
-              <Route path="/dashboard/ops" element={<DashboardRoute><Ops /></DashboardRoute>} />
+              {/* Dashboard - Diagnostics & Ops (Security-Gated) */}
+              <Route path="/dashboard/diagnostics" element={<DashboardRoute service="security"><Diagnostics /></DashboardRoute>} />
+              <Route path="/dashboard/ops" element={<DashboardRoute service="security"><Ops /></DashboardRoute>} />
               <Route path="/dashboard/approvals-v2" element={<DashboardRoute><ApprovalsV2 /></DashboardRoute>} />
               <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
-              <Route path="/dashboard/cms" element={<DashboardRoute><CMS /></DashboardRoute>} />
+              <Route path="/dashboard/cms" element={<DashboardRoute service="marketing"><CMS /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
