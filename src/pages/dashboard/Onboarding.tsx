@@ -3,21 +3,27 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useServices } from "@/hooks/useServices";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useSites } from "@/hooks/useSites";
 import {
   CheckCircle2,
-  Circle,
   ArrowRight,
-  Zap,
   Globe,
-  Palette,
   Link,
-  Target,
-  FileText,
-  Bot,
   Shield,
   Rocket,
   ExternalLink,
+  Crown,
+  TrendingUp,
+  Briefcase,
+  BarChart3,
+  Puzzle,
+  Code,
+  HeadphonesIcon,
+  Settings,
 } from "lucide-react";
+import { Link as RouterLink } from "react-router-dom";
 
 interface SetupStep {
   id: string;
@@ -28,103 +34,62 @@ interface SetupStep {
   stepNumber: number;
 }
 
-const setupSteps: SetupStep[] = [
-  {
-    id: "site",
-    stepNumber: 1,
-    title: "Ajouter votre site",
-    description: "Renseignez l'URL de votre site pour commencer l'analyse",
-    status: "done",
-    link: "/dashboard/sites",
-  },
-  {
-    id: "brand",
-    stepNumber: 2,
-    title: "Configurer le Brand Kit",
-    description: "Ton de voix, couleurs, USP, audience cible",
-    status: "done",
-    link: "/dashboard/brand-kit",
-  },
-  {
-    id: "integrations",
-    stepNumber: 3,
-    title: "Connecter GSC & GA4",
-    description: "Synchronisez vos données Google pour des insights précis",
-    status: "current",
-    link: "/dashboard/integrations",
-  },
-  {
-    id: "crawl",
-    stepNumber: 4,
-    title: "Lancer le premier audit",
-    description: "Crawl technique + audit SEO complet",
-    status: "pending",
-    link: "/dashboard/seo",
-  },
-  {
-    id: "content",
-    stepNumber: 5,
-    title: "Importer vos mots-clés",
-    description: "Depuis GSC ou manuellement",
-    status: "pending",
-    link: "/dashboard/content",
-  },
-];
-
-const modules = [
-  { 
-    name: "SEO Technique", 
-    icon: Globe, 
-    status: "ready",
-    description: "Crawl, audit, corrections automatiques" 
-  },
-  { 
-    name: "Contenu & Keywords", 
-    icon: FileText, 
-    status: "ready",
-    description: "Clusters, briefs, drafts, calendrier" 
-  },
-  { 
-    name: "Local SEO", 
-    icon: Target, 
-    status: "ready",
-    description: "GBP, avis, posts locaux" 
-  },
-  { 
-    name: "Google Ads", 
-    icon: Zap, 
-    status: "integration_required",
-    description: "Requiert connexion Ads" 
-  },
-  { 
-    name: "Social", 
-    icon: Link, 
-    status: "integration_required",
-    description: "Requiert connexion Meta" 
-  },
-  { 
-    name: "CRO", 
-    icon: Target, 
-    status: "ready",
-    description: "Audits pages, tests, backlog" 
-  },
-  { 
-    name: "Lifecycle", 
-    icon: Bot, 
-    status: "ready",
-    description: "CRM, workflows, emails" 
-  },
-];
-
-const limits = [
-  { name: "GBP Q&A API", issue: "Discontinuée (Nov 2025)", workaround: "FAQ Engine + posts manuels" },
-  { name: "Instagram Publishing", issue: "Permissions variables", workaround: "Export assets + calendrier" },
-  { name: "Google Ads Write", issue: "API réservée MCC", workaround: "Recommandations + exports" },
-];
+// Service icon mapping
+const SERVICE_ICONS: Record<string, React.ElementType> = {
+  "core-os": Settings,
+  marketing: TrendingUp,
+  sales: Briefcase,
+  finance: BarChart3,
+  security: Shield,
+  product: Puzzle,
+  engineering: Code,
+  data: BarChart3,
+  support: HeadphonesIcon,
+  governance: Settings,
+};
 
 export default function OnboardingGuide() {
+  const { currentWorkspace } = useWorkspace();
+  const { currentSite } = useSites();
+  const { enabledServices, subscription, isFullCompany, servicesLoading } = useServices();
+
+  // Dynamic setup steps based on current state
+  const setupSteps: SetupStep[] = [
+    {
+      id: "site",
+      stepNumber: 1,
+      title: "Ajouter votre site",
+      description: "Renseignez l'URL de votre site pour commencer",
+      status: currentSite ? "done" : "current",
+      link: "/dashboard/sites",
+    },
+    {
+      id: "brand",
+      stepNumber: 2,
+      title: "Configurer le Brand Kit",
+      description: "Ton de voix, couleurs, USP, audience cible",
+      status: currentSite ? "current" : "pending",
+      link: "/dashboard/brand-kit",
+    },
+    {
+      id: "integrations",
+      stepNumber: 3,
+      title: "Autoriser les accès",
+      description: "Google, Meta, et autres plateformes",
+      status: "pending",
+      link: "/dashboard/integrations",
+    },
+    {
+      id: "run",
+      stepNumber: 4,
+      title: "Premier brief exécutif",
+      description: "Lancez votre première analyse automatique",
+      status: "pending",
+      link: "/dashboard",
+    },
+  ];
+
   const completedSteps = setupSteps.filter(s => s.status === "done").length;
-  const currentStepIndex = setupSteps.findIndex(s => s.status === "current");
   const progress = (completedSteps / setupSteps.length) * 100;
 
   return (
@@ -142,10 +107,18 @@ export default function OnboardingGuide() {
             Configurez votre workspace pour des résultats optimaux
           </p>
         </div>
-        <Badge variant="gradient" className="px-3 py-1">
-          <Rocket className="w-4 h-4 mr-1" />
-          {completedSteps}/{setupSteps.length} étapes
-        </Badge>
+        <div className="flex items-center gap-2">
+          {isFullCompany && (
+            <Badge variant="gradient" className="px-3 py-1">
+              <Crown className="w-4 h-4 mr-1" />
+              Full Company
+            </Badge>
+          )}
+          <Badge variant="secondary" className="px-3 py-1">
+            <Rocket className="w-4 h-4 mr-1" />
+            {completedSteps}/{setupSteps.length} étapes
+          </Badge>
+        </div>
       </div>
 
       {/* Progress */}
@@ -250,69 +223,45 @@ export default function OnboardingGuide() {
         </CardContent>
       </Card>
 
-      {/* Modules status */}
+      {/* Services status */}
       <Card variant="feature">
         <CardHeader>
-          <CardTitle>Modules disponibles</CardTitle>
-          <CardDescription>État des fonctionnalités selon votre configuration</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Services activés</CardTitle>
+              <CardDescription>Départements disponibles dans votre workspace</CardDescription>
+            </div>
+            {!isFullCompany && (
+              <RouterLink to="/dashboard/billing">
+                <Button variant="outline" size="sm">
+                  <Crown className="w-4 h-4 mr-1" />
+                  Upgrade
+                </Button>
+              </RouterLink>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {modules.map((mod, i) => {
-              const Icon = mod.icon;
+            {enabledServices.map((service) => {
+              const Icon = SERVICE_ICONS[service.slug] || Puzzle;
               return (
                 <div 
-                  key={i} 
-                  className={`p-4 rounded-lg ${
-                    mod.status === "ready" ? "bg-green-500/10 border border-green-500/30" : 
-                    "bg-secondary/50 border border-border"
-                  }`}
+                  key={service.id} 
+                  className="flex items-center gap-3 p-4 rounded-lg bg-chart-3/10 border border-chart-3/30"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icon className={`w-5 h-5 ${mod.status === "ready" ? "text-green-500" : "text-muted-foreground"}`} />
-                    <span className="font-medium">{mod.name}</span>
+                  <div className="p-2 rounded-lg bg-chart-3/20">
+                    <Icon className="w-5 h-5 text-chart-3" />
                   </div>
-                  <p className="text-sm text-muted-foreground">{mod.description}</p>
-                  <Badge 
-                    variant={mod.status === "ready" ? "secondary" : "outline"} 
-                    className="mt-2 text-xs"
-                  >
-                    {mod.status === "ready" ? "Prêt" : "Intégration requise"}
-                  </Badge>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{service.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{service.description}</p>
+                  </div>
+                  <CheckCircle2 className="w-4 h-4 text-chart-3 flex-shrink-0" />
                 </div>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Known limitations */}
-      <Card variant="feature">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Limitations connues
-          </CardTitle>
-          <CardDescription>
-            Certaines APIs ont des restrictions - voici les workarounds intégrés
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {limits.map((limit, i) => (
-            <div key={i} className="flex items-start gap-4 p-4 rounded-lg bg-secondary/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{limit.name}</p>
-                  <Badge variant="outline" className="text-xs text-warning">
-                    {limit.issue}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  <span className="text-primary font-medium">Solution :</span> {limit.workaround}
-                </p>
-              </div>
-            </div>
-          ))}
         </CardContent>
       </Card>
 

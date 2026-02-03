@@ -2,13 +2,15 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle, Building2, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { urlSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
 export function Hero() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
+  
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [urlValid, setUrlValid] = useState(false);
@@ -21,7 +23,6 @@ export function Hero() {
       return false;
     }
     
-    // Add protocol if missing
     let urlToValidate = value;
     if (!value.startsWith('http://') && !value.startsWith('https://')) {
       urlToValidate = `https://${value}`;
@@ -60,30 +61,49 @@ export function Hero() {
           {/* Badge */}
           <div className="fade-in-up mb-8">
             <Badge variant="agent" className="px-4 py-2 text-sm">
-              <Sparkles className="w-4 h-4 mr-2" />
-              {t("landing.hero.tagline")}
+              <Building2 className="w-4 h-4 mr-2" />
+              {isEn ? "Your Portable Company" : "Votre Entreprise Portable"}
             </Badge>
           </div>
 
           {/* Headline */}
           <h1 className="fade-in-up text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-balance" style={{ animationDelay: "0.1s" }}>
-            {t("landing.hero.title")}
+            {isEn ? "The Complete" : "L'entreprise digitale"}
             <br />
-            <span className="gradient-text">{t("landing.hero.titleHighlight")}</span>
+            <span className="gradient-text">
+              {isEn ? "Digital Company" : "complète"}
+            </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="fade-in-up text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10" style={{ animationDelay: "0.2s" }}>
-            {t("landing.hero.subtitle")}
+          <p className="fade-in-up text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6" style={{ animationDelay: "0.2s" }}>
+            {isEn 
+              ? "Subscribe to the full digital enterprise or only the departments you need. Marketing, Sales, Finance, Security, and more — all with premium competence standards."
+              : "Abonnez-vous à l'entreprise digitale complète ou seulement aux départements dont vous avez besoin. Marketing, Commercial, Finance, Sécurité et plus — tous avec des standards de compétence premium."
+            }
           </p>
 
-          {/* URL Input + CTA with validation */}
+          {/* Key benefits */}
+          <div className="fade-in-up flex flex-wrap items-center justify-center gap-4 mb-10" style={{ animationDelay: "0.25s" }}>
+            {[
+              { icon: Zap, text: isEn ? "Auto-generated briefs" : "Briefs auto-générés" },
+              { icon: CheckCircle2, text: isEn ? "Approval-driven" : "Approbations intégrées" },
+              { icon: Sparkles, text: isEn ? "Evidence-based" : "Basé sur les données" },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <item.icon className="w-4 h-4 text-primary" />
+                <span>{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* URL Input + CTA */}
           <div className="fade-in-up max-w-xl mx-auto mb-8" style={{ animationDelay: "0.3s" }}>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
                 <input
                   type="url"
-                  placeholder="https://yoursite.com"
+                  placeholder={isEn ? "yourcompany.com" : "votreentreprise.com"}
                   value={url}
                   onChange={handleUrlChange}
                   className={cn(
@@ -107,9 +127,9 @@ export function Hero() {
                   </div>
                 )}
               </div>
-              <Link to="/auth">
-                <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap" disabled={!!urlError && url.length > 0}>
-                  {t("landing.hero.cta")}
+              <Link to="/onboarding">
+                <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap h-14 px-8">
+                  {isEn ? "Get Started" : "Commencer"}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
@@ -125,7 +145,7 @@ export function Hero() {
               {urlValid && (
                 <p id="url-valid" className="text-sm text-chart-3 flex items-center justify-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  URL valide – prêt pour l'audit
+                  {isEn ? "Valid URL — ready to set up" : "URL valide — prêt pour la configuration"}
                 </p>
               )}
             </div>
@@ -133,21 +153,29 @@ export function Hero() {
 
           {/* Secondary CTA */}
           <div className="fade-in-up flex flex-wrap items-center justify-center gap-4" style={{ animationDelay: "0.4s" }}>
-            <Link to="/dashboard">
+            <a href="#pricing">
               <Button variant="hero-outline">
                 <Play className="w-4 h-4 mr-2" />
-                {t("landing.hero.secondaryCta")}
+                {isEn ? "See Pricing" : "Voir les tarifs"}
               </Button>
-            </Link>
+            </a>
           </div>
 
-          {/* Trust indicators */}
+          {/* Value props */}
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
-            <p className="text-sm text-muted-foreground mb-6">{t("landing.hero.stats.clients")}</p>
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
-              {["Startup Alpha", "Agency Pro", "E-commerce Plus", "SaaS Corp", "Local Business"].map((name) => (
-                <div key={name} className="text-lg font-semibold text-muted-foreground">
-                  {name}
+            <p className="text-sm text-muted-foreground mb-6">
+              {isEn ? "Premium competence, delivered simply" : "Compétence premium, livrée simplement"}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
+              {[
+                { value: "9", label: isEn ? "Departments" : "Départements" },
+                { value: "24/7", label: isEn ? "Automation" : "Automatisation" },
+                { value: "100%", label: isEn ? "Auditable" : "Auditable" },
+                { value: "0", label: isEn ? "Technical jargon" : "Jargon technique" },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
             </div>
