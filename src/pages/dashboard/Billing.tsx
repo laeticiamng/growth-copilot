@@ -61,7 +61,7 @@ const STARTER_LIMITS = {
   sites: 1,
   users: 2,
   employeesPerDept: 1,
-  totalEmployees: 9, // 1 per department
+  totalEmployees: 11, // 1 per department (11 departments total)
 };
 
 // Employees per department (Full version)
@@ -245,7 +245,7 @@ export default function Billing() {
                     </CardTitle>
                     <CardDescription className="mt-0.5">
                       {isFullCompany 
-                        ? "37 employés IA • 9 départements" 
+                        ? "37 employés IA • 11 départements" 
                         : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
                       }
                     </CardDescription>
@@ -363,7 +363,7 @@ export default function Billing() {
                   <div>
                     <h3 className="font-semibold text-lg">Passez à Full Company</h3>
                     <p className="text-sm text-muted-foreground">
-                      37 employés IA • 9 départements • Runs illimités
+                      37 employés IA • 11 départements • Runs illimités
                     </p>
                   </div>
                 </div>
