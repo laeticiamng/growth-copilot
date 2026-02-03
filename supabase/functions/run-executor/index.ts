@@ -373,7 +373,34 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Validate auth
+    const body = await req.json();
+    const { run_type, workspace_id, site_id, scheduled } = body;
+
+    // For scheduled runs (from cron), execute for all active workspaces
+    if (scheduled) {
+      console.log(`[CRON] Executing scheduled run: ${run_type}`);
+      
+      // Get all workspaces with active scheduled runs for this type
+      const { data: scheduledRuns } = await supabase
+        .from("scheduled_runs")
+        .select("workspace_id")
+        .eq("run_type", run_type)
+        .eq("enabled", true);
+
+      if (scheduledRuns && scheduledRuns.length > 0) {
+        const results = await Promise.allSettled(
+          scheduledRuns.map((sr) => executeRun(supabase, run_type, sr.workspace_id))
+        );
+        console.log(`[CRON] Completed ${results.length} runs for ${run_type}`);
+      }
+
+      return new Response(JSON.stringify({ scheduled: true, run_type }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // For user-triggered runs, validate auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -391,9 +418,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const body: RunRequest = await req.json();
-    const { run_type, workspace_id, site_id } = body;
 
     // Validate workspace access
     const { data: access } = await supabase.rpc("has_workspace_access", {
