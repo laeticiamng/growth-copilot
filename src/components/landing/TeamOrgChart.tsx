@@ -120,6 +120,25 @@ const DEPARTMENTS_FR = [
       { name: "David Gauthier", role: "Operations Analyst", description: "Optimise les processus et la performance opérationnelle" },
     ]
   },
+  {
+    id: "hr",
+    name: "RH",
+    color: "from-indigo-500 to-indigo-400",
+    icon: Users,
+    employees: [
+      { name: "Céline Hervé", role: "DRH IA", description: "Pilote la stratégie RH et le développement des talents" },
+      { name: "Aurélien Brun", role: "Talent Manager", description: "Gère le recrutement et l'onboarding" },
+    ]
+  },
+  {
+    id: "legal",
+    name: "Juridique",
+    color: "from-slate-500 to-slate-400",
+    icon: Shield,
+    employees: [
+      { name: "Margaux Picard", role: "Directeur Juridique IA", description: "Supervise les contrats et la conformité légale" },
+    ]
+  },
 ];
 
 const DEPARTMENTS_EN = [
@@ -236,6 +255,25 @@ const DEPARTMENTS_EN = [
       { name: "Philippe Renaud", role: "AI Chief of Staff", description: "Coordinates cross-functional operations" },
       { name: "Nathalie Vincent", role: "Project Manager", description: "Manages strategic projects and deadlines" },
       { name: "David Gauthier", role: "Operations Analyst", description: "Optimizes processes and operational performance" },
+    ]
+  },
+  {
+    id: "hr",
+    name: "HR",
+    color: "from-indigo-500 to-indigo-400",
+    icon: Users,
+    employees: [
+      { name: "Céline Hervé", role: "AI HR Director", description: "Leads HR strategy and talent development" },
+      { name: "Aurélien Brun", role: "Talent Manager", description: "Manages recruitment and onboarding" },
+    ]
+  },
+  {
+    id: "legal",
+    name: "Legal",
+    color: "from-slate-500 to-slate-400",
+    icon: Shield,
+    employees: [
+      { name: "Margaux Picard", role: "AI Legal Director", description: "Oversees contracts and legal compliance" },
     ]
   },
 ];

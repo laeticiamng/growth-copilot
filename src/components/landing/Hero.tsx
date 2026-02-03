@@ -168,10 +168,10 @@ export function Hero() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
               {[
-                { value: "9", label: isEn ? "Departments" : "Départements" },
+                { value: "11", label: isEn ? "Departments" : "Départements" },
                 { value: "24/7", label: isEn ? "Automation" : "Automatisation" },
                 { value: "100%", label: isEn ? "Auditable" : "Auditable" },
-                { value: "0", label: isEn ? "Technical jargon" : "Jargon technique" },
+                { value: "37", label: isEn ? "AI Employees" : "Employés IA" },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</p>
