@@ -2437,6 +2437,306 @@ export type Database = {
           },
         ]
       }
+      evidence_bundles: {
+        Row: {
+          agent_run_id: string | null
+          approval_id: string | null
+          confidence_score: number | null
+          created_at: string
+          executive_run_id: string | null
+          generated_at: string
+          id: string
+          key_metrics: Json | null
+          limitations: string[] | null
+          overall_confidence: Database["public"]["Enums"]["evidence_confidence"]
+          summary: string | null
+          title: string
+          warnings: string[] | null
+          workspace_id: string
+        }
+        Insert: {
+          agent_run_id?: string | null
+          approval_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          executive_run_id?: string | null
+          generated_at?: string
+          id?: string
+          key_metrics?: Json | null
+          limitations?: string[] | null
+          overall_confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          summary?: string | null
+          title: string
+          warnings?: string[] | null
+          workspace_id: string
+        }
+        Update: {
+          agent_run_id?: string | null
+          approval_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          executive_run_id?: string | null
+          generated_at?: string
+          id?: string
+          key_metrics?: Json | null
+          limitations?: string[] | null
+          overall_confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          summary?: string | null
+          title?: string
+          warnings?: string[] | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_bundles_agent_run_id_fkey"
+            columns: ["agent_run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_bundles_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "approval_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_bundles_executive_run_id_fkey"
+            columns: ["executive_run_id"]
+            isOneToOne: false
+            referencedRelation: "executive_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_bundles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_metrics: {
+        Row: {
+          anomaly_reason: string | null
+          baseline_value: number | null
+          bundle_id: string
+          change_percent: number | null
+          comparison_type: string | null
+          created_at: string
+          id: string
+          interpretation: string | null
+          is_anomaly: boolean | null
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number | null
+          period_end: string | null
+          period_start: string | null
+          recommended_action: string | null
+          source_id: string | null
+          threshold_max: number | null
+          threshold_min: number | null
+          trend: string | null
+          workspace_id: string
+        }
+        Insert: {
+          anomaly_reason?: string | null
+          baseline_value?: number | null
+          bundle_id: string
+          change_percent?: number | null
+          comparison_type?: string | null
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          is_anomaly?: boolean | null
+          metric_name: string
+          metric_unit?: string | null
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          recommended_action?: string | null
+          source_id?: string | null
+          threshold_max?: number | null
+          threshold_min?: number | null
+          trend?: string | null
+          workspace_id: string
+        }
+        Update: {
+          anomaly_reason?: string | null
+          baseline_value?: number | null
+          bundle_id?: string
+          change_percent?: number | null
+          comparison_type?: string | null
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          is_anomaly?: boolean | null
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          recommended_action?: string | null
+          source_id?: string | null
+          threshold_max?: number | null
+          threshold_min?: number | null
+          trend?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_metrics_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_metrics_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_metrics_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_reasoning: {
+        Row: {
+          alternative_interpretations: string[] | null
+          bundle_id: string
+          confidence: Database["public"]["Enums"]["evidence_confidence"]
+          content: string
+          created_at: string
+          id: string
+          step_order: number
+          step_type: string
+          supporting_evidence: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          alternative_interpretations?: string[] | null
+          bundle_id: string
+          confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          content: string
+          created_at?: string
+          id?: string
+          step_order: number
+          step_type: string
+          supporting_evidence?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          alternative_interpretations?: string[] | null
+          bundle_id?: string
+          confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          content?: string
+          created_at?: string
+          id?: string
+          step_order?: number
+          step_type?: string
+          supporting_evidence?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_reasoning_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_reasoning_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_sources: {
+        Row: {
+          api_endpoint: string | null
+          bundle_id: string
+          confidence: Database["public"]["Enums"]["evidence_confidence"]
+          created_at: string
+          data_extracted: Json
+          data_snapshot_at: string | null
+          extraction_method: string | null
+          id: string
+          is_verified: boolean | null
+          query_used: string | null
+          reliability_notes: string | null
+          source_name: string
+          source_type: Database["public"]["Enums"]["evidence_source_type"]
+          source_url: string | null
+          verified_at: string | null
+          verified_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          api_endpoint?: string | null
+          bundle_id: string
+          confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          created_at?: string
+          data_extracted?: Json
+          data_snapshot_at?: string | null
+          extraction_method?: string | null
+          id?: string
+          is_verified?: boolean | null
+          query_used?: string | null
+          reliability_notes?: string | null
+          source_name: string
+          source_type: Database["public"]["Enums"]["evidence_source_type"]
+          source_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          api_endpoint?: string | null
+          bundle_id?: string
+          confidence?: Database["public"]["Enums"]["evidence_confidence"]
+          created_at?: string
+          data_extracted?: Json
+          data_snapshot_at?: string | null
+          extraction_method?: string | null
+          id?: string
+          is_verified?: boolean | null
+          query_used?: string | null
+          reliability_notes?: string | null
+          source_name?: string
+          source_type?: Database["public"]["Enums"]["evidence_source_type"]
+          source_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_sources_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_sources_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       executive_runs: {
         Row: {
           completed_at: string | null
@@ -7155,6 +7455,19 @@ export type Database = {
     }
     Functions: {
       accept_team_invitation: { Args: { _token: string }; Returns: Json }
+      add_evidence_source: {
+        Args: {
+          _bundle_id: string
+          _confidence?: string
+          _data_extracted: Json
+          _query_used?: string
+          _source_name: string
+          _source_type: string
+          _source_url?: string
+          _workspace_id: string
+        }
+        Returns: string
+      }
       check_claim_guardrail: {
         Args: {
           _claim: string
@@ -7189,6 +7502,18 @@ export type Database = {
       compute_ops_metrics: {
         Args: { _date?: string; _workspace_id: string }
         Returns: undefined
+      }
+      create_evidence_bundle: {
+        Args: {
+          _agent_run_id?: string
+          _confidence?: string
+          _executive_run_id?: string
+          _key_metrics?: Json
+          _summary?: string
+          _title: string
+          _workspace_id: string
+        }
+        Returns: string
       }
       get_effective_role: {
         Args: { _site_id?: string; _user_id: string; _workspace_id: string }
@@ -7359,6 +7684,16 @@ export type Database = {
         | "media_analytics_guardian"
       app_role: "owner" | "admin" | "member" | "manager" | "analyst" | "viewer"
       content_status: "draft" | "review" | "approved" | "published" | "archived"
+      evidence_confidence: "high" | "medium" | "low" | "inferred"
+      evidence_source_type:
+        | "database"
+        | "api"
+        | "web_scrape"
+        | "analytics"
+        | "ai_inference"
+        | "user_input"
+        | "third_party"
+        | "historical"
       experiment_status:
         | "draft"
         | "running"
@@ -7606,6 +7941,17 @@ export const Constants = {
       ],
       app_role: ["owner", "admin", "member", "manager", "analyst", "viewer"],
       content_status: ["draft", "review", "approved", "published", "archived"],
+      evidence_confidence: ["high", "medium", "low", "inferred"],
+      evidence_source_type: [
+        "database",
+        "api",
+        "web_scrape",
+        "analytics",
+        "ai_inference",
+        "user_input",
+        "third_party",
+        "historical",
+      ],
       experiment_status: [
         "draft",
         "running",

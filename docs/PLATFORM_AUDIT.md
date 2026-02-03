@@ -20,6 +20,7 @@
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
 | Départements RH/Juridique | ✅ Implémenté | 80% |
+| Evidence Bundles IA | ✅ Implémenté | 85% |
 | Support Multilingue (3+) | ⚠️ Partiel (FR/EN) | 50% |
 | Monitoring & Observabilité | ⚠️ Partiel | 60% |
 

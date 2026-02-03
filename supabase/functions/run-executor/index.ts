@@ -26,7 +26,29 @@ interface RunResult {
   run_id: string;
   status: "queued" | "running" | "completed" | "failed";
   outputs?: Record<string, unknown>;
+  evidence_bundle_id?: string;
   error?: string;
+}
+
+interface EvidenceData {
+  sources: Array<{
+    type: string;
+    name: string;
+    data: Record<string, unknown>;
+    confidence: string;
+  }>;
+  metrics: Array<{
+    name: string;
+    value: number;
+    unit?: string;
+    trend?: string;
+    baseline?: number;
+  }>;
+  reasoning: Array<{
+    type: string;
+    content: string;
+    confidence: string;
+  }>;
 }
 
 // Template-based run executor (works without AI keys)
@@ -97,6 +119,15 @@ async function executeRun(
       } as Record<string, unknown>)
       .eq("id", runId);
 
+    // Create Evidence Bundle
+    const evidenceBundleId = await createEvidenceBundle(
+      supabase,
+      workspaceId,
+      runId,
+      runType,
+      outputs
+    );
+
     // Log action
     await supabase.from("action_log").insert({
       workspace_id: workspaceId,
@@ -108,7 +139,7 @@ async function executeRun(
       result: "success",
     } as Record<string, unknown>);
 
-    return { run_id: runId, status: "completed", outputs };
+    return { run_id: runId, status: "completed", outputs, evidence_bundle_id: evidenceBundleId };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     
@@ -123,6 +154,195 @@ async function executeRun(
 
     return { run_id: runId, status: "failed", error: errorMessage };
   }
+}
+
+// Create Evidence Bundle for a completed run
+// deno-lint-ignore no-explicit-any
+async function createEvidenceBundle(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string,
+  runId: string,
+  runType: RunType,
+  outputs: Record<string, unknown>
+): Promise<string | undefined> {
+  try {
+    // Build key metrics from outputs
+    const keyMetrics: Array<{ name: string; value: number; unit?: string; trend?: string }> = [];
+    
+    // Extract metrics based on run type
+    // deno-lint-ignore no-explicit-any
+    const metrics = outputs.metrics as Record<string, any> | undefined;
+    if (metrics) {
+      if (typeof metrics.pending_approvals === 'number') {
+        keyMetrics.push({ name: "Approbations en attente", value: metrics.pending_approvals });
+      }
+      if (typeof metrics.success_rate === 'number') {
+        keyMetrics.push({ name: "Taux de succès", value: metrics.success_rate, unit: "%" });
+      }
+      if (typeof metrics.total_actions === 'number') {
+        keyMetrics.push({ name: "Actions totales", value: metrics.total_actions });
+      }
+    }
+
+    // deno-lint-ignore no-explicit-any
+    const issuesSummary = outputs.issues_summary as Record<string, any> | undefined;
+    if (issuesSummary) {
+      if (typeof issuesSummary.critical === 'number') {
+        keyMetrics.push({ name: "Problèmes critiques", value: issuesSummary.critical });
+      }
+      if (typeof issuesSummary.total === 'number') {
+        keyMetrics.push({ name: "Total problèmes", value: issuesSummary.total });
+      }
+    }
+
+    // deno-lint-ignore no-explicit-any
+    const healthScore = outputs.health_score as number | undefined;
+    if (typeof healthScore === 'number') {
+      keyMetrics.push({ name: "Score de santé", value: healthScore, unit: "%" });
+    }
+
+    // Determine confidence based on data availability
+    const hasRealData = keyMetrics.length > 0;
+    const confidence = hasRealData ? 'medium' : 'low';
+
+    // Create the bundle
+    const { data: bundle, error: bundleError } = await supabase
+      .from("evidence_bundles")
+      .insert({
+        workspace_id: workspaceId,
+        executive_run_id: runId,
+        title: `Evidence: ${getRunTypeLabel(runType)}`,
+        summary: outputs.summary as string || `Preuves pour l'exécution ${runType}`,
+        key_metrics: keyMetrics,
+        overall_confidence: confidence,
+        confidence_score: hasRealData ? 70 : 30,
+        limitations: hasRealData ? [] : ["Données limitées disponibles"],
+        warnings: [],
+      } as Record<string, unknown>)
+      .select("id")
+      .single();
+
+    if (bundleError) {
+      console.error("Failed to create evidence bundle:", bundleError);
+      return undefined;
+    }
+
+    const bundleId = bundle.id;
+
+    // Add data sources
+    const sources: Array<{ type: string; name: string; data: Record<string, unknown>; confidence: string }> = [];
+
+    if (metrics) {
+      sources.push({
+        type: "database",
+        name: "Métriques internes",
+        data: metrics,
+        confidence: "high",
+      });
+    }
+
+    if (outputs.recent_activity) {
+      sources.push({
+        type: "database",
+        name: "Historique des actions",
+        data: { count: (outputs.recent_activity as unknown[]).length },
+        confidence: "high",
+      });
+    }
+
+    if (outputs.team) {
+      sources.push({
+        type: "database",
+        name: "Données équipe",
+        data: outputs.team as Record<string, unknown>,
+        confidence: "high",
+      });
+    }
+
+    if (outputs.pipeline) {
+      sources.push({
+        type: "database",
+        name: "Pipeline commercial",
+        data: outputs.pipeline as Record<string, unknown>,
+        confidence: "high",
+      });
+    }
+
+    // Insert sources
+    if (sources.length > 0) {
+      await supabase.from("evidence_sources").insert(
+        sources.map((s) => ({
+          bundle_id: bundleId,
+          workspace_id: workspaceId,
+          source_type: s.type,
+          source_name: s.name,
+          data_extracted: s.data,
+          confidence: s.confidence,
+          data_snapshot_at: new Date().toISOString(),
+        } as Record<string, unknown>))
+      );
+    }
+
+    // Add reasoning steps
+    const reasoning: Array<{ order: number; type: string; content: string; confidence: string }> = [];
+
+    reasoning.push({
+      order: 1,
+      type: "observation",
+      content: `Exécution de l'analyse ${getRunTypeLabel(runType)}`,
+      confidence: "high",
+    });
+
+    if (outputs.priorities && Array.isArray(outputs.priorities)) {
+      reasoning.push({
+        order: 2,
+        type: "analysis",
+        content: `${(outputs.priorities as string[]).filter(Boolean).length} priorité(s) identifiée(s)`,
+        confidence: "medium",
+      });
+    }
+
+    if (outputs.recommendations && Array.isArray(outputs.recommendations)) {
+      const recs = (outputs.recommendations as string[]).filter(Boolean);
+      reasoning.push({
+        order: 3,
+        type: "recommendation",
+        content: recs.length > 0 ? recs[0] : "Aucune recommandation spécifique",
+        confidence: "medium",
+      });
+    }
+
+    if (reasoning.length > 0) {
+      await supabase.from("evidence_reasoning").insert(
+        reasoning.map((r) => ({
+          bundle_id: bundleId,
+          workspace_id: workspaceId,
+          step_order: r.order,
+          step_type: r.type,
+          content: r.content,
+          confidence: r.confidence,
+        } as Record<string, unknown>))
+      );
+    }
+
+    return bundleId;
+  } catch (error) {
+    console.error("Error creating evidence bundle:", error);
+    return undefined;
+  }
+}
+
+function getRunTypeLabel(runType: RunType): string {
+  const labels: Record<RunType, string> = {
+    DAILY_EXECUTIVE_BRIEF: "Brief quotidien",
+    WEEKLY_EXECUTIVE_REVIEW: "Revue hebdomadaire",
+    MARKETING_WEEK_PLAN: "Plan marketing",
+    SEO_AUDIT_REPORT: "Audit SEO",
+    FUNNEL_DIAGNOSTIC: "Diagnostic funnel",
+    ACCESS_REVIEW: "Revue des accès",
+    SALES_PIPELINE_REVIEW: "Revue pipeline",
+  };
+  return labels[runType] || runType;
 }
 
 // Template-based generators (work without AI)
