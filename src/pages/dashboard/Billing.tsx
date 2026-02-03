@@ -2,472 +2,371 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  Check, 
-  Zap, 
-  Building2, 
-  Rocket,
-  Crown,
-  CreditCard,
-  AlertCircle,
-  TrendingUp,
-  Info,
-  ShieldAlert,
-  Loader2,
-} from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useServices, Service } from "@/hooks/useServices";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
+import { toast } from "sonner";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Crown,
+  Zap,
+  Check,
+  CreditCard,
+  TrendingUp,
+  Briefcase,
+  BarChart3,
+  Shield,
+  Puzzle,
+  Code,
+  HeadphonesIcon,
+  Settings,
+  Building2,
+  Sparkles,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 
-interface Plan {
-  id: string;
-  name: string;
-  price: number;
-  period: string;
-  icon: React.ElementType;
-  features: string[];
-  quotas: {
-    sites: number;
-    crawls: number;
-    agentRuns: number;
-  };
-  popular?: boolean;
-  description: string;
-}
-
-const plans: Plan[] = [
-  {
-    id: "free",
-    name: "Free",
-    price: 0,
-    period: "pour toujours",
-    icon: Zap,
-    description: "Pour découvrir la plateforme",
-    features: [
-      "1 site",
-      "10 crawls/mois",
-      "Audit SEO basique",
-      "Dashboard KPIs",
-      "Mode demo complet",
-    ],
-    quotas: { sites: 1, crawls: 10, agentRuns: 50 },
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: 49,
-    period: "/mois",
-    icon: Rocket,
-    description: "Pour les indépendants",
-    features: [
-      "2 sites",
-      "100 crawls/mois",
-      "GSC & GA4 intégrés",
-      "Rapports PDF",
-      "Keywords tracking",
-      "Support email",
-    ],
-    quotas: { sites: 2, crawls: 100, agentRuns: 200 },
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    price: 149,
-    period: "/mois",
-    icon: Crown,
-    popular: true,
-    description: "Pour les équipes en croissance",
-    features: [
-      "5 sites",
-      "500 crawls/mois",
-      "Tous modules actifs",
-      "Google Ads intégré",
-      "GBP & Local SEO",
-      "CRO Autopilot",
-      "Lifecycle & CRM",
-      "Support prioritaire",
-    ],
-    quotas: { sites: 5, crawls: 500, agentRuns: 1000 },
-  },
-  {
-    id: "agency",
-    name: "Agency",
-    price: 399,
-    period: "/mois",
-    icon: Building2,
-    description: "Pour les agences",
-    features: [
-      "Clients illimités",
-      "2000 crawls/mois",
-      "Multi-établissements",
-      "White-label exports",
-      "API access",
-      "Autopilot complet",
-      "Account manager dédié",
-      "SLA garanti",
-    ],
-    quotas: { sites: -1, crawls: 2000, agentRuns: 5000 },
-  },
-];
-
-// Helper to calculate usage percentage with color coding
-const getUsageStatus = (used: number, total: number) => {
-  if (total === -1) return { percent: 0, status: "unlimited" as const };
-  const percent = (used / total) * 100;
-  if (percent >= 90) return { percent, status: "critical" as const };
-  if (percent >= 70) return { percent, status: "warning" as const };
-  return { percent, status: "normal" as const };
+// Service icons mapping
+const SERVICE_ICONS: Record<string, React.ElementType> = {
+  marketing: TrendingUp,
+  sales: Briefcase,
+  finance: BarChart3,
+  security: Shield,
+  product: Puzzle,
+  engineering: Code,
+  data: BarChart3,
+  support: HeadphonesIcon,
+  governance: Settings,
+  "core-os": Zap,
 };
 
-const UsageBar = ({ 
-  label, 
-  used, 
-  total, 
-  tooltip 
-}: { 
-  label: string; 
-  used: number; 
-  total: number; 
-  tooltip?: string;
-}) => {
-  const { percent, status } = getUsageStatus(used, total);
-  
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1.5">
-          {label}
-          {tooltip && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" aria-label="Plus d'informations" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">{tooltip}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </span>
-        <span className={`font-medium ${status === "critical" ? "text-destructive" : status === "warning" ? "text-amber-500" : ""}`}>
-          {used} / {total === -1 ? "∞" : total}
-        </span>
-      </div>
-      <div className="relative">
-        <Progress 
-          value={percent} 
-          className={`h-2.5 ${status === "critical" ? "[&>div]:bg-destructive" : status === "warning" ? "[&>div]:bg-amber-500" : ""}`}
-          aria-label={`${label}: ${used} sur ${total === -1 ? "illimité" : total}`}
-        />
-        {status === "critical" && (
-          <TrendingUp className="absolute -right-1 -top-1 w-3.5 h-3.5 text-destructive animate-pulse" aria-hidden="true" />
-        )}
-      </div>
-    </div>
-  );
+// Service prices (matching landing page)
+const SERVICE_PRICES: Record<string, number> = {
+  marketing: 49,
+  sales: 39,
+  finance: 29,
+  security: 29,
+  product: 29,
+  engineering: 29,
+  data: 39,
+  support: 19,
+  governance: 49,
 };
 
-const Billing = () => {
+const FULL_COMPANY_PRICE = 299;
+
+export default function Billing() {
   const { currentWorkspace } = useWorkspace();
+  const { 
+    catalog, 
+    catalogLoading, 
+    enabledServices, 
+    subscription, 
+    subscriptionLoading,
+    enableService,
+    disableService,
+    isFullCompany,
+    hasService,
+  } = useServices();
   const { isAtLeastRole } = usePermissions();
-  const [currentPlan] = useState("free");
   
-  // Fetch real usage data from database
-  const { data: usageData, isLoading: usageLoading } = useQuery({
-    queryKey: ['billing-usage', currentWorkspace?.id],
-    queryFn: async () => {
-      if (!currentWorkspace?.id) return { sites: 0, crawls: 0, agentRuns: 0 };
-      
-      // Get sites count
-      const { count: sitesCount } = await supabase
-        .from('sites')
-        .select('*', { count: 'exact', head: true })
-        .eq('workspace_id', currentWorkspace.id);
-      
-      // Get crawls this month (from action_log with SEO crawler actions)
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-      
-      const { count: crawlsCount } = await supabase
-        .from('action_log')
-        .select('*', { count: 'exact', head: true })
-        .eq('workspace_id', currentWorkspace.id)
-        .eq('action_type', 'seo_crawl')
-        .gte('created_at', startOfMonth.toISOString());
-      
-      // Get agent runs this month
-      const { count: agentRunsCount } = await supabase
-        .from('agent_runs')
-        .select('*', { count: 'exact', head: true })
-        .eq('workspace_id', currentWorkspace.id)
-        .gte('created_at', startOfMonth.toISOString());
-      
-      return {
-        sites: sitesCount || 0,
-        crawls: crawlsCount || 0,
-        agentRuns: agentRunsCount || 0,
-      };
-    },
-    enabled: !!currentWorkspace?.id,
-  });
+  const [togglingService, setTogglingService] = useState<string | null>(null);
+  const [upgradingToFull, setUpgradingToFull] = useState(false);
 
-  const usage = usageData || { sites: 0, crawls: 0, agentRuns: 0 };
-  const currentPlanData = plans.find(p => p.id === currentPlan) || plans[0];
-  const canManageBilling = isAtLeastRole('owner');
+  // Filter out core services (they're always free)
+  const paidServices = catalog.filter(s => !s.is_core);
+  
+  // Calculate current "à la carte" total
+  const alaCarteTotal = paidServices
+    .filter(s => hasService(s.slug))
+    .reduce((sum, s) => sum + (SERVICE_PRICES[s.slug] || 29), 0);
+
+  // Toggle a service
+  const handleToggleService = async (service: Service, enabled: boolean) => {
+    if (isFullCompany) {
+      toast.info("Tous les services sont inclus dans Full Company");
+      return;
+    }
+
+    setTogglingService(service.id);
+    try {
+      if (enabled) {
+        const { error } = await enableService(service.id);
+        if (error) throw error;
+        toast.success(`${service.name} activé`);
+      } else {
+        const { error } = await disableService(service.id);
+        if (error) throw error;
+        toast.success(`${service.name} désactivé`);
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la modification");
+    } finally {
+      setTogglingService(null);
+    }
+  };
+
+  // Upgrade to Full Company
+  const handleUpgradeToFull = async () => {
+    setUpgradingToFull(true);
+    // TODO: Integrate with Stripe for actual payment
+    toast.info("L'intégration Stripe arrive bientôt !");
+    setUpgradingToFull(false);
+  };
+
+  const isLoading = catalogLoading || subscriptionLoading;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <Skeleton className="h-48 lg:col-span-2" />
+          <Skeleton className="h-48" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
   return (
-    <PermissionGuard 
-      permission="manage_billing" 
-      fallback={
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <ShieldAlert className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Accès restreint</h2>
-          <p className="text-muted-foreground max-w-md">
-            Seuls les propriétaires du workspace peuvent accéder aux informations de facturation. 
-            Contactez le propriétaire pour gérer l'abonnement.
+    <PermissionGuard permission="manage_billing">
+      <div className="space-y-8">
+        {/* Header */}
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight">Facturation</h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez vos services et votre abonnement Portable Company.
           </p>
-        </div>
-      }
-    >
-    <div className="space-y-8">
-      {/* Header with better hierarchy */}
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Billing & Plans</h1>
-        <p className="text-muted-foreground mt-1">
-          Gérez votre abonnement et consultez votre utilisation.
-        </p>
-      </header>
+        </header>
 
-      {/* Stripe integration notice */}
-      <Card className="border-primary/50 bg-primary/5" role="alert" aria-live="polite">
-        <CardContent className="flex items-start gap-4 py-4">
-          <div className="p-2 rounded-full bg-primary/10 mt-0.5" aria-hidden="true">
-            <AlertCircle className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-foreground">Intégration Stripe en cours</p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Les paiements réels seront activés prochainement. Pour l'instant, vous êtes sur le plan <strong>Free</strong>.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Stripe notice */}
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="flex items-start gap-4 py-4">
+            <div className="p-2 rounded-full bg-primary/10 mt-0.5">
+              <AlertCircle className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-foreground">Intégration Stripe en cours</p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Les paiements réels seront activés prochainement. Activez/désactivez les services librement pour tester.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Current Plan & Usage - Better visual separation */}
-      <section aria-labelledby="current-plan-heading">
-        <h2 id="current-plan-heading" className="sr-only">Votre plan actuel</h2>
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* Current Plan Overview */}
+        <div className="grid lg:grid-cols-3 gap-6">
           <Card variant="gradient" className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-xl bg-primary/10">
-                    <currentPlanData.icon className="w-6 h-6 text-primary" aria-hidden="true" />
+                    {isFullCompany ? (
+                      <Crown className="w-6 h-6 text-primary" />
+                    ) : (
+                      <Building2 className="w-6 h-6 text-primary" />
+                    )}
                   </div>
                   <div>
                     <CardTitle className="text-xl">
-                      Plan {currentPlanData.name}
+                      {isFullCompany ? "Full Company" : "À la carte"}
                     </CardTitle>
                     <CardDescription className="mt-0.5">
-                      {currentPlanData.price === 0 ? "Gratuit" : `€${currentPlanData.price}${currentPlanData.period}`}
+                      {isFullCompany 
+                        ? "Tous les départements inclus" 
+                        : `${enabledServices.filter(s => !s.is_core).length} département(s) activé(s)`
+                      }
                     </CardDescription>
                   </div>
                 </div>
-                <Badge variant="success" className="text-sm px-3 py-1">
-                  <span className="w-2 h-2 rounded-full bg-current mr-2 animate-pulse" aria-hidden="true" />
-                  Actif
-                </Badge>
+                <div className="text-right">
+                  <div className="text-3xl font-bold">
+                    {isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal}€
+                    <span className="text-sm font-normal text-muted-foreground">/mois</span>
+                  </div>
+                  {!isFullCompany && alaCarteTotal > FULL_COMPANY_PRICE && (
+                    <p className="text-xs text-destructive mt-1">
+                      Économisez {alaCarteTotal - FULL_COMPANY_PRICE}€ avec Full Company
+                    </p>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6 sm:grid-cols-3">
-                <UsageBar 
-                  label="Sites" 
-                  used={usage.sites} 
-                  total={currentPlanData.quotas.sites}
-                  tooltip="Nombre de sites que vous pouvez connecter"
-                />
-                <UsageBar 
-                  label="Crawls ce mois" 
-                  used={usage.crawls} 
-                  total={currentPlanData.quotas.crawls}
-                  tooltip="Nombre d'audits SEO automatiques par mois"
-                />
-                <UsageBar 
-                  label="Agent Runs" 
-                  used={usage.agentRuns} 
-                  total={currentPlanData.quotas.agentRuns}
-                  tooltip="Exécutions d'agents IA pour l'automatisation"
-                />
+              <div className="flex flex-wrap gap-2">
+                {enabledServices.map(service => {
+                  const Icon = SERVICE_ICONS[service.slug] || Puzzle;
+                  return (
+                    <Badge key={service.id} variant="secondary" className="gap-1.5 py-1">
+                      <Icon className="w-3 h-3" />
+                      {service.name}
+                      {service.is_core && (
+                        <span className="text-xs opacity-60">(Core)</span>
+                      )}
+                    </Badge>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
 
+          {/* Full Company Upgrade Card */}
+          {!isFullCompany && (
+            <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+              <CardHeader className="text-center pb-2">
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-primary to-accent shadow-lg">
+                  <Crown className="w-7 h-7 text-primary-foreground" />
+                </div>
+                <CardTitle>Full Company</CardTitle>
+                <div className="text-2xl font-bold mt-2">
+                  {FULL_COMPANY_PRICE}€
+                  <span className="text-sm font-normal text-muted-foreground">/mois</span>
+                </div>
+              </CardHeader>
+              <CardContent className="text-center space-y-4">
+                <ul className="space-y-2 text-sm text-left">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Tous les 9 départements
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Support prioritaire
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    Économies garanties
+                  </li>
+                </ul>
+                <Button 
+                  variant="gradient" 
+                  className="w-full" 
+                  onClick={handleUpgradeToFull}
+                  disabled={upgradingToFull}
+                >
+                  {upgradingToFull ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4 mr-2" />
+                  )}
+                  Passer à Full Company
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Services Grid */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-semibold">Départements disponibles</h2>
+              <p className="text-sm text-muted-foreground">
+                Activez les services dont vous avez besoin
+              </p>
+            </div>
+            {isFullCompany && (
+              <Badge variant="success">
+                <Crown className="w-3 h-3 mr-1" />
+                Tout inclus
+              </Badge>
+            )}
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paidServices.map(service => {
+              const Icon = SERVICE_ICONS[service.slug] || Puzzle;
+              const price = SERVICE_PRICES[service.slug] || 29;
+              const isEnabled = hasService(service.slug);
+              const isToggling = togglingService === service.id;
+
+              return (
+                <Card 
+                  key={service.id} 
+                  className={`transition-all ${isEnabled ? "border-primary/30 bg-primary/5" : ""}`}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${isEnabled ? "bg-primary/20" : "bg-secondary"}`}>
+                          <Icon className={`w-5 h-5 ${isEnabled ? "text-primary" : "text-muted-foreground"}`} />
+                        </div>
+                        <div>
+                          <p className="font-medium">{service.name}</p>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {price}€/mois
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isToggling && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                        <Switch
+                          checked={isEnabled || isFullCompany}
+                          onCheckedChange={(checked) => handleToggleService(service, checked)}
+                          disabled={isFullCompany || isToggling}
+                        />
+                      </div>
+                    </div>
+                    {service.description && (
+                      <p className="text-xs text-muted-foreground mt-3 line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Core OS (always included) */}
+        <section>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" />
+            Core OS
+            <Badge variant="outline">Toujours inclus</Badge>
+          </h2>
+          <Card variant="feature">
+            <CardContent className="pt-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                {["Workspace & Sites", "RBAC & Permissions", "Audit Log", "Scheduler & Approvals"].map(item => (
+                  <div key={item} className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-primary" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Payment Info */}
+        <section>
           <Card variant="feature">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <CreditCard className="w-5 h-5" aria-hidden="true" />
-                Paiement
+                <CreditCard className="w-5 h-5" />
+                Moyen de paiement
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
-                <CreditCard className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" aria-hidden="true" />
+            <CardContent>
+              <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
+                <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground mb-3">Aucune carte enregistrée</p>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span tabIndex={0}>
-                        <Button variant="outline" size="sm" disabled aria-describedby="card-disabled-reason">
-                          <CreditCard className="w-4 h-4 mr-2" aria-hidden="true" />
-                          Ajouter une carte
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent id="card-disabled-reason">
-                      <p>Disponible prochainement</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Button variant="outline" size="sm" disabled>
+                  Ajouter une carte
+                </Button>
+                <p className="text-xs text-muted-foreground mt-4">
+                  🔒 Paiements sécurisés via Stripe
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
-                <span className="w-4 h-4 inline-flex items-center justify-center rounded bg-primary/10" aria-hidden="true">
-                  🔒
-                </span>
-                Paiements sécurisés via Stripe
-              </p>
             </CardContent>
           </Card>
-        </div>
-      </section>
-
-      {/* Plans Grid - Better hierarchy and spacing */}
-      <section aria-labelledby="all-plans-heading">
-        <div className="flex items-center justify-between mb-6">
-          <h2 id="all-plans-heading" className="text-xl font-semibold">Tous les plans</h2>
-          <p className="text-sm text-muted-foreground hidden sm:block">Choisissez le plan adapté à vos besoins</p>
-        </div>
-        
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {plans.map((plan) => {
-            const Icon = plan.icon;
-            const isCurrent = plan.id === currentPlan;
-            
-            return (
-              <Card 
-                key={plan.id} 
-                variant={plan.popular ? "gradient" : "feature"}
-                className={`relative transition-all duration-200 hover:shadow-lg ${
-                  isCurrent ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
-                } ${plan.popular ? "scale-[1.02] z-10" : ""}`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 shadow-md" variant="default">
-                    ⭐ Populaire
-                  </Badge>
-                )}
-                <CardHeader className="text-center pb-2 pt-6">
-                  <div 
-                    className={`w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center transition-transform hover:scale-110 ${
-                      plan.popular ? 'gradient-bg shadow-lg' : 'bg-secondary'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <Icon className={`w-7 h-7 ${plan.popular ? 'text-primary-foreground' : 'text-foreground'}`} />
-                  </div>
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
-                  <div className="text-3xl font-bold mt-3">
-                    {plan.price === 0 ? (
-                      "Gratuit"
-                    ) : (
-                      <>
-                        €{plan.price}
-                        <span className="text-sm font-normal text-muted-foreground">{plan.period}</span>
-                      </>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <ul className="space-y-2.5" role="list" aria-label={`Fonctionnalités du plan ${plan.name}`}>
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm">
-                        <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter className="pt-4">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="w-full" tabIndex={isCurrent ? 0 : -1}>
-                          <Button 
-                            className="w-full" 
-                            variant={isCurrent ? "outline" : plan.popular ? "gradient" : "default"}
-                            disabled={isCurrent}
-                            aria-label={isCurrent ? `${plan.name} - Plan actuel` : `Choisir le plan ${plan.name}`}
-                          >
-                            {isCurrent ? (
-                              <>
-                                <Check className="w-4 h-4 mr-1.5" aria-hidden="true" />
-                                Plan actuel
-                              </>
-                            ) : (
-                              "Choisir ce plan"
-                            )}
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      {isCurrent && (
-                        <TooltipContent>
-                          <p>Vous êtes actuellement sur ce plan</p>
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Invoice History - Better empty state */}
-      <section aria-labelledby="invoices-heading">
-        <Card variant="feature">
-          <CardHeader>
-            <CardTitle id="invoices-heading">Historique des factures</CardTitle>
-            <CardDescription>Téléchargez vos factures passées</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-10 px-4">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/50 mx-auto mb-4 flex items-center justify-center">
-                <CreditCard className="w-8 h-8 text-muted-foreground/50" aria-hidden="true" />
-              </div>
-              <p className="font-medium text-foreground mb-1">Aucune facture pour l'instant</p>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Les factures apparaîtront ici après votre premier paiement. Vous pourrez les télécharger au format PDF.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </div>
+        </section>
+      </div>
     </PermissionGuard>
   );
-};
-
-export default Billing;
+}

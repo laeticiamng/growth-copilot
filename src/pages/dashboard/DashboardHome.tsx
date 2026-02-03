@@ -24,6 +24,7 @@ import {
   PriorityActions,
   QuickLaunchers,
   ApprovalsWidget,
+  RunsHistory,
 } from "@/components/cockpit";
 
 // CGO Agent Persona
@@ -272,8 +273,13 @@ export default function DashboardHome() {
         />
       </div>
 
-      {/* Quick Launchers */}
-      <QuickLaunchers launchers={quickLaunchers} onLaunch={handleLaunchRun} />
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Quick Launchers */}
+        <QuickLaunchers launchers={quickLaunchers} onLaunch={handleLaunchRun} />
+
+        {/* Runs History */}
+        <RunsHistory maxItems={4} />
+      </div>
     </div>
   );
 }
