@@ -21,6 +21,9 @@
 | Collecte de Données (KPIs) | ⚠️ Partiel | 60% |
 | Départements RH/Juridique | ✅ Implémenté | 80% |
 | Evidence Bundles IA | ✅ Implémenté | 85% |
+| Module Revue Accès | ✅ Implémenté | 85% |
+| Automatisation KPI (pg_cron) | ✅ Implémenté | 80% |
+| Onboarding 4 étapes | ✅ Existant | 90% |
 | Support Multilingue (3+) | ⚠️ Partiel (FR/EN) | 50% |
 | Monitoring & Observabilité | ⚠️ Partiel | 60% |
 
