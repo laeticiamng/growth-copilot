@@ -94,6 +94,14 @@ export function Footer() {
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
               Growth OS {isEn ? "is a product of" : "est un produit de"} EmotionsCare Sasu
+              {" · "}
+              <Link to="/privacy" className="hover:text-foreground underline">
+                {isEn ? "Privacy Policy" : "Politique de confidentialité"}
+              </Link>
+              {" · "}
+              <Link to="/terms" className="hover:text-foreground underline">
+                {isEn ? "Terms of Service" : "Conditions d'utilisation"}
+              </Link>
             </p>
           </div>
           <div className="flex items-center gap-4">

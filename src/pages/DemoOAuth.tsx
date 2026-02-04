@@ -34,10 +34,14 @@ const OAUTH_CONFIG = {
 const SCOPES = [
   {
     name: "Google Analytics Data API",
-    scope: "analytics.readonly",
+    scope: "https://www.googleapis.com/auth/analytics.readonly",
+    shortScope: "analytics.readonly",
     icon: BarChart3,
     sensitivity: "Sensible (Sensitive)",
-    usage: "Lecture seule des métriques de trafic et conversions pour générer des rapports automatisés. (Read-only access to traffic and conversion metrics for automated reporting.)",
+    usage: "Lecture seule des métriques de trafic et conversions pour générer des rapports automatisés.",
+    usageEn: "Read-only access to traffic and conversion metrics for automated reporting.",
+    justification: "Nécessaire pour afficher les KPIs de performance (sessions, taux de rebond, conversions) dans le tableau de bord. Sans cet accès, l'utilisateur ne pourrait pas visualiser ses données Analytics dans l'application.",
+    justificationEn: "Required to display performance KPIs (sessions, bounce rate, conversions) in the dashboard. Without this access, users cannot view their Analytics data in the application.",
     dataAccessed: [
       "Sessions", 
       "Pages vues (Page views)", 
@@ -53,10 +57,14 @@ const SCOPES = [
   },
   {
     name: "Search Console API",
-    scope: "webmasters.readonly",
+    scope: "https://www.googleapis.com/auth/webmasters.readonly",
+    shortScope: "webmasters.readonly",
     icon: Search,
     sensitivity: "Sensible (Sensitive)",
-    usage: "Lecture seule des données SEO pour optimiser le référencement naturel. (Read-only SEO data to optimize organic search rankings.)",
+    usage: "Lecture seule des données SEO pour optimiser le référencement naturel.",
+    usageEn: "Read-only SEO data to optimize organic search rankings.",
+    justification: "Nécessaire pour récupérer les positions de recherche, les requêtes et le CTR. Ces données permettent d'identifier les opportunités d'amélioration SEO et de suivre la visibilité organique du site.",
+    justificationEn: "Required to retrieve search positions, queries, and CTR. This data helps identify SEO improvement opportunities and track the site's organic visibility.",
     dataAccessed: [
       "Requêtes de recherche (Search queries)", 
       "Positions moyennes (Average positions)", 
@@ -70,6 +78,13 @@ const SCOPES = [
       "Détection des opportunités SEO (SEO opportunity detection)"
     ],
   },
+];
+
+// Scopes that we DO NOT request
+const NOT_REQUESTED_SCOPES = [
+  { scope: "bigquery", reason: "Non utilisé - Growth OS n'accède pas à BigQuery (Not used - Growth OS does not access BigQuery)" },
+  { scope: "cloud-platform", reason: "Non utilisé - Aucune ressource Cloud Platform nécessaire (Not used - No Cloud Platform resources needed)" },
+  { scope: "devstorage", reason: "Non utilisé - Pas d'accès au Cloud Storage (Not used - No Cloud Storage access)" },
 ];
 
 const DEMO_STEPS = [
@@ -218,12 +233,23 @@ export default function DemoOAuth() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4 pt-4">
+                    {/* Justification détaillée */}
+                    <div className="p-3 bg-primary/10 rounded-lg border-2 border-primary/30">
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        ✅ Justification détaillée (Detailed Justification)
+                      </h4>
+                      <p className="text-sm font-medium">{scope.justification}</p>
+                      <p className="text-xs text-muted-foreground italic mt-1">({scope.justificationEn})</p>
+                    </div>
+                    
                     <div className="p-3 bg-muted/50 rounded-lg">
                       <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                         <Eye className="w-4 h-4 text-primary" />
                         Utilisation (Usage)
                       </h4>
                       <p className="text-sm">{scope.usage}</p>
+                      <p className="text-xs text-muted-foreground italic">({scope.usageEn})</p>
                     </div>
                     
                     <Separator />
@@ -268,6 +294,42 @@ export default function DemoOAuth() {
               <p className="text-center text-muted-foreground">
                 (NO DATA MODIFICATION - READ-ONLY ACCESS ONLY)
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Scopes NON demandés - Clarification importante */}
+          <Card className="mt-6 border-2 border-destructive/50 bg-destructive/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <Shield className="w-5 h-5" />
+                ❌ Scopes NON demandés par Growth OS (Scopes NOT requested by Growth OS)
+              </CardTitle>
+              <CardDescription>
+                Notre application n'utilise PAS et ne demande PAS les scopes suivants :
+                <br />
+                <span className="italic">(Our application does NOT use and does NOT request the following scopes:)</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {NOT_REQUESTED_SCOPES.map((item) => (
+                  <div key={item.scope} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                    <Badge variant="destructive" className="text-xs">❌</Badge>
+                    <div>
+                      <code className="text-sm font-mono">{item.scope}</code>
+                      <p className="text-xs text-muted-foreground">{item.reason}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/30">
+                <p className="text-sm font-medium text-center">
+                  ⚠️ Si ces scopes apparaissent dans l'écran de consentement Google, c'est une erreur de configuration dans la Google Cloud Console qui doit être corrigée.
+                </p>
+                <p className="text-xs text-muted-foreground text-center italic mt-1">
+                  (If these scopes appear in the Google consent screen, it's a configuration error in the Google Cloud Console that must be fixed.)
+                </p>
+              </div>
             </CardContent>
           </Card>
         </section>
