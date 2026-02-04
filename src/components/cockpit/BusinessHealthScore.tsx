@@ -194,8 +194,10 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
             Météo Business
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                <TooltipTrigger asChild>
+                  <button type="button" className="focus:outline-none">
+                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="text-xs">
