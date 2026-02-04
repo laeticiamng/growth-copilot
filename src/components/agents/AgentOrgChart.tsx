@@ -284,8 +284,8 @@ function AgentCard({
           <div className="flex items-center gap-2">
             <h4 className="font-semibold text-sm truncate">{agent.name}</h4>
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-3/75 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3" />
             </span>
           </div>
           <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
@@ -450,7 +450,7 @@ export function AgentOrgChart() {
                 Organigramme IA
               </CardTitle>
               <CardDescription>
-                {AI_TEAM.length} agents • {Object.keys(DEPARTMENTS).length} départements • Cliquez sur un agent pour voir son profil complet
+                {AI_TEAM.length} agents • Direction + 11 départements • Cliquez sur un agent pour voir son profil complet
               </CardDescription>
             </div>
             
