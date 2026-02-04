@@ -432,6 +432,82 @@ export default function LocalSEO() {
           </Card>
         </TabsContent>
       </Tabs>
+      {/* Post Creation Dialog */}
+      <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau post GBP</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Titre</label>
+              <Input
+                value={postForm.title}
+                onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
+                placeholder="Titre du post"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contenu</label>
+              <Textarea
+                value={postForm.content}
+                onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
+                placeholder="Contenu du post..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPostDialog(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreatePost} disabled={submittingPost}>
+              {submittingPost ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Publier
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Répondre à l'avis</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedReview && (
+              <div className="p-3 rounded-lg bg-secondary/50">
+                <p className="font-medium text-sm">{selectedReview.author}</p>
+                <p className="text-sm text-muted-foreground mt-1">"{selectedReview.comment}"</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Votre réponse</label>
+                <Button variant="ghost" size="sm" onClick={handleGenerateAIReply} disabled={generatingReply}>
+                  {generatingReply ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Bot className="w-4 h-4 mr-1" />}
+                  IA
+                </Button>
+              </div>
+              <Textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Rédigez votre réponse..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReplyDialog(false)}>
+              Annuler
+            </Button>
+            <Button onClick={() => { toast.success("Réponse envoyée (simulation)"); setShowReplyDialog(false); }}>
+              Envoyer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

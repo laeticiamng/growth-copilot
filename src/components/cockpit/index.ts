@@ -12,3 +12,4 @@ export { ROITrackerWidget } from './ROITrackerWidget';
 export { WelcomeCard } from './WelcomeCard';
 export { SectionHeader, PageHeader } from './SectionHeader';
 export { NavigationHelper, NavigationHelperCompact } from './NavigationHelper';
+export { EmptyStateGuide } from './EmptyStateGuide';
