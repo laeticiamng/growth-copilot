@@ -55,7 +55,7 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="py-24 relative">
+    <section id="features" className="py-24 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">

@@ -91,7 +91,7 @@ export function Tools() {
   const seeAllLabel = isEn ? "See all integrations" : "Voir toutes les intégrations";
 
   return (
-    <section id="tools" className="py-24 bg-secondary/30 relative">
+    <section id="tools" className="py-24 bg-secondary/30 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
