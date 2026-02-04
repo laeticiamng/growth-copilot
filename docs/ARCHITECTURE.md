@@ -54,7 +54,7 @@
 │  │  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘  │   │ │
 │  │  │                                                                    │   │ │
 │  │  │  ┌─────────────────────────────────────────────────────────────┐  │   │ │
-│  │  │  │ RLS: 120+ tables with Row Level Security                    │  │   │ │
+│  │  │  │ RLS: 131 tables with 238 Row Level Security policies        │  │   │ │
 │  │  │  │ pg_cron: Scheduled runs (DAILY_BRIEF, WEEKLY_REVIEW)        │  │   │ │
 │  │  │  │ Triggers: Immutable audit_log, auto-updated_at              │  │   │ │
 │  │  │  └─────────────────────────────────────────────────────────────┘  │   │ │
