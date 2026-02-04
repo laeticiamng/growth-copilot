@@ -3,40 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Download, FileText, TrendingUp, TrendingDown, Bot, Calendar, Loader2, Settings, Clock, BarChart3, ArrowRight, Mail } from "lucide-react";
+import { Download, FileText, TrendingUp, TrendingDown, Bot, Calendar, Loader2, Clock, BarChart3, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
+import { ReportScheduler } from "@/components/reports/ReportScheduler";
 
 export default function Reports() {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [generating, setGenerating] = useState(false);
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-  const [scheduleSettings, setScheduleSettings] = useState({
-    enabled: false,
-    frequency: 'monthly',
-    sendEmail: true,
-    dayOfMonth: '1',
-  });
+  const [activeTab, setActiveTab] = useState("reports");
 
   // Fetch monthly reports from database
   const { data: reports, isLoading: reportsLoading, refetch } = useQuery({
@@ -176,10 +155,6 @@ export default function Reports() {
     }
   };
 
-  const handleSaveSchedule = () => {
-    toast.success(scheduleSettings.enabled ? "Planification activée" : "Planification désactivée");
-    setShowScheduleDialog(false);
-  };
 
   const formatMonth = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -218,10 +193,6 @@ export default function Reports() {
           <p className="text-muted-foreground">Audit trail, rapports mensuels et comparaisons</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setShowScheduleDialog(true)}>
-            <Clock className="w-4 h-4 mr-2" />
-            Planifier
-          </Button>
           <Button 
             variant="hero" 
             onClick={() => handleGenerateReport()}
@@ -285,28 +256,24 @@ export default function Reports() {
         </div>
       )}
 
-      <Tabs defaultValue="reports" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="reports">Rapports</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
           <TabsTrigger value="comparison">Comparaison</TabsTrigger>
+          <TabsTrigger value="scheduled">
+            <Settings2 className="w-4 h-4 mr-1" />
+            Planification
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="reports" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Rapports mensuels
-                </CardTitle>
-                {scheduleSettings.enabled && (
-                  <Badge variant="success" className="text-xs">
-                    <Clock className="w-3 h-3 mr-1" />
-                    Auto {scheduleSettings.frequency}
-                  </Badge>
-                )}
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Rapports mensuels
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {reportsLoading ? (
@@ -472,67 +439,11 @@ export default function Reports() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="scheduled" className="space-y-6">
+          <ReportScheduler />
+        </TabsContent>
       </Tabs>
-
-      {/* Schedule Dialog */}
-      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Planifier les rapports</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>Génération automatique</Label>
-                <p className="text-sm text-muted-foreground">Activer la génération planifiée</p>
-              </div>
-              <Switch
-                checked={scheduleSettings.enabled}
-                onCheckedChange={(checked) => setScheduleSettings({ ...scheduleSettings, enabled: checked })}
-              />
-            </div>
-
-            {scheduleSettings.enabled && (
-              <>
-                <div className="space-y-2">
-                  <Label>Fréquence</Label>
-                  <Select 
-                    value={scheduleSettings.frequency} 
-                    onValueChange={(v) => setScheduleSettings({ ...scheduleSettings, frequency: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                      <SelectItem value="monthly">Mensuel</SelectItem>
-                      <SelectItem value="quarterly">Trimestriel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      Notification email
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Recevoir le rapport par email</p>
-                  </div>
-                  <Switch
-                    checked={scheduleSettings.sendEmail}
-                    onCheckedChange={(checked) => setScheduleSettings({ ...scheduleSettings, sendEmail: checked })}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Annuler</Button>
-            <Button onClick={handleSaveSchedule}>Enregistrer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
