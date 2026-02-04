@@ -677,6 +677,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "agent_runs_ai_request_id_fkey"
+            columns: ["ai_request_id"]
+            isOneToOne: false
+            referencedRelation: "ai_requests_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "agent_runs_parent_run_id_fkey"
             columns: ["parent_run_id"]
             isOneToOne: false
@@ -8399,6 +8406,62 @@ export type Database = {
       }
     }
     Views: {
+      ai_requests_safe: {
+        Row: {
+          agent_name: string | null
+          cost_estimate: number | null
+          created_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          id: string | null
+          model_name: string | null
+          provider_name: string | null
+          purpose: string | null
+          status: string | null
+          tokens_in: number | null
+          tokens_out: number | null
+          workspace_id: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          cost_estimate?: never
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string | null
+          model_name?: string | null
+          provider_name?: string | null
+          purpose?: string | null
+          status?: string | null
+          tokens_in?: never
+          tokens_out?: never
+          workspace_id?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          cost_estimate?: never
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string | null
+          model_name?: string | null
+          provider_name?: string | null
+          purpose?: string | null
+          status?: string | null
+          tokens_in?: never
+          tokens_out?: never
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees_safe: {
         Row: {
           contract_type: string | null
@@ -8438,7 +8501,7 @@ export type Database = {
           last_review_at?: string | null
           manager_id?: string | null
           notes?: string | null
-          performance_score?: number | null
+          performance_score?: never
           phone?: string | null
           salary_annual?: never
           skills?: string[] | null
@@ -8462,7 +8525,7 @@ export type Database = {
           last_review_at?: string | null
           manager_id?: string | null
           notes?: string | null
-          performance_score?: number | null
+          performance_score?: never
           phone?: string | null
           salary_annual?: never
           skills?: string[] | null
