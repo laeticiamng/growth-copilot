@@ -8368,6 +8368,7 @@ export type Database = {
         }
         Returns: string
       }
+      anonymize_old_click_data: { Args: never; Returns: undefined }
       calculate_health_score: {
         Args: { _workspace_id: string }
         Returns: number
