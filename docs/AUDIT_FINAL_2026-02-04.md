@@ -261,8 +261,30 @@
 | **DB Tables** | 131 |
 | **RLS Policies** | 251+ |
 | **Tests** | 300+ assertions |
-| **Agents IA** | 14 |
+| **Agents IA** | 39 (2 Direction + 37 Départements) |
+| **Départements** | 11 |
 | **Intégrations** | 12 |
+
+---
+
+## 🤖 AGENTS IA - 39 AGENTS EN 11 DÉPARTEMENTS
+
+### Structure Organisationnelle
+
+| Département | Agents | Noms |
+|-------------|--------|------|
+| **Direction** | 2 | Sophie Marchand (CGO), Jean-Michel Fournier (QCO) |
+| **Marketing** | 5 | Emma, Thomas, Léa, Antoine, Camille |
+| **Sales** | 4 | David, Nicolas, Claire, Alexandre |
+| **Finance** | 3 | Mathilde, François, Aurélie |
+| **Security** | 3 | Julien, Nathalie, Sébastien |
+| **Product** | 4 | Marie, Caroline, Pierre-Antoine, Stéphane |
+| **Engineering** | 5 | Maxime, Olivier, Laurent, Romain, Élodie |
+| **Data** | 4 | Lucas, Damien, Sarah, Benjamin |
+| **Support** | 3 | Marine, Virginie, Christophe |
+| **Governance** | 3 | Isabelle, Philippe, Catherine |
+| **HR** | 2 | Sandrine, Fabrice |
+| **Legal** | 1 | Maître Véronique Roche |
 
 ---
 
@@ -278,6 +300,8 @@ Chaque agent applique les frameworks des meilleures institutions :
 | Content Strategist | Editorial Excellence | Condé Nast |
 | Analytics | Statistical Rigor | FAANG Data Scientist |
 | Ads Optimizer | ROAS Maximization | Google Ads Certified |
+| Security Auditor | OWASP Top 10 | Cybersecurity Expert |
+| Contract Analyzer | Legal Due Diligence | Big Law Partner |
 
 ---
 

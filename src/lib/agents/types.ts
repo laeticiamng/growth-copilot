@@ -31,21 +31,79 @@ export interface AgentRisk {
 // Agent run status
 export type AgentStatus = 'pending' | 'running' | 'completed' | 'failed' | 'requires_approval';
 
-// Agent types available in the system
+/**
+ * Agent types available in the system
+ * 39 agents total: 2 Direction + 37 Department agents across 11 departments
+ * 
+ * Structure:
+ * - Direction (2): CGO, QCO
+ * - Marketing (5): tech_auditor, keyword_strategist, content_builder, local_optimizer, social_manager
+ * - Sales (4): offer_architect, sales_accelerator, lifecycle_manager, deal_closer
+ * - Finance (3): revenue_analyst, budget_optimizer, billing_manager
+ * - Security (3): security_auditor, access_controller, threat_monitor
+ * - Product (4): feature_analyst, ux_optimizer, roadmap_planner, backlog_manager
+ * - Engineering (5): code_reviewer, performance_engineer, devops_agent, api_integrator, testing_agent
+ * - Data (4): analytics_detective, data_engineer, ml_trainer, reporting_agent
+ * - Support (3): reputation_guardian, ticket_handler, knowledge_manager
+ * - Governance (3): compliance_auditor, policy_enforcer, risk_assessor
+ * - HR (2): recruitment_agent, employee_experience
+ * - Legal (1): contract_analyzer
+ */
 export type AgentType = 
+  // Direction (2)
   | 'chief_growth_officer'
   | 'quality_compliance'
+  // Marketing (5)
   | 'tech_auditor'
   | 'keyword_strategist'
   | 'content_builder'
   | 'local_optimizer'
-  | 'ads_optimizer'
-  | 'analytics_detective'
-  | 'cro_specialist'
+  | 'social_manager'
+  // Sales (4)
   | 'offer_architect'
-  | 'lifecycle_manager'
   | 'sales_accelerator'
+  | 'lifecycle_manager'
+  | 'deal_closer'
+  // Finance (3)
+  | 'revenue_analyst'
+  | 'budget_optimizer'
+  | 'billing_manager'
+  // Security (3)
+  | 'security_auditor'
+  | 'access_controller'
+  | 'threat_monitor'
+  // Product (4)
+  | 'feature_analyst'
+  | 'ux_optimizer'
+  | 'roadmap_planner'
+  | 'backlog_manager'
+  // Engineering (5)
+  | 'code_reviewer'
+  | 'performance_engineer'
+  | 'devops_agent'
+  | 'api_integrator'
+  | 'testing_agent'
+  // Data (4)
+  | 'analytics_detective'
+  | 'data_engineer'
+  | 'ml_trainer'
+  | 'reporting_agent'
+  // Support (3)
   | 'reputation_guardian'
+  | 'ticket_handler'
+  | 'knowledge_manager'
+  // Governance (3)
+  | 'compliance_auditor'
+  | 'policy_enforcer'
+  | 'risk_assessor'
+  // HR (2)
+  | 'recruitment_agent'
+  | 'employee_experience'
+  // Legal (1)
+  | 'contract_analyzer'
+  // Legacy (for backward compatibility)
+  | 'ads_optimizer'
+  | 'cro_specialist'
   | 'competitive_watcher';
 
 // Agent run input/output types

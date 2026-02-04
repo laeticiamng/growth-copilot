@@ -36,23 +36,25 @@ import { useWorkspace } from '@/hooks/useWorkspace';
 import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-registry';
 import type { AgentType } from '@/lib/agents/types';
 
-// Agent personas with human names and avatars
+// Agent personas with human names and avatars - 39 agents total
 const AGENT_PERSONAS: Record<string, {
   name: string;
   avatar?: string;
   specialty: string;
   greeting: string;
 }> = {
+  // Direction (2)
   chief_growth_officer: {
     name: 'Sophie Marchand',
     specialty: 'Orchestration & Stratégie',
     greeting: 'Je coordonne tous les agents pour maximiser votre croissance.',
   },
   quality_compliance: {
-    name: 'Pierre Lambert',
+    name: 'Jean-Michel Fournier',
     specialty: 'Contrôle Qualité',
     greeting: 'Je valide chaque action pour garantir conformité et éthique.',
   },
+  // Marketing (5)
   tech_auditor: {
     name: 'Emma Lefebvre',
     specialty: 'SEO Technique',
@@ -73,63 +75,255 @@ const AGENT_PERSONAS: Record<string, {
     specialty: 'SEO Local',
     greeting: 'J\'optimise votre présence locale et Google Business.',
   },
-  ads_optimizer: {
-    name: 'Marc Rousseau',
-    specialty: 'Publicité',
-    greeting: 'J\'optimise vos campagnes publicitaires.',
+  social_manager: {
+    name: 'Camille Rousseau',
+    specialty: 'Réseaux Sociaux',
+    greeting: 'Je planifie et optimise votre présence sociale.',
   },
-  analytics_detective: {
-    name: 'Lucas Bernier',
-    specialty: 'Analytics',
-    greeting: 'Je surveille vos KPIs et détecte les anomalies.',
-  },
-  cro_specialist: {
-    name: 'Julie Martin',
-    specialty: 'Conversion',
-    greeting: 'J\'améliore vos taux de conversion.',
-  },
+  // Sales (4)
   offer_architect: {
     name: 'David Petit',
     specialty: 'Offres commerciales',
     greeting: 'Je conçois des offres irrésistibles.',
-  },
-  lifecycle_manager: {
-    name: 'Claire Dubois',
-    specialty: 'Automation',
-    greeting: 'J\'automatise vos séquences email et nurturing.',
   },
   sales_accelerator: {
     name: 'Nicolas Bernard',
     specialty: 'Ventes',
     greeting: 'J\'accélère votre pipeline commercial.',
   },
+  lifecycle_manager: {
+    name: 'Claire Dubois',
+    specialty: 'Automation',
+    greeting: 'J\'automatise vos séquences email et nurturing.',
+  },
+  deal_closer: {
+    name: 'Alexandre Martin',
+    specialty: 'Closing',
+    greeting: 'J\'optimise vos processus de closing.',
+  },
+  // Finance (3)
+  revenue_analyst: {
+    name: 'Mathilde Legrand',
+    specialty: 'Analyse Revenus',
+    greeting: 'J\'analyse les revenus et prévois les tendances.',
+  },
+  budget_optimizer: {
+    name: 'François Mercier',
+    specialty: 'Budget',
+    greeting: 'J\'optimise l\'allocation budgétaire.',
+  },
+  billing_manager: {
+    name: 'Aurélie Chevalier',
+    specialty: 'Facturation',
+    greeting: 'Je gère la facturation automatisée.',
+  },
+  // Security (3)
+  security_auditor: {
+    name: 'Julien Moreau',
+    specialty: 'Audit Sécurité',
+    greeting: 'J\'audite la sécurité de vos systèmes.',
+  },
+  access_controller: {
+    name: 'Nathalie Vincent',
+    specialty: 'Contrôle d\'accès',
+    greeting: 'Je gère les permissions utilisateurs.',
+  },
+  threat_monitor: {
+    name: 'Sébastien Blanc',
+    specialty: 'Surveillance',
+    greeting: 'Je surveille les menaces en temps réel.',
+  },
+  // Product (4)
+  feature_analyst: {
+    name: 'Marie Leclerc',
+    specialty: 'Analyse Produit',
+    greeting: 'J\'analyse les demandes de fonctionnalités.',
+  },
+  ux_optimizer: {
+    name: 'Caroline Roux',
+    specialty: 'UX Design',
+    greeting: 'J\'optimise l\'expérience utilisateur.',
+  },
+  roadmap_planner: {
+    name: 'Pierre-Antoine Faure',
+    specialty: 'Roadmap',
+    greeting: 'Je planifie la roadmap produit.',
+  },
+  backlog_manager: {
+    name: 'Stéphane Garnier',
+    specialty: 'Backlog',
+    greeting: 'J\'organise et priorise le backlog.',
+  },
+  // Engineering (5)
+  code_reviewer: {
+    name: 'Maxime Perrin',
+    specialty: 'Code Review',
+    greeting: 'Je revois le code automatiquement.',
+  },
+  performance_engineer: {
+    name: 'Olivier Bonnet',
+    specialty: 'Performance',
+    greeting: 'J\'optimise les performances applicatives.',
+  },
+  devops_agent: {
+    name: 'Laurent Muller',
+    specialty: 'DevOps',
+    greeting: 'J\'automatise le déploiement.',
+  },
+  api_integrator: {
+    name: 'Romain Simon',
+    specialty: 'Intégrations',
+    greeting: 'J\'intègre les APIs externes.',
+  },
+  testing_agent: {
+    name: 'Élodie Michel',
+    specialty: 'Tests',
+    greeting: 'Je génère et exécute les tests.',
+  },
+  // Data (4)
+  analytics_detective: {
+    name: 'Lucas Bernier',
+    specialty: 'Analytics',
+    greeting: 'Je surveille vos KPIs et détecte les anomalies.',
+  },
+  data_engineer: {
+    name: 'Damien Lefèvre',
+    specialty: 'Data Engineering',
+    greeting: 'Je construis les pipelines de données.',
+  },
+  ml_trainer: {
+    name: 'Sarah Dupont',
+    specialty: 'Machine Learning',
+    greeting: 'J\'entraîne les modèles de ML.',
+  },
+  reporting_agent: {
+    name: 'Benjamin Giraud',
+    specialty: 'Reporting',
+    greeting: 'Je génère des rapports automatisés.',
+  },
+  // Support (3)
   reputation_guardian: {
     name: 'Marine Leroy',
     specialty: 'E-réputation',
-    greeting: 'Je surveille et protège votre réputation en ligne.',
+    greeting: 'Je surveille et protège votre réputation.',
+  },
+  ticket_handler: {
+    name: 'Virginie Morel',
+    specialty: 'Support',
+    greeting: 'Je traite et priorise les tickets.',
+  },
+  knowledge_manager: {
+    name: 'Christophe Dumas',
+    specialty: 'Knowledge Base',
+    greeting: 'Je maintiens la base de connaissances.',
+  },
+  // Governance (3)
+  compliance_auditor: {
+    name: 'Isabelle Lambert',
+    specialty: 'Conformité',
+    greeting: 'J\'audite la conformité réglementaire.',
+  },
+  policy_enforcer: {
+    name: 'Philippe Durand',
+    specialty: 'Politiques',
+    greeting: 'J\'applique les règles de l\'organisation.',
+  },
+  risk_assessor: {
+    name: 'Catherine Renard',
+    specialty: 'Risques',
+    greeting: 'J\'évalue et quantifie les risques.',
+  },
+  // HR (2)
+  recruitment_agent: {
+    name: 'Sandrine Petit',
+    specialty: 'Recrutement',
+    greeting: 'J\'automatise le processus de recrutement.',
+  },
+  employee_experience: {
+    name: 'Fabrice Leroux',
+    specialty: 'Expérience Collaborateur',
+    greeting: 'J\'optimise l\'engagement des équipes.',
+  },
+  // Legal (1)
+  contract_analyzer: {
+    name: 'Maître Véronique Roche',
+    specialty: 'Contrats',
+    greeting: 'J\'analyse les contrats et détecte les risques.',
+  },
+  // Legacy
+  ads_optimizer: {
+    name: 'Marc Rousseau',
+    specialty: 'Publicité',
+    greeting: 'J\'optimise vos campagnes publicitaires.',
+  },
+  cro_specialist: {
+    name: 'Julie Martin',
+    specialty: 'Conversion',
+    greeting: 'J\'améliore vos taux de conversion.',
   },
   competitive_watcher: {
-    name: 'Julie Moreau',
+    name: 'Paul Moreau',
     specialty: 'Veille concurrentielle',
-    greeting: 'J\'analyse vos concurrents et détecte les opportunités.',
+    greeting: 'J\'analyse vos concurrents.',
   },
 };
 
-// Icon mapping
+// Icon mapping for all 39 agents
 const AGENT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  // Direction
   chief_growth_officer: Brain,
   quality_compliance: Shield,
+  // Marketing
   tech_auditor: Search,
   keyword_strategist: Target,
   content_builder: PenTool,
   local_optimizer: Target,
-  ads_optimizer: Target,
-  analytics_detective: BarChart3,
-  cro_specialist: TrendingUp,
+  social_manager: Share2,
+  // Sales
   offer_architect: Zap,
-  lifecycle_manager: Activity,
   sales_accelerator: Zap,
+  lifecycle_manager: Activity,
+  deal_closer: Zap,
+  // Finance
+  revenue_analyst: BarChart3,
+  budget_optimizer: BarChart3,
+  billing_manager: FileText,
+  // Security
+  security_auditor: Shield,
+  access_controller: Shield,
+  threat_monitor: Eye,
+  // Product
+  feature_analyst: Search,
+  ux_optimizer: PenTool,
+  roadmap_planner: Target,
+  backlog_manager: FileText,
+  // Engineering
+  code_reviewer: Search,
+  performance_engineer: Zap,
+  devops_agent: Activity,
+  api_integrator: Share2,
+  testing_agent: CheckCircle,
+  // Data
+  analytics_detective: BarChart3,
+  data_engineer: Activity,
+  ml_trainer: Bot,
+  reporting_agent: FileText,
+  // Support
   reputation_guardian: Shield,
+  ticket_handler: FileText,
+  knowledge_manager: FileText,
+  // Governance
+  compliance_auditor: Shield,
+  policy_enforcer: Shield,
+  risk_assessor: Eye,
+  // HR
+  recruitment_agent: Users,
+  employee_experience: Users,
+  // Legal
+  contract_analyzer: FileText,
+  // Legacy
+  ads_optimizer: Target,
+  cro_specialist: TrendingUp,
   competitive_watcher: Eye,
 };
 

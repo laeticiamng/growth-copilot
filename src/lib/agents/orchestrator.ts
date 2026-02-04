@@ -17,20 +17,62 @@ type DbAgentType = Database['public']['Enums']['agent_type'];
 type DbAgentRunStatus = Database['public']['Enums']['agent_run_status'];
 
 // Map our agent types to database enum values
+// All 39 agents mapped to the closest DB enum value
 const agentTypeToDb: Record<AgentType, DbAgentType> = {
+  // Direction (2)
   chief_growth_officer: 'chief_growth_officer',
   quality_compliance: 'quality_compliance',
+  // Marketing (5)
   tech_auditor: 'tech_auditor',
   keyword_strategist: 'keyword_strategist',
   content_builder: 'content_builder',
   local_optimizer: 'local_manager',
-  ads_optimizer: 'ads_manager',
-  analytics_detective: 'analytics_guardian',
-  cro_specialist: 'cro_optimizer',
+  social_manager: 'content_builder',
+  // Sales (4)
   offer_architect: 'offer_architect',
-  lifecycle_manager: 'lifecycle_manager',
   sales_accelerator: 'sales_ops',
+  lifecycle_manager: 'lifecycle_manager',
+  deal_closer: 'sales_ops',
+  // Finance (3)
+  revenue_analyst: 'analytics_guardian',
+  budget_optimizer: 'analytics_guardian',
+  billing_manager: 'analytics_guardian',
+  // Security (3)
+  security_auditor: 'tech_auditor',
+  access_controller: 'tech_auditor',
+  threat_monitor: 'tech_auditor',
+  // Product (4)
+  feature_analyst: 'analytics_guardian',
+  ux_optimizer: 'cro_optimizer',
+  roadmap_planner: 'analytics_guardian',
+  backlog_manager: 'analytics_guardian',
+  // Engineering (5)
+  code_reviewer: 'tech_auditor',
+  performance_engineer: 'tech_auditor',
+  devops_agent: 'tech_auditor',
+  api_integrator: 'tech_auditor',
+  testing_agent: 'tech_auditor',
+  // Data (4)
+  analytics_detective: 'analytics_guardian',
+  data_engineer: 'analytics_guardian',
+  ml_trainer: 'analytics_guardian',
+  reporting_agent: 'analytics_guardian',
+  // Support (3)
   reputation_guardian: 'reputation_manager',
+  ticket_handler: 'reputation_manager',
+  knowledge_manager: 'content_builder',
+  // Governance (3)
+  compliance_auditor: 'quality_compliance',
+  policy_enforcer: 'quality_compliance',
+  risk_assessor: 'quality_compliance',
+  // HR (2)
+  recruitment_agent: 'analytics_guardian',
+  employee_experience: 'analytics_guardian',
+  // Legal (1)
+  contract_analyzer: 'analytics_guardian',
+  // Legacy
+  ads_optimizer: 'ads_manager',
+  cro_specialist: 'cro_optimizer',
   competitive_watcher: 'competitive_analyst',
 };
 
