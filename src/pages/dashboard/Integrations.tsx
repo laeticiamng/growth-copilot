@@ -310,8 +310,8 @@ const Integrations = () => {
                     <h3 className="font-semibold text-lg">Google Super-Connecteur</h3>
                     <p className="text-sm text-muted-foreground">GA4, GSC, Ads, GBP, YouTube</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("google"); }} disabled={authorizing === "google"}>
-                    {authorizing === "google" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("google_combined"); }} disabled={authorizing === "google_combined"}>
+                    {authorizing === "google_combined" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
                     Autoriser
                   </Button>
                 </div>
