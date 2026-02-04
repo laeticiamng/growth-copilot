@@ -237,7 +237,7 @@ export default function ROIDashboard() {
             </CardTitle>
             <CardDescription>
               {isFullCompany 
-                ? "37 employés IA, 11 départements, Core OS inclus"
+                ? "38 employés IA, 11 départements, Core OS inclus"
                 : `${totalAIEmployees} employés IA, ${enabledDepartments.length} département(s)`
               }
             </CardDescription>

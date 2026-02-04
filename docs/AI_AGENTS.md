@@ -99,9 +99,9 @@ interface AgentActionV2 {
 
 ---
 
-## 👥 Roster des Agents (37 Employés IA)
+## 👥 Roster des Agents (38 Employés IA)
 
-### Direction (3)
+### Direction (3) — Couche de supervision transverse
 | Agent | Rôle | Purpose | Modèle |
 |-------|------|---------|--------|
 | **Sophie Marchand** | Chief Growth Officer | `cgo_plan` | gpt-5.2 |
@@ -177,6 +177,18 @@ interface AgentActionV2 {
 | **Olivier Dumont** | Chief of Staff IA | `cgo_plan` |
 | **Sandrine Legrand** | Project Manager | `analysis` |
 | **Yannick Garnier** | Operations Analyst | `analysis` |
+
+### HR (3)
+| Agent | Rôle | Purpose |
+|-------|------|---------|
+| **Émilie Vasseur** | DRH IA | `analysis` |
+| **Romain Berthelot** | Talent Acquisition | `analysis` |
+| **Charlotte Masson** | People Operations | `analysis` |
+
+### Legal (1)
+| Agent | Rôle | Purpose |
+|-------|------|---------|
+| **Maître Arnaud Lecomte** | DPO & Legal Counsel | `qa_review` |
 
 ---
 
