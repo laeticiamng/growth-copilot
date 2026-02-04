@@ -177,7 +177,7 @@ export default function CRO() {
       </div>
 
       {/* Metrics */}
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {conversionMetrics.map((metric, i) => (
           <Card key={i} variant="kpi">
             <CardContent className="pt-6">

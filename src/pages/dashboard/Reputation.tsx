@@ -180,7 +180,7 @@ export default function Reputation() {
       </div>
 
       {/* Stats KPIs */}
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card variant="kpi">
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Note moyenne</p>

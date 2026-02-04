@@ -437,7 +437,7 @@ export default function Billing() {
             )}
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {paidServices.map(service => {
               const Icon = SERVICE_ICONS[service.slug] || Puzzle;
               const employees = DEPT_EMPLOYEES[service.slug] || 3;

@@ -142,7 +142,7 @@ export default function Agency() {
       </div>
 
       {/* Agency metrics */}
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {agencyMetrics.map((metric, i) => (
           <Card key={i} variant="kpi">
             <CardContent className="pt-6">
