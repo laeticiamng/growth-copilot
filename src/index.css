@@ -302,4 +302,24 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Status color utilities - use these instead of hardcoded colors */
+  .status-success {
+    color: hsl(var(--agent-active));
+  }
+  .status-warning {
+    color: hsl(var(--agent-idle));
+  }
+  .status-error {
+    color: hsl(var(--agent-error));
+  }
+  .bg-status-success {
+    background-color: hsl(var(--agent-active) / 0.15);
+  }
+  .bg-status-warning {
+    background-color: hsl(var(--agent-idle) / 0.15);
+  }
+  .bg-status-error {
+    background-color: hsl(var(--agent-error) / 0.15);
+  }
 }

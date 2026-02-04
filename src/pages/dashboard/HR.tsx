@@ -281,9 +281,9 @@ export default function HR() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Actifs</p>
-                <p className="text-2xl font-bold text-green-600">{stats.active}</p>
+                <p className="text-2xl font-bold status-success">{stats.active}</p>
               </div>
-              <CheckCircle2 className="w-8 h-8 text-green-500 opacity-80" />
+              <CheckCircle2 className="w-8 h-8 status-success opacity-80" />
             </div>
           </CardContent>
         </Card>
@@ -303,9 +303,9 @@ export default function HR() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Congés en attente</p>
-                <p className="text-2xl font-bold text-yellow-600">{timeOffStats.pending}</p>
+                <p className="text-2xl font-bold status-warning">{timeOffStats.pending}</p>
               </div>
-              <Calendar className="w-8 h-8 text-yellow-500 opacity-80" />
+              <Calendar className="w-8 h-8 status-warning opacity-80" />
             </div>
           </CardContent>
         </Card>
@@ -541,7 +541,7 @@ export default function HR() {
                           <div className="flex items-center gap-3">
                             {review.overall_score && (
                               <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                <Star className="w-4 h-4 status-warning fill-current" />
                                 <span className="font-medium">{review.overall_score}/5</span>
                               </div>
                             )}

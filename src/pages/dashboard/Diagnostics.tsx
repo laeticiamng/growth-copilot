@@ -200,8 +200,8 @@ export default function Diagnostics() {
 
   const getStatusIcon = (status: 'healthy' | 'degraded' | 'down') => {
     switch (status) {
-      case 'healthy': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'degraded': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'healthy': return <CheckCircle2 className="w-4 h-4 status-success" />;
+      case 'degraded': return <AlertTriangle className="w-4 h-4 status-warning" />;
       case 'down': return <XCircle className="w-4 h-4 text-destructive" />;
     }
   };
@@ -297,8 +297,8 @@ export default function Diagnostics() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-3 h-3 text-muted-foreground" />
                   <span className={`text-lg font-bold ${
-                    metric.status === 'healthy' ? 'text-green-500' : 
-                    metric.status === 'degraded' ? 'text-yellow-500' : 'text-destructive'
+                    metric.status === 'healthy' ? 'status-success' : 
+                    metric.status === 'degraded' ? 'status-warning' : 'text-destructive'
                   }`}>
                     {metric.latency !== null ? `${metric.latency}ms` : '—'}
                   </span>
@@ -349,7 +349,7 @@ export default function Diagnostics() {
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-green-500 opacity-50" />
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 status-success opacity-50" />
                 <p className="text-sm">Aucune erreur récente</p>
               </div>
             )}
@@ -394,7 +394,7 @@ export default function Diagnostics() {
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-green-500 opacity-50" />
+                <CheckCircle2 className="w-10 h-10 mx-auto mb-3 status-success opacity-50" />
                 <p className="text-sm">Aucun agent en échec récemment</p>
               </div>
             )}
@@ -436,7 +436,7 @@ export default function Diagnostics() {
             </div>
             <div className="p-3 rounded-lg bg-secondary/30">
               <div className="flex items-center gap-2">
-                {isOnline ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-destructive" />}
+                {isOnline ? <Wifi className="w-4 h-4 status-success" /> : <WifiOff className="w-4 h-4 text-destructive" />}
                 <div>
                   <p className="text-xs text-muted-foreground">Réseau</p>
                   <p className="text-sm font-medium">{isOnline ? 'En ligne' : 'Hors ligne'}</p>
