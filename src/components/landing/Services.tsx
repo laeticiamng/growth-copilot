@@ -128,7 +128,7 @@ const DEPARTMENTS = [
     nameFr: "RH",
     descEn: "Onboarding, Team Management, Talent",
     descFr: "Onboarding, Gestion d'équipe, Talents",
-    employees: 3,
+    employees: 2,
     features: ["Team Onboarding", "Role Management", "Talent Tracking"]
   },
   { 
@@ -147,7 +147,9 @@ const DEPARTMENTS = [
 
 const PRICE_PER_DEPT = 1900;
 const FULL_COMPANY_PRICE = 9000;
-const TOTAL_EMPLOYEES = DEPARTMENTS.reduce((sum, d) => sum + d.employees, 0);
+// 37 employees in departments + 2 Direction (CGO + QCO) = 39 total
+const DEPT_EMPLOYEES = DEPARTMENTS.reduce((sum, d) => sum + d.employees, 0); // = 37
+const TOTAL_EMPLOYEES = DEPT_EMPLOYEES + 2; // + CGO & QCO = 39
 
 export function Services() {
   const { i18n } = useTranslation();
