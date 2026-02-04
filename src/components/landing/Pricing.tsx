@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 // Service modules with detailed AI employee roster (11 departments total)
-// Total employees = 5+4+3+3+4+5+4+3+3+2+1 = 37
+// Total employees = 5+4+3+3+4+5+4+3+3+3+1 = 38
 const SERVICE_MODULES = [
   { 
     id: "marketing", 
@@ -113,8 +113,8 @@ const SERVICE_MODULES = [
   },
 ];
 
-// Calculate totals - 37 employees across 11 departments
-const TOTAL_EMPLOYEES = SERVICE_MODULES.reduce((sum, s) => sum + s.employees, 0); // = 37
+// Calculate totals - 38 employees across 11 departments
+const TOTAL_EMPLOYEES = SERVICE_MODULES.reduce((sum, s) => sum + s.employees, 0); // = 38
 const TOTAL_DEPARTMENTS = SERVICE_MODULES.length; // = 11
 const TOTAL_SEPARATE_PRICE = TOTAL_DEPARTMENTS * 1900; // = 20,900€
 
