@@ -83,11 +83,11 @@ export default function Approvals() {
   const getRiskBadge = (level: string) => {
     switch (level) {
       case "low":
-        return <Badge variant="secondary" className="text-green-600 bg-green-500/10">Faible</Badge>;
+        return <Badge variant="secondary" className="text-chart-3 bg-chart-3/10">Faible</Badge>;
       case "medium":
-        return <Badge variant="secondary" className="text-yellow-600 bg-yellow-500/10">Moyen</Badge>;
+        return <Badge variant="secondary" className="text-chart-4 bg-chart-4/10">Moyen</Badge>;
       case "high":
-        return <Badge variant="secondary" className="text-orange-600 bg-orange-500/10">Élevé</Badge>;
+        return <Badge variant="secondary" className="text-chart-5 bg-chart-5/10">Élevé</Badge>;
       case "critical":
         return <Badge variant="destructive">Critique</Badge>;
       default:
@@ -168,14 +168,14 @@ export default function Approvals() {
                 <CardContent className="py-4">
                   <div className="flex items-start gap-4">
                     <div className={`p-2 rounded-lg ${
-                      item.riskLevel === "low" ? "bg-green-500/10" :
-                      item.riskLevel === "medium" ? "bg-yellow-500/10" :
-                      "bg-orange-500/10"
+                      item.riskLevel === "low" ? "bg-chart-3/10" :
+                      item.riskLevel === "medium" ? "bg-chart-4/10" :
+                      "bg-chart-5/10"
                     }`}>
                       <Bot className={`w-5 h-5 ${
-                        item.riskLevel === "low" ? "text-green-500" :
-                        item.riskLevel === "medium" ? "text-yellow-500" :
-                        "text-orange-500"
+                        item.riskLevel === "low" ? "text-chart-3" :
+                        item.riskLevel === "medium" ? "text-chart-4" :
+                        "text-chart-5"
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">

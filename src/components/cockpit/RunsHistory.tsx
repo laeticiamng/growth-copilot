@@ -34,7 +34,7 @@ interface RunsHistoryProps {
 }
 
 const STATUS_CONFIG: Record<RunStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
-  completed: { icon: CheckCircle2, color: "text-green-500", label: "Terminé" },
+  completed: { icon: CheckCircle2, color: "text-chart-3", label: "Terminé" },
   failed: { icon: XCircle, color: "text-destructive", label: "Échec" },
   running: { icon: Loader2, color: "text-primary", label: "En cours" },
   queued: { icon: Clock, color: "text-muted-foreground", label: "En attente" },

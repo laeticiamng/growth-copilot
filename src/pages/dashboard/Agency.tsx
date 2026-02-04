@@ -148,7 +148,7 @@ export default function Agency() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">{metric.label}</p>
               <p className="text-3xl font-bold mt-1">{metric.value}</p>
-              <p className="text-xs text-green-500 mt-1">{metric.change}</p>
+              <p className="text-xs text-chart-3 mt-1">{metric.change}</p>
             </CardContent>
           </Card>
         ))}
@@ -156,10 +156,10 @@ export default function Agency() {
 
       {/* Pending tasks */}
       {tasks.length > 0 && (
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
+        <Card className="border-chart-4/30 bg-chart-4/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              <AlertTriangle className="w-5 h-5 text-chart-4" />
               Actions en attente
             </CardTitle>
           </CardHeader>
@@ -237,13 +237,13 @@ export default function Agency() {
                     </div>
                     <div className="text-center px-4">
                       <div className="flex items-center gap-1 justify-center">
-                        <span className={`text-xl font-bold ${client.health_score >= 80 ? 'text-green-500' : client.health_score >= 60 ? 'text-yellow-500' : 'text-destructive'}`}>
+                        <span className={`text-xl font-bold ${client.health_score >= 80 ? 'text-chart-3' : client.health_score >= 60 ? 'text-chart-4' : 'text-destructive'}`}>
                           {client.health_score}%
                         </span>
                         {client.trend === "up" ? (
-                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          <TrendingUp className="w-4 h-4 text-chart-3" />
                         ) : (
-                          <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                          <AlertTriangle className="w-4 h-4 text-chart-4" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">Score santé</p>
