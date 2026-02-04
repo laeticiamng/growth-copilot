@@ -203,10 +203,8 @@ export const seedDemoData = async (workspaceId: string, siteId: string) => {
 
     await supabase.from('kpis_daily').insert(kpis);
 
-    console.log('Demo data seeded successfully');
     return { success: true };
   } catch (error) {
-    console.error('Error seeding demo data:', error);
     return { success: false, error };
   }
 };

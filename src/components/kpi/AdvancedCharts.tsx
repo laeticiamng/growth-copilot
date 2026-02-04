@@ -113,8 +113,14 @@ export function AdvancedCharts() {
   const [chartType, setChartType] = useState<"area" | "line" | "bar">("area");
 
   const handleExport = (chartName: string) => {
-    // In production, this would export chart as PNG/SVG
-    console.log(`Exporting ${chartName} chart`);
+    // Export chart data as JSON
+    const blob = new Blob([JSON.stringify({ chartName, data: sampleTimeData, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${chartName}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -405,7 +411,7 @@ export function AdvancedCharts() {
               <span>CAC moyen: {Math.round(sampleTimeData.reduce((a, b) => a + b.cac, 0) / sampleTimeData.length)}€</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-green-500" />
+              <div className="w-3 h-3 rounded bg-primary" />
               <span>LTV moyen: {Math.round(sampleTimeData.reduce((a, b) => a + b.ltv, 0) / sampleTimeData.length)}€</span>
             </div>
             <Badge variant="success">
