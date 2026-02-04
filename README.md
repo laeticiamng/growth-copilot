@@ -3,8 +3,8 @@
 > La première entreprise digitale complète en abonnement. Abonnez-vous à la Full Company ou sélectionnez uniquement les départements dont vous avez besoin.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
-[![Tests](https://img.shields.io/badge/Tests-64%2B%20passing-brightgreen)](./src/test)
-[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE-blue)](./src/i18n)
+[![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
+[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT%20%7C%20NL-blue)](./src/i18n)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
 
 ---
