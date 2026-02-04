@@ -343,7 +343,7 @@ export default function Agents() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="team">Équipe</TabsTrigger>
           <TabsTrigger value="activity">Activité récente</TabsTrigger>
           <TabsTrigger value="capabilities">Capacités</TabsTrigger>

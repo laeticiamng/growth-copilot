@@ -253,7 +253,7 @@ const Integrations = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="google">Google Suite</TabsTrigger>
           <TabsTrigger value="meta">Meta Suite</TabsTrigger>
