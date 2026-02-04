@@ -109,7 +109,7 @@ export function ConfirmActionButton({
   ...props
 }: ConfirmActionButtonProps) {
   const [confirming, setConfirming] = React.useState(false);
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   React.useEffect(() => {
     return () => {
