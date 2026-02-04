@@ -389,7 +389,7 @@ export function Pricing() {
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-sm px-3">
-                  {isEn ? "Free Forever" : "Gratuit à vie"}
+                  {isEn ? "Included" : "Inclus"}
                 </Badge>
               </div>
             </CardContent>
