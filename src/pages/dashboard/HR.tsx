@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { useEmployees, CreateEmployeeInput, EmployeeStatus, ContractType } from "@/hooks/useEmployees";
 import { usePerformanceReviews, CreateReviewInput } from "@/hooks/usePerformanceReviews";
 import { useTimeOffRequests, CreateTimeOffInput, TimeOffType } from "@/hooks/useTimeOffRequests";
+import { OrgChart } from "@/components/hr/OrgChart";
 import { 
   Users, 
   UserPlus, 
@@ -26,7 +27,8 @@ import {
   AlertCircle,
   Star,
   XCircle,
-  Plus
+  Plus,
+  Network,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -313,8 +315,9 @@ export default function HR() {
 
       {/* Tabs */}
       <Tabs defaultValue="directory" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="directory">Annuaire</TabsTrigger>
+          <TabsTrigger value="orgchart">Organigramme</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="timeoff">Congés</TabsTrigger>
@@ -425,6 +428,19 @@ export default function HR() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="orgchart" className="space-y-4">
+          <OrgChart employees={employees.map(e => ({
+            id: e.id,
+            first_name: e.first_name,
+            last_name: e.last_name,
+            role: e.job_title || '',
+            department: e.department || 'Non défini',
+            manager_id: e.manager_id,
+            avatar_url: null,
+            status: e.status,
+          }))} />
         </TabsContent>
 
         <TabsContent value="performance">
