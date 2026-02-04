@@ -196,28 +196,28 @@ L'audit n'a révélé aucun élément non-fonctionnel critique. Tous les modules
 
 ## 📋 Plan d'Enrichissement Prioritaire (Top 20)
 
-| # | Module | Enrichissement | Priorité | Effort |
-|---|--------|----------------|----------|--------|
-| 1 | Dashboard | Widget météo business avec score composite | Haute | Moyen |
-| 2 | Reports | Finaliser planification auto des rapports | Haute | Faible |
-| 3 | Competitors | Enrichir données backlinks | Moyenne | Moyen |
-| 4 | Social | Finaliser Repurpose Engine backend | Moyenne | Élevé |
-| 5 | CRO | Suggestions IA d'optimisation | Moyenne | Moyen |
-| 6 | Agents | Chat direct avec agent | Basse | Élevé |
-| 7 | HR | Organigramme visuel | Basse | Moyen |
-| 8 | Notifications | Push notifications | Moyenne | Moyen |
-| 9 | Dashboard | Export PDF du cockpit | Basse | Moyen |
-| 10 | Integrations | Logs de sync visibles | Moyenne | Faible |
-| 11 | Sites | Import en masse | Basse | Moyen |
-| 12 | Approvals | Approbation par email | Moyenne | Élevé |
-| 13 | Reports | Export Excel/PPT | Basse | Moyen |
-| 14 | Dashboard | Personnalisation widgets | Basse | Élevé |
-| 15 | CRO | Intégration heatmaps | Basse | Élevé |
-| 16 | Competitors | Alertes automatiques | Moyenne | Moyen |
-| 17 | Social | Publication API directe | Moyenne | Élevé |
-| 18 | All | Animations de transition | Basse | Faible |
-| 19 | Dashboard | Mode comparaison MoM/YoY | Moyenne | Moyen |
-| 20 | Agents | Configuration paramètres | Basse | Moyen |
+| # | Module | Enrichissement | Priorité | Effort | Statut |
+|---|--------|----------------|----------|--------|--------|
+| 1 | Dashboard | Widget météo business avec score composite | Haute | Moyen | ✅ Fait |
+| 2 | Reports | Finaliser planification auto des rapports | Haute | Faible | ✅ Fait |
+| 3 | Integrations | Logs de sync visibles | Moyenne | Faible | ✅ Fait |
+| 4 | Competitors | Enrichir données backlinks | Moyenne | Moyen | ✅ Fait |
+| 5 | Social | Finaliser Repurpose Engine backend | Moyenne | Élevé | 🔄 En cours |
+| 6 | CRO | Suggestions IA d'optimisation | Moyenne | Moyen | 📋 Planifié |
+| 7 | Agents | Chat direct avec agent | Basse | Élevé | 📋 Planifié |
+| 8 | HR | Organigramme visuel | Basse | Moyen | 📋 Planifié |
+| 9 | Notifications | Push notifications | Moyenne | Moyen | 📋 Planifié |
+| 10 | Dashboard | Export PDF du cockpit | Basse | Moyen | 📋 Planifié |
+| 11 | Sites | Import en masse | Basse | Moyen | 📋 Planifié |
+| 12 | Approvals | Approbation par email | Moyenne | Élevé | 📋 Planifié |
+| 13 | Reports | Export Excel/PPT | Basse | Moyen | 📋 Planifié |
+| 14 | Dashboard | Personnalisation widgets | Basse | Élevé | 📋 Planifié |
+| 15 | CRO | Intégration heatmaps | Basse | Élevé | 📋 Planifié |
+| 16 | Competitors | Alertes automatiques | Moyenne | Moyen | 📋 Planifié |
+| 17 | Social | Publication API directe | Moyenne | Élevé | 📋 Planifié |
+| 18 | All | Animations de transition | Basse | Faible | 📋 Planifié |
+| 19 | Dashboard | Mode comparaison MoM/YoY | Moyenne | Moyen | 📋 Planifié |
+| 20 | Agents | Configuration paramètres | Basse | Moyen | 📋 Planifié |
 
 ---
 
