@@ -2,7 +2,7 @@
 
 > Transformation complète en "Portable Company OS" - Toutes les recommandations implémentées.
 > Date : 2026-02-04 (Version Finale - 100% COMPLETE - Security Hardening Applied)
-> Dernier Audit : 2026-02-04 13:42 UTC
+> Dernier Audit : 2026-02-04 13:45 UTC
 
 ---
 
@@ -11,9 +11,9 @@
 | Métrique | Valeur |
 |----------|--------|
 | Tables protégées | 131 |
-| Politiques RLS actives | 238 |
+| Politiques RLS actives | 246 |
 | Vulnérabilités critiques | 0 |
-| Recommandations mineures | 16 |
+| Avertissements mineurs | 1 (extension in public - non critique) |
 | Tests smoke passés | 25/25 |
 | Tests sécurité passés | 47/47 |
 | Tests RLS passés | 26/26 |
@@ -64,7 +64,7 @@
 - `has_agency_access()` pour le mode multi-client
 - `has_service()` pour le gating de services
 
-**RLS :** 120+ tables avec politiques RLS actives
+**RLS :** 131 tables avec 246 politiques RLS actives (hardening complet)
 
 ---
 
