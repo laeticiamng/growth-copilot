@@ -188,13 +188,14 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 132 tables avec 186 Row Level Security policies |
+| **RLS** | 132 tables avec 186+ Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
-| **HMAC** | Protection anti-rejeu des états OAuth |
-| **Validation** | Zod schemas + sanitization XSS |
-| **Audit Trail** | Trigger immuable sur audit_log |
-| **Rate Limiting** | Par workspace et plan |
+| **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
+| **Validation** | Zod schemas + sanitization XSS + input length limits |
+| **Audit Trail** | Trigger immuable sur audit_log (anti-modification) |
+| **Rate Limiting** | 100 req/min par workspace + quotas mensuels |
 | **SECURITY DEFINER** | 8 fonctions avec search_path fixe |
+| **Role-Based Access** | Permissions granulaires (manage_team, approve_actions, view_audit) |
 
 ---
 
@@ -250,13 +251,14 @@ npm run test -- --coverage
 npm run test src/test/smoke.test.ts
 ```
 
-**Suite de tests** : 64+ tests couvrant :
-- ✅ Auth et permissions
-- ✅ RLS et sécurité
-- ✅ Hooks et composants
-- ✅ Agents IA
-- ✅ Edge Functions
-- ✅ Workflows critiques
+**Suite de tests** : 126+ tests couvrant :
+- ✅ Auth et permissions (RBAC 5 niveaux)
+- ✅ RLS et sécurité (186+ policies)
+- ✅ Hooks et composants (40+ hooks)
+- ✅ Agents IA (14 agents)
+- ✅ Edge Functions (35 fonctions)
+- ✅ Workflows critiques (E2E)
+- ✅ Validation de formulaires (Zod)
 
 ---
 
