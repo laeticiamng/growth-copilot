@@ -1,8 +1,8 @@
 # Growth OS - Audit Plateforme & Roadmap
 
 > Transformation complète en "Portable Company OS" - Toutes les recommandations implémentées.
-> Date : 2026-02-04 (Version Finale - 100% COMPLETE - Security Hardening Applied)
-> Dernier Audit : 2026-02-04 14:21 UTC
+> Date : 2026-02-04 (Version Finale - 100% COMPLETE - Security Hardening v2 Applied)
+> Dernier Audit : 2026-02-04 15:00 UTC
 
 ---
 
@@ -11,7 +11,7 @@
 | Métrique | Valeur |
 |----------|--------|
 | Tables protégées | 131 |
-| Politiques RLS actives | 246 |
+| Politiques RLS actives | 251+ |
 | Vulnérabilités critiques | 0 |
 | Avertissements mineurs | 1 (extension in public - non critique) |
 | **Tests smoke** | 25/25 ✅ |
@@ -24,6 +24,13 @@
 | **Tests intégration** | 18/18 ✅ |
 | **Tests validation forms** | 18/18 ✅ |
 | **TOTAL TESTS** | **259/259 ✅** |
+
+### Dernière Migration Sécurité (2026-02-04 15:00 UTC)
+- **role_permissions** : Restreint à `authenticated` uniquement
+- **platform_policies** : Restreint à `authenticated` uniquement  
+- **safe_zone_configs** : Restreint à `authenticated` uniquement
+- **employees** : Hardening avec owner/admin/manager/HR ou self-access
+- **leads** : Hardening avec owner/admin/manager/member ou assigned_to
 
 ### Équipe IA Complète
 
