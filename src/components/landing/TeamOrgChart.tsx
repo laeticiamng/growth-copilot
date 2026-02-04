@@ -339,37 +339,46 @@ export function TeamOrgChart() {
           </Badge>
         </div>
 
-        {/* Leadership - Sophie */}
+        {/* Leadership - CGO & QCO */}
         {leadership && (
           <div className="flex justify-center mb-8">
-            <Card className="max-w-lg w-full relative overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${leadership.color} flex items-center justify-center flex-shrink-0`}>
-                    <Brain className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-lg">{leadership.employees[0].name}</h3>
-                      <Badge variant="gradient" className="text-xs">{isEn ? "CEO of your AI" : "PDG de votre IA"}</Badge>
+            <div className="flex flex-col md:flex-row gap-4 max-w-3xl w-full">
+              {leadership.employees.map((employee, index) => (
+                <Card key={employee.name} className="flex-1 relative overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${leadership.color} flex items-center justify-center flex-shrink-0`}>
+                        <Brain className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="font-bold text-base">{employee.name}</h3>
+                          <Badge variant="gradient" className="text-xs">
+                            {index === 0 
+                              ? (isEn ? "CEO of your AI" : "PDG de votre IA")
+                              : (isEn ? "Quality Guardian" : "Gardien Qualité")
+                            }
+                          </Badge>
+                        </div>
+                        <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+                          {employee.role}
+                        </span>
+                        <p className="text-muted-foreground text-sm mt-2">
+                          {employee.description}
+                        </p>
+                      </div>
                     </div>
-                    <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                      {leadership.employees[0].role}
-                    </span>
-                    <p className="text-muted-foreground text-sm mt-2">
-                      {leadership.employees[0].description}
-                    </p>
-                  </div>
-                </div>
-                {/* Pulse animation */}
-                <div className="absolute top-4 right-4">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                    {/* Pulse animation */}
+                    <div className="absolute top-4 right-4">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
