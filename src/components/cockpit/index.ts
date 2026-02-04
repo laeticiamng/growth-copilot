@@ -5,3 +5,5 @@ export { ApprovalsWidget } from './ApprovalsWidget';
 export { RunsHistory } from './RunsHistory';
 export { ServiceHealthMonitor } from './ServiceHealthMonitor';
 export { WorkspaceQuotaWidget } from './WorkspaceQuotaWidget';
+export { SessionStatus } from './SessionStatus';
+export { RealtimeStatus } from './RealtimeStatus';
