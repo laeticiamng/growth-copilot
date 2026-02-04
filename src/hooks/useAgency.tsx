@@ -251,9 +251,26 @@ export function AgencyProvider({ children }: { children: ReactNode }) {
   };
 
   const inviteTeamMember = async (email: string, role: string) => {
-    // This would integrate with Supabase Auth invitation system
-    console.log(`Inviting ${email} as ${role}`);
-    return { error: null };
+    // Integrate with team invitations system
+    if (!currentWorkspace?.id) return { error: new Error('No workspace selected') };
+    
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const { error } = await supabase
+        .from('team_invitations')
+        .insert([{
+          workspace_id: currentWorkspace.id,
+          email,
+          role: role as 'owner' | 'admin' | 'manager' | 'analyst' | 'member' | 'viewer',
+          invited_by: userId,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        }]);
+      
+      if (error) throw error;
+      return { error: null };
+    } catch (err) {
+      return { error: err as Error };
+    }
   };
 
   return (
