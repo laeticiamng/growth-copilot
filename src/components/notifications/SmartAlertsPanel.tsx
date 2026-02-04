@@ -12,8 +12,13 @@ import {
   Info, 
   X,
   ExternalLink,
-  Clock
+  Clock,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Target
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -21,12 +26,17 @@ import { Link } from "react-router-dom";
 
 interface Alert {
   id: string;
-  type: 'critical' | 'warning' | 'success' | 'info';
+  type: 'critical' | 'warning' | 'success' | 'info' | 'predictive';
   title: string;
   message: string;
   action?: { label: string; link: string };
   timestamp: Date;
   read: boolean;
+  prediction?: {
+    confidence: number;
+    impact: string;
+    recommendation: string;
+  };
 }
 
 export function SmartAlertsPanel() {
@@ -83,6 +93,56 @@ export function SmartAlertsPanel() {
           });
         });
 
+        // Add predictive alerts based on patterns
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const { data: recentRuns } = await supabase
+          .from('agent_runs')
+          .select('status, agent_type, created_at')
+          .eq('workspace_id', currentWorkspace.id)
+          .gte('created_at', sevenDaysAgo.toISOString());
+
+        if (recentRuns && recentRuns.length > 0) {
+          const failedRuns = recentRuns.filter(r => r.status === 'failed');
+          const failRate = (failedRuns.length / recentRuns.length) * 100;
+          
+          if (failRate > 20) {
+            newAlerts.push({
+              id: 'predictive-fail-rate',
+              type: 'predictive',
+              title: 'Taux d\'échec élevé détecté',
+              message: `${failRate.toFixed(0)}% des exécutions ont échoué cette semaine.`,
+              action: { label: 'Analyser', link: '/dashboard/agents' },
+              timestamp: new Date(),
+              read: false,
+              prediction: {
+                confidence: 85,
+                impact: 'Dégradation possible des performances',
+                recommendation: 'Vérifier les configurations des agents concernés',
+              },
+            });
+          }
+
+          // Trend prediction
+          if (recentRuns.length < 5) {
+            newAlerts.push({
+              id: 'predictive-activity',
+              type: 'predictive',
+              title: 'Activité faible cette semaine',
+              message: 'Seulement ' + recentRuns.length + ' exécutions en 7 jours.',
+              action: { label: 'Lancer un plan', link: '/dashboard' },
+              timestamp: new Date(),
+              read: false,
+              prediction: {
+                confidence: 70,
+                impact: 'Opportunités manquées potentielles',
+                recommendation: 'Activer l\'autopilot pour automatiser les tâches',
+              },
+            });
+          }
+        }
+
         newAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         setAlerts(newAlerts);
       } catch (error) {
@@ -100,9 +160,20 @@ export function SmartAlertsPanel() {
   const getAlertIcon = (type: Alert['type']) => {
     switch (type) {
       case 'critical': return <AlertTriangle className="h-4 w-4 text-destructive" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-warning" />;
       case 'success': return <CheckCircle className="h-4 w-4 text-primary" />;
+      case 'predictive': return <Sparkles className="h-4 w-4 text-accent-foreground" />;
       default: return <Info className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const getAlertBorderColor = (type: Alert['type']) => {
+    switch (type) {
+      case 'critical': return 'border-l-destructive';
+      case 'warning': return 'border-l-warning';
+      case 'success': return 'border-l-primary';
+      case 'predictive': return 'border-l-accent';
+      default: return 'border-l-muted-foreground';
     }
   };
 
@@ -128,15 +199,38 @@ export function SmartAlertsPanel() {
             <p>Aucune alerte</p>
           </div>
         ) : (
-          <ScrollArea className="h-[250px]">
+          <ScrollArea className="h-[280px]">
             <div className="space-y-2">
               {alerts.map((alert) => (
-                <div key={alert.id} className={cn("p-3 rounded-lg bg-muted/30 border-l-4", alert.type === 'critical' ? 'border-l-destructive' : alert.type === 'success' ? 'border-l-primary' : 'border-l-amber-500')}>
+                <div key={alert.id} className={cn("p-3 rounded-lg bg-muted/30 border-l-4", getAlertBorderColor(alert.type))}>
                   <div className="flex items-start gap-3">
                     {getAlertIcon(alert.type)}
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-sm">{alert.title}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{alert.title}</span>
+                        {alert.type === 'predictive' && (
+                          <Badge variant="outline" className="text-xs">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            IA
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">{alert.message}</p>
+                      
+                      {/* Prediction details */}
+                      {alert.prediction && (
+                        <div className="mt-2 p-2 rounded bg-accent/20 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Target className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs">Confiance: {alert.prediction.confidence}%</span>
+                            <Progress value={alert.prediction.confidence} className="h-1 flex-1" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            💡 {alert.prediction.recommendation}
+                          </p>
+                        </div>
+                      )}
+                      
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(alert.timestamp, { addSuffix: true, locale: fr })}

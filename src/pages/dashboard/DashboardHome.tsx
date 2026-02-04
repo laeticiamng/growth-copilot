@@ -26,7 +26,9 @@ import {
   ApprovalsWidget,
   RunsHistory,
   BusinessHealthScore,
+  ROITrackerWidget,
 } from "@/components/cockpit";
+import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
 import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
 
@@ -271,12 +273,20 @@ export default function DashboardHome() {
         {/* Business Health Score */}
         <BusinessHealthScore />
 
-        {/* Approvals Widget */}
+        {/* ROI Tracker Widget */}
+        <ROITrackerWidget />
+      </div>
+
+      {/* Approvals Widget */}
+      <div className="grid md:grid-cols-2 gap-6">
         <ApprovalsWidget
           approvals={approvalsForWidget}
           onApprove={handleApprove}
           onReject={handleReject}
         />
+        
+        {/* Agent Performance Chart */}
+        <AgentPerformanceChart />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
