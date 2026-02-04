@@ -460,12 +460,15 @@ export default function Agents() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Bot className="h-8 w-8" />
-          Agents IA
-        </h1>
-        <p className="text-muted-foreground">Votre équipe d'agents IA spécialisés</p>
+      {/* Header - Apple-like */}
+      <div className="flex items-center gap-3">
+        <span className="text-3xl">🤖</span>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Mon équipe IA</h1>
+          <p className="text-muted-foreground">
+            39 agents spécialisés répartis en 11 départements, disponibles 24h/24
+          </p>
+        </div>
       </div>
 
       {/* KPI Cards */}

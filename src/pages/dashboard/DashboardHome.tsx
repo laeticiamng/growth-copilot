@@ -28,6 +28,7 @@ import {
   RunsHistory,
   BusinessHealthScore,
   ROITrackerWidget,
+  WelcomeCard,
 } from "@/components/cockpit";
 import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
@@ -223,44 +224,15 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-6">
-      {/* CGO Welcome + Export Button */}
-      <Card variant="gradient" className="border-2 border-primary/20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
-        <CardContent className="relative pt-6 pb-4">
-          <div className="flex items-start gap-4">
-            <div className="text-4xl">{CGO_PERSONA.avatar}</div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold">{CGO_PERSONA.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  <Bot className="w-3 h-3 mr-1" />
-                  {CGO_PERSONA.role}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground">
-                Bonjour ! Voici l'état de{" "}
-                <span className="font-medium text-foreground">
-                  {currentSite?.name || currentWorkspace.name}
-                </span>
-                .{" "}
-                {pendingApprovals.length > 0 ? (
-                  <>
-                    Vous avez{" "}
-                    <span className="font-medium text-primary">
-                      {pendingApprovals.length} décision{pendingApprovals.length > 1 ? "s" : ""}
-                    </span>{" "}
-                    en attente.
-                  </>
-                ) : (
-                  "Tout est à jour."
-                )}
-              </p>
-            </div>
-            {/* PDF Export Button */}
-            <CockpitPDFExport workspaceName={currentWorkspace.name} />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Welcome Card - Apple-like */}
+      <WelcomeCard
+        agentName={CGO_PERSONA.name}
+        agentRole={CGO_PERSONA.role}
+        agentAvatar={CGO_PERSONA.avatar}
+        siteName={currentSite?.name || currentWorkspace.name}
+        pendingCount={pendingApprovals.length}
+        onExport={() => {}}
+      />
 
       {/* Service Health Summary */}
       {serviceHealth.length > 0 && (

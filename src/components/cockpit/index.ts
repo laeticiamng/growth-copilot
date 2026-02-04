@@ -9,3 +9,6 @@ export { SessionStatus } from './SessionStatus';
 export { RealtimeStatus } from './RealtimeStatus';
 export { BusinessHealthScore } from './BusinessHealthScore';
 export { ROITrackerWidget } from './ROITrackerWidget';
+export { WelcomeCard } from './WelcomeCard';
+export { SectionHeader, PageHeader } from './SectionHeader';
+export { NavigationHelper, NavigationHelperCompact } from './NavigationHelper';
