@@ -441,6 +441,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ads_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ads_accounts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -3598,6 +3605,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gbp_profiles_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "gbp_profiles_site_id_fkey"
             columns: ["site_id"]
             isOneToOne: false
@@ -3785,6 +3799,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "integration_token_audit_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "integration_token_audit_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -3848,6 +3869,13 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_tokens_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
             referencedColumns: ["id"]
           },
           {
@@ -5050,6 +5078,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "meta_ad_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "meta_ad_accounts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -5476,6 +5511,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "meta_ig_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "meta_ig_accounts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -5894,6 +5936,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "meta_webhook_configs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "meta_webhook_configs_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -6162,6 +6211,13 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oauth_tokens_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
             referencedColumns: ["id"]
           },
         ]
@@ -7596,6 +7652,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "social_accounts_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "v_integration_health"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "social_accounts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -8310,36 +8373,36 @@ export type Database = {
     Views: {
       v_integration_health: {
         Row: {
-          expires_in_hours: number | null
-          hours_since_sync: number | null
+          expires_at: string | null
+          health_status: string | null
+          id: string | null
+          last_auth_failure_at: string | null
           last_sync_at: string | null
-          needs_attention: boolean | null
           provider: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count: number | null
-          status_text: string | null
-          token_expires_at: string | null
+          status: Database["public"]["Enums"]["integration_status"] | null
           workspace_id: string | null
         }
         Insert: {
-          expires_in_hours?: never
-          hours_since_sync?: never
+          expires_at?: string | null
+          health_status?: never
+          id?: string | null
+          last_auth_failure_at?: string | null
           last_sync_at?: string | null
-          needs_attention?: never
           provider?: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count?: number | null
-          status_text?: never
-          token_expires_at?: string | null
+          status?: Database["public"]["Enums"]["integration_status"] | null
           workspace_id?: string | null
         }
         Update: {
-          expires_in_hours?: never
-          hours_since_sync?: never
+          expires_at?: string | null
+          health_status?: never
+          id?: string | null
+          last_auth_failure_at?: string | null
           last_sync_at?: string | null
-          needs_attention?: never
           provider?: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count?: number | null
-          status_text?: never
-          token_expires_at?: string | null
+          status?: Database["public"]["Enums"]["integration_status"] | null
           workspace_id?: string | null
         }
         Relationships: [
