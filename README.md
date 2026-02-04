@@ -140,7 +140,7 @@ L'AI Gateway centralise tous les appels IA avec :
 ### Backend (Lovable Cloud)
 - **Supabase** - PostgreSQL avec 131 tables
 - **Edge Functions** (Deno) - 38 fonctions serverless
-- **Row Level Security** - 238 policies pour isolation multi-tenant
+- **Row Level Security** - 246 policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -188,7 +188,7 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 131 tables avec 238 Row Level Security policies |
+| **RLS** | 131 tables avec 246 Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
@@ -253,7 +253,7 @@ npm run test src/test/smoke.test.ts
 
 **Suite de tests** : 170+ tests couvrant :
 - ✅ Auth et permissions (RBAC 5 niveaux)
-- ✅ RLS et sécurité (238 policies)
+- ✅ RLS et sécurité (246 policies)
 - ✅ Hooks et composants (40+ hooks)
 - ✅ Agents IA (14 agents)
 - ✅ Edge Functions (38 fonctions)
@@ -312,7 +312,7 @@ npm run test src/test/smoke.test.ts
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │                 POSTGRESQL (131 tables)                    │  │
 │  │  workspaces │ user_roles │ agent_runs │ audit_log         │  │
-│  │  + RLS (238 policies) + pg_cron (Scheduler)               │  │
+│  │  + RLS (246 policies) + pg_cron (Scheduler)               │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
