@@ -12,6 +12,7 @@ const DEPARTMENTS_FR = [
     icon: Brain,
     employees: [
       { name: "Sophie Marchand", role: "Chief Growth Officer", description: "Orchestre tous les agents et priorise les actions selon l'impact business (ICE)" },
+      { name: "Jean-Michel Fournier", role: "Quality & Compliance Officer", description: "Valide chaque livrable pour assurer la conformité éthique et technique" },
     ]
   },
   {
@@ -149,6 +150,7 @@ const DEPARTMENTS_EN = [
     icon: Brain,
     employees: [
       { name: "Sophie Marchand", role: "Chief Growth Officer", description: "Orchestrates all agents and prioritizes actions by business impact (ICE)" },
+      { name: "Jean-Michel Fournier", role: "Quality & Compliance Officer", description: "Validates each deliverable to ensure ethical and technical compliance" },
     ]
   },
   {
