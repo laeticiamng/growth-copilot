@@ -187,7 +187,7 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
   }
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden flex flex-col", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -214,7 +214,7 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
         </div>
         <CardDescription>Score de santé global de votre workspace</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         {/* Main Score */}
         <div className="flex items-center gap-4 mb-4">
           {getWeatherIcon(overallScore)}

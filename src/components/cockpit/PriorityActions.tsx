@@ -75,15 +75,15 @@ export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActi
   const displayedActions = actions.slice(0, maxItems);
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Priorités</CardTitle>
           <Badge variant="gradient">Top {displayedActions.length}</Badge>
         </div>
-        <CardDescription>Actions classées par impact × confiance × facilité</CardDescription>
+        <CardDescription className="text-xs">Actions classées par impact × confiance × facilité</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1">
         {displayedActions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Zap className="w-10 h-10 mx-auto mb-3 opacity-50" />

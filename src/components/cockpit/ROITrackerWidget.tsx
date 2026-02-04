@@ -123,7 +123,7 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
     : "text-destructive";
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden flex flex-col", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -156,7 +156,7 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
         <CardDescription>30 derniers jours</CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1">
         {/* Main Savings Display */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10">
           <div>
