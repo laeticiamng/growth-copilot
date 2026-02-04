@@ -16,6 +16,8 @@ interface ServiceHealth {
   name: string;
   status: "green" | "yellow" | "red" | "grey";
   message?: string;
+  trend?: "up" | "down" | "stable";
+  change?: number;
 }
 
 interface ExecutiveSummaryProps {
@@ -116,8 +118,22 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
                 )}
               >
                 <Icon className={cn("w-4 h-4 flex-shrink-0", config.color)} />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{service.name}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium truncate">{service.name}</p>
+                    {service.trend && (
+                      <span className={cn(
+                        "flex items-center gap-0.5 text-xs font-medium",
+                        service.trend === "up" ? "text-chart-3" : service.trend === "down" ? "text-destructive" : "text-muted-foreground"
+                      )}>
+                        {service.trend === "up" && <TrendingUp className="w-3 h-3" />}
+                        {service.trend === "down" && <TrendingDown className="w-3 h-3" />}
+                        {service.change !== undefined && (
+                          <span>{service.trend === "up" ? "+" : ""}{service.change}%</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
                   {service.message && (
                     <p className="text-xs text-muted-foreground truncate">
                       {service.message}
