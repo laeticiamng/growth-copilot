@@ -8,3 +8,4 @@ export { WorkspaceQuotaWidget } from './WorkspaceQuotaWidget';
 export { SessionStatus } from './SessionStatus';
 export { RealtimeStatus } from './RealtimeStatus';
 export { BusinessHealthScore } from './BusinessHealthScore';
+export { ROITrackerWidget } from './ROITrackerWidget';
