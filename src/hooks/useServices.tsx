@@ -138,9 +138,9 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
       .from('workspace_subscriptions')
       .select('*')
       .eq('workspace_id', currentWorkspace.id)
-      .single();
+      .maybeSingle();
     
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       console.error('Error fetching subscription:', error);
     }
     setSubscription(data as Subscription | null);
