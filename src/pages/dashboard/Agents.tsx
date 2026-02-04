@@ -274,7 +274,29 @@ export default function Agents() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
+        {/* Running Now - Real-time Indicator */}
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">En cours</CardTitle>
+            <div className="relative">
+              {recentRuns.some(r => r.status === 'running') && (
+                <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+              )}
+              <PlayCircle className="h-4 w-4 text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {recentRuns.filter(r => r.status === 'running').length}
+            </div>
+            <p className="text-xs text-muted-foreground">Exécutions actives</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Agents actifs</CardTitle>
