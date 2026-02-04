@@ -197,7 +197,7 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 131 tables avec 260+ Row Level Security policies |
+| **RLS** | 131 tables avec 299 Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
