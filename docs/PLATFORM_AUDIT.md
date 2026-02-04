@@ -1,7 +1,7 @@
 # Growth OS - Audit Plateforme & Roadmap
 
 > Transformation complète en "Portable Company OS" - Toutes les recommandations implémentées.
-> Date : 2026-02-03 (Version Finale - 100% COMPLETE)
+> Date : 2026-02-04 (Version Finale - 100% COMPLETE - Security Hardening Applied)
 
 ---
 
@@ -233,19 +233,30 @@
 ## 🔐 Sécurité
 
 ### Implémenté :
-- RLS sur toutes les tables métier
-- Fonctions Security Definer pour permissions
-- Chiffrement AES-GCM des tokens OAuth
-- Protection HMAC des états OAuth
-- Trigger anti-modification sur audit_log
-- Rate limiting sur Edge Functions
-- Vues Security Definer pour métriques
+- RLS sur 132 tables métier avec 186+ politiques actives
+- Fonctions Security Definer pour permissions (8 fonctions avec search_path fixe)
+- Chiffrement AES-GCM 256-bit des tokens OAuth
+- Protection HMAC des états OAuth avec nonces anti-rejeu
+- Trigger anti-modification sur audit_log (immuable)
+- Rate limiting sur Edge Functions (100 req/min/workspace)
+- Vues Security Definer pour métriques sensibles
+
+### RLS Hardening (2026-02-04) :
+- **meta_conversations/meta_messages** : Restreint aux managers (manage_team)
+- **integration_tokens/oauth_tokens** : Restreint aux workspace owners uniquement
+- **deals/activities** : Restreint à assigned_to ou managers
+- **approval_queue** : Restreint à approve_actions permission ou owner
+- **time_off_requests** : Restreint à l'employé, HR, ou manager
+- **compliance_tasks/incident_reports** : Restreint à manage_team ou owner
+- **audit_log** : Restreint à view_audit permission ou owner
+- **workspace_quotas** : Restreint à owner ou manage_billing
+- **kpis_daily** : Restreint à view_analytics ou owner
+- **ai_requests** : Restreint au créateur, owner, ou manage_billing
 
 ### Warnings Connus (Non-critiques) :
-1. **Extension in Public** - Extensions standard, déplacement optionnel
-2. **RLS Always True sur services_catalog** - Intentionnel pour accès public en lecture
+1. **Extension in Public** - Extensions standard PostgreSQL, déplacement optionnel vers schema dédié
 
-> Ces warnings sont documentés et acceptés car ils n'impactent pas la sécurité des données utilisateur.
+> Ce warning est documenté et accepté car il n'impacte pas la sécurité des données utilisateur.
 
 ## ✅ Checklist "Portable Company OS" - COMPLETE
 
