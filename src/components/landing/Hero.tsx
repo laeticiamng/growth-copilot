@@ -171,7 +171,7 @@ export function Hero() {
                 { value: "11", label: isEn ? "Departments" : "Départements" },
                 { value: "24/7", label: isEn ? "Automation" : "Automatisation" },
                 { value: "100%", label: isEn ? "Auditable" : "Auditable" },
-                { value: "37", label: isEn ? "AI Employees" : "Employés IA" },
+                { value: "38", label: isEn ? "AI Employees" : "Employés IA" },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</p>
