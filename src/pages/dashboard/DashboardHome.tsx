@@ -243,19 +243,25 @@ export default function DashboardHome() {
         />
       )}
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Priority Actions */}
-        <PriorityActions actions={priorityActions} maxItems={3} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        {/* Priority Actions - Takes more space on medium screens */}
+        <div className="lg:col-span-1">
+          <PriorityActions actions={priorityActions} maxItems={3} />
+        </div>
 
         {/* Business Health Score */}
-        <BusinessHealthScore />
+        <div className="lg:col-span-1">
+          <BusinessHealthScore />
+        </div>
 
         {/* ROI Tracker Widget */}
-        <ROITrackerWidget />
+        <div className="lg:col-span-1">
+          <ROITrackerWidget />
+        </div>
       </div>
 
       {/* Approvals Widget */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <ApprovalsWidget
           approvals={approvalsForWidget}
           onApprove={handleApprove}
@@ -266,7 +272,7 @@ export default function DashboardHome() {
         <AgentPerformanceChart />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Quick Launchers */}
         <QuickLaunchers launchers={quickLaunchers} onLaunch={handleLaunchRun} />
 
@@ -275,7 +281,7 @@ export default function DashboardHome() {
       </div>
 
       {/* Voice Assistant & Real-Time Alerts */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Voice-First AI */}
         <Card className="overflow-hidden">
           <CardHeader className="pb-2">
