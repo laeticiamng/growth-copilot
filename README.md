@@ -138,9 +138,9 @@ L'AI Gateway centralise tous les appels IA avec :
 - **i18next** - Internationalisation (4 langues, 551 clés chacune)
 
 ### Backend (Lovable Cloud)
-- **Supabase** - PostgreSQL avec 120+ tables
-- **Edge Functions** (Deno) - 38 fonctions serverless
-- **Row Level Security** - Isolation multi-tenant stricte
+- **Supabase** - PostgreSQL avec 132 tables
+- **Edge Functions** (Deno) - 35 fonctions serverless
+- **Row Level Security** - 186 policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -188,12 +188,13 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 120+ tables avec Row Level Security |
+| **RLS** | 132 tables avec 186 Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth |
 | **Validation** | Zod schemas + sanitization XSS |
 | **Audit Trail** | Trigger immuable sur audit_log |
 | **Rate Limiting** | Par workspace et plan |
+| **SECURITY DEFINER** | 8 fonctions avec search_path fixe |
 
 ---
 
@@ -302,13 +303,13 @@ npm run test src/test/smoke.test.ts
 ┌─────────────────────────────────────────────────────────────────┐
 │                    LOVABLE CLOUD                                 │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 38 EDGE FUNCTIONS                          │  │
+│  │                 35 EDGE FUNCTIONS                          │  │
 │  │  ai-gateway │ run-executor │ oauth-* │ stripe-* │ sync-*  │  │
 │  └───────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 POSTGRESQL (120+ tables)                   │  │
+│  │                 POSTGRESQL (132 tables)                    │  │
 │  │  workspaces │ user_roles │ agent_runs │ audit_log         │  │
-│  │  + RLS (Row Level Security) + pg_cron (Scheduler)         │  │
+│  │  + RLS (186 policies) + pg_cron (Scheduler)               │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
