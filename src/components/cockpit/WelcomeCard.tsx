@@ -36,23 +36,23 @@ export function WelcomeCard({
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
       
       <CardContent className="relative pt-6 pb-5">
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col sm:flex-row items-start gap-4">
           {/* Avatar */}
-          <div className="relative">
-            <div className="text-5xl">{agentAvatar}</div>
-            <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+          <div className="relative flex-shrink-0">
+            <div className="text-4xl sm:text-5xl">{agentAvatar}</div>
+            <span className="absolute -bottom-1 -right-1 flex h-3 w-3 sm:h-4 sm:w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-3 opacity-75" />
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-chart-3 border-2 border-background" />
+              <span className="relative inline-flex rounded-full h-3 w-3 sm:h-4 sm:w-4 bg-chart-3 border-2 border-background" />
             </span>
           </div>
           
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <h2 className="font-bold text-lg">{agentName}</h2>
-              <Badge variant="outline" className="text-xs font-normal">
-                <Bot className="w-3 h-3 mr-1" />
-                {agentRole}
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <h2 className="font-bold text-base sm:text-lg">{agentName}</h2>
+              <Badge variant="outline" className="text-xs font-normal whitespace-nowrap">
+                <Bot className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate max-w-[120px] sm:max-w-none">{agentRole}</span>
               </Badge>
             </div>
             
@@ -92,24 +92,22 @@ export function WelcomeCard({
         
         {/* Quick Stats Bar */}
         <div className="mt-4 pt-4 border-t border-border/50">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-4">
-              <QuickStat 
-                icon={<Sparkles className="w-4 h-4 text-primary" />}
-                label="Agents actifs"
-                value="39"
-              />
-              <QuickStat 
-                icon={<span className="text-sm">📊</span>}
-                label="Départements"
-                value="11"
-              />
-              <QuickStat 
-                icon={<span className="text-sm">⚡</span>}
-                label="Disponibilité"
-                value="24/7"
-              />
-            </div>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <QuickStat 
+              icon={<Sparkles className="w-4 h-4 text-primary flex-shrink-0" />}
+              label="Agents actifs"
+              value="39"
+            />
+            <QuickStat 
+              icon={<span className="text-sm flex-shrink-0">📊</span>}
+              label="Départements"
+              value="11"
+            />
+            <QuickStat 
+              icon={<span className="text-sm flex-shrink-0">⚡</span>}
+              label="Disponibilité"
+              value="24/7"
+            />
           </div>
         </div>
       </CardContent>
