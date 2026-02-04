@@ -100,6 +100,9 @@ export default function Billing() {
 
   // Check if current plan is Starter
   const isStarter = subscription?.plan === "starter";
+  
+  // Check if current plan is Founder (unlimited admin access)
+  const isFounder = subscription?.plan === "founder";
 
   // Filter out core services (they're always free)
   const paidServices = catalog.filter(s => !s.is_core);
@@ -107,9 +110,11 @@ export default function Billing() {
   // Calculate current "à la carte" total
   const enabledPaidCount = paidServices.filter(s => hasService(s.slug)).length;
   const alaCarteTotal = enabledPaidCount * PRICE_PER_DEPT;
-  const totalEmployees = paidServices
-    .filter(s => hasService(s.slug))
-    .reduce((sum, s) => sum + (DEPT_EMPLOYEES[s.slug] || 3), 0);
+  const totalEmployees = isFounder || isFullCompany 
+    ? TOTAL_AI_WORKFORCE 
+    : paidServices
+        .filter(s => hasService(s.slug))
+        .reduce((sum, s) => sum + (DEPT_EMPLOYEES[s.slug] || 3), 0);
 
   // Toggle a service (for demo/trial mode)
   const handleToggleService = async (service: Service, enabled: boolean) => {
@@ -234,7 +239,9 @@ export default function Billing() {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-xl bg-primary/10">
-                    {isFullCompany ? (
+                    {isFounder ? (
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    ) : isFullCompany ? (
                       <Crown className="w-6 h-6 text-primary" />
                     ) : (
                       <Building2 className="w-6 h-6 text-primary" />
@@ -242,38 +249,55 @@ export default function Billing() {
                   </div>
                   <div>
                     <CardTitle className="text-xl">
-                      {isFullCompany ? "Full Company" : "À la carte"}
+                      {isFounder ? "Founder" : isFullCompany ? "Full Company" : "À la carte"}
                     </CardTitle>
                     <CardDescription className="mt-0.5">
-                      {isFullCompany 
-                        ? `${TOTAL_AI_WORKFORCE} employés IA • 11 départements`
-                        : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
+                      {isFounder 
+                        ? `${TOTAL_AI_WORKFORCE} employés IA • Accès illimité • Fondatrice`
+                        : isFullCompany 
+                          ? `${TOTAL_AI_WORKFORCE} employés IA • 11 départements`
+                          : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
                       }
                     </CardDescription>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-3xl font-bold">
-                    {(isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal).toLocaleString()}€
-                    <span className="text-sm font-normal text-muted-foreground">/mois</span>
-                  </div>
-                  {!isFullCompany && alaCarteTotal > FULL_COMPANY_PRICE && (
-                    <p className="text-xs text-destructive mt-1">
-                      Économisez {(alaCarteTotal - FULL_COMPANY_PRICE).toLocaleString()}€ avec Full Company
-                    </p>
+                  {isFounder ? (
+                    <>
+                      <div className="text-3xl font-bold text-primary">
+                        ∞
+                        <span className="text-sm font-normal text-muted-foreground ml-2">Illimité</span>
+                      </div>
+                      <Badge variant="success" className="mt-2">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Fondatrice
+                      </Badge>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold">
+                        {(isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal).toLocaleString()}€
+                        <span className="text-sm font-normal text-muted-foreground">/mois</span>
+                      </div>
+                      {!isFullCompany && alaCarteTotal > FULL_COMPANY_PRICE && (
+                        <p className="text-xs text-destructive mt-1">
+                          Économisez {(alaCarteTotal - FULL_COMPANY_PRICE).toLocaleString()}€ avec Full Company
+                        </p>
+                      )}
+                      <Badge 
+                        variant={isPaid ? "success" : subscription?.status === "trialing" ? "secondary" : "outline"} 
+                        className="mt-2"
+                      >
+                        {isPaid ? "Actif" : subscription?.status === "trialing" ? "Essai" : "Gratuit"}
+                      </Badge>
+                    </>
                   )}
-                  <Badge 
-                    variant={isPaid ? "success" : subscription?.status === "trialing" ? "secondary" : "outline"} 
-                    className="mt-2"
-                  >
-                    {isPaid ? "Actif" : subscription?.status === "trialing" ? "Essai" : "Gratuit"}
-                  </Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {enabledServices.map(service => {
+                {(isFounder || isFullCompany ? catalog.filter(s => !s.is_core) : enabledServices).map(service => {
                   const Icon = SERVICE_ICONS[service.slug] || Puzzle;
                   const employees = DEPT_EMPLOYEES[service.slug] || 0;
                   return (
@@ -302,8 +326,8 @@ export default function Billing() {
             </CardContent>
           </Card>
 
-        {/* Starter Plan Card */}
-          {!isFullCompany && !isStarter && (
+        {/* Starter Plan Card - only show if not full company and not founder and not already starter */}
+          {!isFullCompany && !isStarter && !isFounder && (
             <Card className="border border-border">
               <CardHeader className="text-center pb-2">
                 <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-secondary">
@@ -352,8 +376,8 @@ export default function Billing() {
           )}
         </div>
 
-        {/* Full Company Upgrade Card - only show if not full company */}
-        {!isFullCompany && (
+        {/* Full Company Upgrade Card - only show if not full company and not founder */}
+        {!isFullCompany && !isFounder && (
           <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
