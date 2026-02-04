@@ -85,7 +85,8 @@ const DEPARTMENTS: ModuleStatus[] = [
       { name: "Ads Optimizer", status: "complete", details: "Google Ads sync, budget optimization" },
       { name: "Meta Ads Agent", status: "complete", details: "Facebook/Instagram campaigns, CAPI" },
       { name: "Social Distribution", status: "complete", details: "Multi-platform posting, scheduling" },
-      { name: "CRO Analyst", status: "partial", details: "A/B testing, heatmaps (UI ready, backend partial)" },
+      { name: "CRO Analyst", status: "complete", details: "A/B testing, heatmaps, entonnoir conversion" },
+      { name: "Backlinks Analysis", status: "complete", details: "Profil backlinks, opportunités, comparaison concurrents" },
       { name: "Brand Kit", status: "complete", details: "Colors, fonts, tone of voice, claims" },
       { name: "Creatives Studio", status: "complete", details: "Template factory, QA, export" },
       { name: "Competitors Intel", status: "complete", details: "Monitoring, benchmarks, alerts" },
@@ -102,6 +103,7 @@ const DEPARTMENTS: ModuleStatus[] = [
       { name: "Lead Scoring", status: "complete", details: "Qualification automatique" },
       { name: "Offers Management", status: "complete", details: "Devis, propositions, suivi" },
       { name: "Activity Tracking", status: "complete", details: "Calls, emails, meetings" },
+      { name: "Sales Scripts IA", status: "complete", details: "Génération scripts, objections, templates" },
       { name: "CRM Integration", status: "partial", details: "Sync Salesforce/HubSpot (connecteur planifié)" },
     ]
   },
@@ -116,7 +118,8 @@ const DEPARTMENTS: ModuleStatus[] = [
       { name: "KPI Aggregates", status: "complete", details: "Métriques consolidées multi-sources" },
       { name: "Billing Dashboard", status: "complete", details: "Stripe integration, abonnements" },
       { name: "ROI Calculator", status: "complete", details: "Comparaison AI vs salaires" },
-      { name: "Budget Tracking", status: "partial", details: "Suivi dépenses ads (partiel)" },
+      { name: "Budget Tracking", status: "complete", details: "Suivi dépenses ads, CAC/LTV" },
+      { name: "Advanced Charts", status: "complete", details: "Graphiques interactifs, radar, entonnoir" },
     ]
   },
   {
@@ -196,6 +199,7 @@ const DEPARTMENTS: ModuleStatus[] = [
       { name: "Agency Mode", status: "complete", details: "Multi-client management" },
       { name: "Automations", status: "complete", details: "Rules, triggers, actions" },
       { name: "Webhooks", status: "complete", details: "Outbound integrations" },
+      { name: "Advanced Webhooks", status: "complete", details: "Conditions, transformations, historique" },
       { name: "Policy Profiles", status: "complete", details: "Risk levels, approvals" },
     ]
   },
