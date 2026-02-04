@@ -138,9 +138,9 @@ L'AI Gateway centralise tous les appels IA avec :
 - **i18next** - Internationalisation (4 langues, 551 clés chacune)
 
 ### Backend (Lovable Cloud)
-- **Supabase** - PostgreSQL avec 132 tables
-- **Edge Functions** (Deno) - 35 fonctions serverless
-- **Row Level Security** - 186 policies pour isolation multi-tenant
+- **Supabase** - PostgreSQL avec 131 tables
+- **Edge Functions** (Deno) - 38 fonctions serverless
+- **Row Level Security** - 238 policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -188,7 +188,7 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 132 tables avec 186+ Row Level Security policies |
+| **RLS** | 131 tables avec 238 Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
@@ -251,14 +251,15 @@ npm run test -- --coverage
 npm run test src/test/smoke.test.ts
 ```
 
-**Suite de tests** : 126+ tests couvrant :
+**Suite de tests** : 170+ tests couvrant :
 - ✅ Auth et permissions (RBAC 5 niveaux)
-- ✅ RLS et sécurité (186+ policies)
+- ✅ RLS et sécurité (238 policies)
 - ✅ Hooks et composants (40+ hooks)
 - ✅ Agents IA (14 agents)
-- ✅ Edge Functions (35 fonctions)
+- ✅ Edge Functions (38 fonctions)
 - ✅ Workflows critiques (E2E)
 - ✅ Validation de formulaires (Zod)
+- ✅ Smoke tests complets (25 scénarios)
 
 ---
 
@@ -309,9 +310,9 @@ npm run test src/test/smoke.test.ts
 │  │  ai-gateway │ run-executor │ oauth-* │ stripe-* │ sync-*  │  │
 │  └───────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 POSTGRESQL (132 tables)                    │  │
+│  │                 POSTGRESQL (131 tables)                    │  │
 │  │  workspaces │ user_roles │ agent_runs │ audit_log         │  │
-│  │  + RLS (186 policies) + pg_cron (Scheduler)               │  │
+│  │  + RLS (238 policies) + pg_cron (Scheduler)               │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────────┘
                               │

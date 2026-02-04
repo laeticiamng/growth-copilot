@@ -2,7 +2,7 @@
 
 > Transformation complète en "Portable Company OS" - Toutes les recommandations implémentées.
 > Date : 2026-02-04 (Version Finale - 100% COMPLETE - Security Hardening Applied)
-> Dernier Audit : 2026-02-04 13:39 UTC
+> Dernier Audit : 2026-02-04 13:42 UTC
 
 ---
 
@@ -27,7 +27,7 @@
 | Multi-tenant & RBAC | ✅ Complet | 100% |
 | Moteur de Runs & Approbations | ✅ Complet | 100% |
 | Gestion des Abonnements | ✅ Complet | 100% |
-| Edge Functions (38 fonctions) | ✅ Complet | 100% |
+| Edge Functions (35 fonctions) | ✅ Complet | 100% |
 | Intégrations Google/Meta | ✅ Complet | 100% |
 | AI Gateway | ✅ Complet | 100% |
 | Cockpit Exécutif | ✅ Complet | 100% |
