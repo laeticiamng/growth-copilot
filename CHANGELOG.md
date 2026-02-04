@@ -5,6 +5,29 @@ All notable changes to Growth OS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-04
+
+### Added
+- **Enrichissements UI**: RepurposeEngine (Social), CROSuggestionsAI (CRO), OrgChart (HR)
+- **CockpitPDFExport**: Export du dashboard exécutif en PDF
+- **BulkSiteImport**: Import en masse de sites depuis CSV
+- **CompetitorAlerts**: Alertes automatiques sur activité concurrents
+- **MoMComparison**: Widget comparaison mois-sur-mois
+- **TabsList responsive**: Correction accessibilité mobile sur toutes les pages
+
+### Changed
+- Mise à jour README: 41 pages dashboard (était 37), 38 Edge Functions
+- Audit complet plateforme avec score 91/100
+- Correction RLS sur tables platform_policies, role_permissions, safe_zone_configs
+
+### Security
+- RLS policies renforcées: tables de configuration restreintes aux utilisateurs authentifiés
+- Audit sécurité complet avec 0 findings critiques
+
+### Documentation
+- Ajout `docs/AUDIT_PLATFORM_FINAL_2026-02-04.md` - Audit complet avec recommandations
+- Mise à jour architecture: 131 tables, 251+ policies RLS, 38 Edge Functions
+
 ## [1.2.0] - 2026-02-03
 
 ### Added
