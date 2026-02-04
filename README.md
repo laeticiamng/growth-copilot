@@ -166,8 +166,8 @@ src/
 │   └── ui/             # shadcn/ui components
 ├── hooks/              # 40+ custom hooks (useWorkspace, useServices, etc.)
 ├── lib/agents/         # Définitions des agents IA
-├── pages/dashboard/    # 37 pages dashboard
-└── i18n/locales/       # Traductions (FR, EN, ES, DE)
+├── pages/dashboard/    # 41 pages dashboard
+└── i18n/locales/       # Traductions (FR, EN, ES, DE, NL, IT, PT)
 
 supabase/
 ├── functions/          # 38 Edge Functions
@@ -298,7 +298,7 @@ npm run test src/test/smoke.test.ts
 │                         FRONTEND                                 │
 │  React 18 + Vite + Tailwind CSS + shadcn/ui                      │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Landing  │  │ Cockpit  │  │ 37 Pages │  │ AI Assistant     │ │
+│  │ Landing  │  │ Cockpit  │  │ 41 Pages │  │ AI Assistant     │ │
 │  │ Page     │  │ Exécutif │  │ Dashboard│  │ Voice Commands   │ │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
 └─────────────────────────────┬───────────────────────────────────┘
@@ -307,7 +307,7 @@ npm run test src/test/smoke.test.ts
 ┌─────────────────────────────────────────────────────────────────┐
 │                    LOVABLE CLOUD                                 │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 35 EDGE FUNCTIONS                          │  │
+│  │                 38 EDGE FUNCTIONS                          │  │
 │  │  ai-gateway │ run-executor │ oauth-* │ stripe-* │ sync-*  │  │
 │  └───────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────┐  │
