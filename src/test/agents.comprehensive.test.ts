@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock fetch for AI gateway calls
-global.fetch = vi.fn();
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('AI Agents - Unit Tests', () => {
   beforeEach(() => {

@@ -18,7 +18,7 @@ export function useSessionExpiry(options: SessionExpiryOptions = {}) {
   const { session, user } = useAuth();
   const { toast } = useToast();
   const warningShownRef = useRef(false);
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const checkExpiry = useCallback(() => {
     if (!session?.expires_at) return;
