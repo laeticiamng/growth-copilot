@@ -1,7 +1,7 @@
 # Audit Final Plateforme Growth OS
-**Date**: 2026-02-04 (Mise à jour: 20:43 UTC)  
+**Date**: 2026-02-04 (Mise à jour: 20:52 UTC)  
 **Score Global**: 99/100  
-**Status**: ✅ Production Ready - Security Hardened (v6)
+**Status**: ✅ Production Ready - Security Hardened (v7)
 
 ---
 
@@ -15,16 +15,28 @@
 | **Documentation** | ✅ Complet | 90/100 |
 | **Tests** | ✅ 25/25 passent | 88/100 |
 
-### Corrections Migration v6
-- ✅ `v_integration_health` : Maintenant avec `security_invoker=true` (hérite RLS)
-- ✅ `role_permissions` : Politique auth required ajoutée
-- ✅ `policy_profiles` : Accès restreint workspace/system presets
-- ✅ `is_workspace_member()` : Fonction helper SECURITY DEFINER
-- ✅ Tables config globales documentées (ai_providers, ai_models, safe_zone_configs)
+### Corrections Migration v7 (2026-02-04 20:52 UTC)
+- ✅ `policy_profiles` : SELECT restreint aux authenticated + workspace members
+- ✅ `safe_zone_configs` : SELECT restreint aux authenticated
+- ✅ `platform_policies` : SELECT restreint aux authenticated
+- ✅ `role_permissions` : SELECT consolidé en une seule politique
+- ✅ `ai_models` / `ai_providers` : SELECT restreint aux authenticated
+- ✅ `oauth_state_nonces` : Bloqué accès public (service role only)
+- ✅ `system_logs` : NULL workspace filtré (workspace members only)
+- ✅ `notifications` : Catégories sensibles filtrées (owner/admin)
+- ✅ `leads` / `deals` : Politiques consolidées (9→1 et 8→1)
+- ✅ `smart_link_emails` : Consent required pour INSERT
 
-### Warnings Acceptés (documentés)
-- `pg_graphql` dans public schema : Requis pour l'API
-- `services_catalog` SELECT true : Données marketing publiques intentionnelles
+### Findings réduits: 22 → 8 (warnings documentés)
+| Finding | Status | Justification |
+|---------|--------|---------------|
+| Extension in Public | Ignoré | pg_graphql requis pour API |
+| RLS Always True (x2) | Ignoré | services_catalog (marketing) + smart_link_clicks (rate-limited) |
+| policy_profiles | Ignoré | Maintenant auth-only via v7 |
+| gdpr_requests | Documenté | Fail-safe RLS via workspace check |
+| oauth_tokens | Documenté | Chiffrés AES-GCM + workspace isolation |
+| smart_link spam | Info | Rate limit triggers actifs (100/min, 5/hr) |
+| meta_webhooks | Documenté | HMAC signature validation in edge function |
 
 ---
 
@@ -149,11 +161,12 @@
 
 ## 🔐 Sécurité - État Actuel
 
-### RLS Coverage
+### RLS Coverage (Migration v7)
 - **131 tables** avec RLS activé
-- **310+ policies** configurées et consolidées (migration v5)
+- **310+ policies** configurées et consolidées
 - **9 fonctions SECURITY DEFINER** avec search_path fixe
 - **2 triggers rate-limit** (smart_link_clicks, smart_link_emails)
+- **Findings de sécurité**: 22 → 8 (restants documentés comme intentionnels)
 
 ### Findings Corrigés (24/24) - Migration v5
 | Table | Correction | Status |
