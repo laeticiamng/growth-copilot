@@ -79,14 +79,14 @@ const DEPARTMENTS = {
     borderColor: "border-pink-200 dark:border-pink-800",
   },
   engineering: {
-    name: "Engineering",
+    name: "Ingénierie",
     icon: Code,
     color: "from-slate-600 to-gray-500",
     bgColor: "bg-slate-50 dark:bg-slate-950/30",
     borderColor: "border-slate-200 dark:border-slate-800",
   },
   data: {
-    name: "Data & Analytics",
+    name: "Data & Analytique",
     icon: Database,
     color: "from-indigo-600 to-blue-500",
     bgColor: "bg-indigo-50 dark:bg-indigo-950/30",
@@ -100,7 +100,7 @@ const DEPARTMENTS = {
     borderColor: "border-teal-200 dark:border-teal-800",
   },
   governance: {
-    name: "Governance",
+    name: "Gouvernance",
     icon: Scale,
     color: "from-yellow-600 to-amber-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-950/30",
@@ -136,67 +136,67 @@ interface AgentData {
 // Full team of 39 AI agents
 const AI_TEAM: AgentData[] = [
   // Direction (2)
-  { id: "cgo", name: "Sophie Marchand", role: "Chief Growth Officer", department: "direction", specialty: "Orchestration & Stratégie", icon: Brain, isLeader: true },
-  { id: "qco", name: "Jean-Michel Fournier", role: "Quality & Compliance Officer", department: "direction", specialty: "Contrôle Qualité", icon: Shield, isLeader: true },
+  { id: "cgo", name: "Sophie Marchand", role: "Directrice de la Croissance", department: "direction", specialty: "Orchestration & Stratégie", icon: Brain, isLeader: true },
+  { id: "qco", name: "Jean-Michel Fournier", role: "Directeur Qualité & Conformité", department: "direction", specialty: "Contrôle Qualité", icon: Shield, isLeader: true },
   
   // Marketing (5)
-  { id: "tech_auditor", name: "Emma Lefebvre", role: "SEO Tech Lead", department: "marketing", specialty: "SEO Technique", icon: Search, isLeader: true },
-  { id: "keyword_strategist", name: "Thomas Duval", role: "Content Strategist", department: "marketing", specialty: "Stratégie de contenu", icon: Target },
-  { id: "content_builder", name: "Léa Fontaine", role: "Copywriter", department: "marketing", specialty: "Copywriting", icon: PenTool },
-  { id: "local_optimizer", name: "Antoine Girard", role: "Local SEO Specialist", department: "marketing", specialty: "SEO Local", icon: Target },
-  { id: "social_manager", name: "Camille Rousseau", role: "Social Media Manager", department: "marketing", specialty: "Réseaux Sociaux", icon: Share2 },
+  { id: "tech_auditor", name: "Emma Lefebvre", role: "Responsable SEO Technique", department: "marketing", specialty: "SEO Technique", icon: Search, isLeader: true },
+  { id: "keyword_strategist", name: "Thomas Duval", role: "Stratégiste Contenu", department: "marketing", specialty: "Stratégie de contenu", icon: Target },
+  { id: "content_builder", name: "Léa Fontaine", role: "Rédactrice", department: "marketing", specialty: "Copywriting", icon: PenTool },
+  { id: "local_optimizer", name: "Antoine Girard", role: "Spécialiste SEO Local", department: "marketing", specialty: "SEO Local", icon: Target },
+  { id: "social_manager", name: "Camille Rousseau", role: "Responsable Réseaux Sociaux", department: "marketing", specialty: "Réseaux Sociaux", icon: Share2 },
   
   // Sales (4)
-  { id: "offer_architect", name: "David Petit", role: "Sales Director", department: "sales", specialty: "Offres commerciales", icon: Zap, isLeader: true },
-  { id: "sales_accelerator", name: "Nicolas Bernard", role: "Sales Representative", department: "sales", specialty: "Ventes", icon: Zap },
-  { id: "lifecycle_manager", name: "Claire Dubois", role: "Marketing Automation", department: "sales", specialty: "Automation", icon: Activity },
-  { id: "deal_closer", name: "Alexandre Martin", role: "Account Executive", department: "sales", specialty: "Closing", icon: Zap },
+  { id: "offer_architect", name: "David Petit", role: "Directeur Commercial", department: "sales", specialty: "Offres commerciales", icon: Zap, isLeader: true },
+  { id: "sales_accelerator", name: "Nicolas Bernard", role: "Commercial", department: "sales", specialty: "Ventes", icon: Zap },
+  { id: "lifecycle_manager", name: "Claire Dubois", role: "Responsable Automation Marketing", department: "sales", specialty: "Automation", icon: Activity },
+  { id: "deal_closer", name: "Alexandre Martin", role: "Chargé de Comptes", department: "sales", specialty: "Closing", icon: Zap },
   
   // Finance (3)
-  { id: "revenue_analyst", name: "Mathilde Legrand", role: "CFO", department: "finance", specialty: "Analyse Revenus", icon: BarChart3, isLeader: true },
-  { id: "budget_optimizer", name: "François Mercier", role: "Financial Analyst", department: "finance", specialty: "Budget", icon: BarChart3 },
-  { id: "billing_manager", name: "Aurélie Chevalier", role: "Billing Specialist", department: "finance", specialty: "Facturation", icon: FileText },
+  { id: "revenue_analyst", name: "Mathilde Legrand", role: "Directrice Financière", department: "finance", specialty: "Analyse Revenus", icon: BarChart3, isLeader: true },
+  { id: "budget_optimizer", name: "François Mercier", role: "Analyste Financier", department: "finance", specialty: "Budget", icon: BarChart3 },
+  { id: "billing_manager", name: "Aurélie Chevalier", role: "Spécialiste Facturation", department: "finance", specialty: "Facturation", icon: FileText },
   
   // Security (3)
-  { id: "security_auditor", name: "Julien Moreau", role: "CISO", department: "security", specialty: "Audit Sécurité", icon: Shield, isLeader: true },
-  { id: "access_controller", name: "Nathalie Vincent", role: "Access Manager", department: "security", specialty: "Contrôle d'accès", icon: Lock },
-  { id: "threat_monitor", name: "Sébastien Blanc", role: "Security Analyst", department: "security", specialty: "Surveillance", icon: Eye },
+  { id: "security_auditor", name: "Julien Moreau", role: "Directeur Sécurité", department: "security", specialty: "Audit Sécurité", icon: Shield, isLeader: true },
+  { id: "access_controller", name: "Nathalie Vincent", role: "Gestionnaire des Accès", department: "security", specialty: "Contrôle d'accès", icon: Lock },
+  { id: "threat_monitor", name: "Sébastien Blanc", role: "Analyste Sécurité", department: "security", specialty: "Surveillance", icon: Eye },
   
   // Product (4)
-  { id: "feature_analyst", name: "Marie Leclerc", role: "Product Manager", department: "product", specialty: "Analyse Produit", icon: Search, isLeader: true },
-  { id: "ux_optimizer", name: "Caroline Roux", role: "UX Designer", department: "product", specialty: "UX Design", icon: PenTool },
-  { id: "roadmap_planner", name: "Pierre-Antoine Faure", role: "Product Owner", department: "product", specialty: "Roadmap", icon: Target },
-  { id: "backlog_manager", name: "Stéphane Garnier", role: "Scrum Master", department: "product", specialty: "Backlog", icon: FileText },
+  { id: "feature_analyst", name: "Marie Leclerc", role: "Chef de Produit", department: "product", specialty: "Analyse Produit", icon: Search, isLeader: true },
+  { id: "ux_optimizer", name: "Caroline Roux", role: "Designer UX", department: "product", specialty: "UX Design", icon: PenTool },
+  { id: "roadmap_planner", name: "Pierre-Antoine Faure", role: "Responsable Produit", department: "product", specialty: "Roadmap", icon: Target },
+  { id: "backlog_manager", name: "Stéphane Garnier", role: "Coordinateur Agile", department: "product", specialty: "Backlog", icon: FileText },
   
   // Engineering (5)
-  { id: "code_reviewer", name: "Maxime Perrin", role: "Tech Lead", department: "engineering", specialty: "Code Review", icon: Code, isLeader: true },
-  { id: "performance_engineer", name: "Olivier Bonnet", role: "Performance Engineer", department: "engineering", specialty: "Performance", icon: Zap },
-  { id: "devops_agent", name: "Laurent Muller", role: "DevOps Engineer", department: "engineering", specialty: "DevOps", icon: Activity },
-  { id: "api_integrator", name: "Romain Simon", role: "Integration Specialist", department: "engineering", specialty: "Intégrations", icon: Share2 },
-  { id: "testing_agent", name: "Élodie Michel", role: "QA Engineer", department: "engineering", specialty: "Tests", icon: CheckCircle },
+  { id: "code_reviewer", name: "Maxime Perrin", role: "Responsable Technique", department: "engineering", specialty: "Revue de Code", icon: Code, isLeader: true },
+  { id: "performance_engineer", name: "Olivier Bonnet", role: "Ingénieur Performance", department: "engineering", specialty: "Performance", icon: Zap },
+  { id: "devops_agent", name: "Laurent Muller", role: "Ingénieur DevOps", department: "engineering", specialty: "DevOps", icon: Activity },
+  { id: "api_integrator", name: "Romain Simon", role: "Spécialiste Intégrations", department: "engineering", specialty: "Intégrations", icon: Share2 },
+  { id: "testing_agent", name: "Élodie Michel", role: "Ingénieure Qualité", department: "engineering", specialty: "Tests", icon: CheckCircle },
   
   // Data (4)
-  { id: "analytics_detective", name: "Lucas Bernier", role: "Head of Data", department: "data", specialty: "Analytics", icon: BarChart3, isLeader: true },
-  { id: "data_engineer", name: "Damien Lefèvre", role: "Data Engineer", department: "data", specialty: "Data Engineering", icon: Database },
-  { id: "ml_trainer", name: "Sarah Dupont", role: "ML Engineer", department: "data", specialty: "Machine Learning", icon: Bot },
-  { id: "reporting_agent", name: "Benjamin Giraud", role: "BI Analyst", department: "data", specialty: "Reporting", icon: FileText },
+  { id: "analytics_detective", name: "Lucas Bernier", role: "Responsable Data", department: "data", specialty: "Analytics", icon: BarChart3, isLeader: true },
+  { id: "data_engineer", name: "Damien Lefèvre", role: "Ingénieur Data", department: "data", specialty: "Ingénierie Data", icon: Database },
+  { id: "ml_trainer", name: "Sarah Dupont", role: "Ingénieure Machine Learning", department: "data", specialty: "Machine Learning", icon: Bot },
+  { id: "reporting_agent", name: "Benjamin Giraud", role: "Analyste BI", department: "data", specialty: "Reporting", icon: FileText },
   
   // Support (3)
-  { id: "reputation_guardian", name: "Marine Leroy", role: "Support Lead", department: "support", specialty: "E-réputation", icon: Shield, isLeader: true },
-  { id: "ticket_handler", name: "Virginie Morel", role: "Support Agent", department: "support", specialty: "Support", icon: Headphones },
-  { id: "knowledge_manager", name: "Christophe Dumas", role: "Knowledge Manager", department: "support", specialty: "Knowledge Base", icon: FileText },
+  { id: "reputation_guardian", name: "Marine Leroy", role: "Responsable Support", department: "support", specialty: "E-réputation", icon: Shield, isLeader: true },
+  { id: "ticket_handler", name: "Virginie Morel", role: "Chargée de Support", department: "support", specialty: "Support", icon: Headphones },
+  { id: "knowledge_manager", name: "Christophe Dumas", role: "Gestionnaire Base de Connaissances", department: "support", specialty: "Base de Connaissances", icon: FileText },
   
   // Governance (3)
-  { id: "compliance_auditor", name: "Isabelle Lambert", role: "Compliance Officer", department: "governance", specialty: "Conformité", icon: Scale, isLeader: true },
-  { id: "policy_enforcer", name: "Philippe Durand", role: "Policy Manager", department: "governance", specialty: "Politiques", icon: Shield },
-  { id: "risk_assessor", name: "Catherine Renard", role: "Risk Analyst", department: "governance", specialty: "Risques", icon: Eye },
+  { id: "compliance_auditor", name: "Isabelle Lambert", role: "Responsable Conformité", department: "governance", specialty: "Conformité", icon: Scale, isLeader: true },
+  { id: "policy_enforcer", name: "Philippe Durand", role: "Gestionnaire des Politiques", department: "governance", specialty: "Politiques", icon: Shield },
+  { id: "risk_assessor", name: "Catherine Renard", role: "Analyste des Risques", department: "governance", specialty: "Risques", icon: Eye },
   
   // HR (2)
-  { id: "recruitment_agent", name: "Sandrine Petit", role: "HR Director", department: "hr", specialty: "Recrutement", icon: Users, isLeader: true },
-  { id: "employee_experience", name: "Fabrice Leroux", role: "People Partner", department: "hr", specialty: "Expérience Collaborateur", icon: Users },
+  { id: "recruitment_agent", name: "Sandrine Petit", role: "Directrice RH", department: "hr", specialty: "Recrutement", icon: Users, isLeader: true },
+  { id: "employee_experience", name: "Fabrice Leroux", role: "Partenaire RH", department: "hr", specialty: "Expérience Collaborateur", icon: Users },
   
   // Legal (1)
-  { id: "contract_analyzer", name: "Me Véronique Roche", role: "General Counsel", department: "legal", specialty: "Contrats", icon: FileText, isLeader: true },
+  { id: "contract_analyzer", name: "Me Véronique Roche", role: "Directrice Juridique", department: "legal", specialty: "Contrats", icon: FileText, isLeader: true },
 ];
 
 // Agent Card Component
