@@ -109,11 +109,19 @@ L'AI Gateway centralise tous les appels IA avec :
 
 | Purpose | Modèle | Cas d'usage |
 |---------|--------|-------------|
-| `cgo_plan` | openai/gpt-5.2 | Orchestration stratégique |
-| `qa_review` | openai/gpt-5.2 | Validation compliance |
-| `seo_audit` | openai/gpt-5-mini | Analyse SEO bulk |
-| `copywriting` | openai/gpt-5.2 | Création de contenu |
-| `analysis` | openai/gpt-5-mini | Analyses génériques |
+| `cgo_plan` | google/gemini-3-pro-preview | Orchestration stratégique niveau McKinsey |
+| `qa_review` | google/gemini-3-pro-preview | Validation compliance & éthique Big Four |
+| `seo_audit` | google/gemini-3-flash-preview | Analyse SEO bulk niveau Botify/Ahrefs |
+| `copywriting` | google/gemini-3-flash-preview | Création de contenu niveau agence premium |
+| `analysis` | google/gemini-3-flash-preview | Analyses data-driven niveau FAANG |
+
+### Standard d'Excellence
+
+Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
+- **Rigueur analytique** (Polytechnique/CentraleSupélec) : Approche scientifique, data-driven
+- **Vision stratégique** (HEC/ESSEC/INSEAD) : Pensée systémique, création de valeur
+- **Culture générale** (Sciences Po/ENS) : Contexte macro-économique, sociologique
+- **Excellence opérationnelle** (McKinsey/BCG mindset) : Frameworks éprouvés, livrables conseil
 
 > **Documentation complète** : [docs/AI_AGENTS.md](./docs/AI_AGENTS.md)
 
