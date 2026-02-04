@@ -339,7 +339,7 @@ export default function ROIDashboard() {
               <div>
                 <h3 className="font-semibold text-lg">Passez à Full Company</h3>
                 <p className="text-sm text-muted-foreground">
-                  37 employés IA pour {PRICES.fullCompany.toLocaleString()}€/mois au lieu de {(37 * AVG_SALARY_MONTHLY).toLocaleString()}€
+                  38 employés IA pour {PRICES.fullCompany.toLocaleString()}€/mois au lieu de {(38 * AVG_SALARY_MONTHLY).toLocaleString()}€
                 </p>
               </div>
               <Button variant="hero" asChild>
