@@ -8473,6 +8473,14 @@ export type Database = {
         Args: { _client_workspace_id: string; _user_id: string }
         Returns: boolean
       }
+      has_billing_access: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
+      has_hr_access: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: {
           _permission: Database["public"]["Enums"]["permission_action"]
@@ -8488,6 +8496,10 @@ export type Database = {
           _user_id: string
           _workspace_id: string
         }
+        Returns: boolean
+      }
+      has_sales_access: {
+        Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
       has_service: {
