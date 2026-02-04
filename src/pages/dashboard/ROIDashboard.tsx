@@ -158,11 +158,11 @@ export default function ROIDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Économies mensuelles</p>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-3xl font-bold status-success">
                   {monthlySavings > 0 ? `+${monthlySavings.toLocaleString()}€` : "—"}
                 </p>
               </div>
-              <TrendingUp className="w-10 h-10 text-green-500 opacity-60" />
+              <TrendingUp className="w-10 h-10 status-success opacity-60" />
             </div>
           </CardContent>
         </Card>
@@ -174,7 +174,7 @@ export default function ROIDashboard() {
                 <p className="text-sm text-muted-foreground">Productivité</p>
                 <p className="text-3xl font-bold">{AI_PRODUCTIVITY_MULTIPLIER}x</p>
               </div>
-              <Zap className="w-10 h-10 text-yellow-500 opacity-60" />
+              <Zap className="w-10 h-10 status-warning opacity-60" />
             </div>
           </CardContent>
         </Card>
