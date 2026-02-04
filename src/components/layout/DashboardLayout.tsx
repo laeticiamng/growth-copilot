@@ -33,15 +33,20 @@ import {
   Menu,
   X,
   Bot,
-  Wrench,
   Lock,
+  Target,
+  Briefcase,
+  Shield,
+  Users,
+  Scale,
+  Database,
+  Cog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { OfflineBanner } from "@/components/ui/offline-banner";
-import { Badge } from "@/components/ui/badge";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -53,48 +58,120 @@ interface NavItem {
   icon: React.ElementType;
   requiresRole?: "admin" | "manager" | "owner";
   hideForClients?: boolean;
-  category?: "main" | "advanced";
   comingSoon?: boolean;
   isLocked?: boolean;
 }
 
-// Simplified navigation - Main items visible, technical items in "Advanced"
-const allNavItems: NavItem[] = [
-  // Main navigation - CEO-level
-  { path: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard, category: "main" },
-  { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot, category: "main" },
-  { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span>, category: "main" },
-  { path: "/dashboard/approvals", label: "À valider", icon: () => <span className="text-base">✓</span>, category: "main" },
-  { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span>, category: "main" },
-  
-  // Advanced - Technical tools (collapsible)
-  { path: "/dashboard/sites", label: "Sites", icon: Building2, category: "advanced" },
-  { path: "/dashboard/integrations", label: "Outils", icon: () => <span className="text-base">🔧</span>, category: "advanced", requiresRole: "admin", hideForClients: true },
-  { path: "/dashboard/connections", label: "Mes accès", icon: () => <span className="text-base">🔑</span>, category: "advanced" },
-  { path: "/dashboard/seo", label: "SEO Tech", icon: () => <span className="text-base">🔍</span>, category: "advanced" },
-  { path: "/dashboard/content", label: "Contenu", icon: () => <span className="text-base">📝</span>, category: "advanced" },
-  { path: "/dashboard/local", label: "Local SEO", icon: () => <span className="text-base">📍</span>, category: "advanced" },
-  { path: "/dashboard/ads", label: "Google Ads", icon: () => <span className="text-base">📣</span>, category: "advanced" },
-  { path: "/dashboard/social", label: "Social", icon: () => <span className="text-base">📱</span>, category: "advanced" },
-  { path: "/dashboard/cro", label: "CRO", icon: () => <span className="text-base">🎯</span>, category: "advanced" },
-  { path: "/dashboard/offers", label: "Offres", icon: () => <span className="text-base">📦</span>, category: "advanced" },
-  { path: "/dashboard/lifecycle", label: "Lifecycle", icon: () => <span className="text-base">📧</span>, category: "advanced" },
-  { path: "/dashboard/reputation", label: "Réputation", icon: () => <span className="text-base">⭐</span>, category: "advanced" },
-  { path: "/dashboard/competitors", label: "Concurrents", icon: () => <span className="text-base">👥</span>, category: "advanced" },
-  { path: "/dashboard/brand-kit", label: "Brand Kit", icon: () => <span className="text-base">🎨</span>, category: "advanced" },
-  { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span>, category: "advanced" },
-  { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span>, category: "advanced" },
-  { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span>, category: "advanced" },
-  { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span>, category: "advanced" },
-  { path: "/dashboard/legal", label: "Juridique", icon: () => <span className="text-base">⚖️</span>, category: "advanced" },
-  { path: "/dashboard/access-review", label: "Revue accès", icon: () => <span className="text-base">🔐</span>, category: "advanced" },
-  { path: "/dashboard/audit-log", label: "Audit Log", icon: () => <span className="text-base">📜</span>, category: "advanced", requiresRole: "manager" },
-  { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, category: "advanced", requiresRole: "admin" },
-  { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, category: "advanced", requiresRole: "manager" },
-  { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, category: "advanced", requiresRole: "admin" },
-  { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span>, category: "advanced", requiresRole: "admin" },
-  { path: "/dashboard/billing", label: "Facturation", icon: () => <span className="text-base">💳</span>, category: "advanced", requiresRole: "owner" },
-  { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span>, category: "advanced" },
+interface NavDepartment {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  description: string;
+  items: NavItem[];
+}
+
+// Main navigation - CEO-level (always visible)
+const mainNavItems: NavItem[] = [
+  { path: "/dashboard", label: "Cockpit", icon: LayoutDashboard },
+  { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot },
+  { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
+  { path: "/dashboard/approvals", label: "À valider", icon: () => <span className="text-base">✓</span> },
+  { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span> },
+];
+
+// Advanced items organized by department
+const advancedDepartments: NavDepartment[] = [
+  {
+    id: "marketing",
+    label: "Marketing",
+    icon: Target,
+    color: "text-emerald-500",
+    description: "SEO, contenu, social, publicité",
+    items: [
+      { path: "/dashboard/seo", label: "SEO Tech", icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/content", label: "Contenu", icon: () => <span className="text-base">📝</span> },
+      { path: "/dashboard/local", label: "Local SEO", icon: () => <span className="text-base">📍</span> },
+      { path: "/dashboard/ads", label: "Google Ads", icon: () => <span className="text-base">📣</span> },
+      { path: "/dashboard/social", label: "Social", icon: () => <span className="text-base">📱</span> },
+      { path: "/dashboard/cro", label: "CRO", icon: () => <span className="text-base">🎯</span> },
+      { path: "/dashboard/competitors", label: "Concurrents", icon: () => <span className="text-base">👥</span> },
+      { path: "/dashboard/brand-kit", label: "Brand Kit", icon: () => <span className="text-base">🎨</span> },
+    ],
+  },
+  {
+    id: "sales",
+    label: "Sales",
+    icon: Briefcase,
+    color: "text-blue-500",
+    description: "Pipeline, offres, lifecycle",
+    items: [
+      { path: "/dashboard/offers", label: "Offres", icon: () => <span className="text-base">📦</span> },
+      { path: "/dashboard/lifecycle", label: "Lifecycle", icon: () => <span className="text-base">📧</span> },
+      { path: "/dashboard/reputation", label: "Réputation", icon: () => <span className="text-base">⭐</span> },
+    ],
+  },
+  {
+    id: "content",
+    label: "Médias",
+    icon: Database,
+    color: "text-purple-500",
+    description: "CMS, assets, exports",
+    items: [
+      { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
+      { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span> },
+    ],
+  },
+  {
+    id: "hr-legal",
+    label: "RH & Legal",
+    icon: Scale,
+    color: "text-amber-500",
+    description: "Ressources humaines, juridique",
+    items: [
+      { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
+      { path: "/dashboard/legal", label: "Juridique", icon: () => <span className="text-base">⚖️</span> },
+    ],
+  },
+  {
+    id: "governance",
+    label: "Gouvernance",
+    icon: Shield,
+    color: "text-red-500",
+    description: "Sécurité, accès, audit",
+    items: [
+      { path: "/dashboard/access-review", label: "Revue accès", icon: () => <span className="text-base">🔐</span> },
+      { path: "/dashboard/audit-log", label: "Audit Log", icon: () => <span className="text-base">📜</span>, requiresRole: "manager" },
+      { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
+    ],
+  },
+  {
+    id: "config",
+    label: "Configuration",
+    icon: Cog,
+    color: "text-slate-500",
+    description: "Sites, intégrations, automations",
+    items: [
+      { path: "/dashboard/sites", label: "Sites", icon: Building2 },
+      { path: "/dashboard/integrations", label: "Connexions API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
+      { path: "/dashboard/connections", label: "Mes accès", icon: () => <span className="text-base">🔑</span> },
+      { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span> },
+    ],
+  },
+  {
+    id: "ops",
+    label: "Ops & Support",
+    icon: Users,
+    color: "text-cyan-500",
+    description: "Logs, diagnostics, facturation",
+    items: [
+      { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
+      { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
+      { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
+      { path: "/dashboard/billing", label: "Facturation", icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
+      { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
+    ],
+  },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -102,43 +179,62 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { workspaces, currentWorkspace, setCurrentWorkspace, loading: wsLoading } = useWorkspace();
   const { isAtLeastRole, loading: permLoading } = usePermissions();
-  const { hasService, servicesLoading, catalog } = useServices();
+  const { hasService } = useServices();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [openDepartments, setOpenDepartments] = useState<Set<string>>(new Set());
 
-  // Check if current route is in advanced section
+  // Check if current route is in advanced section and open relevant department
   useEffect(() => {
-    const isAdvancedRoute = allNavItems
-      .filter((item) => item.category === "advanced")
-      .some((item) => location.pathname === item.path);
-    if (isAdvancedRoute) {
-      setAdvancedOpen(true);
+    for (const dept of advancedDepartments) {
+      const isInDept = dept.items.some((item) => location.pathname === item.path);
+      if (isInDept) {
+        setAdvancedOpen(true);
+        setOpenDepartments((prev) => new Set([...prev, dept.id]));
+        break;
+      }
     }
   }, [location.pathname]);
 
-  // Filter nav items based on user role AND enabled services
-  const { mainItems, advancedItems } = useMemo(() => {
-    const filtered = allNavItems.filter((item) => {
-      // Check role requirements
-      if (item.requiresRole && !isAtLeastRole(item.requiresRole)) {
-        return false;
+  const toggleDepartment = (deptId: string) => {
+    setOpenDepartments((prev) => {
+      const next = new Set(prev);
+      if (next.has(deptId)) {
+        next.delete(deptId);
+      } else {
+        next.add(deptId);
       }
-      return true;
+      return next;
     });
-    
-    // Mark items as locked if service not enabled
-    const withServiceStatus = filtered.map((item) => {
+  };
+
+  // Filter nav items based on user role AND enabled services
+  const filteredMainItems = useMemo(() => {
+    return mainNavItems.map((item) => {
       const requiredService = getRouteService(item.path);
       const isLocked = requiredService ? !hasService(requiredService) : false;
       return { ...item, isLocked };
     });
-    
-    return {
-      mainItems: withServiceStatus.filter((item) => item.category === "main"),
-      advancedItems: withServiceStatus.filter((item) => item.category === "advanced"),
-    };
+  }, [hasService]);
+
+  const filteredDepartments = useMemo(() => {
+    return advancedDepartments.map((dept) => ({
+      ...dept,
+      items: dept.items
+        .filter((item) => {
+          if (item.requiresRole && !isAtLeastRole(item.requiresRole)) {
+            return false;
+          }
+          return true;
+        })
+        .map((item) => {
+          const requiredService = getRouteService(item.path);
+          const isLocked = requiredService ? !hasService(requiredService) : false;
+          return { ...item, isLocked };
+        }),
+    })).filter((dept) => dept.items.length > 0);
   }, [isAtLeastRole, hasService]);
 
   // Monitor session expiry
@@ -174,12 +270,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     const Icon = item.icon;
     const isActive = location.pathname === item.path;
 
-    // Coming soon items
     if (item.comingSoon) {
       return (
-        <span
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/50 cursor-default"
-        >
+        <span className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground/50 cursor-default">
           <Icon className="w-4 h-4" />
           {item.label}
           <span className="ml-auto text-[10px] uppercase tracking-wide opacity-60">soon</span>
@@ -187,12 +280,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       );
     }
 
-    // Locked items (service not enabled) - show but disabled with upgrade hint
     if (item.isLocked) {
       return (
         <span
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/40 cursor-default group"
-          title="Service non activé - Mise à niveau requise"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground/40 cursor-default group"
+          title="Service non activé"
         >
           <Icon className="w-4 h-4" />
           <span className="flex-1">{item.label}</span>
@@ -206,7 +298,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         to={item.path}
         onClick={() => setSidebarOpen(false)}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
           isActive
             ? "bg-primary/10 text-primary"
             : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -290,14 +382,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
             {/* Main navigation items */}
-            {mainItems.map((item) => (
+            {filteredMainItems.map((item) => (
               <NavLink key={item.path} item={item} />
             ))}
 
-            {/* Advanced section (collapsible) */}
+            {/* Advanced section with departments */}
             <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
               <CollapsibleTrigger className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors mt-4">
-                <Wrench className="w-4 h-4" />
+                <Cog className="w-4 h-4" />
                 <span className="flex-1 text-left">Avancé</span>
                 <ChevronRight
                   className={cn(
@@ -306,10 +398,32 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 />
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-1 pt-1">
-                {advancedItems.map((item) => (
-                  <NavLink key={item.path} item={item} />
-                ))}
+              <CollapsibleContent className="space-y-1 pt-2">
+                {filteredDepartments.map((dept) => {
+                  const DeptIcon = dept.icon;
+                  const isOpen = openDepartments.has(dept.id);
+                  
+                  return (
+                    <Collapsible key={dept.id} open={isOpen} onOpenChange={() => toggleDepartment(dept.id)}>
+                      <CollapsibleTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-xs font-medium text-muted-foreground hover:bg-secondary/50 transition-colors">
+                        <DeptIcon className={cn("w-3.5 h-3.5", dept.color)} />
+                        <span className="flex-1 text-left">{dept.label}</span>
+                        <span className="text-[10px] opacity-50">{dept.items.length}</span>
+                        <ChevronRight
+                          className={cn(
+                            "w-3 h-3 transition-transform",
+                            isOpen && "rotate-90"
+                          )}
+                        />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pl-4 space-y-0.5 pt-1">
+                        {dept.items.map((item) => (
+                          <NavLink key={item.path} item={item} />
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
               </CollapsibleContent>
             </Collapsible>
           </nav>
