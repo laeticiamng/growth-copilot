@@ -284,7 +284,8 @@ export function TeamOrgChart() {
   
   const departments = isEn ? DEPARTMENTS_EN : DEPARTMENTS_FR;
   const totalEmployees = departments.reduce((sum, dept) => sum + dept.employees.length, 0);
-  const totalDepartments = departments.length;
+  // Direction is the supervisory layer, not a department - count only operational departments
+  const totalDepartments = departments.filter(d => d.id !== "direction").length;
 
   const labels = isEn 
     ? { 
