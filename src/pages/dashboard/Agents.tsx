@@ -35,6 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-registry';
 import type { AgentType } from '@/lib/agents/types';
+import { AgentOrgChart } from '@/components/agents/AgentOrgChart';
 
 // Agent personas with human names and avatars - 39 agents total
 const AGENT_PERSONAS: Record<string, {
@@ -349,7 +350,7 @@ interface AgentStats {
 
 export default function Agents() {
   const { currentWorkspace } = useWorkspace();
-  const [activeTab, setActiveTab] = useState('team');
+  const [activeTab, setActiveTab] = useState('orgchart');
   const [recentRuns, setRecentRuns] = useState<AgentRun[]>([]);
   const [agentStats, setAgentStats] = useState<AgentStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -538,10 +539,16 @@ export default function Agents() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="orgchart">Organigramme</TabsTrigger>
           <TabsTrigger value="team">Équipe</TabsTrigger>
           <TabsTrigger value="activity">Activité récente</TabsTrigger>
           <TabsTrigger value="capabilities">Capacités</TabsTrigger>
         </TabsList>
+
+        {/* Organigramme Tab */}
+        <TabsContent value="orgchart" className="space-y-4">
+          <AgentOrgChart />
+        </TabsContent>
 
         <TabsContent value="team" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
