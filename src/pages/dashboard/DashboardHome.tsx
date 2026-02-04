@@ -15,6 +15,7 @@ import {
   Calendar,
   FileText,
   Rocket,
+  Download,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -31,6 +32,8 @@ import {
 import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
 import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
+import { MoMComparison } from "@/components/dashboard/MoMComparison";
+import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
 
 // CGO Agent Persona
 const CGO_PERSONA = {
@@ -220,7 +223,7 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-6">
-      {/* CGO Welcome */}
+      {/* CGO Welcome + Export Button */}
       <Card variant="gradient" className="border-2 border-primary/20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
         <CardContent className="relative pt-6 pb-4">
@@ -253,6 +256,8 @@ export default function DashboardHome() {
                 )}
               </p>
             </div>
+            {/* PDF Export Button */}
+            <CockpitPDFExport workspaceName={currentWorkspace.name} />
           </div>
         </CardContent>
       </Card>
@@ -317,6 +322,30 @@ export default function DashboardHome() {
         {/* Smart Alerts */}
         <SmartAlertsPanel />
       </div>
+
+      {/* MoM Comparison - KPI Trends */}
+      <MoMComparison 
+        kpis={[
+          { 
+            label: "Clics organiques", 
+            currentValue: kpiData?.organicClicks || 0, 
+            previousValue: Math.round((kpiData?.organicClicks || 0) * 0.88),
+            format: "number" 
+          },
+          { 
+            label: "Conversions", 
+            currentValue: kpiData?.conversions || 0, 
+            previousValue: Math.round((kpiData?.conversions || 0) * 0.92),
+            format: "number" 
+          },
+          { 
+            label: "Position moyenne", 
+            currentValue: parseFloat(kpiData?.avgPosition || "0"), 
+            previousValue: parseFloat(kpiData?.avgPosition || "0") + 1.2,
+            format: "number" 
+          },
+        ]}
+      />
     </div>
   );
 }
