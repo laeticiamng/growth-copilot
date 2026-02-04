@@ -3,3 +3,5 @@ export { PriorityActions } from './PriorityActions';
 export { QuickLaunchers } from './QuickLaunchers';
 export { ApprovalsWidget } from './ApprovalsWidget';
 export { RunsHistory } from './RunsHistory';
+export { ServiceHealthMonitor } from './ServiceHealthMonitor';
+export { WorkspaceQuotaWidget } from './WorkspaceQuotaWidget';
