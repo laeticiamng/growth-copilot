@@ -61,10 +61,13 @@ const DEPT_EMPLOYEES: Record<string, { count: number; roles: string[] }> = {
     roles: ["HR Manager", "Onboarding Specialist"] 
   },
   legal: { 
-    count: 2, 
-    roles: ["Contract Manager", "Compliance Analyst"] 
+    count: 1, 
+    roles: ["Directeur Juridique IA"] 
   },
 };
+
+// Total AI Workforce = 37 in departments + 2 Direction (CGO + QCO) = 39
+const TOTAL_AI_WORKFORCE = 39;
 
 // Pricing
 const PRICES = {
@@ -237,7 +240,7 @@ export default function ROIDashboard() {
             </CardTitle>
             <CardDescription>
               {isFullCompany 
-                ? "38 employés IA, 11 départements, Core OS inclus"
+                ? `${TOTAL_AI_WORKFORCE} employés IA, 11 départements, Core OS inclus`
                 : `${totalAIEmployees} employés IA, ${enabledDepartments.length} département(s)`
               }
             </CardDescription>
@@ -339,7 +342,7 @@ export default function ROIDashboard() {
               <div>
                 <h3 className="font-semibold text-lg">Passez à Full Company</h3>
                 <p className="text-sm text-muted-foreground">
-                  38 employés IA pour {PRICES.fullCompany.toLocaleString()}€/mois au lieu de {(38 * AVG_SALARY_MONTHLY).toLocaleString()}€
+                  {TOTAL_AI_WORKFORCE} employés IA pour {PRICES.fullCompany.toLocaleString()}€/mois au lieu de {(TOTAL_AI_WORKFORCE * AVG_SALARY_MONTHLY).toLocaleString()}€
                 </p>
               </div>
               <Button variant="hero" asChild>

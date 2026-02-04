@@ -65,7 +65,7 @@ const STARTER_LIMITS = {
 };
 
 // Employees per department (Full version)
-// Total = 5+4+3+3+4+5+4+3+3+2+1 = 37 (with HR and Legal)
+// Total = 5+4+3+3+4+5+4+3+3+2+1 = 37 in departments + 2 Direction (CGO + QCO) = 39 total
 const DEPT_EMPLOYEES: Record<string, number> = {
   marketing: 5,
   sales: 4,
@@ -79,6 +79,7 @@ const DEPT_EMPLOYEES: Record<string, number> = {
   hr: 2,
   legal: 1,
 };
+const TOTAL_AI_WORKFORCE = 39; // 37 in departments + 2 Direction (CGO + QCO)
 
 export default function Billing() {
   const { currentWorkspace } = useWorkspace();
@@ -245,7 +246,7 @@ export default function Billing() {
                     </CardTitle>
                     <CardDescription className="mt-0.5">
                       {isFullCompany 
-                        ? "38 employés IA • 11 départements"
+                        ? `${TOTAL_AI_WORKFORCE} employés IA • 11 départements`
                         : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
                       }
                     </CardDescription>
@@ -363,7 +364,7 @@ export default function Billing() {
                   <div>
                     <h3 className="font-semibold text-lg">Passez à Full Company</h3>
                     <p className="text-sm text-muted-foreground">
-                      38 employés IA • 11 départements • Runs illimités
+                      {TOTAL_AI_WORKFORCE} employés IA • 11 départements • Runs illimités
                     </p>
                   </div>
                 </div>
