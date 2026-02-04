@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DiagnosticsPanel } from "@/components/diagnostics/DiagnosticsPanel";
+import { DiagnosticsPanel, LatencyHistoryChart, ConsoleLogsViewer } from "@/components/diagnostics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -401,6 +401,12 @@ export default function Diagnostics() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Latency History Chart */}
+      <LatencyHistoryChart />
+
+      {/* Console Logs Viewer */}
+      <ConsoleLogsViewer />
 
       {/* System Info */}
       <Card variant="feature">
