@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useServices } from "@/hooks/useServices";
 import { 
   TrendingUp, Users, DollarSign, Zap, 
   ArrowRight, Calculator, Bot, Clock,
-  CheckCircle2, BarChart3
+  CheckCircle2, BarChart3, LineChart
 } from "lucide-react";
+import { AdvancedCharts } from "@/components/kpi/AdvancedCharts";
 
 // Salary data (French average)
 const AVG_SALARY_MONTHLY = 4500; // €/month brut chargé
@@ -118,14 +120,26 @@ export default function ROIDashboard() {
       <header>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
           <Calculator className="w-8 h-8 text-primary" />
-          Calculateur ROI
+          Calculateur ROI & Analytiques
         </h1>
         <p className="text-muted-foreground mt-1">
-          Comparez le coût de Growth OS aux équipes traditionnelles
+          Comparez le coût de Growth OS aux équipes traditionnelles et visualisez vos performances
         </p>
       </header>
 
-      {/* Summary Cards */}
+      <Tabs defaultValue="roi" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="roi">
+            <Calculator className="w-4 h-4 mr-2" />
+            ROI
+          </TabsTrigger>
+          <TabsTrigger value="charts">
+            <LineChart className="w-4 h-4 mr-2" />
+            Graphiques avancés
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="roi" className="space-y-6">
       <div className="grid md:grid-cols-4 gap-4">
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-6">
@@ -355,6 +369,12 @@ export default function ROIDashboard() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        <TabsContent value="charts">
+          <AdvancedCharts />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

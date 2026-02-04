@@ -27,10 +27,12 @@ import {
   Trash2,
   Kanban,
   List,
+  Mic,
 } from "lucide-react";
 import { useLifecycle } from "@/hooks/useLifecycle";
 import { LoadingState } from "@/components/ui/loading-state";
 import { PipelineKanban } from "@/components/lifecycle/PipelineKanban";
+import { SalesScriptGenerator } from "@/components/sales/SalesScriptGenerator";
 import { toast } from "sonner";
 
 export default function Lifecycle() {
@@ -329,41 +331,7 @@ export default function Lifecycle() {
         </TabsContent>
 
         <TabsContent value="scripts" className="space-y-6">
-          <Card variant="feature">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                Sales Copilot
-              </CardTitle>
-              <CardDescription>
-                Scripts d'appel et réponses aux objections
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-secondary/50">
-                <p className="font-medium mb-2">Script découverte</p>
-                <p className="text-sm text-muted-foreground">
-                  Introduction, questions de qualification, présentation offre adaptée...
-                </p>
-                <Button variant="ghost" size="sm" className="mt-2">
-                  Voir le script
-                </Button>
-              </div>
-              <div className="p-4 rounded-lg bg-secondary/50">
-                <p className="font-medium mb-2">Script closing</p>
-                <p className="text-sm text-muted-foreground">
-                  Récap bénéfices, traitement objections, call-to-action...
-                </p>
-                <Button variant="ghost" size="sm" className="mt-2">
-                  Voir le script
-                </Button>
-              </div>
-              <Button variant="outline" className="w-full">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Générer un script personnalisé
-              </Button>
-            </CardContent>
-          </Card>
+          <SalesScriptGenerator />
         </TabsContent>
       </Tabs>
 

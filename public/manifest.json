@@ -1,17 +1,49 @@
 {
   "name": "Growth OS - Autopilot Marketing IA",
   "short_name": "Growth OS",
-  "description": "Plateforme marketing IA tout-en-one avec 12 agents spécialisés",
+  "description": "Plateforme marketing IA tout-en-un avec 39 agents spécialisés dans 11 départements",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#8b5cf6",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "64x64",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192.png",
@@ -20,25 +52,58 @@
       "purpose": "any maskable"
     },
     {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity"],
+  "categories": ["business", "productivity", "utilities"],
   "lang": "fr",
+  "dir": "ltr",
   "screenshots": [],
   "shortcuts": [
     {
       "name": "Dashboard",
+      "short_name": "Dashboard",
       "url": "/dashboard",
-      "description": "Accéder au tableau de bord"
+      "description": "Accéder au tableau de bord principal",
+      "icons": [{"src": "/icons/icon-96.png", "sizes": "96x96"}]
     },
     {
       "name": "Approbations",
+      "short_name": "Approvals",
       "url": "/dashboard/approvals",
-      "description": "Voir les actions en attente"
+      "description": "Voir les actions en attente d'approbation",
+      "icons": [{"src": "/icons/icon-96.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "Agents IA",
+      "short_name": "Agents",
+      "url": "/dashboard/agents",
+      "description": "Gérer les 39 agents IA",
+      "icons": [{"src": "/icons/icon-96.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "SEO Tech",
+      "short_name": "SEO",
+      "url": "/dashboard/seo",
+      "description": "Audit SEO technique",
+      "icons": [{"src": "/icons/icon-96.png", "sizes": "96x96"}]
     }
-  ]
+  ],
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

@@ -5,3 +5,4 @@ export { DataExportButton } from './DataExportButton';
 export { KPIDashboard } from './KPIDashboard';
 export { KPISparkline } from './KPISparkline';
 export { KPITrendCard } from './KPITrendCard';
+export { AdvancedCharts } from './AdvancedCharts';
