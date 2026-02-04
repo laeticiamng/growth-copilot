@@ -30,10 +30,11 @@ import {
 } from "lucide-react";
 import { useSocial } from "@/hooks/useSocial";
 import { useSites } from "@/hooks/useSites";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
-
+import { RepurposeEngine } from "@/components/social/RepurposeEngine";
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
   facebook: Facebook,
@@ -48,6 +49,7 @@ const repurposeIdeas = [
 
 export default function Social() {
   const { currentSite } = useSites();
+  const { currentWorkspace } = useWorkspace();
   const { accounts, posts, loading, createPost, updatePost, deletePost, publishPost, refetch } = useSocial();
   
   const [showPostDialog, setShowPostDialog] = useState(false);
@@ -341,37 +343,17 @@ export default function Social() {
         </TabsContent>
 
         <TabsContent value="repurpose" className="space-y-6">
-          <Card variant="feature">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <RefreshCw className="w-5 h-5" />
-                Repurpose Engine
-              </CardTitle>
-              <CardDescription>
-                Transformez 1 contenu long en 10+ micro-contenus
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {repurposeIdeas.map((idea, i) => (
-                <div key={i} className="p-4 rounded-lg bg-secondary/50">
-                  <p className="font-medium mb-2">{idea.source}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {idea.outputs.map((output, j) => (
-                      <Badge key={j} variant="outline" className="text-xs">{output}</Badge>
-                    ))}
-                  </div>
-                  <Button variant="ghost" size="sm" className="mt-3">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Générer les contenus
-                  </Button>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter un contenu source
-              </Button>
-            </CardContent>
-          </Card>
+          {currentWorkspace?.id ? (
+            <RepurposeEngine workspaceId={currentWorkspace.id} />
+          ) : (
+            <Card variant="feature">
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground py-8">
+                  Sélectionnez un workspace pour utiliser le Repurpose Engine
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">

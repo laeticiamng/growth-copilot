@@ -202,21 +202,21 @@ L'audit n'a révélé aucun élément non-fonctionnel critique. Tous les modules
 | 2 | Reports | Finaliser planification auto des rapports | Haute | Faible | ✅ Fait |
 | 3 | Integrations | Logs de sync visibles | Moyenne | Faible | ✅ Fait |
 | 4 | Competitors | Enrichir données backlinks | Moyenne | Moyen | ✅ Fait |
-| 5 | Social | Finaliser Repurpose Engine backend | Moyenne | Élevé | 🔄 En cours |
-| 6 | CRO | Suggestions IA d'optimisation | Moyenne | Moyen | 📋 Planifié |
+| 5 | Social | Finaliser Repurpose Engine backend | Moyenne | Élevé | ✅ Fait |
+| 6 | CRO | Suggestions IA d'optimisation | Moyenne | Moyen | ✅ Fait |
 | 7 | Agents | Chat direct avec agent | Basse | Élevé | 📋 Planifié |
-| 8 | HR | Organigramme visuel | Basse | Moyen | 📋 Planifié |
+| 8 | HR | Organigramme visuel | Basse | Moyen | ✅ Fait |
 | 9 | Notifications | Push notifications | Moyenne | Moyen | 📋 Planifié |
-| 10 | Dashboard | Export PDF du cockpit | Basse | Moyen | 📋 Planifié |
-| 11 | Sites | Import en masse | Basse | Moyen | 📋 Planifié |
+| 10 | Dashboard | Export PDF du cockpit | Basse | Moyen | ✅ Fait |
+| 11 | Sites | Import en masse | Basse | Moyen | ✅ Fait |
 | 12 | Approvals | Approbation par email | Moyenne | Élevé | 📋 Planifié |
 | 13 | Reports | Export Excel/PPT | Basse | Moyen | 📋 Planifié |
 | 14 | Dashboard | Personnalisation widgets | Basse | Élevé | 📋 Planifié |
 | 15 | CRO | Intégration heatmaps | Basse | Élevé | 📋 Planifié |
-| 16 | Competitors | Alertes automatiques | Moyenne | Moyen | 📋 Planifié |
+| 16 | Competitors | Alertes automatiques | Moyenne | Moyen | ✅ Fait |
 | 17 | Social | Publication API directe | Moyenne | Élevé | 📋 Planifié |
 | 18 | All | Animations de transition | Basse | Faible | 📋 Planifié |
-| 19 | Dashboard | Mode comparaison MoM/YoY | Moyenne | Moyen | 📋 Planifié |
+| 19 | Dashboard | Mode comparaison MoM/YoY | Moyenne | Moyen | ✅ Fait |
 | 20 | Agents | Configuration paramètres | Basse | Moyen | 📋 Planifié |
 
 ---

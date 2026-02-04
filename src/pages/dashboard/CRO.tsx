@@ -37,12 +37,15 @@ import {
 } from "lucide-react";
 import { useCRO } from "@/hooks/useCRO";
 import { useSites } from "@/hooks/useSites";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { calculateConfidence, getTestRecommendation, calculateUplift } from "@/lib/statistics";
+import { CROSuggestionsAI } from "@/components/cro/CROSuggestionsAI";
 
 export default function CRO() {
   const { currentSite } = useSites();
+  const { currentWorkspace } = useWorkspace();
   const { audits, experiments, variants, loading, createExperiment, updateExperimentStatus, declareWinner, refetch } = useCRO();
   
   const [showExperimentDialog, setShowExperimentDialog] = useState(false);
@@ -191,8 +194,9 @@ export default function CRO() {
       </div>
 
       <Tabs defaultValue="experiments" className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="experiments">Expérimentations</TabsTrigger>
+          <TabsTrigger value="suggestions">Suggestions IA</TabsTrigger>
           <TabsTrigger value="audits">Audits pages</TabsTrigger>
           <TabsTrigger value="backlog">Backlog CRO</TabsTrigger>
         </TabsList>
@@ -307,6 +311,20 @@ export default function CRO() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="suggestions" className="space-y-6">
+          {currentWorkspace?.id ? (
+            <CROSuggestionsAI workspaceId={currentWorkspace.id} pageUrl={currentSite?.url || ""} />
+          ) : (
+            <Card variant="feature">
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground py-8">
+                  Sélectionnez un workspace pour utiliser les suggestions IA
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="audits" className="space-y-6">
