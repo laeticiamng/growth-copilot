@@ -36,6 +36,7 @@ import { useWorkspace } from '@/hooks/useWorkspace';
 import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-registry';
 import type { AgentType } from '@/lib/agents/types';
 import { AgentOrgChart } from '@/components/agents/AgentOrgChart';
+import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
 
 // Agent personas with human names and avatars - 39 agents total
 const AGENT_PERSONAS: Record<string, {
@@ -350,7 +351,7 @@ interface AgentStats {
 
 export default function Agents() {
   const { currentWorkspace } = useWorkspace();
-  const [activeTab, setActiveTab] = useState('orgchart');
+  const [activeTab, setActiveTab] = useState('departments');
   const [recentRuns, setRecentRuns] = useState<AgentRun[]>([]);
   const [agentStats, setAgentStats] = useState<AgentStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -542,103 +543,19 @@ export default function Agents() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="departments">Par département</TabsTrigger>
           <TabsTrigger value="orgchart">Organigramme</TabsTrigger>
-          <TabsTrigger value="team">Équipe</TabsTrigger>
           <TabsTrigger value="activity">Activité récente</TabsTrigger>
-          <TabsTrigger value="capabilities">Capacités</TabsTrigger>
         </TabsList>
+
+        {/* Departments Tab - New default view */}
+        <TabsContent value="departments" className="space-y-4">
+          <AgentsByDepartment agentStats={agentStats} />
+        </TabsContent>
 
         {/* Organigramme Tab */}
         <TabsContent value="orgchart" className="space-y-4">
           <AgentOrgChart />
-        </TabsContent>
-
-        <TabsContent value="team" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {agentsWithStats.map((agent) => {
-              const Icon = AGENT_ICONS[agent.type] || Bot;
-              const successRate = agent.stats.total_runs > 0 
-                ? ((agent.stats.success_runs / agent.stats.total_runs) * 100).toFixed(0)
-                : '100';
-
-              return (
-                <Card key={agent.type} variant="agent" className="group hover:border-primary/50 transition-all">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      {/* Avatar */}
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getCategoryColor(agent.category)} flex items-center justify-center shrink-0`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold truncate">
-                            {agent.persona?.name || agent.name}
-                          </h3>
-                          {/* Status indicator */}
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-3/75 opacity-75" />
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3" />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>Disponible</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {agent.persona?.specialty || agent.category}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                          {agent.persona?.greeting || agent.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-2 text-center">
-                      <div>
-                        <p className="text-lg font-bold">{agent.stats.total_runs}</p>
-                        <p className="text-xs text-muted-foreground">Exécutions</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-chart-3">{successRate}%</p>
-                        <p className="text-xs text-muted-foreground">Succès</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold">
-                          {agent.stats.avg_duration_ms > 0 
-                            ? `${(agent.stats.avg_duration_ms / 1000).toFixed(1)}s`
-                            : '-'
-                          }
-                        </p>
-                        <p className="text-xs text-muted-foreground">Moy.</p>
-                      </div>
-                    </div>
-
-                    {/* Risk & Approval badges */}
-                    <div className="mt-3 flex gap-2">
-                      {agent.requiresApproval && (
-                        <Badge variant="secondary" className="text-xs">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Approbation requise
-                        </Badge>
-                      )}
-                      {agent.riskLevel === 'high' && (
-                        <Badge variant="destructive" className="text-xs">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          Risque élevé
-                        </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </TabsContent>
 
         <TabsContent value="activity">
@@ -698,62 +615,6 @@ export default function Agents() {
               </ScrollArea>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="capabilities">
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Capabilities by category */}
-            {['orchestration', 'seo', 'content', 'ads', 'analytics', 'sales', 'automation', 'social'].map(category => {
-              const categoryAgents = agentsWithStats.filter(a => a.category === category);
-              if (categoryAgents.length === 0) return null;
-
-              const categoryLabels: Record<string, string> = {
-                orchestration: 'Orchestration',
-                seo: 'SEO',
-                content: 'Contenu',
-                ads: 'Publicité',
-                analytics: 'Analytics',
-                sales: 'Ventes',
-                automation: 'Automation',
-                social: 'Social',
-              };
-
-              return (
-                <Card key={category}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${getCategoryColor(category)}`} />
-                      {categoryLabels[category]}
-                    </CardTitle>
-                    <CardDescription>{categoryAgents.length} agent(s)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {categoryAgents.map(agent => (
-                        <div key={agent.type} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm">{agent.persona?.name || agent.name}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {agent.capabilities.slice(0, 2).map(cap => (
-                              <Badge key={cap} variant="outline" className="text-xs">
-                                {cap.replace(/_/g, ' ')}
-                              </Badge>
-                            ))}
-                            {agent.capabilities.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{agent.capabilities.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </TabsContent>
       </Tabs>
     </div>
