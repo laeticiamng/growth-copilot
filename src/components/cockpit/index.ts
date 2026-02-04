@@ -7,3 +7,4 @@ export { ServiceHealthMonitor } from './ServiceHealthMonitor';
 export { WorkspaceQuotaWidget } from './WorkspaceQuotaWidget';
 export { SessionStatus } from './SessionStatus';
 export { RealtimeStatus } from './RealtimeStatus';
+export { BusinessHealthScore } from './BusinessHealthScore';
