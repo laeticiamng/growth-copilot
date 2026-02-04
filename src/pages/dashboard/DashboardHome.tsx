@@ -243,21 +243,15 @@ export default function DashboardHome() {
         />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        {/* Priority Actions - Takes more space on medium screens */}
-        <div className="lg:col-span-1">
-          <PriorityActions actions={priorityActions} maxItems={3} />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 items-start">
+        {/* Priority Actions */}
+        <PriorityActions actions={priorityActions} maxItems={3} />
 
         {/* Business Health Score */}
-        <div className="lg:col-span-1">
-          <BusinessHealthScore />
-        </div>
+        <BusinessHealthScore className="h-full" />
 
         {/* ROI Tracker Widget */}
-        <div className="lg:col-span-1">
-          <ROITrackerWidget />
-        </div>
+        <ROITrackerWidget className="h-full" />
       </div>
 
       {/* Approvals Widget */}
