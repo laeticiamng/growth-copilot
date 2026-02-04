@@ -473,7 +473,7 @@ export default function Agents() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
         {/* Running Now - Real-time Indicator */}
         <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">

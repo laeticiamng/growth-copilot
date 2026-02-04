@@ -164,7 +164,7 @@ export default function Lifecycle() {
       </div>
 
       {/* Sales Metrics */}
-      <div className="grid sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {salesMetrics.map((metric, i) => (
           <Card key={i} variant="kpi">
             <CardContent className="pt-6">
