@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release of Growth OS
 - 10 Core Departments: Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, HR, Governance
-- 37 AI Employees with distinct personas
+- 38 AI Employees with distinct personas
 - Core OS: Workspace, RBAC, Audit Log, Scheduler, AI Gateway
 - Integrations: Google (GA4, GSC, Ads, GBP, YouTube), Meta (Ads, Pages, Instagram)
 - Stripe billing integration

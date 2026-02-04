@@ -207,7 +207,7 @@ const DEPARTMENTS: ModuleStatus[] = [
     employees: 2,
     features: [
       { name: "Team Management", status: "complete", details: "Invitations, rôles" },
-      { name: "Employee Directory", status: "complete", details: "37 AI employees catalog" },
+      { name: "Employee Directory", status: "complete", details: "38 AI employees catalog" },
       { name: "Access Control", status: "complete", details: "RBAC, site permissions" },
       { name: "Onboarding Flow", status: "complete", details: "Guided setup wizard" },
     ]
