@@ -178,7 +178,7 @@ export default function Reports() {
     const num = Number(change);
     if (num === 0) return <span className="text-muted-foreground">—</span>;
     return (
-      <span className={`flex items-center gap-1 ${num > 0 ? 'text-green-500' : 'text-destructive'}`}>
+      <span className={`flex items-center gap-1 ${num > 0 ? 'text-chart-3' : 'text-destructive'}`}>
         {num > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
         {num > 0 ? '+' : ''}{change}%
       </span>

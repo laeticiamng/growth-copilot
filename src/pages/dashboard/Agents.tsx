@@ -434,7 +434,7 @@ export default function Agents() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-chart-3" />;
       case 'failed':
         return <XCircle className="h-4 w-4 text-destructive" />;
       case 'running':
@@ -447,15 +447,15 @@ export default function Agents() {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       orchestration: 'from-primary to-primary/60',
-      seo: 'from-green-500 to-green-400',
-      content: 'from-purple-500 to-purple-400',
-      ads: 'from-amber-500 to-amber-400',
-      social: 'from-cyan-500 to-cyan-400',
-      analytics: 'from-blue-500 to-blue-400',
-      sales: 'from-red-500 to-red-400',
-      automation: 'from-pink-500 to-pink-400',
+      seo: 'from-chart-3 to-chart-3/60',
+      content: 'from-accent to-accent/60',
+      ads: 'from-chart-4 to-chart-4/60',
+      social: 'from-chart-1 to-chart-1/60',
+      analytics: 'from-chart-1 to-chart-1/60',
+      sales: 'from-chart-5 to-chart-5/60',
+      automation: 'from-chart-5 to-chart-5/60',
     };
-    return colors[category] || 'from-gray-500 to-gray-400';
+    return colors[category] || 'from-muted to-muted/60';
   };
 
   return (
@@ -531,10 +531,10 @@ export default function Agents() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Disponibilité</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-chart-3" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">24/7</div>
+            <div className="text-2xl font-bold text-chart-3">24/7</div>
             <p className="text-xs text-muted-foreground">Toujours disponibles</p>
           </CardContent>
         </Card>
@@ -581,8 +581,8 @@ export default function Agents() {
                             <Tooltip>
                               <TooltipTrigger>
                                 <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-chart-3/75 opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-chart-3" />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>Disponible</TooltipContent>
@@ -605,7 +605,7 @@ export default function Agents() {
                         <p className="text-xs text-muted-foreground">Exécutions</p>
                       </div>
                       <div>
-                        <p className="text-lg font-bold text-green-500">{successRate}%</p>
+                        <p className="text-lg font-bold text-chart-3">{successRate}%</p>
                         <p className="text-xs text-muted-foreground">Succès</p>
                       </div>
                       <div>

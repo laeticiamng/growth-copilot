@@ -214,8 +214,8 @@ export function AgentPerformanceChart() {
             <p className="text-2xl font-bold">{totals.total}</p>
             <p className="text-xs text-muted-foreground">Exécutions</p>
           </div>
-          <div className="text-center p-3 rounded-lg bg-green-500/10">
-            <p className="text-2xl font-bold text-green-600">{totals.success}</p>
+          <div className="text-center p-3 rounded-lg bg-chart-3/10">
+            <p className="text-2xl font-bold text-chart-3">{totals.success}</p>
             <p className="text-xs text-muted-foreground">Succès</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-destructive/10">
