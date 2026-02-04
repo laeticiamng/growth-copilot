@@ -25,6 +25,7 @@ import {
   QuickLaunchers,
   ApprovalsWidget,
   RunsHistory,
+  BusinessHealthScore,
 } from "@/components/cockpit";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
 import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
@@ -263,9 +264,12 @@ export default function DashboardHome() {
         />
       )}
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-3 gap-6">
         {/* Priority Actions */}
         <PriorityActions actions={priorityActions} maxItems={3} />
+
+        {/* Business Health Score */}
+        <BusinessHealthScore />
 
         {/* Approvals Widget */}
         <ApprovalsWidget
