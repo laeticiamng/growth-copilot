@@ -257,7 +257,7 @@ export default function Reports() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="reports">Rapports</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
           <TabsTrigger value="comparison">Comparaison</TabsTrigger>
