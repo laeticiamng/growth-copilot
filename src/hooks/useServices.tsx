@@ -31,8 +31,8 @@ export interface WorkspaceService {
 export interface Subscription {
   id: string;
   workspace_id: string;
-  plan: 'free' | 'starter' | 'growth' | 'agency';
-  status: 'active' | 'cancelled' | 'past_due' | 'trialing';
+  plan: 'free' | 'starter' | 'growth' | 'agency' | 'founder' | 'full_company';
+  status: 'active' | 'cancelled' | 'past_due' | 'trialing' | 'inactive';
   trial_ends_at: string | null;
   is_full_company: boolean;
   stripe_customer_id?: string | null;
@@ -167,8 +167,8 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
 
   const isServiceEnabled = hasService;
 
-  // Is full company plan
-  const isFullCompany = subscription?.is_full_company ?? false;
+  // Is full company plan (includes founder)
+  const isFullCompany = subscription?.is_full_company || subscription?.plan === 'founder' || false;
 
   // Enable a service
   const enableService = async (serviceId: string) => {

@@ -8952,7 +8952,13 @@ export type Database = {
         | "governance"
         | "hr"
         | "legal"
-      subscription_plan: "free" | "starter" | "growth" | "agency"
+      subscription_plan:
+        | "free"
+        | "starter"
+        | "growth"
+        | "agency"
+        | "founder"
+        | "full_company"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9219,7 +9225,14 @@ export const Constants = {
         "hr",
         "legal",
       ],
-      subscription_plan: ["free", "starter", "growth", "agency"],
+      subscription_plan: [
+        "free",
+        "starter",
+        "growth",
+        "agency",
+        "founder",
+        "full_company",
+      ],
     },
   },
 } as const
