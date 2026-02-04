@@ -206,7 +206,7 @@ export default function SEOTech() {
       {!loading && result && (
         <>
           {/* Score + Stats */}
-          <div className="grid lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card variant="gradient" className="lg:col-span-1">
               <CardContent className="pt-6 text-center">
                 <div className="relative w-32 h-32 mx-auto mb-4">

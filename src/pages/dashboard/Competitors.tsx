@@ -253,7 +253,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
       </Card>
 
       {/* Competitors grid */}
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayCompetitors.map((comp) => (
           <Card key={comp.id} variant="feature">
             <CardContent className="pt-6">
