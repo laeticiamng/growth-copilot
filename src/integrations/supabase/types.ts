@@ -2094,6 +2094,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "contracts_related_employee_id_fkey"
+            columns: ["related_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contracts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -2836,6 +2843,13 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
             referencedColumns: ["id"]
           },
           {
@@ -6620,6 +6634,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "performance_reviews_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -7937,6 +7958,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "time_off_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "time_off_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -8371,6 +8399,103 @@ export type Database = {
       }
     }
     Views: {
+      employees_safe: {
+        Row: {
+          contract_type: string | null
+          created_at: string | null
+          department: string | null
+          email: string | null
+          end_date: string | null
+          first_name: string | null
+          hire_date: string | null
+          id: string | null
+          job_title: string | null
+          last_name: string | null
+          last_review_at: string | null
+          manager_id: string | null
+          notes: string | null
+          performance_score: number | null
+          phone: string | null
+          salary_annual: number | null
+          skills: string[] | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          work_location: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          contract_type?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          end_date?: string | null
+          first_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          job_title?: string | null
+          last_name?: string | null
+          last_review_at?: string | null
+          manager_id?: string | null
+          notes?: string | null
+          performance_score?: number | null
+          phone?: string | null
+          salary_annual?: never
+          skills?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          work_location?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          contract_type?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          end_date?: string | null
+          first_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          job_title?: string | null
+          last_name?: string | null
+          last_review_at?: string | null
+          manager_id?: string | null
+          notes?: string | null
+          performance_score?: number | null
+          phone?: string | null
+          salary_annual?: never
+          skills?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          work_location?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_integration_health: {
         Row: {
           expires_at: string | null
