@@ -97,20 +97,21 @@ export default function Approvals() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Header - Apple-like clarity */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Centre d'approbation</h1>
-          <p className="text-muted-foreground">
-            Contrôlez les actions des agents avant exécution
-          </p>
-        </div>
         <div className="flex items-center gap-3">
-          <Badge variant="gradient" className="px-3 py-1">
-            <Shield className="w-4 h-4 mr-1" />
-            Safe-by-default
-          </Badge>
+          <span className="text-3xl">✓</span>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">À valider</h1>
+            <p className="text-muted-foreground">
+              Gardez le contrôle : approuvez les actions importantes avant leur exécution
+            </p>
+          </div>
         </div>
+        <Badge variant="gradient" className="px-3 py-1 self-start sm:self-center">
+          <Shield className="w-4 h-4 mr-1" />
+          Safe-by-default
+        </Badge>
       </div>
 
       {/* Pending count */}

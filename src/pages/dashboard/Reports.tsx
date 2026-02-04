@@ -187,25 +187,29 @@ export default function Reports() {
 
   return (
     <div className="space-y-8">
+      {/* Header - Apple-like */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Rapports</h1>
-          <p className="text-muted-foreground">Audit trail, rapports mensuels et comparaisons</p>
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">📊</span>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Rapports</h1>
+            <p className="text-muted-foreground">
+              Suivez vos performances et exportez des rapports professionnels
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="hero" 
-            onClick={() => handleGenerateReport()}
-            disabled={generating || !currentSite}
-          >
-            {generating ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            Générer rapport PDF
-          </Button>
-        </div>
+        <Button 
+          variant="hero" 
+          onClick={() => handleGenerateReport()}
+          disabled={generating || !currentSite}
+        >
+          {generating ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4 mr-2" />
+          )}
+          Générer rapport PDF
+        </Button>
       </div>
 
       {/* Period Comparison Cards */}
