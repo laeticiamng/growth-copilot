@@ -49,12 +49,12 @@ Growth OS est un **système d'exploitation d'entreprise portable** qui remplace 
 
 | Formule | Prix | Inclus |
 |---------|------|--------|
-| **Full Company** | 9 000€/mois | 38 employés IA, 11 départements, Core OS |
-| **À la carte** | 1 900€/dept/mois | 3-5 employés IA par département + Core OS |
+| **Full Company** | 9 000€/mois | 39 employés IA, 11 départements, Core OS |
+| **À la carte** | 1 900€/dept/mois | 2-5 employés IA par département + Core OS |
 | **Core OS** | Gratuit | Workspace, RBAC, Approbations, Audit Log, Scheduler |
 
-> **Comparaison** : Une équipe de 38 employés traditionnels coûte ~171 000€/mois (salaire moyen 4 500€).  
-> **Économie : 162 000€/mois**.
+> **Comparaison** : Une équipe de 39 employés traditionnels coûte ~175 500€/mois (salaire moyen 4 500€).  
+> **Économie : 166 500€/mois**.
 
 ---
 
@@ -62,6 +62,7 @@ Growth OS est un **système d'exploitation d'entreprise portable** qui remplace 
 
 | Département | Employés IA | Rôles clés | Status |
 |-------------|-------------|------------|--------|
+| **Direction** | 2 | CGO (Sophie Marchand), QCO (Jean-Michel Fournier) | ✅ Complet |
 | **Marketing** | 5 | SEO Strategist, Content Manager, Ads Optimizer, Social Media | ✅ Complet |
 | **Commercial** | 4 | Lead Qualifier, Sales Closer, Account Manager, Pipeline Analyst | ✅ Complet |
 | **Finance** | 3 | DAF IA, Comptable Analytique, Contrôleur de Gestion | ✅ Complet |
@@ -71,10 +72,10 @@ Growth OS est un **système d'exploitation d'entreprise portable** qui remplace 
 | **Data** | 4 | CDO IA, Data Engineer, Data Analyst, ML Engineer | ✅ Complet |
 | **Support** | 3 | Head of Support IA, Customer Success, Technical Support | ✅ Complet |
 | **Governance** | 3 | Chief of Staff IA, Project Manager, Operations Analyst | ✅ Complet |
-| **RH** | 3 | DRH IA, HR Business Partner, Talent Acquisition | ✅ Complet |
-| **Juridique** | 1 | DPO IA, Contract Manager | ✅ Complet |
+| **RH** | 2 | DRH IA, Talent Manager | ✅ Complet |
+| **Juridique** | 1 | Directeur Juridique IA | ✅ Complet |
 
-**Total : 38 employés IA** répartis dans 11 départements fonctionnels.
+**Total : 39 employés IA** (2 Direction + 37 dans 11 départements).
 
 ---
 
@@ -120,8 +121,8 @@ L'AI Gateway centralise tous les appels IA avec :
 
 | Agent | Rôle | Responsabilités |
 |-------|------|-----------------|
-| **Sophie Marchand** | Chief Growth Officer | Orchestration, priorisation ICE, coordination |
-| **Lucas Bertrand** | Quality & Compliance Officer | Validation éthique, anti-spam, anti-plagiat |
+| **Sophie Marchand** | Chief Growth Officer (CGO) | Orchestration, priorisation ICE, coordination |
+| **Jean-Michel Fournier** | Quality & Compliance Officer (QCO) | Validation éthique, anti-spam, anti-plagiat |
 | **Marie Dupont** | SEO Tech Auditor | Audit technique, indexation, performance |
 | **Thomas Laurent** | Content Strategist | Stratégie contenu, briefs, clusters |
 
@@ -139,7 +140,7 @@ L'AI Gateway centralise tous les appels IA avec :
 
 ### Backend (Lovable Cloud)
 - **Supabase** - PostgreSQL avec 131 tables
-- **Edge Functions** (Deno) - 38 fonctions serverless
+- **Edge Functions** (Deno) - 38+ fonctions serverless
 - **Row Level Security** - 246 policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 

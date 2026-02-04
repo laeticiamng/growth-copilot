@@ -95,7 +95,7 @@
 ### 3. Gestion des Abonnements & Facturation (100%)
 
 **Tables :**
-- `services_catalog` - 10 services (1 Core + 9 départements)
+- `services_catalog` - 11 services (1 Core + 10 départements + Direction)
 - `workspace_services` - Activation par workspace
 - `workspace_subscriptions` - Plan + Stripe IDs
 - `workspace_quotas` - Limites (requests/minute, tokens/mois)
@@ -304,7 +304,7 @@ La plateforme Growth OS est maintenant un **"Portable Company OS"** complet avec
 1. **Core OS** - Multi-tenant, RBAC 5 niveaux, Audit immuable, Permissions granulaires
 2. **Run Engine** - Exécutions structurées, Evidence Bundles, Traçabilité IA
 3. **Approval System** - Workflow de validation, SLA, Approbations partielles
-4. **Service Catalog** - 10 départements modulaires (Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, Governance, HR)
+4. **Service Catalog** - 11 départements modulaires (Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, Governance, HR, Legal)
 5. **Billing** - Stripe intégré, Plans Full Company / À la carte
 6. **HR & Legal** - Employés, Contrats, Conformité, RGPD
 7. **KPI Automation** - Agrégation pg_cron, Syncs automatiques, Snapshots
