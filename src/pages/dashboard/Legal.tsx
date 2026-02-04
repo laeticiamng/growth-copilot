@@ -245,7 +245,7 @@ export default function Legal() {
 
       {/* Tabs */}
       <Tabs defaultValue="contracts" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="contracts">Contrats</TabsTrigger>
           <TabsTrigger value="compliance">Conformité</TabsTrigger>
           <TabsTrigger value="gdpr">RGPD</TabsTrigger>

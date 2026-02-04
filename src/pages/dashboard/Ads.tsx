@@ -204,7 +204,7 @@ export default function Ads() {
       </div>
 
       <Tabs defaultValue="campaigns" className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="campaigns">Campagnes</TabsTrigger>
           <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
           <TabsTrigger value="negatives">Négatifs</TabsTrigger>

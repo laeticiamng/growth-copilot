@@ -56,7 +56,7 @@ export default function Automations() {
       </div>
 
       <Tabs defaultValue="automations" className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="automations" className="gap-2">
             <Zap className="h-4 w-4" />
             Automations

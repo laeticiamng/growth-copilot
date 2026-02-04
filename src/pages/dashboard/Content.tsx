@@ -127,7 +127,7 @@ export default function Content() {
       </div>
 
       <Tabs defaultValue="keywords" className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
           <TabsTrigger value="clusters">Clusters</TabsTrigger>
           <TabsTrigger value="calendar">Calendrier</TabsTrigger>

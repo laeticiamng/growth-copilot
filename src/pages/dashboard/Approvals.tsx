@@ -133,7 +133,7 @@ export default function Approvals() {
       )}
 
       <Tabs defaultValue="pending" className="space-y-6">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="pending" className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
             En attente ({pendingApprovals.length})
