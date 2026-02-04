@@ -212,15 +212,16 @@ const Integrations = () => {
         body: {
           provider,
           workspace_id: currentWorkspace.id,
+          redirect_url: window.location.href,
         },
       });
 
       if (error) throw error;
       
-      if (data?.authUrl) {
-        window.location.href = data.authUrl;
+      if (data?.auth_url) {
+        window.location.href = data.auth_url;
       } else {
-        throw new Error("URL d'autorisation manquante");
+        throw new Error(data?.error || "URL d'autorisation manquante");
       }
     } catch (err) {
       console.error("OAuth init error:", err);
