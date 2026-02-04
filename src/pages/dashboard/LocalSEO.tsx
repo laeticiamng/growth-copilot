@@ -218,7 +218,7 @@ export default function LocalSEO() {
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-4 grid sm:grid-cols-4 gap-4">
+        <div className="lg:col-span-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {gbpMetrics.map((metric, i) => {
             const Icon = metric.icon;
             return (

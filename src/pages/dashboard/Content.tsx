@@ -134,11 +134,11 @@ export default function Content() {
         </TabsList>
 
         <TabsContent value="keywords" className="space-y-6">
-          <div className="grid sm:grid-cols-4 gap-4">
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Mots-clés suivis</p><p className="text-3xl font-bold">{keywords.length || 247}</p></CardContent></Card>
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Top 10</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) <= 10).length || 38}</p></CardContent></Card>
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Volume total</p><p className="text-3xl font-bold">45.2K</p></CardContent></Card>
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Opportunités</p><p className="text-3xl font-bold">23</p></CardContent></Card>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Mots-clés suivis</p><p className="text-3xl font-bold">{keywords.length || 0}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Top 10</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) <= 10).length}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Volume total</p><p className="text-3xl font-bold">{keywords.reduce((sum, k) => sum + (k.search_volume || 0), 0).toLocaleString()}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Opportunités</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) > 10 && (k.position_avg || 0) <= 30).length}</p></CardContent></Card>
           </div>
 
           <Card variant="feature">
@@ -179,7 +179,7 @@ export default function Content() {
         </TabsContent>
 
         <TabsContent value="clusters" className="space-y-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {displayClusters.map((cluster, i) => (
               <Card key={i} variant="feature" className="hover:border-primary/50 cursor-pointer transition-colors">
                 <CardContent className="pt-6">

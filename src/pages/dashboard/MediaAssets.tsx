@@ -325,7 +325,7 @@ interface AssetGridProps {
 
 function AssetGrid({ assets, onDelete, onRunAgent, runningAgents, onSelect, labels }: AssetGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {assets.map((asset) => {
         const Icon = platformIcons[asset.platform] || Link2;
         const platformColor = platformColors[asset.platform] || platformColors.other;
