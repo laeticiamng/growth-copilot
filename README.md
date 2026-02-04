@@ -149,7 +149,7 @@ Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
 ### Backend (Lovable Cloud)
 - **Supabase** - PostgreSQL avec 131 tables
 - **Edge Functions** (Deno) - 38 fonctions serverless
-- **Row Level Security** - 260+ policies pour isolation multi-tenant
+- **Row Level Security** - 310+ policies pour isolation multi-tenant (v7)
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -197,7 +197,7 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 131 tables avec 299 Row Level Security policies |
+| **RLS** | 131 tables avec 310+ Row Level Security policies (v7) |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
