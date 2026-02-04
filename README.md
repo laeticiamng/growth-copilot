@@ -148,8 +148,8 @@ Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
 
 ### Backend (Lovable Cloud)
 - **Supabase** - PostgreSQL avec 131 tables
-- **Edge Functions** (Deno) - 38+ fonctions serverless
-- **Row Level Security** - 246 policies pour isolation multi-tenant
+- **Edge Functions** (Deno) - 38 fonctions serverless
+- **Row Level Security** - 260+ policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -197,7 +197,7 @@ docs/
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 131 tables avec 246 Row Level Security policies |
+| **RLS** | 131 tables avec 260+ Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
@@ -260,11 +260,11 @@ npm run test -- --coverage
 npm run test src/test/smoke.test.ts
 ```
 
-**Suite de tests** : 170+ tests couvrant :
+**Suite de tests** : 290+ tests couvrant :
 - ✅ Auth et permissions (RBAC 5 niveaux)
-- ✅ RLS et sécurité (246 policies)
+- ✅ RLS et sécurité (260+ policies)
 - ✅ Hooks et composants (40+ hooks)
-- ✅ Agents IA (14 agents)
+- ✅ Agents IA (39 agents)
 - ✅ Edge Functions (38 fonctions)
 - ✅ Workflows critiques (E2E)
 - ✅ Validation de formulaires (Zod)
