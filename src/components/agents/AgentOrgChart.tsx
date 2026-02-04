@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { AgentProfileDialog } from "./AgentProfileDialog";
 import { 
   Bot, 
   Brain, 
@@ -200,7 +201,15 @@ const AI_TEAM: AgentData[] = [
 ];
 
 // Agent Card Component
-function AgentCard({ agent, compact = false }: { agent: AgentData; compact?: boolean }) {
+function AgentCard({ 
+  agent, 
+  compact = false,
+  onClick
+}: { 
+  agent: AgentData; 
+  compact?: boolean;
+  onClick?: () => void;
+}) {
   const dept = DEPARTMENTS[agent.department];
   const Icon = agent.icon;
   
@@ -209,12 +218,15 @@ function AgentCard({ agent, compact = false }: { agent: AgentData; compact?: boo
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className={cn(
-              "flex items-center gap-2 p-2 rounded-lg border transition-all cursor-pointer",
-              "hover:shadow-md hover:scale-[1.02]",
-              dept.bgColor,
-              dept.borderColor
-            )}>
+            <button
+              onClick={onClick}
+              className={cn(
+                "w-full flex items-center gap-2 p-2 rounded-lg border transition-all cursor-pointer text-left",
+                "hover:shadow-md hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary/50",
+                dept.bgColor,
+                dept.borderColor
+              )}
+            >
               <div className={cn(
                 "w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br shrink-0",
                 dept.color
@@ -228,13 +240,14 @@ function AgentCard({ agent, compact = false }: { agent: AgentData; compact?: boo
               {agent.isLeader && (
                 <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
               )}
-            </div>
+            </button>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-xs">
             <div className="space-y-1">
               <p className="font-semibold">{agent.name}</p>
               <p className="text-xs text-muted-foreground">{agent.role}</p>
               <Badge variant="outline" className="text-xs">{agent.specialty}</Badge>
+              <p className="text-[10px] text-primary mt-1">Cliquer pour voir le profil complet →</p>
             </div>
           </TooltipContent>
         </Tooltip>
@@ -243,13 +256,16 @@ function AgentCard({ agent, compact = false }: { agent: AgentData; compact?: boo
   }
 
   return (
-    <div className={cn(
-      "relative p-4 rounded-xl border-2 transition-all",
-      "hover:shadow-lg hover:scale-[1.02] cursor-pointer",
-      dept.bgColor,
-      dept.borderColor,
-      agent.isLeader && "ring-2 ring-amber-400 ring-offset-2"
-    )}>
+    <button
+      onClick={onClick}
+      className={cn(
+        "relative w-full p-4 rounded-xl border-2 transition-all text-left",
+        "hover:shadow-lg hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50",
+        dept.bgColor,
+        dept.borderColor,
+        agent.isLeader && "ring-2 ring-amber-400 ring-offset-2"
+      )}
+    >
       {agent.isLeader && (
         <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center shadow-md">
           <Sparkles className="w-3 h-3 text-white" />
@@ -276,9 +292,10 @@ function AgentCard({ agent, compact = false }: { agent: AgentData; compact?: boo
           <Badge variant="secondary" className="text-[10px] mt-2">
             {agent.specialty}
           </Badge>
+          <p className="text-[10px] text-primary/70 mt-2">Cliquer pour détails →</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -287,12 +304,14 @@ function DepartmentSection({
   deptKey, 
   agents, 
   expanded, 
-  onToggle 
+  onToggle,
+  onAgentClick
 }: { 
   deptKey: keyof typeof DEPARTMENTS; 
   agents: AgentData[]; 
   expanded: boolean; 
   onToggle: () => void;
+  onAgentClick: (agentId: string) => void;
 }) {
   const dept = DEPARTMENTS[deptKey];
   const DeptIcon = dept.icon;
@@ -345,7 +364,7 @@ function DepartmentSection({
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-medium">
                 Responsable
               </p>
-              <AgentCard agent={leader} />
+              <AgentCard agent={leader} onClick={() => onAgentClick(leader.id)} />
             </div>
           )}
           
@@ -357,7 +376,12 @@ function DepartmentSection({
               </p>
               <div className="grid gap-2">
                 {members.map(agent => (
-                  <AgentCard key={agent.id} agent={agent} compact />
+                  <AgentCard 
+                    key={agent.id} 
+                    agent={agent} 
+                    compact 
+                    onClick={() => onAgentClick(agent.id)}
+                  />
                 ))}
               </div>
             </div>
@@ -371,6 +395,8 @@ function DepartmentSection({
 // Main Org Chart Component
 export function AgentOrgChart() {
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set(['direction', 'marketing', 'sales']));
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   
   // Group agents by department
   const agentsByDept = useMemo(() => {
@@ -404,105 +430,120 @@ export function AgentOrgChart() {
     setExpandedDepts(new Set());
   };
 
+  const handleAgentClick = (agentId: string) => {
+    setSelectedAgentId(agentId);
+    setProfileDialogOpen(true);
+  };
+
   // Get direction members for the top section
   const direction = agentsByDept['direction'] || [];
   const departments = Object.keys(DEPARTMENTS).filter(d => d !== 'direction') as (keyof typeof DEPARTMENTS)[];
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="border-b bg-muted/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              Organigramme IA
-            </CardTitle>
-            <CardDescription>
-              {AI_TEAM.length} agents • {Object.keys(DEPARTMENTS).length} départements
-            </CardDescription>
+    <>
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b bg-muted/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-primary" />
+                Organigramme IA
+              </CardTitle>
+              <CardDescription>
+                {AI_TEAM.length} agents • {Object.keys(DEPARTMENTS).length} départements • Cliquez sur un agent pour voir son profil complet
+              </CardDescription>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={expandAll}>
+                Tout déplier
+              </Button>
+              <Button variant="outline" size="sm" onClick={collapseAll}>
+                Tout replier
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          {/* Direction - Top Level */}
+          <div className="mb-8">
+            <div className="text-center mb-4">
+              <Badge variant="default" className="bg-gradient-to-r from-violet-600 to-purple-500">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Direction
+              </Badge>
+            </div>
+            
+            <div className="flex justify-center gap-6 flex-wrap">
+              {direction.map(agent => (
+                <div key={agent.id} className="w-64">
+                  <AgentCard agent={agent} onClick={() => handleAgentClick(agent.id)} />
+                </div>
+              ))}
+            </div>
+            
+            {/* Connector Line */}
+            <div className="flex justify-center mt-6">
+              <div className="w-px h-8 bg-border" />
+            </div>
+            <div className="flex justify-center">
+              <div className="w-3/4 h-px bg-border" />
+            </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={expandAll}>
-              Tout déplier
-            </Button>
-            <Button variant="outline" size="sm" onClick={collapseAll}>
-              Tout replier
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-6">
-        {/* Direction - Top Level */}
-        <div className="mb-8">
-          <div className="text-center mb-4">
-            <Badge variant="default" className="bg-gradient-to-r from-violet-600 to-purple-500">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Direction
-            </Badge>
-          </div>
+          {/* Departments Grid */}
+          <ScrollArea className="w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4">
+              {departments.map(deptKey => {
+                const agents = agentsByDept[deptKey] || [];
+                if (agents.length === 0) return null;
+                
+                return (
+                  <DepartmentSection
+                    key={deptKey}
+                    deptKey={deptKey}
+                    agents={agents}
+                    expanded={expandedDepts.has(deptKey)}
+                    onToggle={() => toggleDept(deptKey)}
+                    onAgentClick={handleAgentClick}
+                  />
+                );
+              })}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
           
-          <div className="flex justify-center gap-6 flex-wrap">
-            {direction.map(agent => (
-              <div key={agent.id} className="w-64">
-                <AgentCard agent={agent} />
+          {/* Summary Stats */}
+          <div className="mt-6 pt-6 border-t">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-primary">{AI_TEAM.length}</p>
+                <p className="text-xs text-muted-foreground">Agents IA</p>
               </div>
-            ))}
-          </div>
-          
-          {/* Connector Line */}
-          <div className="flex justify-center mt-6">
-            <div className="w-px h-8 bg-border" />
-          </div>
-          <div className="flex justify-center">
-            <div className="w-3/4 h-px bg-border" />
-          </div>
-        </div>
-        
-        {/* Departments Grid */}
-        <ScrollArea className="w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-4">
-            {departments.map(deptKey => {
-              const agents = agentsByDept[deptKey] || [];
-              if (agents.length === 0) return null;
-              
-              return (
-                <DepartmentSection
-                  key={deptKey}
-                  deptKey={deptKey}
-                  agents={agents}
-                  expanded={expandedDepts.has(deptKey)}
-                  onToggle={() => toggleDept(deptKey)}
-                />
-              );
-            })}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-        
-        {/* Summary Stats */}
-        <div className="mt-6 pt-6 border-t">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold text-primary">{AI_TEAM.length}</p>
-              <p className="text-xs text-muted-foreground">Agents IA</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold text-emerald-500">{Object.keys(DEPARTMENTS).length}</p>
-              <p className="text-xs text-muted-foreground">Départements</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold text-amber-500">{AI_TEAM.filter(a => a.isLeader).length}</p>
-              <p className="text-xs text-muted-foreground">Responsables</p>
-            </div>
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-2xl font-bold text-green-500">24/7</p>
-              <p className="text-xs text-muted-foreground">Disponibilité</p>
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-emerald-500">{Object.keys(DEPARTMENTS).length}</p>
+                <p className="text-xs text-muted-foreground">Départements</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-amber-500">{AI_TEAM.filter(a => a.isLeader).length}</p>
+                <p className="text-xs text-muted-foreground">Responsables</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-2xl font-bold text-green-500">24/7</p>
+                <p className="text-xs text-muted-foreground">Disponibilité</p>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Agent Profile Dialog */}
+      <AgentProfileDialog 
+        agentId={selectedAgentId}
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
+    </>
   );
 }
