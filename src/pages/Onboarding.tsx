@@ -20,8 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 // Step types - extended for payment
 type OnboardingStep = "url" | "plan" | "services" | "objectives" | "payment" | "summary";
 
-// Plan types
-type PlanType = "full" | "alacarte";
+// Plan types - now includes starter
+type PlanType = "starter" | "full" | "alacarte";
 
 // Service definitions matching database catalog
 const SERVICE_CATALOG = [
@@ -38,6 +38,7 @@ const SERVICE_CATALOG = [
 
 // Pricing
 const PRICING = {
+  starter: 490,
   full: 9000,
   department: 1900,
 };
@@ -93,7 +94,7 @@ export default function Onboarding() {
   const [step, setStep] = useState<OnboardingStep>("url");
   const [siteUrl, setSiteUrl] = useState("");
   const [siteName, setSiteName] = useState("");
-  const [planType, setPlanType] = useState<PlanType>("full");
+  const [planType, setPlanType] = useState<PlanType>("starter");
   const [selectedServices, setSelectedServices] = useState<string[]>(SERVICE_CATALOG.map(s => s.id));
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,6 +152,7 @@ export default function Onboarding() {
 
   // Calculate total price
   const getTotalPrice = () => {
+    if (planType === "starter") return PRICING.starter;
     if (planType === "full") return PRICING.full;
     return selectedServices.length * PRICING.department;
   };
@@ -179,7 +181,11 @@ export default function Onboarding() {
   };
 
   const handlePlanNext = () => {
-    if (planType === "full") {
+    if (planType === "starter") {
+      // Starter plan = 1 department (marketing by default)
+      setSelectedServices(["marketing"]);
+      setStep("objectives");
+    } else if (planType === "full") {
       setSelectedServices(SERVICE_CATALOG.map(s => s.id));
       setStep("objectives"); // Skip service selection for full plan
     } else {
@@ -355,11 +361,38 @@ export default function Onboarding() {
                 </div>
                 <CardTitle className="text-2xl">Choisissez votre formule</CardTitle>
                 <CardDescription className="text-base">
-                  Full Company ou services à la carte
+                  Tous les plans incluent <strong>14 jours d'essai gratuit</strong>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-4">
+                  {/* Starter */}
+                  <button
+                    onClick={() => setPlanType("starter")}
+                    className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
+                      planType === "starter"
+                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="p-3 rounded-lg bg-chart-3/20">
+                      <Gift className="w-6 h-6 text-chart-3" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg">Starter</span>
+                        <Badge variant="outline" className="text-chart-3 border-chart-3">14 jours gratuits</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        1 département • 50 exécutions/mois • Idéal pour débuter
+                      </p>
+                      <p className="text-lg font-bold mt-2">{PRICING.starter.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">/mois</span></p>
+                    </div>
+                    {planType === "starter" && (
+                      <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
+                    )}
+                  </button>
+
                   {/* Full Company */}
                   <button
                     onClick={() => setPlanType("full")}
