@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Zap, Twitter, Linkedin, Youtube, Mail } from "lucide-react";
+import { Zap, Twitter, Linkedin, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function Footer() {
@@ -9,26 +9,26 @@ export function Footer() {
 
   const footerLinks = {
     [isEn ? "Product" : "Produit"]: [
-      { label: t("landing.footer.features"), href: "#features" },
-      { label: t("landing.footer.pricing"), href: "#pricing" },
+      { label: isEn ? "Features" : "Fonctionnalités", href: "#features" },
       { label: isEn ? "Departments" : "Départements", href: "#services" },
+      { label: isEn ? "Pricing" : "Tarifs", href: "#pricing" },
       { label: isEn ? "Integrations" : "Intégrations", href: "#tools" },
     ],
     [isEn ? "Resources" : "Ressources"]: [
-      { label: isEn ? "Documentation" : "Documentation", href: "/dashboard/guide" },
-      { label: isEn ? "Help Center" : "Centre d'aide", href: "/contact" },
+      { label: "Documentation", href: "/dashboard/guide" },
+      { label: "Blog", href: "#" },
       { label: isEn ? "Status" : "Statut", href: "/dashboard/status" },
-      { label: "API", href: "#" },
+      { label: "API", href: "/dashboard/api-docs" },
     ],
     [isEn ? "Company" : "Entreprise"]: [
-      { label: isEn ? "About" : "À propos", href: "#" },
-      { label: isEn ? "Contact" : "Contact", href: "/contact" },
-      { label: isEn ? "Support" : "Support", href: "mailto:support@agent-growth-automator.com" },
+      { label: isEn ? "About" : "À propos", href: "/about" },
+      { label: "Contact", href: "/contact" },
+      { label: isEn ? "Legal Notice" : "Mentions légales", href: "/legal" },
     ],
     [isEn ? "Legal" : "Légal"]: [
-      { label: t("landing.footer.privacy"), href: "/privacy" },
-      { label: t("landing.footer.terms"), href: "/terms" },
-      { label: "GDPR", href: "#" },
+      { label: isEn ? "Terms" : "CGU", href: "/terms" },
+      { label: isEn ? "Privacy" : "Confidentialité", href: "/privacy" },
+      { label: "RGPD", href: "/privacy#gdpr" },
     ],
   };
 
@@ -90,52 +90,18 @@ export function Footer() {
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-center md:text-left">
             <p className="text-sm text-muted-foreground">
-              © 2026 EmotionsCare Sasu. {isEn ? "All rights reserved." : "Tous droits réservés."}
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Growth OS {isEn ? "is a product of" : "est un produit de"} EmotionsCare Sasu
-              {" · "}
-              <Link to="/privacy" className="hover:text-foreground underline">
-                {isEn ? "Privacy Policy" : "Politique de confidentialité"}
-              </Link>
-              {" · "}
-              <Link to="/terms" className="hover:text-foreground underline">
-                {isEn ? "Terms of Service" : "Conditions d'utilisation"}
-              </Link>
+              © 2026 EmotionsCare SASU — {isEn ? "All rights reserved." : "Tous droits réservés."}
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <a 
-              href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS" 
-              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 mr-4"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <path d="M12 17h.01" />
-              </svg>
-              Besoin d'aide ?
-            </a>
-            <a href="mailto:m.laeticia@hotmail.fr" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Email">
+            <a href="mailto:contact@emotionscare.com" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Email">
               <Mail className="w-5 h-5" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
+            <a href="https://twitter.com/emotionscare" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+            <a href="https://linkedin.com/company/emotionscare" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
               <Linkedin className="w-5 h-5" />
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="YouTube">
-              <Youtube className="w-5 h-5" />
             </a>
           </div>
         </div>
