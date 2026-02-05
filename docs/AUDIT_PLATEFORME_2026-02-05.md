@@ -232,6 +232,37 @@
  
  ---
  
+ ## 🔒 DERNIÈRE MIGRATION RLS (2026-02-05)
+ 
+ ### Politiques durcies
+ ```sql
+ -- Nouvelles restrictions appliquées:
+ integration_tokens  → Owners only (it_select_owner, it_insert_owner)
+ time_off_requests   → Employee or HR only (tor_select_own_or_hr)
+ deals               → Assigned sales or managers (deals_sel_assigned_or_mgr)
+ activities          → Creator/assigned or sales (act_sel_own_or_assigned)
+ system_logs         → Owners only (syslog_sel_owner)
+ workspace_quotas    → Billing access only (wq_sel_billing)
+ meta_conversations  → Workspace members (mc_sel_member)
+ meta_messages       → Workspace members (mm_sel_member)
+ smart_link_emails   → Read: members, Insert: public (sle_sel_member)
+ approval_queue      → Workspace members (aq_sel_member)
+ kpis_daily          → Workspace members (kpi_sel_member)
+ ```
+ 
+ ### Findings restants (17 → Recommandations)
+ | Catégorie | Count | Action |
+ |-----------|-------|--------|
+ | Extensions | 1 | ⚠️ uuid-ossp requis (ignoré) |
+ | Policy True | 1 | ⚠️ Lead capture intentionnel |
+ | Recommandations | 15 | 📋 Durcissement optionnel |
+ 
+ > Les 15 recommandations suggèrent un durcissement supplémentaire des accès
+ > (ex: encryption champ-niveau, restriction par rôle plus fine). 
+ > La configuration actuelle est sécurisée pour une utilisation B2B standard.
+ 
+ ---
+ 
  ## ✅ CONCLUSION
  
  **La plateforme Growth OS est 100% opérationnelle et production-ready.**
