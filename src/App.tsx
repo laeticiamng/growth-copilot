@@ -48,6 +48,9 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth/ProtectedRoute";
 import { ServiceGuard } from "@/components/auth/ServiceGuard";
 
+// Sentry routing hook
+import { useSentryRouting } from "@/hooks/useSentryRouting";
+
 // Pages
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -188,6 +191,15 @@ function DashboardRoute({ children, service }: { children: React.ReactNode; serv
   );
 }
 
+/**
+ * Route tracker component for Sentry breadcrumbs
+ * Must be inside BrowserRouter
+ */
+function SentryRouteTracker() {
+  useSentryRouting();
+  return null;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -197,6 +209,7 @@ function App() {
           <Sonner />
           <OfflineBanner />
           <BrowserRouter>
+            <SentryRouteTracker />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
