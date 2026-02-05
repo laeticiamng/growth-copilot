@@ -10,21 +10,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Loader2, Zap, ArrowLeft, Mail, KeyRound } from "lucide-react";
+import { Loader2, Zap, ArrowLeft, Mail, KeyRound, User, Building2 } from "lucide-react";
 
 const emailSchema = z.string().email("Email invalide");
 const passwordSchema = z.string().min(8, "Minimum 8 caractères");
+const nameSchema = z.string().min(2, "Minimum 2 caractères");
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode");
+  const tabParam = searchParams.get("tab");
+  
+  // Controlled tab state
+  const [activeTab, setActiveTab] = useState<string>(tabParam === "signup" ? "signup" : "signin");
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "apple" | null>(null);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{ 
+    email?: string; 
+    password?: string; 
+    confirmPassword?: string;
+    fullName?: string;
+    companyName?: string;
+  }>({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   
@@ -35,7 +48,6 @@ export default function Auth() {
   // Handle password reset mode from URL
   useEffect(() => {
     if (mode === "reset" && session) {
-      // User clicked the reset link and is now authenticated
       setShowForgotPassword(false);
     }
   }, [mode, session]);
@@ -47,7 +59,12 @@ export default function Auth() {
     }
   }, [user, navigate, mode]);
 
-  const validateForm = (isSignUp: boolean) => {
+  // Clear form errors when switching tabs
+  useEffect(() => {
+    setErrors({});
+  }, [activeTab]);
+
+  const validateSignInForm = () => {
     const newErrors: typeof errors = {};
     
     try {
@@ -66,7 +83,48 @@ export default function Auth() {
       }
     }
     
-    if (isSignUp && password !== confirmPassword) {
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateSignUpForm = () => {
+    const newErrors: typeof errors = {};
+    
+    // Validate full name
+    try {
+      nameSchema.parse(fullName.trim());
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.fullName = e.errors[0].message;
+      }
+    }
+    
+    // Validate company name
+    try {
+      nameSchema.parse(companyName.trim());
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.companyName = e.errors[0].message;
+      }
+    }
+    
+    try {
+      emailSchema.parse(email);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.email = e.errors[0].message;
+      }
+    }
+    
+    try {
+      passwordSchema.parse(password);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.password = e.errors[0].message;
+      }
+    }
+    
+    if (password !== confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
     
@@ -76,7 +134,7 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm(false)) return;
+    if (!validateSignInForm()) return;
     
     setLoading(true);
     const { error } = await signIn(email, password);
@@ -105,9 +163,11 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm(true)) return;
+    if (!validateSignUpForm()) return;
     
     setLoading(true);
+    
+    // Store user metadata during signup for later use
     const { error } = await signUp(email, password);
     setLoading(false);
     
@@ -115,6 +175,8 @@ export default function Auth() {
       let message = "Échec de l'inscription";
       if (error.message.includes("User already registered")) {
         message = "Un compte existe déjà avec cet email";
+      } else if (error.message.includes("Password")) {
+        message = "Le mot de passe doit contenir au moins 8 caractères";
       }
       toast({
         title: "Erreur",
@@ -122,6 +184,13 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
+      // Store signup data in localStorage for onboarding
+      localStorage.setItem("signup_data", JSON.stringify({
+        fullName: fullName.trim(),
+        companyName: companyName.trim(),
+        email: email,
+      }));
+      
       toast({
         title: "Compte créé !",
         description: "Vérifiez votre email pour confirmer votre inscription",
@@ -404,7 +473,7 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Connexion</TabsTrigger>
                 <TabsTrigger value="signup">Inscription</TabsTrigger>
@@ -511,6 +580,42 @@ export default function Auth() {
               
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-fullname">Nom complet</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="signup-fullname"
+                        type="text"
+                        placeholder="Jean Dupont"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className={`pl-10 ${errors.fullName ? "border-destructive" : ""}`}
+                      />
+                    </div>
+                    {errors.fullName && (
+                      <p className="text-sm text-destructive">{errors.fullName}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-company">Nom de l'entreprise</Label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="signup-company"
+                        type="text"
+                        placeholder="Mon Entreprise"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className={`pl-10 ${errors.companyName ? "border-destructive" : ""}`}
+                      />
+                    </div>
+                    {errors.companyName && (
+                      <p className="text-sm text-destructive">{errors.companyName}</p>
+                    )}
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
