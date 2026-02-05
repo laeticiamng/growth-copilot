@@ -39,6 +39,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { GSCMetricsWidget } from "@/components/integrations";
 
 // Types for SEO Audit
 interface SEOIssue {
@@ -348,6 +349,9 @@ export default function SEOTech() {
           <Skeleton className="h-80" />
         </div>
       )}
+
+      {/* GSC Metrics Widget - Real Search Console Data */}
+      {currentSite && <GSCMetricsWidget className="mt-6" />}
 
       {/* Results */}
       {!loading && result && !result.error && (

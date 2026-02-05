@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
- import { useCallback } from "react";
+import { useCallback } from "react";
 import { DiagnosticsPanel, LatencyHistoryChart, ConsoleLogsViewer } from "@/components/diagnostics";
+import { GA4MetricsWidget } from "@/components/integrations";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +29,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 interface LatencyMetric {
   name: string;
@@ -331,6 +332,9 @@ export default function Diagnostics() {
           </div>
         </CardContent>
       </Card>
+
+      {/* GA4 Metrics Widget */}
+      <GA4MetricsWidget />
 
       {/* Main Diagnostics Panel */}
       <DiagnosticsPanel />

@@ -1,5 +1,5 @@
 import { useState } from "react";
- import { useCallback } from "react";
+import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,8 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { RepurposeEngine } from "@/components/social/RepurposeEngine";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { MetaMetricsWidget } from "@/components/integrations";
+
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
   facebook: Facebook,
@@ -412,6 +414,9 @@ export default function Social() {
         </TabsContent>
 
         <TabsContent value="performance" className="space-y-6">
+          {/* Meta/Instagram Metrics Widget */}
+          <MetaMetricsWidget />
+          
           <Card variant="feature">
             <CardHeader>
               <CardTitle>Performance récente</CardTitle>
