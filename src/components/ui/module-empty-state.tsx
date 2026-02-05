@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -39,48 +39,49 @@ export function ModuleEmptyState({
 }: ModuleEmptyStateProps) {
   return (
     <Card className={cn("border-dashed border-2 border-primary/20", className)}>
-      <CardContent className="flex flex-col items-center justify-center text-center py-16 px-8">
-        {/* Icon */}
-        <div className="rounded-full bg-gradient-to-br from-primary/20 to-accent/20 p-6 mb-6">
-          <Icon className="w-12 h-12 text-primary" />
+      <CardContent className="flex flex-col items-center justify-center text-center py-16 px-8 min-h-[400px]">
+        {/* Icon - 64px avec cercle gradient */}
+        <div className="rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 p-5 mb-6">
+          <Icon className="w-16 h-16 text-primary" />
         </div>
         
-        {/* Title */}
-        <h3 className="text-2xl font-bold mb-3">
+        {/* Title - Heading 2 style */}
+        <h2 className="text-2xl font-bold mb-3 tracking-tight">
           {title || `Votre module ${moduleName} est prêt`}
-        </h3>
+        </h2>
         
         {/* Description */}
         <p className="text-muted-foreground max-w-lg mb-6 text-base leading-relaxed">
           {description}
         </p>
         
-        {/* Features list */}
+        {/* Features list avec check icons */}
         {features && features.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
+          <div className="flex flex-wrap justify-center gap-3 mb-8 max-w-md">
             {features.map((feature, i) => (
               <span
                 key={i}
-                className="px-3 py-1 rounded-full bg-secondary/80 text-sm text-muted-foreground"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-sm font-medium text-foreground"
               >
+                <Check className="w-3.5 h-3.5 text-primary" />
                 {feature}
               </span>
             ))}
           </div>
         )}
         
-        {/* Actions */}
+        {/* Actions - Bouton primaire gradient + secondaire outline */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {primaryAction && (
             primaryAction.href ? (
-              <Button variant="hero" asChild>
+              <Button variant="hero" size="lg" asChild>
                 <Link to={primaryAction.href}>
                   {primaryAction.icon && <primaryAction.icon className="w-4 h-4 mr-2" />}
                   {primaryAction.label}
                 </Link>
               </Button>
             ) : (
-              <Button variant="hero" onClick={primaryAction.onClick}>
+              <Button variant="hero" size="lg" onClick={primaryAction.onClick}>
                 {primaryAction.icon && <primaryAction.icon className="w-4 h-4 mr-2" />}
                 {primaryAction.label}
               </Button>
@@ -89,13 +90,13 @@ export function ModuleEmptyState({
           
           {secondaryAction && (
             secondaryAction.href ? (
-              <Button variant="outline" asChild>
+              <Button variant="outline" size="lg" asChild>
                 <Link to={secondaryAction.href}>
                   {secondaryAction.label}
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" onClick={secondaryAction.onClick}>
+              <Button variant="outline" size="lg" onClick={secondaryAction.onClick}>
                 {secondaryAction.label}
               </Button>
             )
@@ -107,7 +108,7 @@ export function ModuleEmptyState({
           href={docUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 mt-6 text-sm text-muted-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2 mt-8 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
           <HelpCircle className="w-4 h-4" />
           Consulter la documentation
