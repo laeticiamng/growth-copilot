@@ -5,7 +5,7 @@
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
  [![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
  [![Audit](https://img.shields.io/badge/Audit-100%2F100-brightgreen)](./docs/AUDIT_PLATEFORME_2026-02-05.md)
-[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT%20%7C%20NL-blue)](./src/i18n)
+[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE-blue)](./src/i18n)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
 
 ---
