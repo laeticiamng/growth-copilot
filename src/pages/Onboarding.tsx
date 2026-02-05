@@ -2,24 +2,23 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { useSites } from "@/hooks/useSites";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { 
   Loader2, Globe, Target, Rocket, CheckCircle2, ArrowRight, Sparkles, 
   Building2, Crown, Puzzle, Briefcase, TrendingUp, Shield, Code, 
-  BarChart3, HeadphonesIcon, Settings, ArrowLeft
+  BarChart3, HeadphonesIcon, Settings, ArrowLeft, CreditCard, Gift
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-// Step types - extended for plan selection
-type OnboardingStep = "url" | "plan" | "services" | "objectives" | "summary";
+// Step types - extended for payment
+type OnboardingStep = "url" | "plan" | "services" | "objectives" | "payment" | "summary";
 
 // Plan types
 type PlanType = "full" | "alacarte";
@@ -36,6 +35,12 @@ const SERVICE_CATALOG = [
   { id: "support", name: "Support", icon: HeadphonesIcon, description: "Tickets, Knowledge Base", color: "text-pink-500" },
   { id: "governance", name: "Gouvernance", icon: Settings, description: "IT, Policies, Access", color: "text-gray-500" },
 ];
+
+// Pricing
+const PRICING = {
+  full: 9000,
+  department: 1900,
+};
 
 // Objectives options
 const OBJECTIVES = [
@@ -81,8 +86,7 @@ const generateSlug = (name: string): string => {
 
 export default function Onboarding() {
   const { user, loading: authLoading } = useAuth();
-  const { createWorkspace, workspaces, refetch: refetchWorkspaces } = useWorkspace();
-  const { createSite } = useSites();
+  const { workspaces } = useWorkspace();
   const navigate = useNavigate();
 
   // Form state
@@ -95,6 +99,24 @@ export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [urlTouched, setUrlTouched] = useState(false);
   const [detectedInfo, setDetectedInfo] = useState<{ name: string } | null>(null);
+  const [useTrial, setUseTrial] = useState(false);
+
+  // Check for checkout success/cancel in URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkoutStatus = params.get("checkout");
+    
+    if (checkoutStatus === "success") {
+      setStep("summary");
+      toast.success("Paiement confirmé ! Votre workspace est en cours de création...");
+      // Clear the URL params
+      window.history.replaceState({}, "", window.location.pathname);
+      setTimeout(() => navigate("/dashboard"), 3000);
+    } else if (checkoutStatus === "cancelled") {
+      toast.error("Paiement annulé. Vous pouvez réessayer.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [navigate]);
 
   // Auto-detect info from URL
   useEffect(() => {
@@ -117,13 +139,20 @@ export default function Onboarding() {
   // Calculate progress
   const getProgress = () => {
     switch (step) {
-      case "url": return 20;
-      case "plan": return 40;
-      case "services": return 60;
-      case "objectives": return 80;
+      case "url": return 16;
+      case "plan": return 33;
+      case "services": return 50;
+      case "objectives": return 66;
+      case "payment": return 83;
       case "summary": return 100;
       default: return 0;
     }
+  };
+
+  // Calculate total price
+  const getTotalPrice = () => {
+    if (planType === "full") return PRICING.full;
+    return selectedServices.length * PRICING.department;
   };
 
   // Toggle service selection
@@ -166,76 +195,46 @@ export default function Onboarding() {
     setStep("objectives");
   };
 
-  // Final submission
-  const handleComplete = async () => {
+  const handleObjectivesNext = () => {
+    setStep("payment");
+  };
+
+  // Handle payment - redirect to Stripe Checkout
+  const handlePayment = async () => {
     if (!user) return;
     setIsSubmitting(true);
 
     try {
       const workspaceName = siteName || detectedInfo?.name || "Mon Workspace";
-      const slug = generateSlug(workspaceName);
       const formattedUrl = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
+      const slug = generateSlug(workspaceName);
 
-      // Step 1: Create workspace
-      const { error: wsError, workspace } = await createWorkspace(workspaceName, slug);
-      if (wsError || !workspace) {
-        throw new Error(wsError?.message || "Échec de la création du workspace");
-      }
-
-      await refetchWorkspaces();
-
-      // Step 2: Create site
-      const { error: siteError } = await createSite({
-        url: formattedUrl,
-        name: workspaceName,
-        language: "fr",
-        objectives: selectedObjectives,
+      // Call stripe-checkout edge function with onboarding data
+      const { data, error } = await supabase.functions.invoke("stripe-checkout", {
+        body: {
+          plan_type: planType === "full" ? "full_company" : "department",
+          departments: planType === "alacarte" ? selectedServices : [],
+          use_trial: useTrial,
+          // Pass onboarding data to be stored in metadata
+          onboarding_data: {
+            site_url: formattedUrl,
+            site_name: workspaceName,
+            workspace_slug: slug,
+            objectives: selectedObjectives,
+            plan_type: planType,
+            selected_services: selectedServices,
+          },
+        },
       });
 
-      if (siteError) {
-        console.error("Site creation error:", siteError);
-      }
+      if (error) throw error;
+      if (!data?.url) throw new Error("Impossible de créer la session de paiement");
 
-      // Step 3: Update subscription type (Full Company vs À la carte)
-      if (planType === "full") {
-        await supabase
-          .from("workspace_subscriptions")
-          .update({ is_full_company: true })
-          .eq("workspace_id", workspace.id);
-      }
-
-      // Step 4: Enable selected services (if à la carte)
-      if (planType === "alacarte") {
-        // Get service IDs from catalog
-        const { data: catalog } = await supabase
-          .from("services_catalog")
-          .select("id, slug")
-          .in("slug", selectedServices);
-
-        if (catalog) {
-          for (const service of catalog) {
-            await supabase
-              .from("workspace_services")
-              .upsert({
-                workspace_id: workspace.id,
-                service_id: service.id,
-                enabled: true,
-                enabled_by: user.id,
-                enabled_at: new Date().toISOString(),
-              }, { onConflict: "workspace_id,service_id" });
-          }
-        }
-      }
-
-      toast.success(`${workspaceName} créé avec succès !`);
-      setStep("summary");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
     } catch (error) {
-      console.error("Onboarding error:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      console.error("Payment error:", error);
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la création du paiement");
     } finally {
       setIsSubmitting(false);
     }
@@ -381,9 +380,7 @@ export default function Onboarding() {
                       <p className="text-sm text-muted-foreground mt-1">
                         Tous les départements activés. L'entreprise digitale complète.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Marketing • Commercial • Finance • Sécurité • Produit • Data • Support • Gouvernance
-                      </p>
+                      <p className="text-lg font-bold mt-2">{PRICING.full.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">/mois</span></p>
                     </div>
                     {planType === "full" && (
                       <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
@@ -407,9 +404,7 @@ export default function Onboarding() {
                       <p className="text-sm text-muted-foreground mt-1">
                         Choisissez uniquement les départements dont vous avez besoin.
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Idéal pour les entreprises avec des équipes existantes.
-                      </p>
+                      <p className="text-lg font-bold mt-2">{PRICING.department.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">/dépt/mois</span></p>
                     </div>
                     {planType === "alacarte" && (
                       <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
@@ -527,25 +522,137 @@ export default function Onboarding() {
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Retour
                   </Button>
-                  <Button onClick={handleComplete} className="flex-1 h-12" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Création...
-                      </>
-                    ) : (
-                      <>
-                        Lancer Growth OS
-                        <Rocket className="w-4 h-4 ml-2" />
-                      </>
-                    )}
+                  <Button onClick={handleObjectivesNext} className="flex-1 h-12">
+                    Continuer
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Step 5: Summary */}
+          {/* Step 5: Payment */}
+          {step === "payment" && (
+            <Card variant="gradient" className="border-2">
+              <CardHeader className="text-center pb-2">
+                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
+                  <CreditCard className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="text-2xl">Récapitulatif & Paiement</CardTitle>
+                <CardDescription className="text-base">
+                  Vérifiez votre commande et finalisez l'activation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Order summary */}
+                <div className="p-4 rounded-lg bg-muted/50 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Building2 className="w-5 h-5 text-muted-foreground" />
+                      <span className="font-medium">{siteName || detectedInfo?.name || "Workspace"}</span>
+                    </div>
+                    <Badge variant="secondary">{siteUrl}</Badge>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    {planType === "full" ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Crown className="w-4 h-4 text-primary" />
+                          <span>Full Company</span>
+                        </div>
+                        <span className="font-bold">{PRICING.full.toLocaleString()} €/mois</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {selectedServices.length} département{selectedServices.length > 1 ? "s" : ""} sélectionné{selectedServices.length > 1 ? "s" : ""} :
+                        </div>
+                        {selectedServices.map(serviceId => {
+                          const service = SERVICE_CATALOG.find(s => s.id === serviceId);
+                          return service ? (
+                            <div key={serviceId} className="flex items-center justify-between text-sm">
+                              <span>{service.name}</span>
+                              <span>{PRICING.department.toLocaleString()} €</span>
+                            </div>
+                          ) : null;
+                        })}
+                      </>
+                    )}
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex items-center justify-between text-lg font-bold">
+                    <span>Total mensuel</span>
+                    <span className="text-primary">{getTotalPrice().toLocaleString()} €/mois</span>
+                  </div>
+                </div>
+
+                {/* Trial option */}
+                <button
+                  onClick={() => setUseTrial(!useTrial)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all ${
+                    useTrial
+                      ? "border-chart-3 bg-chart-3/10"
+                      : "border-border hover:border-chart-3/50"
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${useTrial ? "bg-chart-3/20" : "bg-muted"}`}>
+                    <Gift className={`w-5 h-5 ${useTrial ? "text-chart-3" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Essai gratuit 14 jours</span>
+                      {useTrial && <Badge variant="secondary" className="bg-chart-3/20 text-chart-3">Activé</Badge>}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Testez toutes les fonctionnalités sans engagement. Annulez à tout moment.
+                    </p>
+                  </div>
+                  {useTrial && <CheckCircle2 className="w-5 h-5 text-chart-3 flex-shrink-0" />}
+                </button>
+
+                {/* Payment buttons */}
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep("objectives")} className="flex-1 h-12">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Retour
+                  </Button>
+                  <Button 
+                    onClick={handlePayment} 
+                    className="flex-1 h-12" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Redirection...
+                      </>
+                    ) : useTrial ? (
+                      <>
+                        <Gift className="w-4 h-4 mr-2" />
+                        Démarrer l'essai gratuit
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Payer et activer
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  Paiement sécurisé par Stripe. {useTrial ? "Vous ne serez pas débité avant la fin de l'essai." : "Facturé mensuellement."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 6: Summary */}
           {step === "summary" && (
             <Card variant="gradient" className="border-2">
               <CardHeader className="text-center pb-2">
@@ -554,7 +661,7 @@ export default function Onboarding() {
                 </div>
                 <CardTitle className="text-2xl">Parfait !</CardTitle>
                 <CardDescription className="text-base">
-                  <span className="font-semibold text-foreground">{siteName || detectedInfo?.name}</span> est prêt.
+                  Votre workspace est en cours de création...
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-center">
