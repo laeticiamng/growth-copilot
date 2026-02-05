@@ -4,6 +4,19 @@ import { useWorkspace } from './useWorkspace';
 import { toast } from 'sonner';
 
 // ─────────────────────────────────────────────────────────────
+// Types - Integration Status
+// ─────────────────────────────────────────────────────────────
+
+interface MetaIntegration {
+  id: string;
+  provider: string;
+  status: string;
+  account_id: string | null;
+  last_sync_at: string | null;
+  created_at: string;
+}
+
+// ─────────────────────────────────────────────────────────────
 // Types - Meta Ads
 // ─────────────────────────────────────────────────────────────
 
@@ -204,6 +217,10 @@ interface MetaContextType {
   // Module status
   moduleStatus: MetaModuleStatus;
   loading: boolean;
+   
+  // OAuth integration status
+  isOAuthConnected: boolean;
+  oauthIntegration: MetaIntegration | null;
   
   // Ads
   adAccounts: MetaAdAccount[];
@@ -242,6 +259,9 @@ export function MetaProvider({ children }: { children: ReactNode }) {
   const { currentWorkspace } = useWorkspace();
   const [loading, setLoading] = useState(true);
   
+  // OAuth integration state
+  const [oauthIntegration, setOauthIntegration] = useState<MetaIntegration | null>(null);
+  
   // State
   const [adAccounts, setAdAccounts] = useState<MetaAdAccount[]>([]);
   const [campaigns, setCampaigns] = useState<MetaCampaign[]>([]);
@@ -266,6 +286,29 @@ export function MetaProvider({ children }: { children: ReactNode }) {
     webhooks: { configured: false, eventsToday: 0 },
   });
 
+  // Fetch OAuth integration status
+  const fetchOAuthIntegration = useCallback(async () => {
+    if (!currentWorkspace) {
+      setOauthIntegration(null);
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('integrations')
+      .select('*')
+      .eq('workspace_id', currentWorkspace.id)
+      .eq('provider', 'meta')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching Meta integration:', error);
+      return null;
+    }
+
+    setOauthIntegration(data as MetaIntegration | null);
+    return data;
+  }, [currentWorkspace]);
+
   const fetchMeta = useCallback(async () => {
     if (!currentWorkspace) {
       setAdAccounts([]);
@@ -286,6 +329,9 @@ export function MetaProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     try {
+      // First fetch OAuth status
+      await fetchOAuthIntegration();
+      
       // Fetch all Meta data in parallel
       const [
         adAccountsRes,
@@ -362,11 +408,22 @@ export function MetaProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace]);
+  }, [currentWorkspace, fetchOAuthIntegration]);
 
   useEffect(() => {
     fetchMeta();
   }, [fetchMeta]);
+
+  // Auto-refresh OAuth status every 5 seconds to catch OAuth callback
+  useEffect(() => {
+    if (!currentWorkspace) return;
+    
+    const interval = setInterval(() => {
+      fetchOAuthIntegration();
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [currentWorkspace, fetchOAuthIntegration]);
 
   // ─────────────────────────────────────────────────────────────
   // Actions
@@ -457,11 +514,14 @@ export function MetaProvider({ children }: { children: ReactNode }) {
     setMessages(msgs);
     return msgs;
   };
+  const isOAuthConnected = oauthIntegration?.status === 'active';
 
   return (
     <MetaContext.Provider value={{
       moduleStatus,
       loading,
+      isOAuthConnected,
+      oauthIntegration,
       adAccounts,
       campaigns,
       adsets,
