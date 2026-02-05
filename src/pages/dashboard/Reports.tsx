@@ -10,6 +10,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { ReportScheduler } from "@/components/reports/ReportScheduler";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Reports() {
   const { currentWorkspace } = useWorkspace();
@@ -184,6 +185,22 @@ export default function Reports() {
       </span>
     );
   };
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">📊</span>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Rapports</h1>
+            <p className="text-muted-foreground">Suivez vos performances et exportez des rapports professionnels</p>
+          </div>
+        </div>
+        <NoSiteEmptyState moduleName="Rapports" icon={FileText} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

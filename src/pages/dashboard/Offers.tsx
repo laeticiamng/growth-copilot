@@ -27,6 +27,7 @@ import { useOffers, CreateOfferData } from "@/hooks/useOffers";
 import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Offers() {
   const { currentSite } = useSites();
@@ -190,6 +191,55 @@ export default function Offers() {
 
   if (loading) {
     return <LoadingState message="Chargement des offres..." />;
+  }
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Offer Lab</h1>
+          <p className="text-muted-foreground">Packaging, pricing et pages de vente</p>
+        </div>
+        <NoSiteEmptyState moduleName="Offers" icon={Package} />
+      </div>
+    );
+  }
+
+  // Empty state - no offers
+  if (offers.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Offer Lab</h1>
+          <p className="text-muted-foreground">Packaging, pricing et pages de vente</p>
+        </div>
+        <ModuleEmptyState
+          icon={Package}
+          moduleName="Offers"
+          description="Créez et gérez vos offres commerciales. Définissez vos propositions de valeur, anticipez les objections clients et configurez vos garanties pour maximiser les conversions."
+          features={["Packaging pricing", "Objections IA", "Garanties", "Proposition de valeur"]}
+          primaryAction={{
+            label: "Créer une offre",
+            onClick: () => {
+              setEditingOffer(null);
+              setOfferForm({
+                name: "",
+                tier: "standard",
+                price: 0,
+                price_period: "/mois",
+                features: [],
+                benefits: [],
+                guarantees: [],
+                objections_answers: {},
+              });
+              setShowOfferDialog(true);
+            },
+            icon: Plus,
+          }}
+        />
+      </div>
+    );
   }
 
   return (

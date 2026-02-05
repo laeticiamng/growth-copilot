@@ -1,5 +1,5 @@
 import { useState } from "react";
- import { useCallback } from "react";
+import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +20,9 @@ import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
- import { useWorkspace } from "@/hooks/useWorkspace";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Content() {
   const { currentSite } = useSites();
@@ -72,6 +73,48 @@ export default function Content() {
 
   if (loading) {
     return <LoadingState message="Chargement du contenu..." />;
+  }
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
+          <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
+        </div>
+        <NoSiteEmptyState moduleName="Contenu" icon={FileText} />
+      </div>
+    );
+  }
+
+  // Empty state - no data
+  const hasData = keywords.length > 0 || briefs.length > 0 || clusters.length > 0;
+  if (!hasData) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
+            <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
+          </div>
+        </div>
+        <ModuleEmptyState
+          icon={FileText}
+          moduleName="Contenu"
+          description="Analysez vos mots-clés, générez des briefs SEO optimisés et planifiez votre stratégie de contenu. Ce module utilise l'IA pour identifier les opportunités de positionnement et créer du contenu pertinent."
+          features={["Analyse de mots-clés", "Briefs SEO automatisés", "Clusters sémantiques", "Calendrier éditorial"]}
+          primaryAction={{
+            label: "Connecter Google Search Console",
+            href: "/dashboard/integrations",
+          }}
+          secondaryAction={{
+            label: "Générer un brief IA",
+            onClick: handleSync,
+          }}
+        />
+      </div>
+    );
   }
 
   return (

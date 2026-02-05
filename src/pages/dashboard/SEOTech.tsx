@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 // Types for SEO Audit
 interface SEOIssue {
@@ -321,15 +322,7 @@ export default function SEOTech() {
 
       {/* No Site Selected */}
       {!currentSite && (
-        <Card variant="feature">
-          <CardContent className="py-12 text-center">
-            <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-warning" />
-            <h3 className="text-lg font-medium mb-2">Aucun site sélectionné</h3>
-            <p className="text-muted-foreground mb-6">
-              Ajoutez un site dans la section "Sites" pour lancer un audit SEO.
-            </p>
-          </CardContent>
-        </Card>
+        <NoSiteEmptyState moduleName="SEO Technique" icon={Target} />
       )}
 
       {/* Loading State - Skeleton */}

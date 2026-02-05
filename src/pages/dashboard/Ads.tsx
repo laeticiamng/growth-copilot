@@ -1,5 +1,5 @@
 import { useState } from "react";
- import { useCallback } from "react";
+import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +31,11 @@ import {
 } from "lucide-react";
 import { useAds } from "@/hooks/useAds";
 import { useSites } from "@/hooks/useSites";
- import { useWorkspace } from "@/hooks/useWorkspace";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { LoadingState } from "@/components/ui/loading-state";
 
 export default function Ads() {
   const { currentSite } = useSites();
@@ -165,6 +167,54 @@ export default function Ads() {
       setNegativeForm({ keyword: "", match_type: "exact" });
     }
   };
+
+  if (loading) {
+    return <LoadingState message="Chargement des campagnes..." />;
+  }
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Google Ads</h1>
+          <p className="text-muted-foreground">Gestion des campagnes publicitaires</p>
+        </div>
+        <NoSiteEmptyState moduleName="Ads" icon={Megaphone} />
+      </div>
+    );
+  }
+
+  // Empty state - no campaigns
+  const hasData = campaigns.length > 0 || accounts.length > 0;
+  if (!hasData) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            Google Ads
+            <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+          </h1>
+          <p className="text-muted-foreground">Gestion des campagnes publicitaires</p>
+        </div>
+        <ModuleEmptyState
+          icon={Megaphone}
+          moduleName="Google Ads"
+          description="Gérez vos campagnes publicitaires, optimisez vos enchères et suivez vos performances en temps réel. Les agents IA détectent les opportunités d'économies et les mots-clés à exclure."
+          features={["Gestion de campagnes", "Mots-clés négatifs automatiques", "Alertes budget", "Garde-fous IA"]}
+          primaryAction={{
+            label: "Connecter Google Ads",
+            href: "/dashboard/integrations",
+          }}
+          secondaryAction={{
+            label: "Créer une campagne",
+            onClick: () => setShowCampaignDialog(true),
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
