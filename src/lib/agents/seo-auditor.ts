@@ -268,110 +268,15 @@ Please:
 }
 
 /**
- * Run audit using demo data when no real crawl is available
+  * Generate empty audit results when no real crawl data is available
+  * IMPORTANT: This returns an empty state, not fake data
  */
-export function generateDemoAuditResults(): CrawlResult {
-  const issues: SEOIssue[] = [
-    {
-      id: 'demo-1',
-      type: 'missing_title',
-      severity: 'critical',
-      title: 'Pages sans balise title',
-      description: '12 pages n\'ont pas de balise title définie',
-      affected_urls: ['/page-1', '/page-2', '/contact'],
-      recommendation: 'Ajouter une balise title unique et descriptive (50-60 caractères) pour chaque page',
-      ice_score: 85,
-      auto_fixable: false,
-      fix_instructions: '1. Identifier les pages concernées\n2. Rédiger un title unique incluant le mot-clé principal\n3. Implémenter via le CMS ou le code source',
-    },
-    {
-      id: 'demo-2',
-      type: 'duplicate_meta',
-      severity: 'high',
-      title: 'Meta descriptions dupliquées',
-      description: '8 pages partagent la même meta description',
-      affected_urls: ['/services', '/services/seo', '/services/ads'],
-      recommendation: 'Rédiger une meta description unique pour chaque page (150-160 caractères)',
-      ice_score: 72,
-      auto_fixable: true,
-      fix_instructions: '1. Exporter la liste des pages avec meta dupliquée\n2. Rédiger des descriptions uniques mettant en avant la proposition de valeur\n3. Inclure un CTA quand pertinent',
-    },
-    {
-      id: 'demo-3',
-      type: 'missing_h1',
-      severity: 'high',
-      title: 'Pages sans H1',
-      description: '5 pages n\'ont pas de balise H1',
-      affected_urls: ['/blog/article-1', '/blog/article-2'],
-      recommendation: 'Chaque page doit avoir exactement un H1 contenant le mot-clé principal',
-      ice_score: 68,
-      auto_fixable: false,
-    },
-    {
-      id: 'demo-4',
-      type: 'http_error',
-      severity: 'critical',
-      title: 'Erreurs 404',
-      description: '15 liens internes pointent vers des pages 404',
-      affected_urls: ['/old-page', '/deleted-product', '/legacy-service'],
-      recommendation: 'Mettre en place des redirections 301 ou corriger les liens cassés',
-      ice_score: 90,
-      auto_fixable: false,
-      fix_instructions: '1. Identifier les pages sources des liens cassés\n2. Décider: redirection 301 ou mise à jour du lien\n3. Implémenter via .htaccess, next.config, ou CMS',
-    },
-    {
-      id: 'demo-5',
-      type: 'slow_page',
-      severity: 'high',
-      title: 'Pages lentes (LCP > 2.5s)',
-      description: 'Le Largest Contentful Paint dépasse 4.2s sur mobile',
-      affected_urls: ['/accueil', '/produits'],
-      recommendation: 'Optimiser les images, activer le lazy loading, réduire le JavaScript bloquant',
-      ice_score: 75,
-      auto_fixable: false,
-      fix_instructions: '1. Analyser avec PageSpeed Insights\n2. Compresser les images (WebP, AVIF)\n3. Implémenter le lazy loading\n4. Différer le JS non critique',
-    },
-    {
-      id: 'demo-6',
-      type: 'missing_schema',
-      severity: 'medium',
-      title: 'Schema.org manquant',
-      description: 'Aucun balisage Schema détecté sur les pages produits',
-      affected_urls: ['/produits/item-1', '/produits/item-2'],
-      recommendation: 'Implémenter le schema Product avec price, availability, reviews',
-      ice_score: 55,
-      auto_fixable: true,
-      fix_instructions: '1. Utiliser un générateur de schema JSON-LD\n2. Inclure: name, description, price, availability\n3. Valider avec le Rich Results Test',
-    },
-    {
-      id: 'demo-7',
-      type: 'canonical_issue',
-      severity: 'medium',
-      title: 'Canonical mal configuré',
-      description: '3 pages ont un canonical pointant vers une URL incorrecte',
-      affected_urls: ['/produit?variant=1', '/produit?color=red'],
-      recommendation: 'Corriger les canonical pour pointer vers l\'URL canonique sans paramètres',
-      ice_score: 60,
-      auto_fixable: true,
-    },
-    {
-      id: 'demo-8',
-      type: 'orphan_page',
-      severity: 'low',
-      title: 'Pages orphelines détectées',
-      description: '7 pages ne reçoivent aucun lien interne',
-      affected_urls: ['/landing-old', '/promo-2023', '/test-page'],
-      recommendation: 'Ajouter des liens internes depuis des pages thématiquement proches ou supprimer si non pertinent',
-      ice_score: 40,
-      auto_fixable: false,
-    },
-  ];
-
+ export function generateEmptyAuditResults(): CrawlResult {
   return {
-    pages_crawled: 156,
-    pages_total: 178,
-    issues,
+     pages_crawled: 0,
+     pages_total: 0,
+     issues: [],
     errors: [],
-    duration_ms: 45000,
+     duration_ms: 0,
   };
 }

@@ -1,9 +1,66 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   SEOTechAuditor,
-  generateDemoAuditResults,
+   generateEmptyAuditResults,
 } from '../seo-auditor';
 import type { CrawlResult, SEOIssue } from '../types';
+
+// Test fixture - creates a sample CrawlResult for testing
+function createTestCrawlResult(): CrawlResult {
+  return {
+    pages_crawled: 50,
+    pages_total: 60,
+    issues: [
+      {
+        id: 'test-1',
+        type: 'missing_title',
+        severity: 'critical',
+        title: 'Missing title',
+        description: 'Page has no title',
+        affected_urls: ['/page-1'],
+        recommendation: 'Add a title tag',
+        ice_score: 90,
+        auto_fixable: false,
+        fix_instructions: 'Edit the HTML to add a title tag',
+      },
+      {
+        id: 'test-2',
+        type: 'duplicate_meta',
+        severity: 'high',
+        title: 'Duplicate meta',
+        description: 'Multiple pages share meta',
+        affected_urls: ['/page-2', '/page-3'],
+        recommendation: 'Make meta descriptions unique',
+        ice_score: 75,
+        auto_fixable: true,
+      },
+      {
+        id: 'test-3',
+        type: 'slow_page',
+        severity: 'medium',
+        title: 'Slow page',
+        description: 'LCP > 2.5s',
+        affected_urls: ['/page-4'],
+        recommendation: 'Optimize images',
+        ice_score: 60,
+        auto_fixable: false,
+      },
+      {
+        id: 'test-4',
+        type: 'orphan_page',
+        severity: 'low',
+        title: 'Orphan page',
+        description: 'No internal links',
+        affected_urls: ['/page-5'],
+        recommendation: 'Add internal links',
+        ice_score: 30,
+        auto_fixable: false,
+      },
+    ],
+    errors: [],
+    duration_ms: 1000,
+  };
+}
 
 // Mock supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -22,20 +79,24 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 describe('SEOTechAuditor', () => {
-  describe('generateDemoAuditResults', () => {
-    it('should return valid CrawlResult structure', () => {
-      const result = generateDemoAuditResults();
+   describe('generateEmptyAuditResults', () => {
+     it('should return empty CrawlResult structure', () => {
+       const result = generateEmptyAuditResults();
       
-      expect(result.pages_crawled).toBeGreaterThan(0);
-      expect(result.pages_total).toBeGreaterThanOrEqual(result.pages_crawled);
+       expect(result.pages_crawled).toBe(0);
+       expect(result.pages_total).toBe(0);
       expect(result.issues).toBeDefined();
       expect(Array.isArray(result.issues)).toBe(true);
+       expect(result.issues).toHaveLength(0);
       expect(result.errors).toBeDefined();
-      expect(result.duration_ms).toBeGreaterThan(0);
+       expect(result.errors).toHaveLength(0);
+       expect(result.duration_ms).toBe(0);
     });
+   });
 
-    it('should contain issues with required fields', () => {
-      const result = generateDemoAuditResults();
+   describe('CrawlResult structure validation', () => {
+     it('should validate issues with required fields', () => {
+       const result = createTestCrawlResult();
       
       for (const issue of result.issues) {
         expect(issue.id).toBeDefined();
@@ -51,38 +112,6 @@ describe('SEOTechAuditor', () => {
         expect(typeof issue.auto_fixable).toBe('boolean');
       }
     });
-
-    it('should have critical issues first by ICE score', () => {
-      const result = generateDemoAuditResults();
-      
-      // Check that issues are sorted by ICE score (demo data may not be perfectly sorted)
-      const criticalIssues = result.issues.filter(i => i.severity === 'critical');
-      expect(criticalIssues.length).toBeGreaterThan(0);
-      
-      // All critical issues should have high ICE scores
-      for (const issue of criticalIssues) {
-        expect(issue.ice_score).toBeGreaterThanOrEqual(80);
-      }
-    });
-
-    it('should include common SEO issue types', () => {
-      const result = generateDemoAuditResults();
-      const issueTypes = result.issues.map(i => i.type);
-      
-      // Should have at least some of these common types
-      const commonTypes = ['missing_title', 'duplicate_meta', 'missing_h1', 'http_error', 'slow_page'];
-      const hasCommonTypes = commonTypes.some(t => issueTypes.includes(t));
-      expect(hasCommonTypes).toBe(true);
-    });
-
-    it('should include fix instructions for critical issues', () => {
-      const result = generateDemoAuditResults();
-      const criticalIssues = result.issues.filter(i => i.severity === 'critical');
-      
-      // At least some critical issues should have fix instructions
-      const withInstructions = criticalIssues.filter(i => i.fix_instructions);
-      expect(withInstructions.length).toBeGreaterThan(0);
-    });
   });
 
   describe('SEOTechAuditor class', () => {
@@ -93,7 +122,7 @@ describe('SEOTechAuditor', () => {
 
     it('should have generateArtifact that produces valid structure', () => {
       const auditor = new SEOTechAuditor('test-workspace', 'test-site');
-      const mockResult = generateDemoAuditResults();
+       const mockResult = createTestCrawlResult();
       
       // Access private method through prototype for testing
       const artifact = (auditor as any).generateArtifact(mockResult);
@@ -221,7 +250,7 @@ describe('SEOTechAuditor', () => {
 
     it('should include standard metrics to watch', () => {
       const auditor = new SEOTechAuditor('test-workspace', 'test-site');
-      const mockResult = generateDemoAuditResults();
+       const mockResult = createTestCrawlResult();
       
       const artifact = (auditor as any).generateArtifact(mockResult);
       
@@ -253,8 +282,8 @@ describe('SEOTechAuditor', () => {
   });
 
   describe('Issue severity distribution', () => {
-    it('should have balanced severity distribution in demo data', () => {
-      const result = generateDemoAuditResults();
+     it('should correctly count severity distribution', () => {
+       const result = createTestCrawlResult();
       
       const severityCounts = {
         critical: 0,
@@ -267,7 +296,11 @@ describe('SEOTechAuditor', () => {
         severityCounts[issue.severity]++;
       }
       
-      // Should have at least one of each severity level
+       // Should have the expected distribution from our test fixture
+       expect(severityCounts.critical).toBe(1);
+       expect(severityCounts.high).toBe(1);
+       expect(severityCounts.medium).toBe(1);
+       expect(severityCounts.low).toBe(1);
       expect(severityCounts.critical).toBeGreaterThan(0);
       expect(severityCounts.high).toBeGreaterThan(0);
       expect(severityCounts.medium).toBeGreaterThan(0);
