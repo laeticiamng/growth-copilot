@@ -23,7 +23,7 @@ import { toast } from "sonner";
 
 import {
   ExecutiveSummary,
-  PriorityActions,
+  PriorityActionsEnhanced,
   QuickLaunchers,
   ApprovalsWidget,
   RunsHistory,
@@ -31,6 +31,8 @@ import {
   ROITrackerWidget,
   WelcomeCard,
   RealtimeStatus,
+  DailyBriefing,
+  DepartmentSemaphores,
 } from "@/components/cockpit";
 import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
@@ -124,43 +126,6 @@ export default function DashboardHome() {
     status: "green" as const, // Will be dynamic based on integration status
     message: service.is_core ? "Core" : undefined,
   }));
-
-  // Build priority actions from recommendations
-  const priorityActions = [
-    ...(kpiData ? [] : [{
-      id: "connect-gsc",
-      title: "Autoriser l'accès Google Search Console",
-      description: "Connectez vos données de performance pour des insights personnalisés.",
-      priority: "high" as const,
-      iceScore: 85,
-      effort: "5 min",
-      link: "/dashboard/integrations",
-      actionLabel: "Autoriser",
-      service: "Marketing",
-    }]),
-    {
-      id: "seo-audit",
-      title: "Lancer l'audit SEO initial",
-      description: "Votre site n'a jamais été audité. C'est la première étape pour identifier les opportunités.",
-      priority: "critical" as const,
-      iceScore: 90,
-      effort: "Auto",
-      link: "/dashboard/seo",
-      actionLabel: "Lancer",
-      service: "Marketing",
-    },
-    {
-      id: "brand-kit",
-      title: "Configurer le Brand Kit",
-      description: "Personnalisez le ton et les guidelines pour un contenu cohérent.",
-      priority: "medium" as const,
-      iceScore: 65,
-      effort: "10 min",
-      link: "/dashboard/brand-kit",
-      actionLabel: "Configurer",
-      service: "Marketing",
-    },
-  ];
 
   // Quick launchers based on enabled services
   const quickLaunchers = [
@@ -291,6 +256,12 @@ export default function DashboardHome() {
         onExport={() => {}}
       />
 
+      {/* Daily Briefing from Sophie Marchand (CGO) */}
+      <DailyBriefing />
+
+      {/* Department Semaphores - Health Overview */}
+      <DepartmentSemaphores />
+
       {/* Service Health Summary */}
       {serviceHealth.length > 0 && (
         <ExecutiveSummary
@@ -301,8 +272,8 @@ export default function DashboardHome() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 items-start">
-        {/* Priority Actions */}
-        <PriorityActions actions={priorityActions} maxItems={3} />
+        {/* Priority Actions - Enhanced with Approve/Reject */}
+        <PriorityActionsEnhanced maxItems={5} />
 
         {/* Business Health Score */}
         <BusinessHealthScore className="h-full" />

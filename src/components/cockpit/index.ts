@@ -1,5 +1,6 @@
 export { ExecutiveSummary } from './ExecutiveSummary';
 export { PriorityActions } from './PriorityActions';
+export { PriorityActionsEnhanced } from './PriorityActionsEnhanced';
 export { QuickLaunchers } from './QuickLaunchers';
 export { ApprovalsWidget } from './ApprovalsWidget';
 export { RunsHistory } from './RunsHistory';
@@ -13,3 +14,5 @@ export { WelcomeCard } from './WelcomeCard';
 export { SectionHeader, PageHeader } from './SectionHeader';
 export { NavigationHelper, NavigationHelperCompact } from './NavigationHelper';
 export { EmptyStateGuide } from './EmptyStateGuide';
+export { DailyBriefing } from './DailyBriefing';
+export { DepartmentSemaphores } from './DepartmentSemaphores';
