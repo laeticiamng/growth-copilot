@@ -60,7 +60,7 @@ export default function Terms() {
               <p className="text-sm text-muted-foreground">
                 Société par Actions Simplifiée Unipersonnelle<br />
                 Siège social : France<br />
-                Contact : <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline">m.laeticia@hotmail.fr</a>
+                Contact : <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a>
               </p>
             </div>
             <p>Dans les présentes CGU, les termes suivants ont la signification indiquée :</p>

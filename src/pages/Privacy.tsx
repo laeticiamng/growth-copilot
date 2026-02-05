@@ -61,7 +61,7 @@ export default function Privacy() {
               <p className="text-sm text-muted-foreground">
                 EmotionsCare SASU<br />
                 Siège social : France<br />
-                DPO / Contact : <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline">m.laeticia@hotmail.fr</a>
+                DPO / Contact : <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a>
               </p>
             </div>
             <p>
@@ -344,8 +344,8 @@ export default function Privacy() {
               <p className="font-medium mb-2">📧 Exercer vos droits</p>
               <p className="text-sm">
                 Pour exercer vos droits, envoyez un email à notre DPO :{" "}
-                <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline font-medium">
-                  m.laeticia@hotmail.fr
+                <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline font-medium">
+                  contact@emotionscare.com
                 </a>
               </p>
               <p className="text-sm mt-2 text-muted-foreground">
