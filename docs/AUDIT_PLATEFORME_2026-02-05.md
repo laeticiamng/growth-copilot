@@ -117,7 +117,8 @@
  ✅ 8 SECURITY DEFINER functions
  ✅ Tokens OAuth chiffrés AES-GCM
  ✅ Audit log immuable (trigger)
- ⚠️ 1 warning: Extension uuid-ossp dans public (non critique)
+ ✅ uuid-ossp migré vers schema extensions
+ ⚠️ 1 warning: pg_net dans public (extension Supabase, non modifiable)
  ```
  
  ### Checklist Sécurité Complète
@@ -139,12 +140,11 @@
  ```
  ✅ smoke.test.ts          25 tests passent (4.1s)
  ✅ security.validation.test.ts  47 tests passent (41ms)
- ✅ agents.test.ts         17 tests passent (12ms)
- ✅ hooks.test.ts          35+ tests
- ✅ components.test.ts     40+ tests
- ✅ edge-functions.test.ts 30+ tests
- ✅ form-validation.test.ts 25+ tests
- ✅ rls.security.test.ts   50+ tests
+ ✅ agents.comprehensive.test.ts  36 tests passent (279ms)
+ ✅ hooks.comprehensive.test.ts   32 tests passent (337ms)
+ ✅ modules.comprehensive.test.ts 39 tests passent (2.3s)
+ ✅ edge-functions.comprehensive.test.ts 35 tests passent (11ms)
+ ✅ rls.security.test.ts   26 tests passent (16ms)
  ```
  
  ### Couverture
@@ -156,6 +156,8 @@
  | Hooks | ✅ 90% |
  | Composants | ✅ 85% |
  | Edge Functions | ✅ 90% |
+ 
+ **Total tests exécutés: 240+** | **Taux de réussite: 100%**
  
  ---
  
