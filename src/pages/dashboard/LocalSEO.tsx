@@ -36,6 +36,7 @@ import { useSites } from "@/hooks/useSites";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function LocalSEO() {
   const { currentWorkspace } = useWorkspace();
@@ -157,6 +158,46 @@ export default function LocalSEO() {
     setReplyText("");
     setShowReplyDialog(true);
   };
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Local SEO</h1>
+          <p className="text-muted-foreground">Google Business Profile & présence locale</p>
+        </div>
+        <NoSiteEmptyState moduleName="Local SEO" icon={MapPin} />
+      </div>
+    );
+  }
+
+  // Empty state - no GBP profile
+  if (!hasProfile && profiles.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Local SEO</h1>
+          <p className="text-muted-foreground">Google Business Profile & présence locale</p>
+        </div>
+        <ModuleEmptyState
+          icon={MapPin}
+          moduleName="Local SEO"
+          description="Connectez votre fiche Google Business Profile pour gérer vos avis, poster des actualités et optimiser votre présence locale. L'IA génère des réponses aux avis et des posts optimisés."
+          features={["Gestion des avis", "Posts GBP automatisés", "FAQ Engine", "Audit de fiche"]}
+          primaryAction={{
+            label: "Connecter Google Business",
+            href: "/dashboard/integrations",
+          }}
+          secondaryAction={{
+            label: "Synchroniser GBP",
+            onClick: handleSyncGBP,
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}

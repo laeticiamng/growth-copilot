@@ -36,7 +36,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { RepurposeEngine } from "@/components/social/RepurposeEngine";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
   facebook: Facebook,
@@ -219,8 +220,53 @@ export default function Social() {
     }));
   };
 
-  if (loading) {
-    return <LoadingState message="Chargement des données sociales..." />;
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Social Distribution</h1>
+          <p className="text-muted-foreground">Calendrier social et distribution de contenu</p>
+        </div>
+        <ModuleEmptyState
+          icon={Instagram}
+          moduleName="Social"
+          description="Planifiez vos publications, générez du contenu IA et distribuez automatiquement sur toutes vos plateformes sociales. Repurposez votre contenu blog en posts optimisés."
+          features={["Multi-plateforme", "Génération IA", "Repurpose Engine", "Calendrier iCal"]}
+          primaryAction={{
+            label: "Gérer mes sites",
+            href: "/dashboard/sites",
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Empty state - no accounts connected
+  const hasConnectedAccounts = accounts.some(a => a.connected);
+  if (!hasConnectedAccounts && posts.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Social Distribution</h1>
+          <p className="text-muted-foreground">Calendrier social et distribution de contenu</p>
+        </div>
+        <ModuleEmptyState
+          icon={Instagram}
+          moduleName="Social"
+          description="Connectez vos réseaux sociaux pour planifier et distribuer automatiquement votre contenu. Générez des posts optimisés pour chaque plateforme avec l'IA."
+          features={["Instagram", "LinkedIn", "Facebook", "Twitter"]}
+          primaryAction={{
+            label: "Connecter mes réseaux",
+            href: "/dashboard/integrations",
+          }}
+          secondaryAction={{
+            label: "Créer un post manuellement",
+            onClick: () => setShowPostDialog(true),
+          }}
+        />
+      </div>
+    );
   }
 
   return (

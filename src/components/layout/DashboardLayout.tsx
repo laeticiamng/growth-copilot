@@ -52,6 +52,7 @@ import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { SupportChatWidget } from "@/components/support/SupportChatWidget";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 
 interface DashboardLayoutProps {
@@ -433,6 +434,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Collapsible>
               );
             })}
+            {/* Support link */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <a
+                href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <path d="M12 17h.01" />
+                </svg>
+                Besoin d'aide ?
+              </a>
+            </div>
           </nav>
 
           {/* User menu */}
@@ -485,6 +509,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* AI Assistant */}
       <AIAssistant />
+      
+      {/* Support Chat Widget */}
+      <SupportChatWidget />
     </div>
   );
 }

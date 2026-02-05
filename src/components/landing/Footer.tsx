@@ -105,6 +105,26 @@ export function Footer() {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <a 
+              href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 mr-4"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+              Besoin d'aide ?
+            </a>
             <a href="mailto:m.laeticia@hotmail.fr" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Email">
               <Mail className="w-5 h-5" />
             </a>

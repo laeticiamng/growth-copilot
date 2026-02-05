@@ -1,5 +1,5 @@
 import { useState } from "react";
- import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,8 @@ import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { calculateConfidence, getTestRecommendation, calculateUplift } from "@/lib/statistics";
 import { CROSuggestionsAI } from "@/components/cro/CROSuggestionsAI";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function CRO() {
   const { currentSite } = useSites();
@@ -178,6 +179,48 @@ export default function CRO() {
 
   if (loading) {
     return <LoadingState message="Chargement des données CRO..." />;
+  }
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">CRO Autopilot</h1>
+          <p className="text-muted-foreground">Optimisation du taux de conversion</p>
+        </div>
+        <NoSiteEmptyState moduleName="CRO" icon={Target} />
+      </div>
+    );
+  }
+
+  // Empty state - no experiments
+  const hasData = experiments.length > 0 || audits.length > 0;
+  if (!hasData) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              CRO Autopilot
+              <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+            </h1>
+            <p className="text-muted-foreground">Optimisation du taux de conversion</p>
+          </div>
+        </div>
+        <ModuleEmptyState
+          icon={Target}
+          moduleName="CRO"
+          description="Testez des variations de vos pages, analysez la friction utilisateur et obtenez des suggestions IA pour améliorer vos taux de conversion. Le module calcule la significativité statistique de vos tests."
+          features={["Tests A/B", "Audit de friction", "Suggestions IA", "Calcul de confiance statistique"]}
+          primaryAction={{
+            label: "Créer un test A/B",
+            onClick: () => setShowExperimentDialog(true),
+            icon: Plus,
+          }}
+        />
+      </div>
+    );
   }
 
   return (

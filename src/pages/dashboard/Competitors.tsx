@@ -41,6 +41,7 @@ import { useCompetitors } from "@/hooks/useCompetitors";
 import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Competitors() {
   const { currentSite } = useSites();
@@ -208,6 +209,42 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
 
   if (loading) {
     return <LoadingState message="Chargement des concurrents..." />;
+  }
+
+  // Empty state - no site selected
+  if (!currentSite) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Veille concurrentielle</h1>
+          <p className="text-muted-foreground">Analysez vos concurrents et identifiez les opportunités</p>
+        </div>
+        <NoSiteEmptyState moduleName="Concurrents" icon={Users} />
+      </div>
+    );
+  }
+
+  // Empty state - no competitors added
+  if (competitors.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Veille concurrentielle</h1>
+          <p className="text-muted-foreground">Analysez vos concurrents et identifiez les opportunités</p>
+        </div>
+        <ModuleEmptyState
+          icon={Users}
+          moduleName="Concurrents"
+          description="Surveillez vos concurrents, identifiez leurs mots-clés gagnants et découvrez des opportunités de contenu. Générez une analyse SWOT automatisée et recevez des alertes de changements."
+          features={["Keyword gaps", "Content gaps", "Analyse backlinks", "SWOT automatisé"]}
+          primaryAction={{
+            label: "Ajouter un concurrent",
+            onClick: () => setShowAddDialog(true),
+            icon: Plus,
+          }}
+        />
+      </div>
+    );
   }
 
   return (

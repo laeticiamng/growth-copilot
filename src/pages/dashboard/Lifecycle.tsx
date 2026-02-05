@@ -35,8 +35,9 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { PipelineKanban } from "@/components/lifecycle/PipelineKanban";
 import { SalesScriptGenerator } from "@/components/sales/SalesScriptGenerator";
 import { toast } from "sonner";
- import { useWorkspace } from "@/hooks/useWorkspace";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Lifecycle() {
   const { leads, deals, stages, loading, createLead, deleteLead, updateLead, updateDealStage, createDeal, refetch } = useLifecycle();
@@ -168,6 +169,35 @@ export default function Lifecycle() {
 
   if (loading) {
     return <LoadingState message="Chargement des données CRM..." />;
+  }
+
+  // Empty state - no leads or deals
+  const hasData = leads.length > 0 || deals.length > 0;
+  if (!hasData) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              Lifecycle & CRM
+              <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+            </h1>
+            <p className="text-muted-foreground">Pipeline de vente et automatisations</p>
+          </div>
+        </div>
+        <ModuleEmptyState
+          icon={Kanban}
+          moduleName="Lifecycle"
+          description="Gérez votre pipeline de vente avec un CRM Kanban intuitif. Suivez vos leads, créez des deals et générez des scripts de vente personnalisés avec l'IA."
+          features={["Pipeline Kanban", "Gestion de leads", "Scripts IA", "Automatisations"]}
+          primaryAction={{
+            label: "Créer un lead",
+            onClick: () => setShowLeadDialog(true),
+            icon: Plus,
+          }}
+        />
+      </div>
+    );
   }
 
   return (

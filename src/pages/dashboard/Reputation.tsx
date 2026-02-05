@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Star, MessageSquare, Send, ThumbsUp, AlertTriangle, Loader2, Mail, Sparkles, Bot } from "lucide-react";
+import { Star, MessageSquare, Send, ThumbsUp, AlertTriangle, Loader2, Mail, Sparkles } from "lucide-react";
 import { useReputation, Review } from "@/hooks/useReputation";
 import { useLocalSEO } from "@/hooks/useLocalSEO";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Reputation() {
   const { reviews, stats, loading, sendReviewRequest, respondToReview } = useReputation();
@@ -130,6 +131,29 @@ export default function Reputation() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Empty state - no reviews and no profiles
+  const hasData = reviews.length > 0 || stats.totalReviews > 0;
+  if (!hasData && profiles.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Réputation</h1>
+          <p className="text-muted-foreground">Avis clients et preuve sociale</p>
+        </div>
+        <ModuleEmptyState
+          icon={Star}
+          moduleName="Réputation"
+          description="Gérez votre réputation en ligne : collectez des avis, répondez aux clients et améliorez votre note moyenne. L'IA génère des réponses personnalisées à vos avis."
+          features={["Collecte d'avis", "Réponses IA", "Suivi de note", "Alertes négatifs"]}
+          primaryAction={{
+            label: "Configurer Google Business",
+            href: "/dashboard/local",
+          }}
+        />
       </div>
     );
   }
