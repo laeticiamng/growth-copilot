@@ -15,18 +15,22 @@ import {
   Minus,
   Calendar,
   BarChart3,
+  Link as LinkIcon,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface KPIData {
+export interface KPIData {
   label: string;
-  currentValue: number;
-  previousValue: number;
+  currentValue: number | null;
+  previousValue: number | null;
   format?: "number" | "currency" | "percent";
 }
 
 interface MoMComparisonProps {
   kpis: KPIData[];
   onPeriodChange?: (period: string) => void;
+  loading?: boolean;
+  hasData?: boolean;
 }
 
 type ComparisonPeriod = "mom" | "yoy" | "wow" | "custom";
@@ -38,7 +42,7 @@ const periodLabels: Record<ComparisonPeriod, string> = {
   custom: "Personnalisé",
 };
 
-export function MoMComparison({ kpis, onPeriodChange }: MoMComparisonProps) {
+export function MoMComparison({ kpis, onPeriodChange, loading = false, hasData = true }: MoMComparisonProps) {
   const [period, setPeriod] = useState<ComparisonPeriod>("mom");
 
   const handlePeriodChange = (value: ComparisonPeriod) => {
@@ -46,7 +50,9 @@ export function MoMComparison({ kpis, onPeriodChange }: MoMComparisonProps) {
     onPeriodChange?.(value);
   };
 
-  const formatValue = (value: number, format?: string) => {
+  const formatValue = (value: number | null, format?: string): string => {
+    if (value === null || value === undefined) return "—";
+    
     switch (format) {
       case "currency":
         return new Intl.NumberFormat('fr-FR', {
@@ -61,35 +67,69 @@ export function MoMComparison({ kpis, onPeriodChange }: MoMComparisonProps) {
     }
   };
 
-  const calculateChange = (current: number, previous: number) => {
+  const calculateChange = (current: number | null, previous: number | null): number | null => {
+    // Don't calculate change if either value is missing
+    if (current === null || previous === null) return null;
     if (previous === 0) return current > 0 ? 100 : 0;
     return ((current - previous) / previous) * 100;
   };
 
   const kpiWithChanges = useMemo(() => {
-    return kpis.map(kpi => ({
-      ...kpi,
-      change: calculateChange(kpi.currentValue, kpi.previousValue),
-      formattedCurrent: formatValue(kpi.currentValue, kpi.format),
-      formattedPrevious: formatValue(kpi.previousValue, kpi.format),
-    }));
+    return kpis.map(kpi => {
+      const change = calculateChange(kpi.currentValue, kpi.previousValue);
+      return {
+        ...kpi,
+        change,
+        hasChange: change !== null,
+        formattedCurrent: formatValue(kpi.currentValue, kpi.format),
+        formattedPrevious: formatValue(kpi.previousValue, kpi.format),
+      };
+    });
   }, [kpis]);
 
-  // Summary stats
+  // Summary stats - only count KPIs with real change values
   const summary = useMemo(() => {
-    const changes = kpiWithChanges.map(k => k.change);
+    const kpisWithChange = kpiWithChanges.filter(k => k.hasChange);
+    if (kpisWithChange.length === 0) {
+      return { positive: 0, negative: 0, neutral: 0, avgChange: null, hasValidData: false };
+    }
+    
+    const changes = kpisWithChange.map(k => k.change as number);
     const positive = changes.filter(c => c > 0).length;
     const negative = changes.filter(c => c < 0).length;
     const neutral = changes.filter(c => c === 0).length;
     const avgChange = changes.reduce((a, b) => a + b, 0) / changes.length;
     
-    return { positive, negative, neutral, avgChange };
+    return { positive, negative, neutral, avgChange, hasValidData: true };
   }, [kpiWithChanges]);
+
+  // Empty state when no data exists at all
+  if (!hasData) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-primary/10 p-4 mb-4">
+            <BarChart3 className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Aucune donnée KPI disponible</h3>
+          <p className="text-muted-foreground max-w-md mb-6">
+            Connectez Google Search Console pour voir vos KPIs et suivre leur évolution dans le temps.
+          </p>
+          <Link to="/dashboard/integrations">
+            <Button variant="hero">
+              <LinkIcon className="w-4 h-4 mr-2" />
+              Connecter Google Search Console
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card variant="feature">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
@@ -115,36 +155,44 @@ export function MoMComparison({ kpis, onPeriodChange }: MoMComparisonProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Summary */}
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-          <div className="flex items-center gap-2">
-            <Badge variant="success" className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              {summary.positive}
-            </Badge>
-            <span className="text-sm text-muted-foreground">en hausse</span>
+        {/* Summary - only show if we have valid comparison data */}
+        {summary.hasValidData ? (
+          <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Badge variant="success" className="flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                {summary.positive}
+              </Badge>
+              <span className="text-sm text-muted-foreground">en hausse</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive" className="flex items-center gap-1">
+                <TrendingDown className="w-3 h-3" />
+                {summary.negative}
+              </Badge>
+              <span className="text-sm text-muted-foreground">en baisse</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Minus className="w-3 h-3" />
+                {summary.neutral}
+              </Badge>
+              <span className="text-sm text-muted-foreground">stables</span>
+            </div>
+            <div className="ml-auto">
+              <span className="text-sm text-muted-foreground">Moyenne: </span>
+              <span className={`font-medium ${(summary.avgChange ?? 0) > 0 ? 'status-success' : (summary.avgChange ?? 0) < 0 ? 'text-destructive' : ''}`}>
+                {(summary.avgChange ?? 0) > 0 ? '+' : ''}{(summary.avgChange ?? 0).toFixed(1)}%
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="destructive" className="flex items-center gap-1">
-              <TrendingDown className="w-3 h-3" />
-              {summary.negative}
-            </Badge>
-            <span className="text-sm text-muted-foreground">en baisse</span>
+        ) : (
+          <div className="p-4 rounded-lg bg-secondary/50 text-center">
+            <p className="text-sm text-muted-foreground">
+              Pas de données antérieures disponibles pour comparer
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Minus className="w-3 h-3" />
-              {summary.neutral}
-            </Badge>
-            <span className="text-sm text-muted-foreground">stables</span>
-          </div>
-          <div className="ml-auto">
-            <span className="text-sm text-muted-foreground">Moyenne: </span>
-            <span className={`font-medium ${summary.avgChange > 0 ? 'status-success' : summary.avgChange < 0 ? 'text-destructive' : ''}`}>
-              {summary.avgChange > 0 ? '+' : ''}{summary.avgChange.toFixed(1)}%
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* KPI Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -152,37 +200,47 @@ export function MoMComparison({ kpis, onPeriodChange }: MoMComparisonProps) {
             <div key={i} className="p-4 rounded-lg bg-secondary/50">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-muted-foreground">{kpi.label}</p>
-                <Badge
-                  variant={kpi.change > 0 ? "success" : kpi.change < 0 ? "destructive" : "secondary"}
-                  className="flex items-center gap-1"
-                >
-                  {kpi.change > 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : kpi.change < 0 ? (
-                    <TrendingDown className="w-3 h-3" />
-                  ) : (
-                    <Minus className="w-3 h-3" />
-                  )}
-                  {kpi.change > 0 ? '+' : ''}{kpi.change.toFixed(1)}%
-                </Badge>
+                {kpi.hasChange ? (
+                  <Badge
+                    variant={(kpi.change ?? 0) > 0 ? "success" : (kpi.change ?? 0) < 0 ? "destructive" : "secondary"}
+                    className="flex items-center gap-1"
+                  >
+                    {(kpi.change ?? 0) > 0 ? (
+                      <TrendingUp className="w-3 h-3" />
+                    ) : (kpi.change ?? 0) < 0 ? (
+                      <TrendingDown className="w-3 h-3" />
+                    ) : (
+                      <Minus className="w-3 h-3" />
+                    )}
+                    {(kpi.change ?? 0) > 0 ? '+' : ''}{(kpi.change ?? 0).toFixed(1)}%
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">
+                    Pas de comparaison
+                  </Badge>
+                )}
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-2xl font-bold">{kpi.formattedCurrent}</p>
-                <p className="text-sm text-muted-foreground">
-                  vs {kpi.formattedPrevious}
-                </p>
+                {kpi.previousValue !== null && (
+                  <p className="text-sm text-muted-foreground">
+                    vs {kpi.formattedPrevious}
+                  </p>
+                )}
               </div>
-              {/* Progress bar */}
-              <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    kpi.change > 0 ? 'bg-green-500' : kpi.change < 0 ? 'bg-red-500' : 'bg-muted-foreground'
-                  }`}
-                  style={{
-                    width: `${Math.min(Math.abs(kpi.change) * 2, 100)}%`,
-                  }}
-                />
-              </div>
+              {/* Progress bar - only show if we have comparison data */}
+              {kpi.hasChange && (
+                <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      (kpi.change ?? 0) > 0 ? 'bg-green-500' : (kpi.change ?? 0) < 0 ? 'bg-red-500' : 'bg-muted-foreground'
+                    }`}
+                    style={{
+                      width: `${Math.min(Math.abs(kpi.change ?? 0) * 2, 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
