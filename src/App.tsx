@@ -117,6 +117,7 @@ import StatusPage from "./pages/dashboard/StatusPage";
 import ROIDashboard from "./pages/dashboard/ROIDashboard";
 import ServiceCatalog from "./pages/dashboard/ServiceCatalog";
 import AICostDashboard from "./pages/dashboard/AICostDashboard";
+import Settings from "./pages/dashboard/Settings";
 
 const queryClient = new QueryClient();
 
@@ -281,6 +282,7 @@ function App() {
               <Route path="/dashboard/roi" element={<DashboardRoute><ROIDashboard /></DashboardRoute>} />
               <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
               <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
+              <Route path="/dashboard/settings" element={<DashboardRoute><Settings /></DashboardRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

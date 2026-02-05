@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { usePagination } from "@/hooks/usePagination";
@@ -38,9 +38,11 @@ import {
   Timer,
   Hash,
   Eye,
+  Rss,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -312,8 +314,12 @@ const Logs = () => {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="ai" className="w-full">
+      <Tabs defaultValue="feed" className="w-full">
         <TabsList>
+          <TabsTrigger value="feed" className="gap-2">
+            <Rss className="w-4 h-4" />
+            Fil d'activité
+          </TabsTrigger>
           <TabsTrigger value="ai" className="gap-2">
             <Brain className="w-4 h-4" />
             AI Requests
@@ -330,6 +336,11 @@ const Logs = () => {
             <Badge variant="secondary" className="ml-1">{displayActionLogs.length}</Badge>
           </TabsTrigger>
         </TabsList>
+
+        {/* Activity Feed Tab (New!) */}
+        <TabsContent value="feed" className="mt-4">
+          <ActivityFeed showFilters={true} showLoadMore={true} limit={20} />
+        </TabsContent>
 
         {/* AI Requests Tab */}
         <TabsContent value="ai" className="mt-4">
