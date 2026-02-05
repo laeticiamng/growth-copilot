@@ -102,7 +102,10 @@ export default function Approvals() {
         <div className="flex items-center gap-3">
           <span className="text-3xl">✓</span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">À valider</h1>
+           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+             À valider
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
             <p className="text-muted-foreground">
               Gardez le contrôle : approuvez les actions importantes avant leur exécution
             </p>

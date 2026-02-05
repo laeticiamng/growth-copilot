@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { calculateConfidence, getTestRecommendation, calculateUplift } from "@/lib/statistics";
 import { CROSuggestionsAI } from "@/components/cro/CROSuggestionsAI";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export default function CRO() {
   const { currentSite } = useSites();
@@ -56,6 +58,31 @@ export default function CRO() {
     test_type: "ab",
   });
   const [submitting, setSubmitting] = useState(false);
+ 
+   // Real-time subscription for experiments
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `cro-experiments-${currentWorkspace?.id}`,
+     {
+       table: 'experiments',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `cro-variants-${currentWorkspace?.id}`,
+     {
+       table: 'experiment_variants',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   // Calculate metrics from real data only
   const conversionMetrics = [
@@ -158,7 +185,10 @@ export default function CRO() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">CRO Autopilot</h1>
+           <h1 className="text-2xl font-bold flex items-center gap-2">
+             CRO Autopilot
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
           <p className="text-muted-foreground">
             Optimisation du taux de conversion
           </p>

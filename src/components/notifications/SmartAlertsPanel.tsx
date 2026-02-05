@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 interface Alert {
   id: string;
@@ -43,11 +44,11 @@ export function SmartAlertsPanel() {
   const { currentWorkspace } = useWorkspace();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
+   const [isLive, setIsLive] = useState(false);
 
-  useEffect(() => {
-    if (!currentWorkspace?.id) return;
-
-    const fetchAlerts = async () => {
+   const fetchAlerts = useCallback(async () => {
+     if (!currentWorkspace?.id) return;
+     
       setLoading(true);
       const newAlerts: Alert[] = [];
 
@@ -149,11 +150,34 @@ export function SmartAlertsPanel() {
         console.error('[Alerts] Error:', error);
       } finally {
         setLoading(false);
+         setIsLive(true);
       }
-    };
-
-    fetchAlerts();
   }, [currentWorkspace?.id]);
+ 
+   useEffect(() => {
+     fetchAlerts();
+   }, [fetchAlerts]);
+ 
+   // Real-time subscriptions for approvals and runs
+   useRealtimeSubscription(
+     `alerts-approvals-${currentWorkspace?.id}`,
+     {
+       table: 'approval_queue',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => fetchAlerts(),
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `alerts-runs-${currentWorkspace?.id}`,
+     {
+       table: 'executive_runs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => fetchAlerts(),
+     !!currentWorkspace?.id
+   );
 
   const dismissAlert = (id: string) => setAlerts((prev) => prev.filter((a) => a.id !== id));
 
@@ -182,9 +206,12 @@ export function SmartAlertsPanel() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Bell className="h-5 w-5" />
-          Alertes
+         <CardTitle className="flex items-center gap-2 text-lg">
+           <span className="relative">
+             <Bell className="h-5 w-5" />
+             {isLive && <span className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />}
+           </span>
+           Alertes
           {unreadCount > 0 && <Badge variant="destructive">{unreadCount}</Badge>}
         </CardTitle>
       </CardHeader>

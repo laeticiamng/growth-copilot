@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,10 +31,13 @@ import {
 } from "lucide-react";
 import { useAds } from "@/hooks/useAds";
 import { useSites } from "@/hooks/useSites";
+ import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export default function Ads() {
   const { currentSite } = useSites();
+   const { currentWorkspace } = useWorkspace();
   const { 
     accounts, 
     campaigns, 
@@ -45,6 +49,31 @@ export default function Ads() {
     addNegativeKeyword,
     refetch 
   } = useAds();
+ 
+   // Real-time subscription for campaigns
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `ads-campaigns-${currentWorkspace?.id}`,
+     {
+       table: 'campaigns',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `ads-negatives-${currentWorkspace?.id}`,
+     {
+       table: 'ads_negatives',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [showNegativeDialog, setShowNegativeDialog] = useState(false);
@@ -141,7 +170,10 @@ export default function Ads() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Google Ads</h1>
+           <h1 className="text-2xl font-bold flex items-center gap-2">
+             Google Ads
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
           <p className="text-muted-foreground">
             Gestion des campagnes publicitaires
           </p>

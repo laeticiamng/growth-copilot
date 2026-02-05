@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +14,11 @@ import {
   Snowflake,
   TrendingUp,
   TrendingDown,
-  Minus,
-  HelpCircle,
-} from "lucide-react";
+   Minus,
+   HelpCircle,
+   RefreshCw,
+ } from "lucide-react";
+ import { useMultiTableSubscription } from "@/hooks/useRealtimeSubscription";
 
 interface HealthMetric {
   name: string;
@@ -35,19 +37,19 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
   const { currentSite } = useSites();
   const [metrics, setMetrics] = useState<HealthMetric[]>([]);
   const [overallScore, setOverallScore] = useState(0);
-  const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(true);
+   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  useEffect(() => {
+   const calculateHealth = useCallback(async () => {
     if (!currentWorkspace?.id) {
       setLoading(false);
-      return;
+       return;
     }
-
-    const calculateHealth = async () => {
-      setLoading(true);
-      const newMetrics: HealthMetric[] = [];
-
-      try {
+     
+     setLoading(true);
+     const newMetrics: HealthMetric[] = [];
+ 
+     try {
         // 1. Site configuré (20%)
         const { count: sitesCount } = await supabase
           .from("sites")
@@ -141,15 +143,46 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
         const weightedSum = newMetrics.reduce((sum, m) => sum + (m.score * m.weight) / 100, 0);
         const overall = Math.round((weightedSum / totalWeight) * 100);
         setOverallScore(overall);
-      } catch (error) {
-        console.error("[BusinessHealth] Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+     } catch (error) {
+       console.error("[BusinessHealth] Error:", error);
+     } finally {
+       setLoading(false);
+       setLastUpdate(new Date());
+     }
+   }, [currentWorkspace?.id, currentSite?.id]);
 
-    calculateHealth();
-  }, [currentWorkspace?.id, currentSite?.id]);
+   // Initial fetch
+   useEffect(() => {
+     calculateHealth();
+   }, [calculateHealth]);
+ 
+   // Real-time subscriptions
+   useMultiTableSubscription(
+     `health-score-${currentWorkspace?.id}`,
+     [
+       {
+         table: 'sites',
+         filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+         onPayload: () => calculateHealth(),
+       },
+       {
+         table: 'integrations',
+         filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+         onPayload: () => calculateHealth(),
+       },
+       {
+         table: 'agent_runs',
+         filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+         onPayload: () => calculateHealth(),
+       },
+       {
+         table: 'approval_queue',
+         filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+         onPayload: () => calculateHealth(),
+       },
+     ],
+     !!currentWorkspace?.id
+   );
 
   const getWeatherIcon = (score: number) => {
     if (score >= 80) return <Sun className="w-8 h-8 text-warning" />;
@@ -190,8 +223,11 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
     <Card className={cn("overflow-hidden flex flex-col", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            Météo Business
+         <CardTitle className="text-base flex items-center gap-2">
+             <span className="relative">
+               Météo Business
+               <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+             </span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

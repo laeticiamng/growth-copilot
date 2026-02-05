@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 interface PlatformTool {
   id: string;
@@ -283,12 +284,30 @@ const Integrations = () => {
     }
   };
 
+   // Real-time subscription for integrations
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `integrations-${currentWorkspace?.id}`,
+     {
+       table: 'integrations',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
+ 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Outils & Intégrations</h1>
+           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+             Outils & Intégrations
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
             Connectez vos comptes pour permettre aux agents d'agir sur vos ressources.
           </p>
