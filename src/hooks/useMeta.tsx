@@ -330,7 +330,8 @@ export function MetaProvider({ children }: { children: ReactNode }) {
 
     try {
       // First fetch OAuth status
-      await fetchOAuthIntegration();
+      const oauthData = await fetchOAuthIntegration();
+      const isOAuthActive = oauthData?.status === 'active';
       
       // Fetch all Meta data in parallel
       const [
@@ -378,27 +379,27 @@ export function MetaProvider({ children }: { children: ReactNode }) {
 
       setModuleStatus({
         ads: {
-          connected: (adAccountsRes.data?.length || 0) > 0,
+          connected: isOAuthActive && (adAccountsRes.data?.length || 0) > 0,
           lastSync: adAccountsRes.data?.[0]?.updated_at || null,
           accountCount: adAccountsRes.data?.length || 0,
         },
         capi: {
-          configured: true, // Always configured via edge function
+          configured: isOAuthActive, // Only configured if OAuth connected
           pixelId: adAccountsRes.data?.[0]?.account_id || null,
           eventsToday: capiEventsRes.data?.length || 0,
         },
         instagram: {
-          connected: (igAccountsRes.data?.length || 0) > 0,
+          connected: isOAuthActive && (igAccountsRes.data?.length || 0) > 0,
           lastSync: igAccountsRes.data?.[0]?.updated_at || null,
           accountCount: igAccountsRes.data?.length || 0,
         },
         messaging: {
-          connected: (conversationsRes.data?.length || 0) > 0,
+          connected: isOAuthActive && (conversationsRes.data?.length || 0) > 0,
           conversationCount: conversationsRes.data?.length || 0,
           unreadCount,
         },
         webhooks: {
-          configured: true, // Always configured
+          configured: isOAuthActive, // Only configured if OAuth connected
           eventsToday: todayEvents,
         },
       });
