@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+ import { useCallback } from "react";
 import { DiagnosticsPanel, LatencyHistoryChart, ConsoleLogsViewer } from "@/components/diagnostics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 interface LatencyMetric {
   name: string;
@@ -41,6 +43,17 @@ export default function Diagnostics() {
   const { isOnline } = useNetworkStatus();
   const [latencyMetrics, setLatencyMetrics] = useState<LatencyMetric[]>([]);
   const [isRunningHealthCheck, setIsRunningHealthCheck] = useState(false);
+ 
+   // Real-time subscription for action_log errors
+   useRealtimeSubscription(
+     `diagnostics-${currentWorkspace?.id}`,
+     {
+       table: 'action_log',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
 
   // Fetch recent errors from action_log
   const { data: recentErrors } = useQuery({

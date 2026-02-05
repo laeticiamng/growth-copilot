@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,8 @@ import {
   Euro,
   FileCheck
 } from "lucide-react";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 const CONTRACT_STATUS_LABELS: Record<ContractStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   draft: { label: "Brouillon", variant: "secondary" },
@@ -48,6 +51,7 @@ const CONTRACT_TYPES = [
 export default function Legal() {
   const { contracts, loading: loadingContracts, stats: contractStats, expiringContracts, createContract, isCreating } = useContracts();
   const { complianceItems, gdprRequests, loading: loadingCompliance, complianceStats, gdprStats } = useCompliance();
+   const { currentWorkspace } = useWorkspace();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newContract, setNewContract] = useState<CreateContractInput>({
@@ -58,6 +62,27 @@ export default function Legal() {
   });
 
   const loading = loadingContracts || loadingCompliance;
+ 
+   // Real-time subscriptions
+   useRealtimeSubscription(
+     `legal-contracts-${currentWorkspace?.id}`,
+     {
+       table: 'contracts',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `legal-gdpr-${currentWorkspace?.id}`,
+     {
+       table: 'gdpr_requests',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
 
   const filteredContracts = contracts.filter(
     (c) =>
