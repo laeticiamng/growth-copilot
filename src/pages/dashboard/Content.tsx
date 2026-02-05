@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileText,
@@ -23,6 +21,7 @@ import { toast } from "sonner";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { ContentStrategyGenerator } from "@/components/content";
 
 export default function Content() {
   const { currentSite } = useSites();
@@ -184,12 +183,20 @@ export default function Content() {
         </div>
       </div>
 
-      <Tabs defaultValue="keywords" className="space-y-6">
+      <Tabs defaultValue="generator" className="space-y-6">
         <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="generator">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Générer du contenu
+          </TabsTrigger>
           <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
           <TabsTrigger value="clusters">Clusters</TabsTrigger>
           <TabsTrigger value="calendar">Calendrier</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="generator" className="space-y-6">
+          <ContentStrategyGenerator />
+        </TabsContent>
 
         <TabsContent value="keywords" className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -223,7 +230,7 @@ export default function Content() {
                       <td className="py-3 px-2 text-right text-muted-foreground">{kw.volume.toLocaleString()}</td>
                       <td className="py-3 px-2 text-right"><Badge variant={kw.position <= 10 ? "gradient" : "secondary"}>#{kw.position}</Badge></td>
                       <td className="py-3 px-2 text-right">
-                        <span className={`flex items-center justify-end gap-1 ${kw.change > 0 ? "text-green-500" : "text-destructive"}`}>
+                        <span className={`flex items-center justify-end gap-1 ${kw.change > 0 ? "text-primary" : "text-destructive"}`}>
                           {kw.change > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                           {Math.abs(kw.change)}
                         </span>
@@ -267,18 +274,26 @@ export default function Content() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {displayBriefs.map((content) => (
-                <div key={content.id} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                  <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{content.title}</p>
-                    <p className="text-sm text-muted-foreground">Cible : "{content.keyword}" • {content.wordCount} mots</p>
+              {displayBriefs.length > 0 ? (
+                displayBriefs.map((content) => (
+                  <div key={content.id} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                    <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{content.title}</p>
+                      <p className="text-sm text-muted-foreground">Cible : "{content.keyword}" • {content.wordCount} mots</p>
+                    </div>
+                    <Badge variant={content.status === "published" ? "gradient" : "outline"}>
+                      {content.status === "published" ? "Publié" : "Brouillon"}
+                    </Badge>
                   </div>
-                  <Badge variant={content.status === "published" ? "gradient" : "outline"}>
-                    {content.status === "published" ? "Publié" : "Brouillon"}
-                  </Badge>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun brief créé</p>
+                  <p className="text-sm">Utilisez l'onglet "Générer du contenu" pour créer votre premier brief</p>
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </TabsContent>
