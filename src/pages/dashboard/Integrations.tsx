@@ -440,7 +440,13 @@ const Integrations = () => {
             {Object.entries(groupedTools).map(([category, tools]) => {
               const config = categoryConfig[category];
               const CategoryIcon = config.icon;
-              const activeInCategory = tools.filter(t => t.status === "active").length;
+              // Calculate connected count based on real database connections
+              const connectedInCategory = tools.filter(t => 
+                getToolConnectionStatus(t.id, t.category) === "connected"
+              ).length;
+              const availableInCategory = tools.filter(t => 
+                getToolConnectionStatus(t.id, t.category) === "available"
+              ).length;
               
               return (
                 <div key={category}>
@@ -451,7 +457,14 @@ const Integrations = () => {
                     <div>
                       <h2 className="text-lg font-semibold">{config.label}</h2>
                       <p className="text-sm text-muted-foreground">
-                        {activeInCategory} outil{activeInCategory > 1 ? 's' : ''} actif{activeInCategory > 1 ? 's' : ''}
+                        {connectedInCategory > 0 ? (
+                          <span className="text-green-600 font-medium">{connectedInCategory} connecté{connectedInCategory > 1 ? 's' : ''}</span>
+                        ) : null}
+                        {connectedInCategory > 0 && availableInCategory > 0 ? ' • ' : ''}
+                        {availableInCategory > 0 ? (
+                          <span>{availableInCategory} disponible{availableInCategory > 1 ? 's' : ''}</span>
+                        ) : null}
+                        {connectedInCategory === 0 && availableInCategory === 0 ? 'Bientôt disponible' : null}
                       </p>
                     </div>
                   </div>
