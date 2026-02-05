@@ -41,6 +41,12 @@ import {
   Scale,
   Database,
   Cog,
+   Layers,
+   FileCheck,
+   History,
+   BarChart3,
+   UserCog,
+   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -75,13 +81,23 @@ interface NavDepartment {
 const mainNavItems: NavItem[] = [
   { path: "/dashboard", label: "Cockpit", icon: LayoutDashboard },
   { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot },
-  { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
-  { path: "/dashboard/approvals", label: "À valider", icon: () => <span className="text-base">✓</span> },
-  { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span> },
 ];
 
 // Advanced items organized by department
 const advancedDepartments: NavDepartment[] = [
+  {
+    id: "operations",
+    label: "Opérations",
+    icon: Layers,
+    color: "text-violet-500",
+    description: "Réunions, approbations, historique",
+    items: [
+      { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/approvals", label: "Approbations", icon: FileCheck },
+      { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span> },
+      { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span> },
+    ],
+  },
   {
     id: "marketing",
     label: "Marketing",
@@ -101,7 +117,7 @@ const advancedDepartments: NavDepartment[] = [
   },
   {
     id: "sales",
-    label: "Sales",
+    label: "Ventes",
     icon: Briefcase,
     color: "text-blue-500",
     description: "Pipeline, offres, lifecycle",
@@ -112,25 +128,27 @@ const advancedDepartments: NavDepartment[] = [
     ],
   },
   {
-    id: "content",
-    label: "Médias",
+    id: "data-analytics",
+    label: "Data & Analytics",
     icon: Database,
     color: "text-purple-500",
-    description: "CMS, assets, exports",
+    description: "CMS, assets, KPIs",
     items: [
       { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
       { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span> },
+      { path: "/dashboard/media-kpis", label: "Media KPIs", icon: BarChart3 },
     ],
   },
   {
-    id: "hr-legal",
-    label: "RH & Legal",
-    icon: Scale,
+    id: "resources",
+    label: "Ressources & RH",
+    icon: UserCog,
     color: "text-amber-500",
-    description: "Ressources humaines, juridique",
+    description: "Équipes, RH, juridique",
     items: [
       { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
       { path: "/dashboard/legal", label: "Juridique", icon: () => <span className="text-base">⚖️</span> },
+      { path: "/dashboard/service-catalog", label: "Catalogue", icon: () => <span className="text-base">📋</span> },
     ],
   },
   {
@@ -138,11 +156,23 @@ const advancedDepartments: NavDepartment[] = [
     label: "Gouvernance",
     icon: Shield,
     color: "text-red-500",
-    description: "Sécurité, accès, audit",
+    description: "Audit, conformité, sécurité",
     items: [
+      { path: "/dashboard/audit-log", label: "Audit Log", icon: History, requiresRole: "manager" },
       { path: "/dashboard/access-review", label: "Revue accès", icon: () => <span className="text-base">🔐</span> },
-      { path: "/dashboard/audit-log", label: "Audit Log", icon: () => <span className="text-base">📜</span>, requiresRole: "manager" },
+      { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span> },
       { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
+    ],
+  },
+  {
+    id: "compliance",
+    label: "Conformité RGPD",
+    icon: ShieldCheck,
+    color: "text-teal-500",
+    description: "Protection données, export",
+    items: [
+      { path: "/dashboard/logs", label: "Logs système", icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
+      { path: "/dashboard/status", label: "Status Page", icon: () => <span className="text-base">🟢</span> },
     ],
   },
   {
@@ -150,24 +180,12 @@ const advancedDepartments: NavDepartment[] = [
     label: "Configuration",
     icon: Cog,
     color: "text-slate-500",
-    description: "Sites, intégrations, automations",
+    description: "Sites, intégrations, facturation",
     items: [
       { path: "/dashboard/sites", label: "Sites", icon: Building2 },
       { path: "/dashboard/integrations", label: "Connexions API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
       { path: "/dashboard/connections", label: "Mes accès", icon: () => <span className="text-base">🔑</span> },
-      { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span> },
-    ],
-  },
-  {
-    id: "ops",
-    label: "Ops & Support",
-    icon: Users,
-    color: "text-cyan-500",
-    description: "Logs, diagnostics, facturation",
-    items: [
-      { path: "/dashboard/logs", label: "Logs", icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
       { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
-      { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
       { path: "/dashboard/billing", label: "Facturation", icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
       { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
     ],
@@ -386,46 +404,35 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <NavLink key={item.path} item={item} />
             ))}
 
-            {/* Advanced section with departments */}
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <CollapsibleTrigger className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors mt-4">
-                <Cog className="w-4 h-4" />
-                <span className="flex-1 text-left">Avancé</span>
-                <ChevronRight
-                  className={cn(
-                    "w-4 h-4 transition-transform",
-                    advancedOpen && "rotate-90"
-                  )}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-1 pt-2">
-                {filteredDepartments.map((dept) => {
-                  const DeptIcon = dept.icon;
-                  const isOpen = openDepartments.has(dept.id);
-                  
-                  return (
-                    <Collapsible key={dept.id} open={isOpen} onOpenChange={() => toggleDepartment(dept.id)}>
-                      <CollapsibleTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-xs font-medium text-muted-foreground hover:bg-secondary/50 transition-colors">
-                        <DeptIcon className={cn("w-3.5 h-3.5", dept.color)} />
-                        <span className="flex-1 text-left">{dept.label}</span>
-                        <span className="text-[10px] opacity-50">{dept.items.length}</span>
-                        <ChevronRight
-                          className={cn(
-                            "w-3 h-3 transition-transform",
-                            isOpen && "rotate-90"
-                          )}
-                        />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="pl-4 space-y-0.5 pt-1">
-                        {dept.items.map((item) => (
-                          <NavLink key={item.path} item={item} />
-                        ))}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
+            {/* Separator */}
+            <div className="my-3 border-t border-border/50" />
+
+            {/* Departments - direct display */}
+            {filteredDepartments.map((dept) => {
+              const DeptIcon = dept.icon;
+              const isOpen = openDepartments.has(dept.id);
+              
+              return (
+                <Collapsible key={dept.id} open={isOpen} onOpenChange={() => toggleDepartment(dept.id)}>
+                  <CollapsibleTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/50 transition-colors">
+                    <DeptIcon className={cn("w-4 h-4", dept.color)} />
+                    <span className="flex-1 text-left">{dept.label}</span>
+                    <span className="text-[10px] text-muted-foreground/60">{dept.items.length}</span>
+                    <ChevronRight
+                      className={cn(
+                        "w-3.5 h-3.5 transition-transform text-muted-foreground/50",
+                        isOpen && "rotate-90"
+                      )}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-5 space-y-0.5 pt-1">
+                    {dept.items.map((item) => (
+                      <NavLink key={item.path} item={item} />
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
           </nav>
 
           {/* User menu */}
