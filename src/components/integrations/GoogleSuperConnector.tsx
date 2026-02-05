@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,40 +22,39 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
-interface GoogleModuleStatus {
-  connected: boolean;
-  lastSync?: string;
-  accountName?: string;
-  error?: string;
-}
-
-interface GoogleSuperConnectorProps {
-  moduleStatus?: {
-    ga4: GoogleModuleStatus;
-    gsc: GoogleModuleStatus;
-    gads: GoogleModuleStatus;
-    gbp: GoogleModuleStatus;
-    youtube: GoogleModuleStatus;
-  };
-  onRefresh?: () => void;
-}
-
-const DEFAULT_STATUS: GoogleSuperConnectorProps["moduleStatus"] = {
-  ga4: { connected: false },
-  gsc: { connected: false },
-  gads: { connected: false },
-  gbp: { connected: false },
-  youtube: { connected: false },
-};
-
-export function GoogleSuperConnector({ 
-  moduleStatus = DEFAULT_STATUS, 
-  onRefresh 
-}: GoogleSuperConnectorProps) {
+ export function GoogleSuperConnector() {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [connecting, setConnecting] = useState(false);
 
+   // Fetch Google integration status from database
+   const { data: integration, isLoading, refetch } = useQuery({
+     queryKey: ["google-integration", currentWorkspace?.id],
+     queryFn: async () => {
+       if (!currentWorkspace?.id) return null;
+       
+       const { data, error } = await supabase
+         .from("integrations")
+         .select("*")
+         .eq("workspace_id", currentWorkspace.id)
+         .eq("provider", "google_combined")
+         .maybeSingle();
+       
+       if (error) {
+         console.error("Error fetching Google integration:", error);
+         return null;
+       }
+       
+       return data;
+     },
+     enabled: !!currentWorkspace?.id,
+     refetchInterval: 5000, // Auto-refresh every 5 seconds to catch OAuth callback
+   });
+ 
+   const isConnected = integration?.status === "active";
+   const lastSync = integration?.last_sync_at;
+   const accountName = integration?.account_id;
+ 
   const handleConnectAll = async () => {
     if (!currentWorkspace) {
       toast.error("Aucun workspace actif");
@@ -92,8 +92,17 @@ export function GoogleSuperConnector({
     }
   };
 
-  const connectedCount = Object.values(moduleStatus).filter(m => m.connected).length;
-  const anyConnected = connectedCount > 0;
+   // Determine which modules are connected based on scopes
+   // For now, if google_combined is connected, GA4 and GSC are available
+   const moduleStatus = {
+     ga4: { connected: isConnected, lastSync, accountName },
+     gsc: { connected: isConnected, lastSync, accountName },
+     gads: { connected: false }, // Not in current scopes
+     gbp: { connected: false },  // Not in current scopes
+     youtube: { connected: false }, // Not in current scopes
+   };
+ 
+   const connectedCount = Object.values(moduleStatus).filter(m => m.connected).length;
 
   const modules = [
     { 
@@ -101,44 +110,44 @@ export function GoogleSuperConnector({
       title: "Google Analytics 4", 
       description: "Trafic, comportement, conversions",
       icon: BarChart3,
-      status: moduleStatus.ga4,
+       status: moduleStatus.ga4 as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gsc", 
       title: "Search Console", 
       description: "Positions, clics, impressions SEO",
       icon: Search,
-      status: moduleStatus.gsc,
+       status: moduleStatus.gsc as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gads", 
       title: "Google Ads", 
       description: "Campagnes, CPC, ROAS",
       icon: Megaphone,
-      status: moduleStatus.gads,
+       status: moduleStatus.gads as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gbp", 
       title: "Business Profile", 
       description: "Fiches locales, avis, posts",
       icon: MapPin,
-      status: moduleStatus.gbp,
+       status: moduleStatus.gbp as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "youtube", 
       title: "YouTube", 
       description: "Chaîne, analytics, vidéos",
       icon: Youtube,
-      status: moduleStatus.youtube,
+       status: moduleStatus.youtube as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
   ];
 
   return (
-    <Card className="border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-red-500/5">
+     <Card className={`border-2 ${isConnected ? "border-green-500/50 bg-gradient-to-br from-green-500/5 to-blue-500/5" : "border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-red-500/5"}`}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-red-500 text-white">
+             <div className={`p-2.5 rounded-xl ${isConnected ? "bg-gradient-to-br from-green-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-red-500"} text-white`}>
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -149,34 +158,37 @@ export function GoogleSuperConnector({
             <div>
               <CardTitle className="text-lg">Google Suite</CardTitle>
               <CardDescription>
-                5 services : GA4, Search Console, Ads, GBP, YouTube
+                 {isConnected ? `Connecté • ${connectedCount}/5 services actifs` : "5 services : GA4, Search Console, Ads, GBP, YouTube"}
               </CardDescription>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {anyConnected && (
+             {isConnected && (
               <Badge variant="success" className="text-xs">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
                 {connectedCount}/5 actifs
               </Badge>
             )}
-            {anyConnected && onRefresh && (
-              <Button variant="ghost" size="icon" onClick={onRefresh}>
+             {isConnected && (
+               <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isLoading}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
             )}
             <Button
-              variant={anyConnected ? "outline" : "default"}
+               variant={isConnected ? "outline" : "default"}
               size="sm"
               onClick={handleConnectAll}
-              disabled={connecting || !currentSite}
-              className={!anyConnected ? "bg-gradient-to-r from-blue-500 to-red-500 hover:from-blue-600 hover:to-red-600 border-0" : ""}
+               disabled={connecting || !currentSite || isLoading}
+               className={!isConnected ? "bg-gradient-to-r from-blue-500 to-red-500 hover:from-blue-600 hover:to-red-600 border-0" : ""}
             >
-              {connecting ? (
+               {connecting || isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : anyConnected ? (
-                "Modifier les accès"
+               ) : isConnected ? (
+                 <>
+                   <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
+                   Connecté
+                 </>
               ) : (
                 <>
                   Autoriser l'accès
@@ -240,14 +252,11 @@ export function GoogleSuperConnector({
                 </div>
                 {module.status.lastSync && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Sync : {formatDistanceToNow(new Date(module.status.lastSync), { 
+                     Sync : {formatDistanceToNow(new Date(module.status.lastSync as string), { 
                       addSuffix: true, 
                       locale: fr 
                     })}
                   </p>
-                )}
-                {module.status.error && (
-                  <p className="text-xs text-destructive mt-1">{module.status.error}</p>
                 )}
               </div>
             );
