@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface SmartLinkData {
   id: string;
+  workspace_id: string;
   slug: string;
   title: string | null;
   artist_name: string | null;
@@ -150,6 +151,7 @@ export default function SmartLinkPage() {
           embed_html: asset.embed_html,
           platform: asset.platform,
           links: platformLinks,
+        workspace_id: asset.workspace_id,
           show_email_capture: config.show_email_capture || false,
           email_capture_text: config.email_capture_text || 'Get notified about new releases',
           background_color: config.background_color || '#1a1a2e',
@@ -194,7 +196,7 @@ export default function SmartLinkPage() {
       
       const { error } = await supabase.from('smart_link_emails').insert({
         media_asset_id: data.id,
-        workspace_id: '', // This will be set by the RLS policy
+        workspace_id: data.workspace_id,
         email,
         consent_given: consent,
         utm_source: urlParams.get('utm_source'),
