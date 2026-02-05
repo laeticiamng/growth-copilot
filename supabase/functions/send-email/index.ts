@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +24,7 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[SEND-EMAIL] ${step}${detailsStr}`);
 };
 
-// Brand constants (must match src/lib/email-templates.ts)
+// Brand constants
 const BRAND = {
   name: 'Growth OS',
   company: 'EmotionsCare SASU',
@@ -289,38 +289,6 @@ function generateAgentRunCompletedEmail(data: Record<string, unknown>): EmailTem
   };
 }
 
-async function sendEmailWithRetry(
-  smtpClient: SMTPClient,
-  to: string,
-  subject: string,
-  html: string,
-  maxRetries: number = 1
-): Promise<{ success: boolean; error?: string }> {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      await smtpClient.send({
-        from: `Growth OS <noreply@agent-growth-automator.com>`,
-        to: to,
-        subject: subject,
-        content: "auto",
-        html: html,
-      });
-      return { success: true };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logStep(`Send attempt ${attempt + 1} failed`, { error: errorMessage });
-      
-      if (attempt === maxRetries) {
-        return { success: false, error: errorMessage };
-      }
-      
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  }
-  return { success: false, error: 'Max retries exceeded' };
-}
-
 // deno-lint-ignore no-explicit-any
 async function logEmailToDatabase(
   supabase: any,
@@ -363,10 +331,7 @@ serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const SMTP_HOST = Deno.env.get("SMTP_HOST");
-    const SMTP_PORT = Deno.env.get("SMTP_PORT");
-    const SMTP_USER = Deno.env.get("SMTP_USER");
-    const SMTP_PASS = Deno.env.get("SMTP_PASS");
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Supabase configuration missing");
@@ -386,9 +351,9 @@ serve(async (req) => {
     // Generate email content
     const { subject, html } = generateTemplate(template, data);
 
-    // Check if SMTP is configured
-    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-      logStep("SMTP not configured, logging email as pending");
+    // Check if Resend is configured
+    if (!RESEND_API_KEY) {
+      logStep("Resend API key not configured, logging email as pending");
       
       await logEmailToDatabase(
         supabase,
@@ -397,13 +362,13 @@ serve(async (req) => {
         template,
         subject,
         'pending',
-        'SMTP not configured'
+        'RESEND_API_KEY not configured'
       );
 
       return new Response(
         JSON.stringify({ 
           success: false, 
-          warning: "SMTP not configured, email logged but not sent" 
+          warning: "Resend not configured, email logged but not sent" 
         }),
         {
           status: 200,
@@ -412,58 +377,78 @@ serve(async (req) => {
       );
     }
 
-    // Create SMTP client
-    const smtpClient = new SMTPClient({
-      connection: {
-        hostname: SMTP_HOST,
-        port: parseInt(SMTP_PORT, 10),
-        tls: true,
-        auth: {
-          username: SMTP_USER,
-          password: SMTP_PASS,
-        },
-      },
-    });
-
+    // Send email with Resend
+    const resend = new Resend(RESEND_API_KEY);
+    
     try {
-      // Send email with retry
-      const result = await sendEmailWithRetry(smtpClient, to, subject, html);
+      const { data: emailData, error: emailError } = await resend.emails.send({
+        from: "Growth OS <noreply@agent-growth-automator.com>",
+        to: [to],
+        subject: subject,
+        html: html,
+      });
 
-      // Log to database
-      await logEmailToDatabase(
-        supabase,
-        workspace_id || null,
-        to,
-        template,
-        subject,
-        result.success ? 'sent' : 'failed',
-        result.error
-      );
-
-      await smtpClient.close();
-
-      if (result.success) {
-        logStep("Email sent successfully", { to, template });
-        return new Response(
-          JSON.stringify({ success: true }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
+      if (emailError) {
+        logStep("Resend error", { error: emailError });
+        
+        await logEmailToDatabase(
+          supabase,
+          workspace_id || null,
+          to,
+          template,
+          subject,
+          'failed',
+          emailError.message
         );
-      } else {
-        logStep("Email sending failed after retries", { error: result.error });
+
         return new Response(
-          JSON.stringify({ success: false, error: result.error }),
+          JSON.stringify({ success: false, error: emailError.message }),
           {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
       }
-    } catch (error) {
-      await smtpClient.close();
-      throw error;
+
+      logStep("Email sent successfully", { to, template, id: emailData?.id });
+      
+      await logEmailToDatabase(
+        supabase,
+        workspace_id || null,
+        to,
+        template,
+        subject,
+        'sent'
+      );
+
+      return new Response(
+        JSON.stringify({ success: true, id: emailData?.id }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    } catch (sendError) {
+      const errorMessage = sendError instanceof Error ? sendError.message : String(sendError);
+      logStep("Send error", { error: errorMessage });
+      
+      await logEmailToDatabase(
+        supabase,
+        workspace_id || null,
+        to,
+        template,
+        subject,
+        'failed',
+        errorMessage
+      );
+
+      return new Response(
+        JSON.stringify({ success: false, error: errorMessage }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
