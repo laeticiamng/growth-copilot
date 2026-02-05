@@ -12,6 +12,7 @@ import {
   Loader2,
   CheckCircle2,
   Info,
+  RefreshCw,
 } from "lucide-react";
 import { useMeta } from "@/hooks/useMeta";
 import { useSites } from "@/hooks/useSites";
@@ -25,10 +26,10 @@ interface MetaSuperConnectorProps {
   isConnected?: boolean;
 }
 
-export function MetaSuperConnector({ onConnect, isConnected = false }: MetaSuperConnectorProps) {
+export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
-  const { moduleStatus, syncAds, syncInstagram, loading } = useMeta();
+  const { moduleStatus, syncAds, syncInstagram, loading, isOAuthConnected, refetch } = useMeta();
   const [connecting, setConnecting] = useState(false);
   const [syncingAds, setSyncingAds] = useState(false);
   const [syncingIG, setSyncingIG] = useState(false);
@@ -87,24 +88,36 @@ export function MetaSuperConnector({ onConnect, isConnected = false }: MetaSuper
     setSyncingIG(false);
   };
 
-  const anyConnected = 
-    moduleStatus.ads.connected || 
-    moduleStatus.instagram.connected || 
-    moduleStatus.messaging.connected;
+  // Use OAuth status as primary indicator, fall back to module status
+  const anyConnected = isOAuthConnected || 
+    moduleStatus.ads.connected ||
+    moduleStatus.instagram.connected;
+
+  const connectedModulesCount = [
+    moduleStatus.ads.connected,
+    moduleStatus.capi.configured,
+    moduleStatus.instagram.connected,
+    moduleStatus.messaging.connected,
+    moduleStatus.webhooks.configured,
+  ].filter(Boolean).length;
 
   return (
-    <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+    <Card className={`border-2 ${anyConnected ? "border-green-500/50 bg-gradient-to-br from-green-500/5 to-blue-500/5" : "border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5"}`}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground">
+            <div className={`p-2.5 rounded-xl ${anyConnected ? "bg-gradient-to-br from-green-500 to-blue-500" : "bg-gradient-to-br from-primary to-accent"} text-primary-foreground`}>
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
               </svg>
             </div>
             <div>
               <CardTitle className="text-lg">Meta Super-Connecteur</CardTitle>
-              <CardDescription>5 modules : Ads, CAPI, Instagram, Messaging, Webhooks</CardDescription>
+              <CardDescription>
+                {anyConnected 
+                  ? `Connecté • ${connectedModulesCount}/5 modules actifs` 
+                  : "5 modules : Ads, CAPI, Instagram, Messaging, Webhooks"}
+              </CardDescription>
             </div>
           </div>
           
@@ -112,19 +125,28 @@ export function MetaSuperConnector({ onConnect, isConnected = false }: MetaSuper
             {anyConnected && (
               <Badge variant="success" className="text-xs">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                Actif
+                {connectedModulesCount}/5 actifs
               </Badge>
+            )}
+            {anyConnected && (
+              <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={loading}>
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              </Button>
             )}
             <Button
               variant={anyConnected ? "outline" : "default"}
               size="sm"
               onClick={handleConnect}
-              disabled={connecting || !currentSite}
+              disabled={connecting || !currentSite || loading}
+              className={!anyConnected ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0" : ""}
             >
-              {connecting ? (
+              {connecting || loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : anyConnected ? (
-                "Modifier les accès"
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
+                  Connecté
+                </>
               ) : (
                 <>
                   Autoriser l'accès
