@@ -224,7 +224,26 @@ const Integrations = () => {
     return acc;
   }, {} as Record<string, PlatformTool[]>);
 
-  const activeCount = platformTools.filter(t => t.status === "active").length;
+  // Calculate real connection status based on database, not static config
+  const getToolConnectionStatus = (toolId: string, category: string): "connected" | "available" | "coming_soon" => {
+    // Coming soon tools stay coming soon
+    const tool = platformTools.find(t => t.id === toolId);
+    if (tool?.status === "coming_soon") return "coming_soon";
+    
+    // Check real connections from database
+    if (category === "google") {
+      return googleConnected ? "connected" : "available";
+    }
+    if (category === "meta") {
+      return metaConnected ? "connected" : "available";
+    }
+    
+    return "available";
+  };
+
+  // Count only really connected tools
+  const connectedCount = (googleConnected ? 5 : 0) + (metaConnected ? 3 : 0); // 5 Google tools, 3 Meta tools
+  const availableCount = platformTools.filter(t => t.status === "active").length - connectedCount;
   const comingSoonCount = platformTools.filter(t => t.status === "coming_soon").length;
 
   // Handle OAuth authorization
@@ -275,10 +294,18 @@ const Integrations = () => {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Badge variant="success" className="gap-1">
-            <Zap className="w-3 h-3" />
-            {activeCount} actifs
-          </Badge>
+          {connectedCount > 0 && (
+            <Badge variant="success" className="gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              {connectedCount} connectés
+            </Badge>
+          )}
+          {availableCount > 0 && (
+            <Badge variant="outline" className="gap-1">
+              <Zap className="w-3 h-3" />
+              {availableCount} disponibles
+            </Badge>
+          )}
           <Badge variant="secondary">
             {comingSoonCount} à venir
           </Badge>
@@ -432,33 +459,40 @@ const Integrations = () => {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {tools.map((tool) => {
                       const Icon = tool.icon;
-                      const isActive = tool.status === "active";
+                      const connectionStatus = getToolConnectionStatus(tool.id, tool.category);
+                      const isConnected = connectionStatus === "connected";
+                      const isAvailable = connectionStatus === "available";
+                      const isComingSoon = connectionStatus === "coming_soon";
                       
                       return (
                         <Card 
                           key={tool.id} 
                           className={`transition-all ${
-                            isActive 
-                              ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/40" 
+                            isConnected 
+                              ? "border-green-500/30 bg-gradient-to-br from-green-500/5 to-transparent hover:border-green-500/50" 
+                              : isAvailable
+                              ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/40"
                               : "opacity-60"
                           }`}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
                               <div className={`p-2.5 rounded-lg ${
-                                isActive ? 'bg-primary/15' : 'bg-muted'
+                                isConnected ? 'bg-green-500/15' : isAvailable ? 'bg-primary/15' : 'bg-muted'
                               }`}>
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <Icon className={`w-5 h-5 ${isConnected ? 'text-green-600' : isAvailable ? 'text-primary' : 'text-muted-foreground'}`} />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                   <h3 className="font-medium">{tool.name}</h3>
                                   <Badge 
-                                    variant={isActive ? "success" : "outline"} 
+                                    variant={isConnected ? "success" : isAvailable ? "outline" : "secondary"} 
                                     className="text-xs"
                                   >
-                                    {isActive ? (
+                                    {isConnected ? (
                                       <><CheckCircle2 className="w-3 h-3 mr-1" /> Actif</>
+                                    ) : isAvailable ? (
+                                      <><Unlock className="w-3 h-3 mr-1" /> Disponible</>
                                     ) : (
                                       <><Clock className="w-3 h-3 mr-1" /> Bientôt</>
                                     )}
