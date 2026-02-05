@@ -53,6 +53,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { AIAssistant } from "@/components/ai/AIAssistant";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { SupportChatWidget } from "@/components/support/SupportChatWidget";
+import { SubscriptionStatusBadge } from "@/components/billing/SubscriptionStatusBadge";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 
 interface DashboardLayoutProps {
@@ -459,6 +460,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </nav>
 
+          {/* Subscription Status Badge */}
+          <div className="px-4 py-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Abonnement</span>
+              <SubscriptionStatusBadge compact />
+            </div>
+          </div>
+
           {/* User menu */}
           <div className="p-4 border-t border-border">
             <DropdownMenu>
@@ -477,6 +486,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Settings className="w-4 h-4 mr-2" />
                   {t("common.configure")}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/billing")}>
+                  <span className="w-4 h-4 mr-2">💳</span>
+                  Facturation
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
                   {t("auth.logout")}

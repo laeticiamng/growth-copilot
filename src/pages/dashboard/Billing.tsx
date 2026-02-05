@@ -9,6 +9,7 @@ import { useServices, Service } from "@/hooks/useServices";
 import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { BillingOverview } from "@/components/billing/BillingOverview";
 import {
   Crown,
   Zap,
@@ -180,33 +181,7 @@ export default function Billing() {
     }
   };
 
-  // Manage billing (customer portal)
-  const handleManageBilling = async () => {
-    if (!subscription?.stripe_customer_id) {
-      toast.info("Aucun abonnement actif");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke("stripe-portal", {
-        body: {
-          customerId: subscription.stripe_customer_id,
-          returnUrl: `${window.location.origin}/dashboard/billing`,
-        },
-      });
-
-      if (error) throw error;
-      
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      toast.error("Erreur lors de l'ouverture du portail de facturation");
-    }
-  };
-
   const isLoading = catalogLoading || subscriptionLoading;
-  const isPaid = subscription?.status === "active" && subscription?.plan !== "free";
 
   if (isLoading) {
     return (
@@ -221,6 +196,8 @@ export default function Billing() {
     );
   }
 
+  const isPaid = subscription?.status === "active" && subscription?.plan !== "free";
+
   return (
     <PermissionGuard permission="manage_billing">
       <div className="space-y-8">
@@ -232,152 +209,11 @@ export default function Billing() {
           </p>
         </header>
 
-        {/* Current Plan Overview */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          <Card variant="gradient" className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-primary/10">
-                    {isFounder ? (
-                      <Sparkles className="w-6 h-6 text-primary" />
-                    ) : isFullCompany ? (
-                      <Crown className="w-6 h-6 text-primary" />
-                    ) : (
-                      <Building2 className="w-6 h-6 text-primary" />
-                    )}
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">
-                      {isFounder ? "Founder" : isFullCompany ? "Full Company" : "À la carte"}
-                    </CardTitle>
-                    <CardDescription className="mt-0.5">
-                      {isFounder 
-                        ? `${TOTAL_AI_WORKFORCE} employés IA • Accès illimité • Fondatrice`
-                        : isFullCompany 
-                          ? `${TOTAL_AI_WORKFORCE} employés IA • 11 départements`
-                          : `${totalEmployees} employés IA • ${enabledPaidCount} département(s)`
-                      }
-                    </CardDescription>
-                  </div>
-                </div>
-                <div className="text-right">
-                  {isFounder ? (
-                    <>
-                      <div className="text-3xl font-bold text-primary">
-                        ∞
-                        <span className="text-sm font-normal text-muted-foreground ml-2">Illimité</span>
-                      </div>
-                      <Badge variant="success" className="mt-2">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Fondatrice
-                      </Badge>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold">
-                        {(isFullCompany ? FULL_COMPANY_PRICE : alaCarteTotal).toLocaleString()}€
-                        <span className="text-sm font-normal text-muted-foreground">/mois</span>
-                      </div>
-                      {!isFullCompany && alaCarteTotal > FULL_COMPANY_PRICE && (
-                        <p className="text-xs text-destructive mt-1">
-                          Économisez {(alaCarteTotal - FULL_COMPANY_PRICE).toLocaleString()}€ avec Full Company
-                        </p>
-                      )}
-                      <Badge 
-                        variant={isPaid ? "success" : subscription?.status === "trialing" ? "secondary" : "outline"} 
-                        className="mt-2"
-                      >
-                        {isPaid ? "Actif" : subscription?.status === "trialing" ? "Essai" : "Gratuit"}
-                      </Badge>
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {(isFounder || isFullCompany ? catalog.filter(s => !s.is_core) : enabledServices).map(service => {
-                  const Icon = SERVICE_ICONS[service.slug] || Puzzle;
-                  const employees = DEPT_EMPLOYEES[service.slug] || 0;
-                  return (
-                    <Badge key={service.id} variant="secondary" className="gap-1.5 py-1">
-                      <Icon className="w-3 h-3" />
-                      {service.name}
-                      {!service.is_core && employees > 0 && (
-                        <span className="text-xs opacity-60 flex items-center gap-0.5">
-                          <Bot className="w-2.5 h-2.5" />
-                          {employees}
-                        </span>
-                      )}
-                    </Badge>
-                  );
-                })}
-              </div>
-              
-              {isPaid && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <Button variant="outline" size="sm" onClick={handleManageBilling}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Gérer mon abonnement
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-        {/* Starter Plan Card - only show if not full company and not founder and not already starter */}
-          {!isFullCompany && !isStarter && !isFounder && (
-            <Card className="border border-border">
-              <CardHeader className="text-center pb-2">
-                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-secondary">
-                  <Zap className="w-7 h-7 text-primary" />
-                </div>
-                <CardTitle>Starter</CardTitle>
-                <div className="text-2xl font-bold mt-2">
-                  {STARTER_PRICE.toLocaleString()}€
-                  <span className="text-sm font-normal text-muted-foreground">/mois</span>
-                </div>
-              </CardHeader>
-              <CardContent className="text-center space-y-4">
-                <ul className="space-y-2 text-sm text-left">
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    9 départements (version allégée)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    {STARTER_LIMITS.totalEmployees} employés IA (1/dept)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    {STARTER_LIMITS.runs} runs/mois
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-primary" />
-                    {STARTER_LIMITS.sites} site • {STARTER_LIMITS.users} utilisateurs
-                  </li>
-                </ul>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => handleCheckout("starter")}
-                  disabled={creatingCheckout === "starter"}
-                >
-                  {creatingCheckout === "starter" ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Zap className="w-4 h-4 mr-2" />
-                  )}
-                  Commencer avec Starter
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        {/* Billing Overview Component */}
+        <BillingOverview />
 
         {/* Full Company Upgrade Card - only show if not full company and not founder */}
-        {!isFullCompany && !isFounder && (
+        {!isFullCompany && !isFounder && !isPaid && (
           <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -524,30 +360,15 @@ export default function Billing() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isPaid && subscription?.stripe_customer_id ? (
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <CreditCard className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Carte enregistrée</p>
-                      <p className="text-sm text-muted-foreground">Gérez vos informations via le portail Stripe</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={handleManageBilling}>
-                    Modifier
-                  </Button>
-                </div>
-              ) : (
-                <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
-                  <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
-                  <p className="text-sm text-muted-foreground mb-3">Aucune carte enregistrée</p>
-                  <p className="text-xs text-muted-foreground">
-                    Votre carte sera demandée lors du premier paiement
-                  </p>
-                </div>
-              )}
+              <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
+                <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isPaid ? "Votre carte est enregistrée" : "Aucune carte enregistrée"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isPaid ? "Gérez vos moyens de paiement via le portail Stripe ci-dessus" : "Votre carte sera demandée lors du premier paiement"}
+                </p>
+              </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">
                 🔒 Paiements sécurisés via Stripe • Pas d'engagement • Annulez à tout moment
               </p>
