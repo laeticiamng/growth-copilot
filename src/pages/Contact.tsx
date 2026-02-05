@@ -8,6 +8,7 @@ import { Footer } from "@/components/landing/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SEOHead } from "@/components/SEOHead";
 import {
   Mail,
   MessageCircle,
@@ -129,6 +130,17 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Contact"
+        description="Contactez l'équipe Growth OS. Support client réactif, assistance technique et réponses à vos questions sous 24h."
+        canonical="/contact"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          "name": "Contact Growth OS",
+          "description": "Formulaire de contact et support"
+        }}
+      />
       <Navbar />
 
       <main className="container mx-auto px-4 py-24">
