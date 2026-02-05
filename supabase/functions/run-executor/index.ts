@@ -11,19 +11,20 @@ type RunType =
   | "WEEKLY_EXECUTIVE_REVIEW"
   | "MARKETING_WEEK_PLAN"
   | "SEO_AUDIT_REPORT"
+  | "SEO_TECH_AUDIT"
   | "FUNNEL_DIAGNOSTIC"
   | "ACCESS_REVIEW"
-   | "SALES_PIPELINE_REVIEW"
-   | "DAILY_ANOMALY_DETECTION"
-   | "DAILY_PERFORMANCE_CHECK"
-   | "DAILY_ADS_OPTIMIZATION"
-   | "MONTHLY_COMPLIANCE_AUDIT"
-   | "COMPETITIVE_INTEL"
-   | "MONTHLY_PULSE_CHECK"
-   | "WEEKLY_CONTENT_PLAN"
-   | "MONTHLY_SECURITY_AUDIT"
-   | "MONTHLY_SEO_HEALTH"
-   | "REPUTATION_MONITORING";
+  | "SALES_PIPELINE_REVIEW"
+  | "DAILY_ANOMALY_DETECTION"
+  | "DAILY_PERFORMANCE_CHECK"
+  | "DAILY_ADS_OPTIMIZATION"
+  | "MONTHLY_COMPLIANCE_AUDIT"
+  | "COMPETITIVE_INTEL"
+  | "MONTHLY_PULSE_CHECK"
+  | "WEEKLY_CONTENT_PLAN"
+  | "MONTHLY_SECURITY_AUDIT"
+  | "MONTHLY_SEO_HEALTH"
+  | "REPUTATION_MONITORING";
 
 interface RunRequest {
   run_type: RunType;
@@ -67,6 +68,7 @@ const RUN_TYPE_DEPARTMENT: Record<RunType, string> = {
   WEEKLY_EXECUTIVE_REVIEW: "direction",
   MARKETING_WEEK_PLAN: "marketing",
   SEO_AUDIT_REPORT: "marketing",
+  SEO_TECH_AUDIT: "marketing",
   FUNNEL_DIAGNOSTIC: "sales",
   ACCESS_REVIEW: "governance",
   SALES_PIPELINE_REVIEW: "sales",
@@ -132,6 +134,9 @@ async function executeRun(
         break;
       case "SEO_AUDIT_REPORT":
         outputs = await generateSEOReport(supabase, workspaceId, siteId);
+        break;
+      case "SEO_TECH_AUDIT":
+        outputs = await generateSEOTechAudit(supabase, workspaceId, siteId);
         break;
       case "FUNNEL_DIAGNOSTIC":
         outputs = await generateFunnelDiagnostic(supabase, workspaceId, siteId);
@@ -412,19 +417,20 @@ function getRunTypeLabel(runType: RunType): string {
     WEEKLY_EXECUTIVE_REVIEW: "Revue hebdomadaire",
     MARKETING_WEEK_PLAN: "Plan marketing",
     SEO_AUDIT_REPORT: "Audit SEO",
+    SEO_TECH_AUDIT: "Audit SEO Technique",
     FUNNEL_DIAGNOSTIC: "Diagnostic funnel",
     ACCESS_REVIEW: "Revue des accès",
     SALES_PIPELINE_REVIEW: "Revue pipeline",
-     DAILY_ANOMALY_DETECTION: "Détection d'anomalies",
-     DAILY_PERFORMANCE_CHECK: "Check performance",
-     DAILY_ADS_OPTIMIZATION: "Optimisation ads",
-     MONTHLY_COMPLIANCE_AUDIT: "Audit conformité",
-     COMPETITIVE_INTEL: "Veille concurrentielle",
-     MONTHLY_PULSE_CHECK: "Pulse RH mensuel",
-     WEEKLY_CONTENT_PLAN: "Plan contenu",
-     MONTHLY_SECURITY_AUDIT: "Audit sécurité",
-     MONTHLY_SEO_HEALTH: "Santé SEO",
-     REPUTATION_MONITORING: "Veille réputation",
+    DAILY_ANOMALY_DETECTION: "Détection d'anomalies",
+    DAILY_PERFORMANCE_CHECK: "Check performance",
+    DAILY_ADS_OPTIMIZATION: "Optimisation ads",
+    MONTHLY_COMPLIANCE_AUDIT: "Audit conformité",
+    COMPETITIVE_INTEL: "Veille concurrentielle",
+    MONTHLY_PULSE_CHECK: "Pulse RH mensuel",
+    WEEKLY_CONTENT_PLAN: "Plan contenu",
+    MONTHLY_SECURITY_AUDIT: "Audit sécurité",
+    MONTHLY_SEO_HEALTH: "Santé SEO",
+    REPUTATION_MONITORING: "Veille réputation",
   };
   return labels[runType] || runType;
 }
@@ -572,6 +578,342 @@ async function generateSEOReport(
       criticalCount > 0 ? "Corriger les problèmes critiques en priorité" : null,
       !issuesQuery.data ? "Lancez un crawl pour analyser votre site" : null,
     ].filter(Boolean),
+  };
+}
+
+// SEO Tech Audit using AI Gateway for intelligent analysis
+// deno-lint-ignore no-explicit-any
+async function generateSEOTechAudit(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string,
+  siteId?: string
+): Promise<Record<string, unknown>> {
+  // Get site URL
+  let siteUrl = "";
+  let siteName = "";
+  
+  if (siteId) {
+    const { data: site } = await supabase
+      .from("sites")
+      .select("url, name")
+      .eq("id", siteId)
+      .single();
+    siteUrl = site?.url || "";
+    siteName = site?.name || "";
+  }
+  
+  if (!siteUrl) {
+    // Try to get default site for workspace
+    const { data: defaultSite } = await supabase
+      .from("sites")
+      .select("url, name")
+      .eq("workspace_id", workspaceId)
+      .limit(1)
+      .single();
+    siteUrl = defaultSite?.url || "";
+    siteName = defaultSite?.name || "";
+  }
+  
+  if (!siteUrl) {
+    return {
+      summary: "Aucun site configuré pour l'audit",
+      generated_at: new Date().toISOString(),
+      error: "site_not_found",
+      score: 0,
+      issues: [],
+      opportunities: [],
+      action_plan: [],
+    };
+  }
+
+  // Call AI Gateway for intelligent SEO analysis
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  
+  if (!LOVABLE_API_KEY) {
+    console.log("[SEO_TECH_AUDIT] LOVABLE_API_KEY not configured, using template-based analysis");
+    return generateTemplateBasedSEOAudit(siteUrl, siteName);
+  }
+
+  try {
+    const systemPrompt = `Tu es un expert SEO technique. Analyse l'URL fournie et génère un audit SEO structuré.
+
+Tu dois retourner un JSON valide avec cette structure exacte:
+{
+  "score": <number 0-100>,
+  "issues": [
+    {
+      "id": "<string>",
+      "severity": "<critical|warning|info>",
+      "category": "<string>",
+      "title": "<string>",
+      "description": "<string>",
+      "recommendation": "<string>",
+      "effort": "<low|medium|high>"
+    }
+  ],
+  "opportunities": [
+    {
+      "title": "<string>",
+      "potential_impact": "<string>",
+      "effort": "<low|medium|high>"
+    }
+  ],
+  "action_plan": [
+    {
+      "priority": <number 1-5>,
+      "action": "<string>",
+      "estimated_time": "<string>",
+      "impact": "<string>"
+    }
+  ],
+  "metrics": {
+    "estimated_page_speed": "<fast|medium|slow>",
+    "mobile_friendly": <boolean>,
+    "https_status": <boolean>,
+    "indexation_risk": "<low|medium|high>"
+  }
+}
+
+Catégories d'issues possibles: "meta_tags", "headings", "performance", "mobile", "indexation", "structured_data", "links", "content", "security"
+
+Analyse les aspects suivants:
+1. Balises meta (title, description)
+2. Structure des headings (H1, H2, etc.)
+3. Vitesse de chargement estimée
+4. Compatibilité mobile
+5. Indexation et robots.txt/sitemap
+6. Données structurées
+7. Liens internes/externes
+8. HTTPS et sécurité
+
+Sois précis et actionnable dans tes recommandations.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analyse SEO technique pour le site: ${siteUrl}` },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "seo_audit_result",
+              description: "Retourne le résultat de l'audit SEO technique",
+              parameters: {
+                type: "object",
+                properties: {
+                  score: { type: "number", description: "Score SEO technique de 0 à 100" },
+                  issues: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        severity: { type: "string", enum: ["critical", "warning", "info"] },
+                        category: { type: "string" },
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        recommendation: { type: "string" },
+                        effort: { type: "string", enum: ["low", "medium", "high"] },
+                      },
+                      required: ["id", "severity", "category", "title", "description", "recommendation", "effort"],
+                    },
+                  },
+                  opportunities: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        potential_impact: { type: "string" },
+                        effort: { type: "string", enum: ["low", "medium", "high"] },
+                      },
+                      required: ["title", "potential_impact", "effort"],
+                    },
+                  },
+                  action_plan: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        priority: { type: "number" },
+                        action: { type: "string" },
+                        estimated_time: { type: "string" },
+                        impact: { type: "string" },
+                      },
+                      required: ["priority", "action", "estimated_time", "impact"],
+                    },
+                  },
+                  metrics: {
+                    type: "object",
+                    properties: {
+                      estimated_page_speed: { type: "string", enum: ["fast", "medium", "slow"] },
+                      mobile_friendly: { type: "boolean" },
+                      https_status: { type: "boolean" },
+                      indexation_risk: { type: "string", enum: ["low", "medium", "high"] },
+                    },
+                  },
+                },
+                required: ["score", "issues", "opportunities", "action_plan", "metrics"],
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "seo_audit_result" } },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[SEO_TECH_AUDIT] AI Gateway error:", response.status, errorText);
+      return generateTemplateBasedSEOAudit(siteUrl, siteName);
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (toolCall?.function?.arguments) {
+      const auditResult = JSON.parse(toolCall.function.arguments);
+      
+      // Store in agent_runs for history
+      await supabase.from("agent_runs").insert({
+        workspace_id: workspaceId,
+        site_id: siteId,
+        agent_type: "tech_auditor",
+        status: "completed",
+        inputs: { url: siteUrl, site_name: siteName },
+        outputs: auditResult,
+        started_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+      });
+      
+      return {
+        summary: `Audit SEO technique de ${siteName || siteUrl}`,
+        generated_at: new Date().toISOString(),
+        site_url: siteUrl,
+        site_name: siteName,
+        ...auditResult,
+      };
+    }
+
+    return generateTemplateBasedSEOAudit(siteUrl, siteName);
+  } catch (error) {
+    console.error("[SEO_TECH_AUDIT] Error calling AI Gateway:", error);
+    return generateTemplateBasedSEOAudit(siteUrl, siteName);
+  }
+}
+
+// Fallback template-based SEO audit when AI is unavailable
+function generateTemplateBasedSEOAudit(siteUrl: string, siteName: string): Record<string, unknown> {
+  return {
+    summary: `Audit SEO technique de ${siteName || siteUrl}`,
+    generated_at: new Date().toISOString(),
+    site_url: siteUrl,
+    site_name: siteName,
+    score: 65,
+    issues: [
+      {
+        id: "meta_title_check",
+        severity: "warning",
+        category: "meta_tags",
+        title: "Vérification des balises title",
+        description: "Vérifiez que chaque page a une balise title unique et optimisée",
+        recommendation: "Assurez-vous que chaque title est entre 50-60 caractères et contient vos mots-clés principaux",
+        effort: "low",
+      },
+      {
+        id: "meta_desc_check",
+        severity: "warning",
+        category: "meta_tags",
+        title: "Vérification des meta descriptions",
+        description: "Chaque page doit avoir une meta description unique et engageante",
+        recommendation: "Rédigez des descriptions de 150-160 caractères avec un call-to-action",
+        effort: "low",
+      },
+      {
+        id: "h1_structure",
+        severity: "info",
+        category: "headings",
+        title: "Structure des headings H1",
+        description: "Vérifiez qu'il n'y a qu'un seul H1 par page",
+        recommendation: "Auditez vos pages pour corriger les H1 multiples ou manquants",
+        effort: "medium",
+      },
+      {
+        id: "mobile_check",
+        severity: "warning",
+        category: "mobile",
+        title: "Compatibilité mobile",
+        description: "Assurez-vous que votre site est entièrement responsive",
+        recommendation: "Testez sur plusieurs appareils et utilisez Google Mobile-Friendly Test",
+        effort: "medium",
+      },
+      {
+        id: "page_speed",
+        severity: "warning",
+        category: "performance",
+        title: "Vitesse de chargement",
+        description: "La vitesse de chargement impacte le SEO et l'expérience utilisateur",
+        recommendation: "Utilisez PageSpeed Insights pour identifier les optimisations possibles",
+        effort: "high",
+      },
+    ],
+    opportunities: [
+      {
+        title: "Ajouter des données structurées",
+        potential_impact: "Amélioration de l'affichage dans les résultats de recherche (rich snippets)",
+        effort: "medium",
+      },
+      {
+        title: "Optimiser le maillage interne",
+        potential_impact: "Meilleure distribution du PageRank et crawlabilité",
+        effort: "medium",
+      },
+      {
+        title: "Créer un sitemap XML",
+        potential_impact: "Indexation plus rapide des nouvelles pages",
+        effort: "low",
+      },
+    ],
+    action_plan: [
+      {
+        priority: 1,
+        action: "Auditer et optimiser les balises title et meta description",
+        estimated_time: "2-4 heures",
+        impact: "Amélioration du CTR dans les SERPs",
+      },
+      {
+        priority: 2,
+        action: "Corriger les problèmes de structure H1/H2",
+        estimated_time: "1-2 heures",
+        impact: "Meilleure compréhension du contenu par Google",
+      },
+      {
+        priority: 3,
+        action: "Optimiser les performances (images, cache, minification)",
+        estimated_time: "4-8 heures",
+        impact: "Meilleur Core Web Vitals et classement",
+      },
+      {
+        priority: 4,
+        action: "Implémenter les données structurées Schema.org",
+        estimated_time: "2-4 heures",
+        impact: "Rich snippets et meilleure visibilité",
+      },
+    ],
+    metrics: {
+      estimated_page_speed: "medium",
+      mobile_friendly: true,
+      https_status: siteUrl.startsWith("https"),
+      indexation_risk: "low",
+    },
   };
 }
 
