@@ -28,7 +28,7 @@ export default function Legal() {
               <li><strong>RCS :</strong> [Ville d'immatriculation à compléter]</li>
               <li><strong>Capital social :</strong> [Montant à compléter] euros</li>
               <li><strong>N° TVA intracommunautaire :</strong> [Numéro TVA à compléter]</li>
-              <li><strong>Email de contact :</strong> <a href="mailto:contact@agent-growth-automator.com" className="text-primary hover:underline">contact@agent-growth-automator.com</a></li>
+              <li><strong>Email de contact :</strong> <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a></li>
             </ul>
           </section>
 
@@ -84,7 +84,7 @@ export default function Legal() {
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
               Pour exercer vos droits ou pour toute question relative à vos données personnelles, vous pouvez 
-              nous contacter à : <a href="mailto:contact@agent-growth-automator.com" className="text-primary hover:underline">contact@agent-growth-automator.com</a>
+              nous contacter à : <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a>
             </p>
           </section>
 
@@ -123,7 +123,7 @@ export default function Legal() {
               Pour toute question ou demande concernant les mentions légales, vous pouvez nous contacter :
             </p>
             <ul className="list-none space-y-2 text-muted-foreground mt-4">
-              <li><strong>Par email :</strong> <a href="mailto:contact@agent-growth-automator.com" className="text-primary hover:underline">contact@agent-growth-automator.com</a></li>
+              <li><strong>Par email :</strong> <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a></li>
               <li><strong>Via le site :</strong> <Link to="/contact" className="text-primary hover:underline">Formulaire de contact</Link></li>
             </ul>
           </section>

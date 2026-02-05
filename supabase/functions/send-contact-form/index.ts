@@ -27,7 +27,7 @@ serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const SUPPORT_EMAIL = "support@agent-growth-automator.com";
+  const SUPPORT_EMAIL = "contact@emotionscare.com";
 
   try {
     const body: ContactFormRequest = await req.json();
