@@ -61,6 +61,10 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Roadmap from "./pages/Roadmap";
 import DemoOAuth from "./pages/DemoOAuth";
+import Contact from "./pages/Contact";
+
+// Crisp Chat widget
+import { CrispChat } from "@/components/CrispChat";
 
 // Dashboard pages - Foundation
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -208,6 +212,7 @@ function App() {
           <Toaster />
           <Sonner />
           <OfflineBanner />
+          <CrispChat />
           <BrowserRouter>
             <SentryRouteTracker />
             <Routes>
@@ -216,6 +221,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/roadmap" element={<Roadmap />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/demo-oauth" element={<DemoOAuth />} />
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />

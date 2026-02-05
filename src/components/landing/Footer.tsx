@@ -15,15 +15,15 @@ export function Footer() {
       { label: isEn ? "Integrations" : "Intégrations", href: "#tools" },
     ],
     [isEn ? "Resources" : "Ressources"]: [
-      { label: isEn ? "Documentation" : "Documentation", href: "#" },
-      { label: isEn ? "Help Center" : "Centre d'aide", href: "#" },
-      { label: isEn ? "Status" : "Statut", href: "#" },
+      { label: isEn ? "Documentation" : "Documentation", href: "/dashboard/guide" },
+      { label: isEn ? "Help Center" : "Centre d'aide", href: "/contact" },
+      { label: isEn ? "Status" : "Statut", href: "/dashboard/status" },
       { label: "API", href: "#" },
     ],
     [isEn ? "Company" : "Entreprise"]: [
       { label: isEn ? "About" : "À propos", href: "#" },
-      { label: isEn ? "Contact" : "Contact", href: "mailto:m.laeticia@hotmail.fr" },
-      { label: isEn ? "Blog" : "Blog", href: "#" },
+      { label: isEn ? "Contact" : "Contact", href: "/contact" },
+      { label: isEn ? "Support" : "Support", href: "mailto:support@agent-growth-automator.com" },
     ],
     [isEn ? "Legal" : "Légal"]: [
       { label: t("landing.footer.privacy"), href: "/privacy" },
