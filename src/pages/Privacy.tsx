@@ -2,12 +2,18 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { SEOHead } from "@/components/SEOHead";
 
 const LAST_UPDATED = "5 février 2026";
 
 export default function Privacy() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Politique de Confidentialité"
+        description="Politique de confidentialité de Growth OS. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles conformément au RGPD."
+        canonical="/privacy"
+      />
       {/* Header */}
       <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center justify-between h-16 px-4">

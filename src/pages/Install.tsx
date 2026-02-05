@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { SEOHead } from "@/components/SEOHead";
 
 const features = [
   {
@@ -66,6 +67,11 @@ export default function Install() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Installer l'application"
+        description="Installez Growth OS sur votre appareil. Application PWA disponible sur iPhone, Android et ordinateur. Accès rapide, notifications et mode hors ligne."
+        canonical="/install"
+      />
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

@@ -2,12 +2,18 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Scale, Building2, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { SEOHead } from "@/components/SEOHead";
 
 const LAST_UPDATED = "5 février 2026";
 
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Conditions Générales d'Utilisation"
+        description="CGU de Growth OS. Conditions d'accès, tarification, propriété intellectuelle et responsabilités pour l'utilisation de la plateforme."
+        canonical="/terms"
+      />
       {/* Header */}
       <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center justify-between h-16 px-4">

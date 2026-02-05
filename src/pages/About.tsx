@@ -6,7 +6,7 @@ import { Footer } from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Users, Eye, Shield, Sparkles, Heart } from "lucide-react";
-
+import { SEOHead } from "@/components/SEOHead";
 const VALUES = [
   {
     icon: Eye,
@@ -37,6 +37,21 @@ const VALUES = [
 export default function About() {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="À propos"
+        description="Découvrez la mission de Growth OS : démocratiser l'accès à une entreprise digitale complète avec 39 agents IA. Créé par EmotionsCare SASU."
+        canonical="/about"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "À propos de Growth OS",
+          "description": "Mission, équipe et valeurs de Growth OS",
+          "publisher": {
+            "@type": "Organization",
+            "name": "EmotionsCare SASU"
+          }
+        }}
+      />
       <Navbar />
       
       <main className="container mx-auto px-4 py-20">
