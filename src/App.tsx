@@ -63,6 +63,7 @@ import Roadmap from "./pages/Roadmap";
 import DemoOAuth from "./pages/DemoOAuth";
 import Contact from "./pages/Contact";
 import LegalPage from "./pages/Legal";
+import About from "./pages/About";
 
 // Crisp Chat widget
 import { CrispChat } from "@/components/CrispChat";
@@ -223,6 +224,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/legal" element={<LegalPage />} />
+              <Route path="/about" element={<About />} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/demo-oauth" element={<DemoOAuth />} />
