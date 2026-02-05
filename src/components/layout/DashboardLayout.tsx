@@ -436,8 +436,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             })}
             {/* Support link */}
             <div className="mt-4 pt-4 border-t border-border/50">
-              <a
-                href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS"
+              <Link
+                to="/contact"
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
               >
                 <svg
@@ -455,7 +455,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <path d="M12 17h.01" />
                 </svg>
                 Besoin d'aide ?
-              </a>
+              </Link>
             </div>
           </nav>
 

@@ -1858,6 +1858,42 @@ export type Database = {
           },
         ]
       }
+      contact_submissions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          name: string
+          replied_at: string | null
+          resend_id: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          name: string
+          replied_at?: string | null
+          resend_id?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          replied_at?: string | null
+          resend_id?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       content_briefs: {
         Row: {
           assigned_to: string | null
