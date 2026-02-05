@@ -2722,6 +2722,7 @@ export type Database = {
           id: string
           metadata: Json | null
           recipient: string
+          resend_id: string | null
           sent_at: string | null
           status: string | null
           subject: string | null
@@ -2734,6 +2735,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           recipient: string
+          resend_id?: string | null
           sent_at?: string | null
           status?: string | null
           subject?: string | null
@@ -2746,6 +2748,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           recipient?: string
+          resend_id?: string | null
           sent_at?: string | null
           status?: string | null
           subject?: string | null
