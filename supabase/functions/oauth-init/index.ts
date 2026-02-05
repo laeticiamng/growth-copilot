@@ -144,6 +144,7 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
 // Whitelist of allowed redirect URL origins
 const ALLOWED_REDIRECT_ORIGINS = [
   "https://id-preview--c548a033-0937-4830-bc84-bb2548968cd3.lovable.app",
+  "https://c548a033-0937-4830-bc84-bb2548968cd3.lovableproject.com",
   "https://lovable.app",
   "http://localhost:5173",
   "http://localhost:3000",

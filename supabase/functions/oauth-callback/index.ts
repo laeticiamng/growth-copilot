@@ -9,6 +9,7 @@ const corsHeaders = {
 // Whitelist of allowed redirect URL origins
 const ALLOWED_REDIRECT_ORIGINS = [
   "https://id-preview--c548a033-0937-4830-bc84-bb2548968cd3.lovable.app",
+  "https://c548a033-0937-4830-bc84-bb2548968cd3.lovableproject.com",
   "https://lovable.app",
   "http://localhost:5173",
   "http://localhost:3000",
@@ -22,7 +23,7 @@ function isValidRedirectUrl(redirectUrl: string): boolean {
     const url = new URL(redirectUrl);
     const origin = url.origin;
     return ALLOWED_REDIRECT_ORIGINS.some(allowed => 
-      origin === allowed || origin.endsWith('.lovable.app')
+      origin === allowed || origin.endsWith('.lovable.app') || origin.endsWith('.lovableproject.com')
     );
   } catch {
     return false;
