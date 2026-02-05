@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 const STATUS_LABELS: Record<EmployeeStatus, { label: string; color: string }> = {
   active: { label: "Actif", color: "bg-green-500" },
@@ -59,6 +62,7 @@ const TIME_OFF_LABELS: Record<TimeOffType, string> = {
 
 export default function HR() {
   const { employees, loading: loadingEmployees, stats, createEmployee, isCreating, deleteEmployee } = useEmployees();
+   const { currentWorkspace } = useWorkspace();
   const { reviews, loading: loadingReviews, stats: reviewStats, createReview, submitReview } = usePerformanceReviews();
   const { requests: timeOffRequests, loading: loadingTimeOff, stats: timeOffStats, createRequest, approveRequest, rejectRequest } = useTimeOffRequests();
   
@@ -96,6 +100,27 @@ export default function HR() {
   });
 
   const loading = loadingEmployees || loadingReviews || loadingTimeOff;
+ 
+   // Real-time subscriptions
+   useRealtimeSubscription(
+     `hr-employees-${currentWorkspace?.id}`,
+     {
+       table: 'employees',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `hr-timeoff-${currentWorkspace?.id}`,
+     {
+       table: 'time_off_requests',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
 
   const filteredEmployees = employees.filter(
     (e) =>

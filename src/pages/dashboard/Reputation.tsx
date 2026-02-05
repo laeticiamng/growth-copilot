@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { useLocalSEO } from "@/hooks/useLocalSEO";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export default function Reputation() {
   const { reviews, stats, loading, sendReviewRequest, respondToReview } = useReputation();
@@ -24,6 +26,21 @@ export default function Reputation() {
   const [requestForm, setRequestForm] = useState({ name: "", email: "", phone: "" });
   const [submitting, setSubmitting] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+ 
+   // Real-time subscription for reviews
+   const handleRealtimeUpdate = useCallback(() => {
+     // Reviews will auto-refresh via hook
+   }, []);
+ 
+   useRealtimeSubscription(
+     `reputation-${currentWorkspace?.id}`,
+     {
+       table: 'reviews',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const handleSendRequest = async () => {
     if (!requestForm.name.trim() || !requestForm.email.trim()) return;

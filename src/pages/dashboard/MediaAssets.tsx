@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 const platformIcons: Record<string, typeof Youtube> = {
   youtube_video: Youtube,
@@ -60,11 +63,23 @@ const statusColors: Record<string, string> = {
 export default function MediaAssets() {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === "en";
+   const { currentWorkspace } = useWorkspace();
   const { assets, loading, createAsset, deleteAsset, runAgent, setSelectedAsset } = useMedia();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [runningAgents, setRunningAgents] = useState<Set<string>>(new Set());
+ 
+   // Real-time subscription for media assets
+   useRealtimeSubscription(
+     `media-assets-${currentWorkspace?.id}`,
+     {
+       table: 'media_assets',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => {},
+     !!currentWorkspace?.id
+   );
 
   const handleAddAsset = async () => {
     if (!newUrl.trim()) return;

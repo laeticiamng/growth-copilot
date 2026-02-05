@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,11 +20,25 @@ import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export default function Content() {
   const { currentSite } = useSites();
   const { keywords, clusters, briefs, loading, refetch } = useContent();
+   const { currentWorkspace } = useWorkspace();
   const [syncing, setSyncing] = useState(false);
+ 
+   // Real-time subscription for content changes
+   useRealtimeSubscription(
+     `content-briefs-${currentWorkspace?.id}`,
+     {
+       table: 'content_briefs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => refetch(),
+     !!currentWorkspace?.id
+   );
 
   const handleSync = async () => {
     setSyncing(true);

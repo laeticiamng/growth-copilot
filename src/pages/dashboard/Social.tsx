@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { RepurposeEngine } from "@/components/social/RepurposeEngine";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
   facebook: Facebook,
@@ -58,6 +60,17 @@ export default function Social() {
   const [aiPrompt, setAIPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+ 
+   // Real-time subscription for social posts
+   useRealtimeSubscription(
+     `social-posts-${currentWorkspace?.id}`,
+     {
+       table: 'social_posts',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => refetch(),
+     !!currentWorkspace?.id
+   );
 
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
@@ -72,12 +85,8 @@ export default function Social() {
       return;
     }
 
-    // Get workspace_id from accounts or use a fallback
-    const workspaceId = accounts[0]?.id ? 
-      (await supabase.from('social_accounts').select('workspace_id').eq('id', accounts[0].id).single())?.data?.workspace_id 
-      : null;
-
-    if (!workspaceId) {
+     // Use currentWorkspace directly
+     if (!currentWorkspace?.id) {
       toast.error("Workspace non trouvé");
       return;
     }
@@ -86,7 +95,7 @@ export default function Social() {
     try {
       const { data, error } = await supabase.functions.invoke("ai-gateway", {
         body: {
-          workspace_id: workspaceId,
+           workspace_id: currentWorkspace.id,
           agent_name: "social-generator",
           purpose: "copywriting",
           input: {

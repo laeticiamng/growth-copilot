@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,8 @@ import {
 } from "lucide-react";
 import { useSites, Site } from "@/hooks/useSites";
 import { toast } from "sonner";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 const sectors = [
   "E-commerce", "SaaS / Tech", "Agence / Services", "Restaurant / Local",
@@ -52,7 +55,8 @@ const sectors = [
 
 const Sites = () => {
   const { t } = useTranslation();
-  const { sites, currentSite, setCurrentSite, createSite, updateSite, deleteSite, loading } = useSites();
+   const { sites, currentSite, setCurrentSite, createSite, updateSite, deleteSite, loading, refetch } = useSites();
+   const { currentWorkspace } = useWorkspace();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | null>(null);
@@ -66,6 +70,21 @@ const Sites = () => {
     language: "fr",
     business_type: "",
   });
+ 
+   // Real-time subscription for sites
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch?.();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `sites-${currentWorkspace?.id}`,
+     {
+       table: 'sites',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const resetForm = () => {
     setFormData({
