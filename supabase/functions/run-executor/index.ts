@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { getTemplate } from "../_shared/email-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,6 +93,102 @@ const PLAN_QUOTAS: Record<string, { runs_per_month: number; runs_per_day: number
   starter: { runs_per_month: 50, runs_per_day: 5 },
   free: { runs_per_month: 0, runs_per_day: 0 },
 };
+
+// Send run_completed email with anti-spam (max 1 per 5 minutes per workspace)
+// deno-lint-ignore no-explicit-any
+async function sendRunCompletedEmail(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string,
+  runType: RunType,
+  outputs: Record<string, unknown>
+): Promise<void> {
+  try {
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) {
+      console.log("[RUN-EXECUTOR] RESEND_API_KEY not configured, skipping email");
+      return;
+    }
+
+    // Anti-spam check: was an email sent in the last 5 minutes for this workspace?
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { data: recentEmails } = await supabase
+      .from("email_log")
+      .select("id")
+      .eq("workspace_id", workspaceId)
+      .eq("template_name", "run_completed")
+      .gte("created_at", fiveMinutesAgo)
+      .limit(1);
+
+    if (recentEmails && recentEmails.length > 0) {
+      console.log("[RUN-EXECUTOR] Skipping email - already sent within last 5 minutes");
+      return;
+    }
+
+    // Get workspace owner email
+    const { data: workspace } = await supabase
+      .from("workspaces")
+      .select("owner_id, name")
+      .eq("id", workspaceId)
+      .single();
+
+    if (!workspace?.owner_id) {
+      console.log("[RUN-EXECUTOR] No workspace owner found");
+      return;
+    }
+
+    // Get owner's email from auth
+    const { data: userData } = await supabase.auth.admin.getUserById(workspace.owner_id);
+    const ownerEmail = userData?.user?.email;
+    
+    if (!ownerEmail) {
+      console.log("[RUN-EXECUTOR] No owner email found");
+      return;
+    }
+
+    // Prepare email data
+    const summary = (outputs.summary as string) || `Exécution ${getRunTypeLabel(runType)} terminée avec succès.`;
+    const emailData = {
+      userName: userData?.user?.user_metadata?.name || undefined,
+      agentName: "Growth OS",
+      runType: getRunTypeLabel(runType),
+      summary,
+    };
+
+    const { subject, html } = getTemplate("run_completed", emailData);
+
+    // Send via Resend
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Growth OS <noreply@agent-growth-automator.com>",
+        to: [ownerEmail],
+        subject,
+        html,
+      }),
+    });
+
+    const resendData = await response.json();
+    
+    // Log to email_log
+    await supabase.from("email_log").insert({
+      workspace_id: workspaceId,
+      recipient: ownerEmail,
+      template_name: "run_completed",
+      subject,
+      status: response.ok ? "sent" : "failed",
+      resend_id: resendData.id || null,
+      error_message: response.ok ? null : (resendData.message || "Unknown error"),
+    });
+
+    console.log(`[RUN-EXECUTOR] Email ${response.ok ? "sent" : "failed"}: run_completed to ${ownerEmail}`);
+  } catch (error) {
+    console.error("[RUN-EXECUTOR] Email send error:", error);
+  }
+}
 
 // Template-based run executor (works without AI keys)
 // deno-lint-ignore no-explicit-any
@@ -217,6 +314,9 @@ async function executeRun(
       is_automated: true,
       result: "success",
     } as Record<string, unknown>);
+
+    // Send run_completed email notification (with anti-spam: max 1 email per 5 minutes per workspace)
+    await sendRunCompletedEmail(supabase, workspaceId, runType, outputs);
 
     return { run_id: runId, status: "completed", outputs, evidence_bundle_id: evidenceBundleId };
   } catch (error) {
