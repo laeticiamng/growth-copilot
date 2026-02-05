@@ -50,20 +50,22 @@ export default function DashboardHome() {
   const { pendingApprovals, approveAction, rejectAction } = useApprovals();
   const { enabledServices, servicesLoading, hasService } = useServices();
 
-  // Fetch real KPI data
+  // Fetch real KPI data - current period (last 30 days)
   const { data: kpiData, isLoading: kpiLoading } = useQuery({
-    queryKey: ['dashboard-kpis', currentSite?.id],
+    queryKey: ['dashboard-kpis-current', currentSite?.id],
     queryFn: async () => {
       if (!currentSite?.id) return null;
       
+      const today = new Date();
       const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
       
       const { data: kpis } = await supabase
         .from('kpis_daily')
         .select('organic_clicks, organic_impressions, total_conversions, avg_position')
         .eq('site_id', currentSite.id)
         .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .lte('date', today.toISOString().split('T')[0])
         .order('date', { ascending: false });
       
       if (!kpis || kpis.length === 0) return null;
@@ -71,7 +73,43 @@ export default function DashboardHome() {
       return {
         organicClicks: kpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0),
         conversions: kpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0),
-        avgPosition: (kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.length).toFixed(1),
+        avgPosition: kpis.filter(k => k.avg_position).length > 0
+          ? (kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.filter(k => k.avg_position).length)
+          : null,
+        daysTracked: kpis.length,
+      };
+    },
+    enabled: !!currentSite?.id,
+  });
+
+  // Fetch previous period KPI data (J-60 to J-30)
+  const { data: previousKpiData } = useQuery({
+    queryKey: ['dashboard-kpis-previous', currentSite?.id],
+    queryFn: async () => {
+      if (!currentSite?.id) return null;
+      
+      const today = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(today.getDate() - 60);
+      
+      const { data: kpis } = await supabase
+        .from('kpis_daily')
+        .select('organic_clicks, organic_impressions, total_conversions, avg_position')
+        .eq('site_id', currentSite.id)
+        .gte('date', sixtyDaysAgo.toISOString().split('T')[0])
+        .lt('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .order('date', { ascending: false });
+      
+      if (!kpis || kpis.length === 0) return null;
+      
+      return {
+        organicClicks: kpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0),
+        conversions: kpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0),
+        avgPosition: kpis.filter(k => k.avg_position).length > 0
+          ? (kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.filter(k => k.avg_position).length)
+          : null,
         daysTracked: kpis.length,
       };
     },
@@ -330,25 +368,26 @@ export default function DashboardHome() {
       </Card>
     </div>
 
-      {/* MoM Comparison - KPI Trends */}
+      {/* MoM Comparison - KPI Trends with real data */}
       <MoMComparison 
+        hasData={!!kpiData}
         kpis={[
           { 
             label: "Clics organiques", 
-            currentValue: kpiData?.organicClicks || 0, 
-            previousValue: Math.round((kpiData?.organicClicks || 0) * 0.88),
+            currentValue: kpiData?.organicClicks ?? null, 
+            previousValue: previousKpiData?.organicClicks ?? null,
             format: "number" 
           },
           { 
             label: "Conversions", 
-            currentValue: kpiData?.conversions || 0, 
-            previousValue: Math.round((kpiData?.conversions || 0) * 0.92),
+            currentValue: kpiData?.conversions ?? null, 
+            previousValue: previousKpiData?.conversions ?? null,
             format: "number" 
           },
           { 
             label: "Position moyenne", 
-            currentValue: parseFloat(kpiData?.avgPosition || "0"), 
-            previousValue: parseFloat(kpiData?.avgPosition || "0") + 1.2,
+            currentValue: kpiData?.avgPosition ?? null, 
+            previousValue: previousKpiData?.avgPosition ?? null,
             format: "number" 
           },
         ]}
