@@ -8885,6 +8885,7 @@ export type Database = {
         | "email_provider"
         | "crm"
         | "calendar"
+        | "google_combined"
       integration_status: "connected" | "disconnected" | "error" | "pending"
       issue_severity: "critical" | "high" | "medium" | "low" | "info"
       issue_status: "open" | "in_progress" | "fixed" | "ignored" | "wont_fix"
@@ -9150,6 +9151,7 @@ export const Constants = {
         "email_provider",
         "crm",
         "calendar",
+        "google_combined",
       ],
       integration_status: ["connected", "disconnected", "error", "pending"],
       issue_severity: ["critical", "high", "medium", "low", "info"],
