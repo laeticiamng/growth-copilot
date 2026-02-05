@@ -29,6 +29,7 @@ import {
   BusinessHealthScore,
   ROITrackerWidget,
   WelcomeCard,
+  RealtimeStatus,
 } from "@/components/cockpit";
 import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
 import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
@@ -294,6 +295,40 @@ export default function DashboardHome() {
         {/* Smart Alerts */}
         <SmartAlertsPanel />
       </div>
+
+    {/* Realtime Status - Connections Monitor */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <RealtimeStatus />
+      <Card className="md:col-span-2">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            🤖 Agents IA disponibles
+            <Badge variant="secondary" className="ml-auto">39 agents</Badge>
+          </CardTitle>
+          <CardDescription>
+            Votre équipe d'agents spécialisés travaille 24h/24
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                11 départements • Direction, Marketing, Sales, Finance, Sécurité, Product, Engineering, Data, Support, Governance, RH
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Prêts à exécuter vos demandes en toute conformité
+              </p>
+            </div>
+            <Link to="/dashboard/agents">
+              <Button variant="outline" size="sm">
+                Voir l'équipe
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
 
       {/* MoM Comparison - KPI Trends */}
       <MoMComparison 
