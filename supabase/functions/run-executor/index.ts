@@ -13,7 +13,17 @@ type RunType =
   | "SEO_AUDIT_REPORT"
   | "FUNNEL_DIAGNOSTIC"
   | "ACCESS_REVIEW"
-  | "SALES_PIPELINE_REVIEW";
+   | "SALES_PIPELINE_REVIEW"
+   | "DAILY_ANOMALY_DETECTION"
+   | "DAILY_PERFORMANCE_CHECK"
+   | "DAILY_ADS_OPTIMIZATION"
+   | "MONTHLY_COMPLIANCE_AUDIT"
+   | "COMPETITIVE_INTEL"
+   | "MONTHLY_PULSE_CHECK"
+   | "WEEKLY_CONTENT_PLAN"
+   | "MONTHLY_SECURITY_AUDIT"
+   | "MONTHLY_SEO_HEALTH"
+   | "REPUTATION_MONITORING";
 
 interface RunRequest {
   run_type: RunType;
@@ -51,6 +61,36 @@ interface EvidenceData {
   }>;
 }
 
+// Mapping run_type -> département requis
+const RUN_TYPE_DEPARTMENT: Record<RunType, string> = {
+  DAILY_EXECUTIVE_BRIEF: "direction",
+  WEEKLY_EXECUTIVE_REVIEW: "direction",
+  MARKETING_WEEK_PLAN: "marketing",
+  SEO_AUDIT_REPORT: "marketing",
+  FUNNEL_DIAGNOSTIC: "sales",
+  ACCESS_REVIEW: "governance",
+  SALES_PIPELINE_REVIEW: "sales",
+  DAILY_ANOMALY_DETECTION: "data",
+  DAILY_PERFORMANCE_CHECK: "engineering",
+  DAILY_ADS_OPTIMIZATION: "marketing",
+  MONTHLY_COMPLIANCE_AUDIT: "governance",
+  COMPETITIVE_INTEL: "marketing",
+  MONTHLY_PULSE_CHECK: "hr",
+  WEEKLY_CONTENT_PLAN: "marketing",
+  MONTHLY_SECURITY_AUDIT: "security",
+  MONTHLY_SEO_HEALTH: "marketing",
+  REPUTATION_MONITORING: "support",
+};
+
+// Quotas par plan
+const PLAN_QUOTAS: Record<string, { runs_per_month: number; runs_per_day: number }> = {
+  founder: { runs_per_month: 999999, runs_per_day: 999999 },
+  full_company: { runs_per_month: 10000, runs_per_day: 500 },
+  department: { runs_per_month: 200, runs_per_day: 20 },
+  starter: { runs_per_month: 50, runs_per_day: 5 },
+  free: { runs_per_month: 0, runs_per_day: 0 },
+};
+
 // Template-based run executor (works without AI keys)
 // deno-lint-ignore no-explicit-any
 async function executeRun(
@@ -66,10 +106,9 @@ async function executeRun(
   const { error: insertError } = await supabase.from("executive_runs").insert({
     id: runId,
     workspace_id: workspaceId,
-    site_id: siteId || null,
     run_type: runType,
     status: "running",
-    inputs: { triggered_at: startedAt },
+     inputs: { triggered_at: startedAt, site_id: siteId || null },
     started_at: startedAt,
   } as Record<string, unknown>);
 
@@ -103,21 +142,56 @@ async function executeRun(
       case "SALES_PIPELINE_REVIEW":
         outputs = await generateSalesPipelineReview(supabase, workspaceId);
         break;
+       case "DAILY_ANOMALY_DETECTION":
+         outputs = await generateAnomalyDetection(supabase, workspaceId);
+         break;
+       case "DAILY_PERFORMANCE_CHECK":
+         outputs = await generatePerformanceCheck(supabase, workspaceId);
+         break;
+       case "DAILY_ADS_OPTIMIZATION":
+         outputs = await generateAdsOptimization(supabase, workspaceId);
+         break;
+       case "MONTHLY_COMPLIANCE_AUDIT":
+         outputs = await generateComplianceAudit(supabase, workspaceId);
+         break;
+       case "COMPETITIVE_INTEL":
+         outputs = await generateCompetitiveIntel(supabase, workspaceId);
+         break;
+       case "MONTHLY_PULSE_CHECK":
+         outputs = await generatePulseCheck(supabase, workspaceId);
+         break;
+       case "WEEKLY_CONTENT_PLAN":
+         outputs = await generateContentPlan(supabase, workspaceId);
+         break;
+       case "MONTHLY_SECURITY_AUDIT":
+         outputs = await generateSecurityAudit(supabase, workspaceId);
+         break;
+       case "MONTHLY_SEO_HEALTH":
+         outputs = await generateSEOHealth(supabase, workspaceId, siteId);
+         break;
+       case "REPUTATION_MONITORING":
+         outputs = await generateReputationMonitoring(supabase, workspaceId);
+         break;
       default:
-        throw new Error(`Unknown run type: ${runType}`);
+         outputs = { summary: `Run type ${runType} exécuté`, generated_at: new Date().toISOString() };
     }
 
     // Update run as completed
     const completedAt = new Date().toISOString();
-    await supabase
+     const durationMs = new Date(completedAt).getTime() - new Date(startedAt).getTime();
+     const { error: updateError } = await supabase
       .from("executive_runs")
       .update({
-        status: "completed",
+         status: "done",
         outputs,
         completed_at: completedAt,
-        duration_ms: new Date(completedAt).getTime() - new Date(startedAt).getTime(),
+         executive_summary: `Exécution ${getRunTypeLabel(runType)} terminée en ${durationMs}ms`,
       } as Record<string, unknown>)
       .eq("id", runId);
+     
+     if (updateError) {
+       console.error("Failed to update run status:", updateError);
+     }
 
     // Create Evidence Bundle
     const evidenceBundleId = await createEvidenceBundle(
@@ -341,6 +415,16 @@ function getRunTypeLabel(runType: RunType): string {
     FUNNEL_DIAGNOSTIC: "Diagnostic funnel",
     ACCESS_REVIEW: "Revue des accès",
     SALES_PIPELINE_REVIEW: "Revue pipeline",
+     DAILY_ANOMALY_DETECTION: "Détection d'anomalies",
+     DAILY_PERFORMANCE_CHECK: "Check performance",
+     DAILY_ADS_OPTIMIZATION: "Optimisation ads",
+     MONTHLY_COMPLIANCE_AUDIT: "Audit conformité",
+     COMPETITIVE_INTEL: "Veille concurrentielle",
+     MONTHLY_PULSE_CHECK: "Pulse RH mensuel",
+     WEEKLY_CONTENT_PLAN: "Plan contenu",
+     MONTHLY_SECURITY_AUDIT: "Audit sécurité",
+     MONTHLY_SEO_HEALTH: "Santé SEO",
+     REPUTATION_MONITORING: "Veille réputation",
   };
   return labels[runType] || runType;
 }
@@ -583,6 +667,404 @@ async function generateSalesPipelineReview(
   };
 }
 
+// ====== NOUVEAUX GÉNÉRATEURS POUR LES DÉPARTEMENTS ======
+
+// deno-lint-ignore no-explicit-any
+async function generateAnomalyDetection(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  // Check for unusual patterns in agent runs
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const { data: recentRuns } = await supabase
+    .from("agent_runs")
+    .select("agent_type, status, duration_ms")
+    .eq("workspace_id", workspaceId)
+    .gte("created_at", yesterday.toISOString());
+
+  // deno-lint-ignore no-explicit-any
+  const failedRuns = recentRuns?.filter((r: any) => r.status === "failed") || [];
+  const anomalyScore = failedRuns.length > 5 ? "high" : failedRuns.length > 2 ? "medium" : "low";
+
+  return {
+    summary: "Détection d'anomalies quotidienne",
+    generated_at: new Date().toISOString(),
+    metrics: {
+      total_runs_24h: recentRuns?.length || 0,
+      failed_runs: failedRuns.length,
+      anomaly_score: anomalyScore,
+    },
+    anomalies: failedRuns.length > 0 ? [`${failedRuns.length} exécution(s) échouée(s) détectée(s)`] : [],
+    recommendations: anomalyScore !== "low" ? ["Vérifier les logs des agents", "Contrôler les intégrations"] : [],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generatePerformanceCheck(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: runs } = await supabase
+    .from("agent_runs")
+    .select("duration_ms")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  // deno-lint-ignore no-explicit-any
+  const durations = runs?.map((r: any) => r.duration_ms).filter(Boolean) || [];
+  const avgDuration = durations.length > 0 ? durations.reduce((a: number, b: number) => a + b, 0) / durations.length : 0;
+
+  return {
+    summary: "Check de performance quotidien",
+    generated_at: new Date().toISOString(),
+    metrics: {
+      avg_duration_ms: Math.round(avgDuration),
+      total_runs_analyzed: durations.length,
+      performance_status: avgDuration < 5000 ? "excellent" : avgDuration < 15000 ? "good" : "needs_attention",
+    },
+    recommendations: avgDuration > 15000 ? ["Optimiser les requêtes lentes", "Vérifier les timeouts"] : [],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateAdsOptimization(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: campaigns } = await supabase
+    .from("campaigns")
+    .select("name, status, budget_daily, cost_30d, clicks_30d, conversions_30d")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "active");
+
+  return {
+    summary: "Optimisation Ads quotidienne",
+    generated_at: new Date().toISOString(),
+    campaigns_analyzed: campaigns?.length || 0,
+    recommendations: campaigns && campaigns.length > 0 
+      ? ["Analyser le ROAS par campagne", "Ajuster les budgets selon performance"]
+      : ["Créez votre première campagne publicitaire"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateComplianceAudit(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: gdprRequests } = await supabase
+    .from("gdpr_requests")
+    .select("status, request_type")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "pending");
+
+  const { data: policies } = await supabase
+    .from("policies")
+    .select("id, is_active")
+    .eq("workspace_id", workspaceId);
+
+  return {
+    summary: "Audit de conformité mensuel",
+    generated_at: new Date().toISOString(),
+    gdpr: {
+      pending_requests: gdprRequests?.length || 0,
+      compliance_status: (gdprRequests?.length || 0) === 0 ? "compliant" : "action_required",
+    },
+    policies: {
+      total: policies?.length || 0,
+      // deno-lint-ignore no-explicit-any
+      active: policies?.filter((p: any) => p.is_active).length || 0,
+    },
+    recommendations: (gdprRequests?.length || 0) > 0 
+      ? ["Traiter les demandes RGPD en attente"] 
+      : ["Conformité RGPD à jour"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateCompetitiveIntel(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: competitors } = await supabase
+    .from("competitor_profiles")
+    .select("name, domain, last_analyzed_at")
+    .eq("workspace_id", workspaceId);
+
+  return {
+    summary: "Veille concurrentielle",
+    generated_at: new Date().toISOString(),
+    competitors_tracked: competitors?.length || 0,
+    insights: competitors && competitors.length > 0 
+      ? ["Analyse des mouvements concurrentiels", "Surveillance des prix et offres"]
+      : [],
+    recommendations: !competitors || competitors.length === 0 
+      ? ["Ajoutez des concurrents à surveiller"] 
+      : ["Planifier une analyse approfondie"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generatePulseCheck(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: employees } = await supabase
+    .from("employees")
+    .select("status, department")
+    .eq("workspace_id", workspaceId);
+
+  const { data: timeOff } = await supabase
+    .from("time_off_requests")
+    .select("status")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "pending");
+
+  return {
+    summary: "Pulse RH mensuel",
+    generated_at: new Date().toISOString(),
+    team: {
+      total_employees: employees?.length || 0,
+      pending_time_off: timeOff?.length || 0,
+    },
+    recommendations: (timeOff?.length || 0) > 0 
+      ? ["Traiter les demandes de congés en attente"] 
+      : ["Équipe RH à jour"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateContentPlan(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: content } = await supabase
+    .from("content_items")
+    .select("status, content_type")
+    .eq("workspace_id", workspaceId);
+
+  // deno-lint-ignore no-explicit-any
+  const draft = content?.filter((c: any) => c.status === "draft").length || 0;
+  // deno-lint-ignore no-explicit-any
+  const published = content?.filter((c: any) => c.status === "published").length || 0;
+
+  return {
+    summary: "Plan de contenu hebdomadaire",
+    generated_at: new Date().toISOString(),
+    content_status: {
+      drafts: draft,
+      published: published,
+      total: content?.length || 0,
+    },
+    recommendations: draft > 5 
+      ? ["Finaliser les brouillons en attente"] 
+      : ["Créer du nouveau contenu"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateSecurityAudit(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: auditLogs } = await supabase
+    .from("audit_log")
+    .select("action, actor_type")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  // deno-lint-ignore no-explicit-any
+  const suspiciousActions = auditLogs?.filter((l: any) => 
+    l.action.includes("delete") || l.action.includes("permission")
+  ).length || 0;
+
+  return {
+    summary: "Audit de sécurité mensuel",
+    generated_at: new Date().toISOString(),
+    security_score: suspiciousActions < 5 ? 95 : suspiciousActions < 15 ? 75 : 50,
+    findings: {
+      total_actions_reviewed: auditLogs?.length || 0,
+      suspicious_actions: suspiciousActions,
+    },
+    recommendations: suspiciousActions > 10 
+      ? ["Revoir les actions sensibles", "Vérifier les permissions"] 
+      : ["Sécurité nominale"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateSEOHealth(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string,
+  siteId?: string
+): Promise<Record<string, unknown>> {
+  const query = siteId 
+    ? supabase.from("seo_issues").select("severity, status").eq("site_id", siteId)
+    : supabase.from("sites").select("id").eq("workspace_id", workspaceId).limit(1);
+
+  const { data } = await query;
+
+  return {
+    summary: "Santé SEO mensuelle",
+    generated_at: new Date().toISOString(),
+    site_analyzed: siteId || "aucun",
+    issues_found: Array.isArray(data) ? data.length : 0,
+    recommendations: ["Lancer un audit SEO complet", "Vérifier les Core Web Vitals"],
+  };
+}
+
+// deno-lint-ignore no-explicit-any
+async function generateReputationMonitoring(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string
+): Promise<Record<string, unknown>> {
+  const { data: reviews } = await supabase
+    .from("reputation_reviews")
+    .select("rating, responded_at")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  // deno-lint-ignore no-explicit-any
+  const avgRating = reviews && reviews.length > 0 
+    ? reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length 
+    : 0;
+  // deno-lint-ignore no-explicit-any
+  const unanswered = reviews?.filter((r: any) => !r.responded_at).length || 0;
+
+  return {
+    summary: "Veille réputation",
+    generated_at: new Date().toISOString(),
+    metrics: {
+      avg_rating: Math.round(avgRating * 10) / 10,
+      total_reviews: reviews?.length || 0,
+      unanswered_reviews: unanswered,
+    },
+    recommendations: unanswered > 0 
+      ? [`Répondre aux ${unanswered} avis en attente`] 
+      : ["Réputation bien gérée"],
+  };
+}
+
+// Vérifie l'accès au département et les quotas
+// deno-lint-ignore no-explicit-any
+async function checkSubscriptionAccess(
+  supabase: SupabaseClient<any, "public", any>,
+  workspaceId: string,
+  runType: RunType
+): Promise<{ allowed: boolean; reason?: string; plan?: string }> {
+  const requiredDept = RUN_TYPE_DEPARTMENT[runType] || "direction";
+
+  // Get subscription info
+  const { data: subscription } = await supabase
+    .from("workspace_subscriptions")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "active")
+    .single();
+
+  if (!subscription) {
+    return { allowed: false, reason: "No active subscription" };
+  }
+
+  const plan = subscription.plan || "free";
+  const isFounder = plan === "founder";
+  const isFullCompany = subscription.is_full_company === true || isFounder;
+  const isStarter = subscription.is_starter === true;
+
+  // Founder/Full Company = accès à tout
+  if (isFullCompany) {
+    return { allowed: true, plan };
+  }
+
+  // Starter = accès limité à tout
+  if (isStarter) {
+    // Check daily quota for starter
+    const today = new Date().toISOString().split("T")[0];
+    const { count: todayRuns } = await supabase
+      .from("executive_runs")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId)
+      .gte("started_at", `${today}T00:00:00Z`);
+
+    if ((todayRuns || 0) >= PLAN_QUOTAS.starter.runs_per_day) {
+      return { allowed: false, reason: "Daily run quota exceeded for Starter plan", plan };
+    }
+
+    // Check monthly quota
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const { count: monthRuns } = await supabase
+      .from("executive_runs")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspaceId)
+      .gte("started_at", monthStart.toISOString());
+
+    if ((monthRuns || 0) >= PLAN_QUOTAS.starter.runs_per_month) {
+      return { allowed: false, reason: "Monthly run quota exceeded for Starter plan", plan };
+    }
+
+    return { allowed: true, plan };
+  }
+
+  // À la carte = vérifier que le département est activé
+  if (requiredDept === "direction") {
+    // Direction toujours accessible si au moins un département
+    const { data: depts } = await supabase
+      .from("workspace_departments")
+      .select("id")
+      .eq("workspace_id", workspaceId)
+      .eq("is_active", true)
+      .limit(1);
+
+    if (!depts || depts.length === 0) {
+      return { allowed: false, reason: "No active department subscription", plan };
+    }
+  } else {
+    // Vérifier l'accès au département spécifique
+    const { data: deptAccess } = await supabase
+      .from("workspace_departments")
+      .select("id")
+      .eq("workspace_id", workspaceId)
+      .eq("department_slug", requiredDept)
+      .eq("is_active", true)
+      .single();
+
+    if (!deptAccess) {
+      return { allowed: false, reason: `Department '${requiredDept}' not in your subscription`, plan };
+    }
+  }
+
+  // Check quotas for department plan
+  const today = new Date().toISOString().split("T")[0];
+  const { count: deptCount } = await supabase
+    .from("workspace_departments")
+    .select("id", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .eq("is_active", true);
+
+  const dailyLimit = PLAN_QUOTAS.department.runs_per_day * (deptCount || 1);
+  const monthlyLimit = PLAN_QUOTAS.department.runs_per_month * (deptCount || 1);
+
+  const { count: todayRuns } = await supabase
+    .from("executive_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .gte("started_at", `${today}T00:00:00Z`);
+
+  if ((todayRuns || 0) >= dailyLimit) {
+    return { allowed: false, reason: "Daily run quota exceeded", plan };
+  }
+
+  return { allowed: true, plan };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -600,18 +1082,27 @@ Deno.serve(async (req) => {
     if (scheduled) {
       console.log(`[CRON] Executing scheduled run: ${run_type}`);
       
-      // Get all workspaces with active scheduled runs for this type
-      const { data: scheduledRuns } = await supabase
-        .from("scheduled_runs")
-        .select("workspace_id")
-        .eq("run_type", run_type)
-        .eq("enabled", true);
+       // Get all workspaces with active subscriptions
+       const { data: activeWorkspaces } = await supabase
+         .from("workspace_subscriptions")
+         .select("workspace_id")
+         .eq("status", "active");
 
-      if (scheduledRuns && scheduledRuns.length > 0) {
+       if (activeWorkspaces && activeWorkspaces.length > 0) {
         const results = await Promise.allSettled(
-          scheduledRuns.map((sr) => executeRun(supabase, run_type, sr.workspace_id))
+           activeWorkspaces.map(async (ws) => {
+             // Vérifier l'accès avant d'exécuter
+             const access = await checkSubscriptionAccess(supabase, ws.workspace_id, run_type);
+             if (access.allowed) {
+               return executeRun(supabase, run_type, ws.workspace_id);
+             } else {
+               console.log(`[CRON] Skipped ${run_type} for ${ws.workspace_id}: ${access.reason}`);
+               return { skipped: true, reason: access.reason };
+             }
+           })
         );
-        console.log(`[CRON] Completed ${results.length} runs for ${run_type}`);
+         const executed = results.filter(r => r.status === "fulfilled" && !(r.value as any)?.skipped).length;
+         console.log(`[CRON] Completed ${executed}/${results.length} runs for ${run_type}`);
       }
 
       return new Response(JSON.stringify({ scheduled: true, run_type }), {
@@ -652,7 +1143,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Execute the run
+     // Check subscription access and quotas
+     const subscriptionCheck = await checkSubscriptionAccess(supabase, workspace_id, run_type);
+     if (!subscriptionCheck.allowed) {
+       return new Response(JSON.stringify({ 
+         error: "Subscription limit", 
+         message: subscriptionCheck.reason,
+         plan: subscriptionCheck.plan
+       }), {
+         status: 403,
+         headers: { ...corsHeaders, "Content-Type": "application/json" },
+       });
+     }
+
+     // Execute the run with subscription info
     const result = await executeRun(supabase, run_type, workspace_id, site_id);
 
     return new Response(JSON.stringify(result), {
