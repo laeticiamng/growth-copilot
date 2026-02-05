@@ -38,6 +38,7 @@ import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-regi
 import type { AgentType } from '@/lib/agents/types';
 import { AgentOrgChart } from '@/components/agents/AgentOrgChart';
 import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
+  import { DepartmentHeadDashboard } from '@/components/agents/DepartmentHeadDashboard';
  import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 // Agent personas with human names and avatars - 39 agents total
@@ -353,7 +354,7 @@ interface AgentStats {
 
 export default function Agents() {
   const { currentWorkspace } = useWorkspace();
-  const [activeTab, setActiveTab] = useState('departments');
+   const [activeTab, setActiveTab] = useState('heads');
   const [recentRuns, setRecentRuns] = useState<AgentRun[]>([]);
   const [agentStats, setAgentStats] = useState<AgentStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -559,11 +560,17 @@ export default function Agents() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="departments">Par département</TabsTrigger>
+           <TabsTrigger value="heads">Chefs de département</TabsTrigger>
+           <TabsTrigger value="departments">Équipes</TabsTrigger>
           <TabsTrigger value="orgchart">Organigramme</TabsTrigger>
           <TabsTrigger value="activity">Activité récente</TabsTrigger>
         </TabsList>
 
+         {/* Department Heads - Default view */}
+         <TabsContent value="heads" className="space-y-4">
+           <DepartmentHeadDashboard />
+         </TabsContent>
+ 
         {/* Departments Tab - New default view */}
         <TabsContent value="departments" className="space-y-4">
           <AgentsByDepartment agentStats={agentStats} />
