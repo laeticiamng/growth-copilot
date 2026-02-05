@@ -6,6 +6,41 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
+// Helper to send transactional emails
+async function sendEmail(
+  template: string,
+  to: string,
+  data: Record<string, unknown>,
+  workspaceId?: string
+): Promise<void> {
+  try {
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    if (!SUPABASE_URL) return;
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({
+        to,
+        template,
+        data,
+        workspace_id: workspaceId,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log(`[STRIPE-WEBHOOKS] Email send failed: ${response.status}`);
+    } else {
+      console.log(`[STRIPE-WEBHOOKS] Email sent successfully: ${template} to ${to}`);
+    }
+  } catch (error) {
+    console.log(`[STRIPE-WEBHOOKS] Email send error: ${error}`);
+  }
+}
+
 interface StripeEvent {
   id: string;
   type: string;
@@ -102,21 +137,46 @@ async function handleCheckoutCompleted(
   const metadata = session.metadata as Record<string, string> | undefined;
   const customerId = session.customer as string;
   const subscriptionId = session.subscription as string;
+  const customerDetails = session.customer_details as Record<string, unknown> | undefined;
+  const customerEmail = (session.customer_email as string) || (customerDetails?.email as string);
+  const amountTotal = session.amount_total as number;
 
   logStep("Checkout completed", { customerId, subscriptionId, source: metadata?.source });
 
+  let workspaceId: string | undefined;
+  let planName = "Growth";
+
   // Check if this is from onboarding flow
   if (metadata?.source === "onboarding" && metadata?.user_id) {
-    await createWorkspaceFromOnboarding(supabase, metadata, customerId, subscriptionId, eventId);
+    workspaceId = await createWorkspaceFromOnboarding(supabase, metadata, customerId, subscriptionId, eventId) ?? undefined;
+    planName = metadata?.onboarding_plan_type === "full" ? "Full Company" : "Départements à la carte";
   } else if (metadata?.user_id) {
     // Existing billing flow - update workspace by client_reference_id or find by user
-    const workspaceId = session.client_reference_id as string;
+    workspaceId = session.client_reference_id as string;
     
     if (workspaceId) {
       await updateExistingWorkspace(supabase, workspaceId, customerId, subscriptionId, eventId);
     } else {
       logStep("No workspace ID found in session, skipping update");
     }
+  }
+
+  // Send payment confirmation email
+  if (customerEmail) {
+    const amount = amountTotal ? `${(amountTotal / 100).toLocaleString('fr-FR')} €` : planName === "Full Company" ? "9 000 €" : "1 900 €";
+    
+    await sendEmail(
+      "payment_confirmation",
+      customerEmail,
+      {
+        userName: metadata?.user_name,
+        planName,
+        amount,
+        dashboardUrl: "https://agent-growth-automator.lovable.app/dashboard",
+        invoiceUrl: session.invoice as string | undefined,
+      },
+      workspaceId
+    );
   }
 }
 
@@ -127,7 +187,7 @@ async function createWorkspaceFromOnboarding(
   customerId: string,
   subscriptionId: string,
   eventId: string
-) {
+): Promise<string | null> {
   const userId = metadata.user_id;
   const siteName = metadata.onboarding_site_name || "Mon Workspace";
   const siteUrl = metadata.onboarding_site_url || "";
@@ -159,7 +219,7 @@ async function createWorkspaceFromOnboarding(
 
   if (wsError) {
     logStep("Error creating workspace", { error: wsError.message });
-    throw wsError;
+    return null;
   }
 
   const workspaceId = workspace.id;
@@ -253,6 +313,8 @@ async function createWorkspaceFromOnboarding(
   });
 
   logStep("Onboarding workspace setup complete", { workspaceId });
+  
+  return workspaceId;
 }
 
 // deno-lint-ignore no-explicit-any

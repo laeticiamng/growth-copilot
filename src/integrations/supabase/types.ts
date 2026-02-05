@@ -2715,6 +2715,53 @@ export type Database = {
           },
         ]
       }
+      email_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          recipient: string
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          template_name: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          recipient: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          template_name: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string | null
+          subject?: string | null
+          template_name?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           category: string | null
