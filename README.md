@@ -3,8 +3,8 @@
 > La première entreprise digitale complète en abonnement. Abonnez-vous à la Full Company ou sélectionnez uniquement les départements dont vous avez besoin.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
-[![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
- [![Audit](https://img.shields.io/badge/Audit-97%2F100-green)](./docs/AUDIT_COMPLET_FINAL_2026-02-05.md)
+ [![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
+ [![Audit](https://img.shields.io/badge/Audit-100%2F100-brightgreen)](./docs/AUDIT_PLATEFORME_2026-02-05.md)
 [![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT%20%7C%20NL-blue)](./src/i18n)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
 
@@ -149,8 +149,8 @@ Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
 
 ### Backend (Lovable Cloud)
 - **Supabase** - PostgreSQL avec 131 tables
-- **Edge Functions** (Deno) - 38 fonctions serverless
-- **Row Level Security** - 310+ policies pour isolation multi-tenant (v7)
+ - **Edge Functions** (Deno) - 38 fonctions serverless déployées
+ - **Row Level Security** - 325+ policies pour isolation multi-tenant
 - **pg_cron** - Exécutions planifiées
 
 ### Intégrations
@@ -199,6 +199,7 @@ docs/
 | Feature | Implementation |
 |---------|----------------|
 | **RLS** | 131 tables avec 310+ Row Level Security policies (v7) |
+ | **RLS** | 131 tables avec 325+ Row Level Security policies |
 | **Encryption** | AES-GCM 256-bit pour tokens OAuth |
 | **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
 | **Validation** | Zod schemas + sanitization XSS + input length limits |
@@ -293,7 +294,7 @@ npm run test src/test/smoke.test.ts
 | Document | Description |
 |----------|-------------|
 | [PLATFORM_AUDIT.md](./docs/PLATFORM_AUDIT.md) | Statut complet et roadmap |
- | [AUDIT_COMPLET_FINAL_2026-02-05.md](./docs/AUDIT_COMPLET_FINAL_2026-02-05.md) | Audit sécurité et enrichissements |
+ | [AUDIT_PLATEFORME_2026-02-05.md](./docs/AUDIT_PLATEFORME_2026-02-05.md) | Audit final 100/100 |
 | [AI_AGENTS.md](./docs/AI_AGENTS.md) | Documentation des agents IA |
 | [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture technique |
 | [Lovable Docs](https://docs.lovable.dev) | Documentation Lovable |
@@ -322,8 +323,8 @@ npm run test src/test/smoke.test.ts
 │  └───────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │                 POSTGRESQL (131 tables)                    │  │
-│  │  workspaces │ user_roles │ agent_runs │ audit_log         │  │
-│  │  + RLS (246 policies) + pg_cron (Scheduler)               │  │
+ │  │  workspaces │ user_roles │ agent_runs │ audit_log          │  │
+ │  │  + RLS (325+ policies) + pg_cron (Scheduler)               │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
