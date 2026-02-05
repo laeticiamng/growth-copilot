@@ -234,6 +234,16 @@
  
  ## 🔒 DERNIÈRE MIGRATION RLS (2026-02-05)
  
+ ### Nettoyage RLS effectué
+ - ✅ Suppression de 30+ policies redondantes
+ - ✅ Consolidation à 1 policy stricte par table/opération
+ - ✅ employees_own_or_hr_only (user_id OU HR uniquement)
+ - ✅ leads_assigned_or_manager (assigné OU manager+)
+ - ✅ contracts_owner_billing_only (owner OU billing)
+ - ✅ perf_reviews_strict_access (employee, reviewer, HR)
+ - ✅ oauth_tokens_owner_strict (via integration → owner)
+ - ✅ evidence_*_owner_mgr (manager+ uniquement)
+ 
  ---
  
  ## 🚫 POLITIQUE "ZÉRO FAKE DATA" (2026-02-05)
