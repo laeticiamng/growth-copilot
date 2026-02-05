@@ -8172,6 +8172,53 @@ export type Database = {
           },
         ]
       }
+      workspace_departments: {
+        Row: {
+          activated_at: string
+          agents_count: number
+          created_at: string
+          department_slug: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          stripe_subscription_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          activated_at?: string
+          agents_count?: number
+          created_at?: string
+          department_slug: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          activated_at?: string
+          agents_count?: number
+          created_at?: string
+          department_slug?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_departments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_quotas: {
         Row: {
           agent_runs_per_month: number | null
@@ -8308,8 +8355,10 @@ export type Database = {
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
+          enabled_departments: string[] | null
           id: string
           is_full_company: boolean | null
+          is_starter: boolean | null
           plan: Database["public"]["Enums"]["subscription_plan"]
           status: string | null
           stripe_customer_id: string | null
@@ -8322,8 +8371,10 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          enabled_departments?: string[] | null
           id?: string
           is_full_company?: boolean | null
+          is_starter?: boolean | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           status?: string | null
           stripe_customer_id?: string | null
@@ -8336,8 +8387,10 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          enabled_departments?: string[] | null
           id?: string
           is_full_company?: boolean | null
+          is_starter?: boolean | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           status?: string | null
           stripe_customer_id?: string | null
@@ -8671,6 +8724,14 @@ export type Database = {
         }
         Returns: string
       }
+      get_accessible_agents: {
+        Args: { _workspace_id: string }
+        Returns: {
+          agent_type: string
+          department: string
+          is_lite: boolean
+        }[]
+      }
       get_effective_role: {
         Args: { _site_id?: string; _user_id: string; _workspace_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -8726,6 +8787,10 @@ export type Database = {
       }
       has_billing_access: {
         Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
+      has_department_access: {
+        Args: { _department_slug: string; _workspace_id: string }
         Returns: boolean
       }
       has_hr_access: {
