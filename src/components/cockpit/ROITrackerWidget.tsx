@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
+ import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
+ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { 
@@ -15,8 +15,10 @@ import {
   HelpCircle,
   ArrowUpRight,
   Bot,
-  Users
+   Users,
+   RefreshCw
 } from "lucide-react";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { cn } from "@/lib/utils";
 
 interface ROITrackerWidgetProps {
@@ -30,6 +32,7 @@ const MONTHLY_PLATFORM_COST = 299; // € per month
 
 export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
   const { currentWorkspace } = useWorkspace();
+   const queryClient = useQueryClient();
 
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['roi-metrics', currentWorkspace?.id],
@@ -91,8 +94,24 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
       };
     },
     enabled: !!currentWorkspace?.id,
-    refetchInterval: 60000, // Refresh every minute
+     refetchInterval: 60000,
+     staleTime: 30000,
   });
+ 
+   // Real-time subscription for agent_runs
+   const handleRealtimeUpdate = useCallback(() => {
+     queryClient.invalidateQueries({ queryKey: ['roi-metrics', currentWorkspace?.id] });
+   }, [queryClient, currentWorkspace?.id]);
+ 
+   useRealtimeSubscription(
+     `roi-tracker-${currentWorkspace?.id}`,
+     {
+       table: 'agent_runs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const topAgents = useMemo(() => {
     if (!metrics?.tasksByAgent) return [];
@@ -128,7 +147,10 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Calculator className="w-4 h-4" />
-            ROI Temps Réel
+             <span className="relative">
+               ROI Temps Réel
+               <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+             </span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

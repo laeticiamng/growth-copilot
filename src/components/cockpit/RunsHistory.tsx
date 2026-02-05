@@ -27,6 +27,9 @@ import {
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EvidenceBundleViewer } from "@/components/evidence";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useCallback } from "react";
 
 interface RunsHistoryProps {
   maxItems?: number;
@@ -42,7 +45,23 @@ const STATUS_CONFIG: Record<RunStatus, { icon: typeof CheckCircle2; color: strin
 
 export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProps) {
   const { runs, loading, refetch } = useExecutiveRuns();
+   const { currentWorkspace } = useWorkspace();
   const [selectedRun, setSelectedRun] = useState<typeof runs[0] | null>(null);
+ 
+   // Real-time subscription for executive_runs
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `runs-history-${currentWorkspace?.id}`,
+     {
+       table: 'executive_runs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const displayedRuns = runs.slice(0, maxItems);
 
@@ -71,7 +90,12 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
         {showHeader && (
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Exécutions récentes</CardTitle>
+             <CardTitle className="text-lg flex items-center gap-2">
+               <span className="relative">
+                 Exécutions récentes
+                 <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+               </span>
+             </CardTitle>
               <Button variant="ghost" size="sm" onClick={() => refetch()}>
                 <RefreshCw className="w-4 h-4" />
               </Button>

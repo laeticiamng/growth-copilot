@@ -1,21 +1,24 @@
 import { useState, useMemo } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { TrendingUp, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { format, subDays, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 type ViewMode = "executions" | "duration" | "success";
 type TimeRange = "7d" | "30d" | "90d";
 
 export function AgentPerformanceChart() {
   const { currentWorkspace } = useWorkspace();
+   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>("executions");
   const [timeRange, setTimeRange] = useState<TimeRange>("7d");
   
@@ -39,6 +42,21 @@ export function AgentPerformanceChart() {
     },
     enabled: !!currentWorkspace?.id,
   });
+ 
+   // Real-time subscription
+   const handleRealtimeUpdate = useCallback(() => {
+     queryClient.invalidateQueries({ queryKey: ['agent-performance', currentWorkspace?.id, timeRange] });
+   }, [queryClient, currentWorkspace?.id, timeRange]);
+ 
+   useRealtimeSubscription(
+     `agent-perf-${currentWorkspace?.id}`,
+     {
+       table: 'agent_runs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   const chartData = useMemo(() => {
     if (!runs) return [];
@@ -178,7 +196,12 @@ export function AgentPerformanceChart() {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <CardTitle className="text-lg">Performance des Agents</CardTitle>
+             <CardTitle className="text-lg flex items-center gap-2">
+               <span className="relative">
+                 Performance des Agents
+                 <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+               </span>
+             </CardTitle>
             <CardDescription>
               {totals.total} exécutions sur les {days} derniers jours
             </CardDescription>

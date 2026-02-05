@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +35,12 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { PipelineKanban } from "@/components/lifecycle/PipelineKanban";
 import { SalesScriptGenerator } from "@/components/sales/SalesScriptGenerator";
 import { toast } from "sonner";
+ import { useWorkspace } from "@/hooks/useWorkspace";
+ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
 export default function Lifecycle() {
   const { leads, deals, stages, loading, createLead, deleteLead, updateLead, updateDealStage, createDeal, refetch } = useLifecycle();
+   const { currentWorkspace } = useWorkspace();
   
   const [showLeadDialog, setShowLeadDialog] = useState(false);
   const [showDealDialog, setShowDealDialog] = useState(false);
@@ -45,6 +49,31 @@ export default function Lifecycle() {
   const [leadForm, setLeadForm] = useState({ name: "", email: "", company: "", phone: "", source: "direct" });
   const [dealForm, setDealForm] = useState({ title: "", lead_id: "", value: 0 });
   const [submitting, setSubmitting] = useState(false);
+ 
+   // Real-time subscriptions for CRM data
+   const handleRealtimeUpdate = useCallback(() => {
+     refetch();
+   }, [refetch]);
+ 
+   useRealtimeSubscription(
+     `lifecycle-leads-${currentWorkspace?.id}`,
+     {
+       table: 'leads',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
+ 
+   useRealtimeSubscription(
+     `lifecycle-deals-${currentWorkspace?.id}`,
+     {
+       table: 'deals',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     handleRealtimeUpdate,
+     !!currentWorkspace?.id
+   );
 
   // Calculate pipeline stages from deals
   const pipelineData = stages.length > 0 ? stages.map(stage => {
@@ -146,7 +175,10 @@ export default function Lifecycle() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Lifecycle & CRM</h1>
+           <h1 className="text-2xl font-bold flex items-center gap-2">
+             Lifecycle & CRM
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
           <p className="text-muted-foreground">
             Pipeline de vente et automatisations
           </p>

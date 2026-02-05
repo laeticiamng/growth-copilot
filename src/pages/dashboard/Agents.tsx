@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+ import { useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,7 @@ import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-regi
 import type { AgentType } from '@/lib/agents/types';
 import { AgentOrgChart } from '@/components/agents/AgentOrgChart';
 import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
+ import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 // Agent personas with human names and avatars - 39 agents total
 const AGENT_PERSONAS: Record<string, {
@@ -355,58 +357,69 @@ export default function Agents() {
   const [recentRuns, setRecentRuns] = useState<AgentRun[]>([]);
   const [agentStats, setAgentStats] = useState<AgentStats[]>([]);
   const [loading, setLoading] = useState(true);
+ 
+   const fetchAgentData = useCallback(async () => {
+     if (!currentWorkspace?.id) return;
+     
+     setLoading(true);
+     try {
+       // Fetch recent agent runs
+       const { data: runs } = await supabase
+         .from('agent_runs')
+         .select('id, agent_type, status, started_at, completed_at, duration_ms, error_message, created_at')
+         .eq('workspace_id', currentWorkspace.id)
+         .order('created_at', { ascending: false })
+         .limit(50);
+ 
+       setRecentRuns(runs || []);
+ 
+       // Calculate stats per agent type
+       const stats: Record<string, AgentStats> = {};
+       (runs || []).forEach(run => {
+         if (!stats[run.agent_type]) {
+           stats[run.agent_type] = {
+             type: run.agent_type,
+             total_runs: 0,
+             success_runs: 0,
+             failed_runs: 0,
+             avg_duration_ms: 0,
+             last_run_at: null,
+           };
+         }
+         const s = stats[run.agent_type];
+         s.total_runs++;
+         if (run.status === 'completed') s.success_runs++;
+         if (run.status === 'failed') s.failed_runs++;
+         if (run.duration_ms) {
+           s.avg_duration_ms = (s.avg_duration_ms * (s.total_runs - 1) + run.duration_ms) / s.total_runs;
+         }
+         if (!s.last_run_at || run.created_at > s.last_run_at) {
+           s.last_run_at = run.created_at;
+         }
+       });
+ 
+       setAgentStats(Object.values(stats));
+     } catch (err) {
+       console.error('Failed to fetch agent data:', err);
+     } finally {
+       setLoading(false);
+     }
+   }, [currentWorkspace?.id]);
 
   useEffect(() => {
-    if (!currentWorkspace?.id) return;
-
-    const fetchAgentData = async () => {
-      setLoading(true);
-      try {
-        // Fetch recent agent runs
-        const { data: runs } = await supabase
-          .from('agent_runs')
-          .select('id, agent_type, status, started_at, completed_at, duration_ms, error_message, created_at')
-          .eq('workspace_id', currentWorkspace.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        setRecentRuns(runs || []);
-
-        // Calculate stats per agent type
-        const stats: Record<string, AgentStats> = {};
-        (runs || []).forEach(run => {
-          if (!stats[run.agent_type]) {
-            stats[run.agent_type] = {
-              type: run.agent_type,
-              total_runs: 0,
-              success_runs: 0,
-              failed_runs: 0,
-              avg_duration_ms: 0,
-              last_run_at: null,
-            };
-          }
-          const s = stats[run.agent_type];
-          s.total_runs++;
-          if (run.status === 'completed') s.success_runs++;
-          if (run.status === 'failed') s.failed_runs++;
-          if (run.duration_ms) {
-            s.avg_duration_ms = (s.avg_duration_ms * (s.total_runs - 1) + run.duration_ms) / s.total_runs;
-          }
-          if (!s.last_run_at || run.created_at > s.last_run_at) {
-            s.last_run_at = run.created_at;
-          }
-        });
-
-        setAgentStats(Object.values(stats));
-      } catch (err) {
-        console.error('Failed to fetch agent data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAgentData();
-  }, [currentWorkspace?.id]);
+   }, [fetchAgentData]);
+ 
+   // Real-time subscription for agent_runs
+   useRealtimeSubscription(
+     `agents-runs-${currentWorkspace?.id}`,
+     {
+       table: 'agent_runs',
+       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+     },
+     () => fetchAgentData(),
+     !!currentWorkspace?.id
+   );
 
   // Combine definitions with stats
   const agentsWithStats = useMemo(() => {
@@ -465,7 +478,10 @@ export default function Agents() {
       <div className="flex items-center gap-3">
         <span className="text-3xl">🤖</span>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Mon équipe IA</h1>
+           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+             Mon équipe IA
+             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+           </h1>
           <p className="text-muted-foreground">
             39 agents spécialisés répartis en 11 départements, disponibles 24h/24
           </p>
