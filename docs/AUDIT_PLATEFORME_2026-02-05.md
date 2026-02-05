@@ -234,6 +234,31 @@
  
  ## 🔒 DERNIÈRE MIGRATION RLS (2026-02-05)
  
+ ---
+ 
+ ## 🚫 POLITIQUE "ZÉRO FAKE DATA" (2026-02-05)
+ 
+ ### Fichiers supprimés/nettoyés
+ | Fichier | Action |
+ |---------|--------|
+ | `src/lib/demo-data.ts` | ❌ Supprimé - contenait seedDemoData() |
+ | `src/hooks/useDemoMode.tsx` | 🔧 DEMO_DATA supprimé |
+ | `src/lib/agents/seo-auditor.ts` | 🔧 generateDemoAuditResults → generateEmptyAuditResults |
+ | `src/lib/agents/competitive-intel-agent.ts` | 🔧 Mock crawl data supprimé |
+ | `src/components/kpi/AdvancedCharts.tsx` | 🔧 Données mockées remplacées par empty states |
+ | `src/pages/dashboard/AICostDashboard.tsx` | 🔧 Référence DEMO_DATA supprimée |
+ 
+ ### Tests mis à jour
+ - `src/test/seo-auditor.test.ts` → Tests sur generateEmptyAuditResults
+ - `src/test/smoke.test.ts` → Test vérifie structure vide
+ - `src/lib/agents/__tests__/seo-auditor.test.ts` → Fixtures de test explicites
+ 
+ ### Principe appliqué
+ > **INTERDICTION** d'utiliser des données fictives codées en dur dans l'UI de production.
+ > Si aucune donnée réelle n'est présente, afficher un **empty state explicite**.
+ 
+ ---
+ 
  ### Politiques durcies
  ```sql
  -- Nouvelles restrictions appliquées:
@@ -268,6 +293,7 @@
  **La plateforme Growth OS est 100% opérationnelle et production-ready.**
  
  - ✅ 20/20 corrections appliquées
+ - ✅ Politique "Zéro Fake Data" appliquée
  - ✅ 290+ tests automatisés passent
  - ✅ 325+ policies RLS actives
  - ✅ 38 Edge Functions déployées

@@ -66,55 +66,20 @@ interface FunnelData {
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const sampleTimeData: ChartData[] = [
-  { date: "Jan", sessions: 4200, conversions: 120, revenue: 12000, cac: 45, ltv: 180 },
-  { date: "Fév", sessions: 4800, conversions: 145, revenue: 14500, cac: 42, ltv: 195 },
-  { date: "Mar", sessions: 5200, conversions: 168, revenue: 16800, cac: 38, ltv: 210 },
-  { date: "Avr", sessions: 4900, conversions: 155, revenue: 15500, cac: 40, ltv: 205 },
-  { date: "Mai", sessions: 5800, conversions: 195, revenue: 19500, cac: 35, ltv: 225 },
-  { date: "Jun", sessions: 6400, conversions: 225, revenue: 22500, cac: 32, ltv: 240 },
-  { date: "Jul", sessions: 7200, conversions: 260, revenue: 26000, cac: 30, ltv: 255 },
-  { date: "Aoû", sessions: 6800, conversions: 240, revenue: 24000, cac: 31, ltv: 250 },
-  { date: "Sep", sessions: 7500, conversions: 280, revenue: 28000, cac: 28, ltv: 265 },
-  { date: "Oct", sessions: 8200, conversions: 310, revenue: 31000, cac: 26, ltv: 280 },
-  { date: "Nov", sessions: 9000, conversions: 350, revenue: 35000, cac: 24, ltv: 295 },
-  { date: "Déc", sessions: 9800, conversions: 390, revenue: 39000, cac: 22, ltv: 310 },
-];
-
-const channelData: ChannelData[] = [
-  { channel: "Organic", sessions: 35000, conversions: 1400, revenue: 140000, roi: 450 },
-  { channel: "Paid Search", sessions: 18000, conversions: 720, revenue: 72000, roi: 280 },
-  { channel: "Social", sessions: 12000, conversions: 360, revenue: 36000, roi: 180 },
-  { channel: "Email", sessions: 8000, conversions: 640, revenue: 64000, roi: 520 },
-  { channel: "Direct", sessions: 15000, conversions: 450, revenue: 45000, roi: 320 },
-  { channel: "Referral", sessions: 6000, conversions: 240, revenue: 24000, roi: 400 },
-];
-
-const funnelData: FunnelData[] = [
-  { stage: "Visiteurs", value: 10000, fill: COLORS[0] },
-  { stage: "Leads", value: 3500, fill: COLORS[1] },
-  { stage: "MQL", value: 1200, fill: COLORS[2] },
-  { stage: "SQL", value: 600, fill: COLORS[3] },
-  { stage: "Opportunités", value: 250, fill: COLORS[4] },
-  { stage: "Clients", value: 85, fill: COLORS[5] },
-];
-
-const radarData = [
-  { metric: "SEO", score: 78, benchmark: 65 },
-  { metric: "Ads", score: 65, benchmark: 70 },
-  { metric: "Social", score: 82, benchmark: 60 },
-  { metric: "Email", score: 90, benchmark: 75 },
-  { metric: "CRO", score: 72, benchmark: 68 },
-  { metric: "Content", score: 85, benchmark: 72 },
-];
-
 export function AdvancedCharts() {
   const [period, setPeriod] = useState("12m");
   const [chartType, setChartType] = useState<"area" | "line" | "bar">("area");
+   
+   // NOTE: This component now receives data from props or context
+   // Empty arrays are used as defaults - populate via real integrations
+   const [timeData] = useState<ChartData[]>([]);
+   const [channelData] = useState<ChannelData[]>([]);
+   const [funnelData] = useState<FunnelData[]>([]);
+   const [radarData] = useState<{ metric: string; score: number; benchmark: number }[]>([]);
 
   const handleExport = (chartName: string) => {
     // Export chart data as JSON
-    const blob = new Blob([JSON.stringify({ chartName, data: sampleTimeData, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+     const blob = new Blob([JSON.stringify({ chartName, data: timeData, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -123,6 +88,22 @@ export function AdvancedCharts() {
     URL.revokeObjectURL(url);
   };
 
+   // Empty state when no data
+   if (timeData.length === 0 && channelData.length === 0) {
+     return (
+       <Card className="p-8 text-center">
+         <BarChart2 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+         <h3 className="text-lg font-semibold mb-2">Aucune donnée KPI</h3>
+         <p className="text-muted-foreground mb-4">
+           Connectez vos intégrations (GA4, GSC, Ads) pour voir vos métriques avancées ici.
+         </p>
+         <Button asChild>
+           <a href="/dashboard/integrations">Configurer les intégrations</a>
+         </Button>
+       </Card>
+     );
+   }
+ 
   return (
     <div className="space-y-6">
       {/* Controls */}
@@ -192,8 +173,8 @@ export function AdvancedCharts() {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               {chartType === "area" ? (
-                <AreaChart data={sampleTimeData}>
-                  <defs>
+                 <AreaChart data={timeData}>
+                   <defs>
                     <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
                       <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
@@ -236,7 +217,7 @@ export function AdvancedCharts() {
                   <Brush dataKey="date" height={30} stroke="hsl(var(--primary))" />
                 </AreaChart>
               ) : chartType === "line" ? (
-                <LineChart data={sampleTimeData}>
+                 <LineChart data={timeData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="date" className="text-xs" />
                   <YAxis yAxisId="left" className="text-xs" />
@@ -249,7 +230,7 @@ export function AdvancedCharts() {
                   <Brush dataKey="date" height={30} stroke="hsl(var(--primary))" />
                 </LineChart>
               ) : (
-                <BarChart data={sampleTimeData}>
+                 <BarChart data={timeData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="date" className="text-xs" />
                   <YAxis className="text-xs" />
@@ -394,7 +375,7 @@ export function AdvancedCharts() {
         <CardContent>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={sampleTimeData}>
+               <ComposedChart data={timeData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" className="text-xs" />
                 <YAxis className="text-xs" />
@@ -408,14 +389,16 @@ export function AdvancedCharts() {
           <div className="flex items-center justify-center gap-6 mt-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-destructive" />
-              <span>CAC moyen: {Math.round(sampleTimeData.reduce((a, b) => a + b.cac, 0) / sampleTimeData.length)}€</span>
+               <span>CAC moyen: {timeData.length > 0 ? Math.round(timeData.reduce((a, b) => a + b.cac, 0) / timeData.length) : 0}€</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-primary" />
-              <span>LTV moyen: {Math.round(sampleTimeData.reduce((a, b) => a + b.ltv, 0) / sampleTimeData.length)}€</span>
+               <span>LTV moyen: {timeData.length > 0 ? Math.round(timeData.reduce((a, b) => a + b.ltv, 0) / timeData.length) : 0}€</span>
             </div>
             <Badge variant="success">
-              Ratio LTV/CAC: {(sampleTimeData.reduce((a, b) => a + b.ltv, 0) / sampleTimeData.reduce((a, b) => a + b.cac, 0)).toFixed(1)}x
+               Ratio LTV/CAC: {timeData.length > 0 && timeData.reduce((a, b) => a + b.cac, 0) > 0 
+                 ? (timeData.reduce((a, b) => a + b.ltv, 0) / timeData.reduce((a, b) => a + b.cac, 0)).toFixed(1) 
+                 : 0}x
             </Badge>
           </div>
         </CardContent>

@@ -165,14 +165,13 @@ describe("Smoke Tests - Critical Paths", () => {
   });
 
   describe("8. Demo Data", () => {
-    it("should generate SEO audit demo results", async () => {
-      const { generateDemoAuditResults } = await import("@/lib/agents/seo-auditor");
-      const results = generateDemoAuditResults();
+     it("should generate empty SEO audit results when no data", async () => {
+       const { generateEmptyAuditResults } = await import("@/lib/agents/seo-auditor");
+       const results = generateEmptyAuditResults();
       
-      expect(results.pages_crawled).toBe(156);
-      expect(results.issues.length).toBeGreaterThan(0);
-      expect(results.issues[0]).toHaveProperty("id");
-      expect(results.issues[0]).toHaveProperty("severity");
+       expect(results.pages_crawled).toBe(0);
+       expect(results.issues).toHaveLength(0);
+       expect(results.errors).toHaveLength(0);
     });
   });
 });

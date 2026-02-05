@@ -447,40 +447,25 @@ export function runCompetitiveIntelligence(
       continue;
     }
     
-    // Mock crawl result for demo (in production, would actually crawl)
-    const mockCrawlResult: CompetitorCrawlResult = {
-      url: competitor.url,
-      title: `${competitor.name} - Solutions`,
-      description: "Description du concurrent",
-      h1: [`${competitor.name} Solutions`],
-      topics: ["marketing", "automation", "growth"],
-      contentLength: 1500,
-      hasSchema: true,
-      schemaTypes: ["Organization", "WebPage"],
-      socialProof: [
-        { type: "testimonial", text: "Great product!" },
-        { type: "stat", text: "10,000+ customers" },
-      ],
-      pricing: {
-        hasPublicPricing: true,
-        tiers: ["Starter", "Pro", "Enterprise"],
-        lowestPrice: "29€/mois",
-        pricingModel: "subscription",
-      },
-      features: ["Feature 1", "Feature 2", "Feature 3"],
-      ctas: ["Essai gratuit", "Réserver une démo"],
-    };
+     // NOTE: In production, this would call the seo-crawler edge function
+     // to actually crawl the competitor's website. For now, we skip
+     // competitors that don't have cached crawl data.
+     // TODO: Implement real crawl via edge function call
+     blockedCompetitors.push({ 
+       url: competitor.url, 
+       reason: "Crawl en temps réel non disponible - utilisez l'edge function seo-crawler" 
+     });
+     continue;
     
-    const analysis = analyzeCompetitor(
-      competitor,
-      mockCrawlResult,
-      input.ourKeywords || []
-    );
-    
-    analyses.push(analysis);
-    allInsights.push(...analysis.insights);
-    allContentGaps.push(...analysis.contentGaps);
-    analyzed++;
+     // Real implementation would be:
+     // const crawlResult = await callEdgeFunction('seo-crawler', { url: competitor.url });
+     // if (crawlResult) {
+     //   const analysis = analyzeCompetitor(competitor, crawlResult, input.ourKeywords || []);
+     //   analyses.push(analysis);
+     //   allInsights.push(...analysis.insights);
+     //   allContentGaps.push(...analysis.contentGaps);
+     //   analyzed++;
+     // }
   }
   
   // Aggregate and prioritize

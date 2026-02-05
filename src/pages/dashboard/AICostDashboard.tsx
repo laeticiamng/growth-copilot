@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
-import { useDemoMode, DEMO_DATA } from "@/hooks/useDemoMode";
 import { 
   DollarSign, Zap, Clock, TrendingUp, TrendingDown,
   Bot, BarChart3, AlertTriangle, CheckCircle2
@@ -26,14 +25,13 @@ interface CostBreakdown {
 
 export default function AICostDashboard() {
   const { metrics, loading } = useOpsMetrics();
-  const { isDemoMode } = useDemoMode();
 
   // Get latest metric or default
   const latestMetric = Array.isArray(metrics) ? metrics[0] : metrics;
   const aiCost = latestMetric?.ai_cost_usd || 0;
 
-  // Use demo data if in demo mode
-  const displayData = isDemoMode ? DEMO_DATA.aiCosts : {
+   // Calculate display data from real metrics only
+   const displayData = {
     today: aiCost,
     thisWeek: aiCost * 5,
     thisMonth: aiCost * 22,
@@ -128,9 +126,8 @@ export default function AICostDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {Object.entries(MODEL_COSTS).map(([model, costs]) => {
-                  const usage = isDemoMode 
-                    ? DEMO_DATA.aiCosts.breakdown.find(b => b.model === model)
-                    : null;
+                   // Real usage data would come from ai_requests table
+                   const usage = null;
                   
                   return (
                     <div key={model} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
