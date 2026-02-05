@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { setSentryUser, captureException, addBreadcrumb } from '@/lib/sentry';
 
 interface AuthContextType {
   user: User | null;
@@ -27,6 +28,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Update Sentry user context (ID only, no PII)
+        setSentryUser(session?.user?.id ?? null);
+        
+        // Add auth breadcrumb
+        addBreadcrumb({
+          category: 'auth',
+          message: `Auth event: ${event}`,
+          level: 'info',
+          data: { event, hasSession: !!session },
+        });
       }
     );
 
@@ -35,6 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Set initial Sentry user
+      setSentryUser(session?.user?.id ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -50,6 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: redirectUrl
       }
     });
+    if (error) {
+      captureException(error, { action: 'signUp' });
+    }
     return { error: error as Error | null };
   };
 
@@ -58,11 +76,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password
     });
+    if (error) {
+      captureException(error, { action: 'signIn' });
+    }
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      captureException(error, { action: 'signOut' });
+    }
+    // Clear Sentry user on sign out
+    setSentryUser(null);
   };
 
   const resetPassword = async (email: string) => {
@@ -71,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
     });
+    if (error) {
+      captureException(error, { action: 'resetPassword' });
+    }
     return { error: error as Error | null };
   };
 
@@ -78,6 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
+    if (error) {
+      captureException(error, { action: 'updatePassword' });
+    }
     return { error: error as Error | null };
   };
 

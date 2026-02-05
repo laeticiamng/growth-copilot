@@ -9,6 +9,7 @@ import { useApprovals } from "@/hooks/useApprovals";
 import { useServices } from "@/hooks/useServices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { captureException, addBreadcrumb } from "@/lib/sentry";
 import {
   ArrowRight,
   Bot,
@@ -190,6 +191,14 @@ export default function DashboardHome() {
       return;
     }
 
+    // Add breadcrumb for run launch
+    addBreadcrumb({
+      category: 'agent',
+      message: `Launching run: ${runType}`,
+      level: 'info',
+      data: { runType, workspaceId: currentWorkspace.id, siteId: currentSite?.id },
+    });
+
     try {
       const { data, error } = await supabase.functions.invoke("run-executor", {
         body: {
@@ -199,7 +208,16 @@ export default function DashboardHome() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Capture edge function errors to Sentry
+        captureException(error, {
+          action: 'launchRun',
+          runType,
+          workspaceId: currentWorkspace.id,
+          siteId: currentSite?.id,
+        });
+        throw error;
+      }
       toast.success("Exécution lancée avec succès");
     } catch (error) {
       console.error("Run launch error:", error);
