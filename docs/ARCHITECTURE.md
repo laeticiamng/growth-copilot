@@ -67,7 +67,7 @@
 │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐ │ │
 │  │  │   Google    │ │    Meta     │ │   Stripe    │ │   Lovable AI        │ │ │
 │  │  │  Analytics  │ │  Marketing  │ │  Payments   │ │   Gateway           │ │ │
-│  │  │  Search     │ │  Instagram  │ │  Webhooks   │ │  (GPT-5, Gemini)    │ │ │
+│  │  │  Search     │ │  Instagram  │ │  Webhooks   │ │  (Gemini 3 Pro/Flash)│ │ │
 │  │  │  Ads, YT    │ │  CAPI       │ │  Portal     │ │                     │ │ │
 │  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────────────┘ │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
@@ -320,7 +320,7 @@ CREATE VIEW v_integration_health AS ...
 | i18n | i18next (FR, EN, ES, DE) |
 | Backend | Supabase (PostgreSQL, Edge Functions) |
 | Auth | Supabase Auth (Email, OAuth) |
-| AI | Lovable AI Gateway (GPT-5, Gemini) |
+| AI | Lovable AI Gateway (Gemini 3 Pro, Gemini 3 Flash, Gemini 2.5 Pro) |
 | Payments | Stripe (Checkout, Webhooks, Portal) |
 | Hosting | Lovable Cloud |
 
