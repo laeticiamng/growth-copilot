@@ -94,13 +94,19 @@ export default function Offers() {
     }
     setGeneratingObjections(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-gateway`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
+      // Import supabase client for proper authentication
+      const { supabase } = await import("@/integrations/supabase/client");
+      
+      // Get current session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Veuillez vous connecter pour continuer");
+        setGeneratingObjections(false);
+        return;
+      }
+      
+      const { data, error } = await supabase.functions.invoke("ai-gateway", {
+        body: {
           purpose: "copywriting",
           agent_name: "objection-handler",
           input: {
@@ -108,11 +114,10 @@ export default function Offers() {
             service_description: objectionInput,
             existing_objections: objections.map(o => o.objection),
           },
-        }),
+        },
       });
       
-      if (response.ok) {
-        const data = await response.json();
+      if (!error && data) {
         const generated = data.output?.objections || [];
         if (generated.length > 0) {
           toast.success(`${generated.length} objections générées`);
