@@ -232,17 +232,19 @@
  
  ---
  
- ## 🔒 DERNIÈRE MIGRATION RLS (2026-02-05)
+ ## 🔒 DERNIÈRE MIGRATION RLS (2026-02-05 - Phase 3 Final)
  
- ### Nettoyage RLS effectué
- - ✅ Suppression de 30+ policies redondantes
- - ✅ Consolidation à 1 policy stricte par table/opération
- - ✅ employees_own_or_hr_only (user_id OU HR uniquement)
- - ✅ leads_assigned_or_manager (assigné OU manager+)
- - ✅ contracts_owner_billing_only (owner OU billing)
- - ✅ perf_reviews_strict_access (employee, reviewer, HR)
- - ✅ oauth_tokens_owner_strict (via integration → owner)
- - ✅ evidence_*_owner_mgr (manager+ uniquement)
+ ### Corrections Phase 3 (22 findings → 2 intentionnels)
+ - ✅ employees → emp_sel_strict (user_id OU HR OU owner)
+ - ✅ contracts → cntr_sel_owner (owner OU billing)
+ - ✅ gdpr_requests → gdpr_sel_owner (owner uniquement)
+ - ✅ meta_conversations → metaconv_sel (admin/manager)
+ - ✅ meta_messages → metamsg_sel (admin/manager)
+ - ✅ ai_requests → aireq_sel (creator OU owner)
+ - ✅ creative_jobs → crjob_sel (admin/manager)
+ - ✅ smart_link_emails → sle_sel_admin (owner/admin read)
+ - ✅ approval_queue → trigger anti self-approval
+ - ✅ audit_log → insert membre supprimé (système only)
  
  ---
  
