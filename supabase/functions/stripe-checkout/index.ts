@@ -1,8 +1,32 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+// Price IDs pour chaque plan/département
+const PRICE_IDS: Record<string, string> = {
+   full_company: "price_1SwlDUDFa5Y9NR1IzLwG74ue",      // 9000€/mois
+   starter: "price_1SwnyuDFa5Y9NR1IEQaigAaY",           // 490€/mois
+   dept_marketing: "price_1SxHdWDFa5Y9NR1IShSgEnIo",    // 1900€/mois
+   dept_sales: "price_1SxHdYDFa5Y9NR1IjoLhZo9L",
+   dept_finance: "price_1SxHdZDFa5Y9NR1Ii3xidkqC",
+   dept_security: "price_1SxHdaDFa5Y9NR1IxPqV3KlA",
+   dept_product: "price_1SxHdbDFa5Y9NR1Ibc5nkfXp",
+   dept_engineering: "price_1SxHddDFa5Y9NR1IZDV3RSd8",
+   dept_data: "price_1SxHdeDFa5Y9NR1IRQFGTjku",
+   dept_support: "price_1SxHdfDFa5Y9NR1IctUpZzhc",
+   dept_governance: "price_1SxHdhDFa5Y9NR1IWwDiyuSj",
+   dept_hr: "price_1SxHdiDFa5Y9NR1ItvPJUay8",
+   dept_legal: "price_1SxHdjDFa5Y9NR1IoOWNywUH",
+};
+
+const logStep = (step: string, details?: unknown) => {
+   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+   console.log(`[STRIPE-CHECKOUT] ${step}${detailsStr}`);
 };
 
 serve(async (req) => {
@@ -11,53 +35,82 @@ serve(async (req) => {
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!STRIPE_SECRET_KEY) {
-      throw new Error("STRIPE_SECRET_KEY is not configured");
+     logStep("Function started");
+
+     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+
+     const supabaseClient = createClient(
+       Deno.env.get("SUPABASE_URL") ?? "",
+       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+     );
+
+     const authHeader = req.headers.get("Authorization")!;
+     const token = authHeader.replace("Bearer ", "");
+     const { data } = await supabaseClient.auth.getUser(token);
+     const user = data.user;
+     if (!user?.email) throw new Error("User not authenticated");
+     logStep("User authenticated", { email: user.email });
+
+     const { plan_type = "full_company", departments = [] } = await req.json().catch(() => ({}));
+     logStep("Plan requested", { plan_type, departments });
+
+     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+     let customerId: string | undefined;
+     if (customers.data.length > 0) {
+       customerId = customers.data[0].id;
+       logStep("Found existing customer", { customerId });
     }
 
-    const { priceId, workspaceId, successUrl, cancelUrl } = await req.json();
+     // Build line items based on plan type
+     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-    if (!priceId || !workspaceId || !successUrl || !cancelUrl) {
-      throw new Error("Missing required parameters");
-    }
+     if (plan_type === "full_company" || plan_type === "starter") {
+       const priceId = PRICE_IDS[plan_type];
+       if (priceId) {
+         lineItems.push({ price: priceId, quantity: 1 });
+       }
+     } else if (plan_type === "department" && Array.isArray(departments)) {
+       for (const dept of departments) {
+         const priceId = PRICE_IDS[`dept_${dept}`];
+         if (priceId) {
+           lineItems.push({ price: priceId, quantity: 1 });
+           logStep("Adding department", { dept, priceId });
+         }
+       }
+     }
 
-    // Create Stripe Checkout session
-    const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        "mode": "subscription",
-        "payment_method_types[0]": "card",
-        "line_items[0][price]": priceId,
-        "line_items[0][quantity]": "1",
-        "success_url": successUrl,
-        "cancel_url": cancelUrl,
-        "client_reference_id": workspaceId,
-        "allow_promotion_codes": "true",
-        "billing_address_collection": "required",
-        "locale": "fr",
-      }),
-    });
+     if (lineItems.length === 0) {
+       throw new Error("No valid plan or departments selected");
+     }
 
-    const session = await response.json();
-
-    if (!response.ok) {
-      console.error("Stripe error:", session);
-      throw new Error(session.error?.message || "Stripe API error");
-    }
+     const session = await stripe.checkout.sessions.create({
+       customer: customerId,
+       customer_email: customerId ? undefined : user.email,
+       line_items: lineItems,
+       mode: "subscription",
+       allow_promotion_codes: true,
+       success_url: `${req.headers.get("origin")}/dashboard?checkout=success`,
+       cancel_url: `${req.headers.get("origin")}/dashboard/billing?checkout=cancelled`,
+       metadata: {
+         user_id: user.id,
+         plan_type,
+         departments: departments.join(","),
+       },
+       locale: "fr",
+       billing_address_collection: "required",
+     });
+     logStep("Checkout session created", { sessionId: session.id });
 
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Checkout error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), {
+     const errorMessage = error instanceof Error ? error.message : String(error);
+     logStep("ERROR", { message: errorMessage });
+     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

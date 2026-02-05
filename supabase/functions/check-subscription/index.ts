@@ -10,8 +10,34 @@ const corsHeaders = {
 // Stripe product IDs for Growth OS plans
 const PRODUCT_PLANS = {
   "prod_TuaO9YlvplPsJl": "full_company",
-  "prod_TuaORHrJ1nfbln": "department",
   "prod_TudFAeXRQEJpdY": "starter",
+   // Départements individuels
+   "prod_Tv7tOII8jDslPP": "dept_marketing",
+   "prod_Tv7tjP9mFXcc8i": "dept_sales",
+   "prod_Tv7tcI8A5btGI7": "dept_finance",
+   "prod_Tv7tYGb1VW9oig": "dept_security",
+   "prod_Tv7tbGZouXpDih": "dept_product",
+   "prod_Tv7tPkYPvyZhkG": "dept_engineering",
+   "prod_Tv7t1qLAweBdWI": "dept_data",
+   "prod_Tv7tvJApiwXSY3": "dept_support",
+   "prod_Tv7tw3S264TNts": "dept_governance",
+   "prod_Tv7tDlqiofN0Nf": "dept_hr",
+   "prod_Tv7tyrjRkuQGHL": "dept_legal",
+};
+
+// Mapping département -> agents
+const DEPARTMENT_AGENTS: Record<string, { agents: string[], count: number }> = {
+  marketing: { agents: ["tech_auditor", "keyword_strategist", "content_builder", "local_optimizer", "social_manager"], count: 5 },
+  sales: { agents: ["offer_architect", "sales_accelerator", "lifecycle_manager", "deal_closer"], count: 4 },
+  finance: { agents: ["revenue_analyst", "budget_optimizer", "billing_manager"], count: 3 },
+  security: { agents: ["security_auditor", "access_controller", "threat_monitor"], count: 3 },
+  product: { agents: ["feature_analyst", "ux_optimizer", "roadmap_planner", "backlog_manager"], count: 4 },
+  engineering: { agents: ["code_reviewer", "performance_engineer", "devops_agent", "api_integrator", "testing_agent"], count: 5 },
+  data: { agents: ["analytics_detective", "data_engineer", "ml_trainer", "reporting_agent"], count: 4 },
+  support: { agents: ["reputation_guardian", "ticket_handler", "knowledge_manager"], count: 3 },
+  governance: { agents: ["compliance_auditor", "policy_enforcer", "risk_assessor"], count: 3 },
+  hr: { agents: ["recruitment_agent", "employee_experience"], count: 2 },
+  legal: { agents: ["contract_analyzer"], count: 1 },
 };
 
 // Helper logging function for enhanced debugging
@@ -107,7 +133,9 @@ serve(async (req) => {
     
     let plan = "free";
     let isFullCompany = false;
+     let isStarter = false;
     let subscriptionEnd = null;
+     let enabledDepartments: string[] = [];
     let features = {
       all_departments: false,
       ai_employees: 0,
@@ -141,6 +169,7 @@ serve(async (req) => {
             users_limit: -1, // Unlimited
           };
         } else if (plan === "starter") {
+           isStarter = true;
           features = {
             all_departments: true, // Lite access to all
             ai_employees: 11, // 1 per department
@@ -148,30 +177,61 @@ serve(async (req) => {
             runs_limit: 50,
             users_limit: 2,
           };
-        } else if (plan === "department") {
-          // Count department subscriptions
-          const deptCount = subscriptions.data.filter(
-            (sub: Stripe.Subscription) => PRODUCT_PLANS[sub.items.data[0]?.price?.product as keyof typeof PRODUCT_PLANS] === "department"
-          ).length;
-          
-          features = {
-            all_departments: false,
-            ai_employees: deptCount * 4, // Average 4 employees per dept
-            sites_limit: 5 * deptCount,
-            runs_limit: 200 * deptCount,
-            users_limit: 5 + (deptCount * 3),
-          };
         }
       }
-    } else {
-      logStep("No active subscription found");
+
+     }
+
+     // Update workspace_subscriptions in database
+     const { data: workspaces } = await supabaseClient
+       .from('workspaces')
+       .select('id')
+       .eq('owner_id', user.id);
+
+     // Check for individual department subscriptions
+     let totalDeptAgents = 0;
+
+     if (hasActiveSub) {
+       for (const sub of subscriptions.data) {
+         const prodId = sub.items.data[0]?.price?.product as string;
+         const subMappedPlan = PRODUCT_PLANS[prodId as keyof typeof PRODUCT_PLANS];
+         
+         if (subMappedPlan?.startsWith("dept_")) {
+           const deptSlug = subMappedPlan.replace("dept_", "");
+           enabledDepartments.push(deptSlug);
+           totalDeptAgents += DEPARTMENT_AGENTS[deptSlug]?.count || 0;
+ 
+           // Sync to workspace_departments table
+           if (workspaces && workspaces.length > 0) {
+             for (const ws of workspaces) {
+               await supabaseClient
+                 .from('workspace_departments')
+                 .upsert({
+                   workspace_id: ws.id,
+                   department_slug: deptSlug,
+                   stripe_subscription_id: sub.id,
+                   is_active: true,
+                   agents_count: DEPARTMENT_AGENTS[deptSlug]?.count || 0,
+                   expires_at: new Date(sub.current_period_end * 1000).toISOString(),
+                   updated_at: new Date().toISOString(),
+                 }, { onConflict: 'workspace_id,department_slug' });
+             }
+           }
+         }
+      }
     }
 
-    // Update workspace_subscriptions in database
-    const { data: workspaces } = await supabaseClient
-      .from('workspaces')
-      .select('id')
-      .eq('owner_id', user.id);
+     // If user has department subscriptions but no full_company/starter
+     if (enabledDepartments.length > 0 && plan === "free") {
+       plan = "department";
+       features = {
+         all_departments: false,
+         ai_employees: totalDeptAgents + 2,
+         sites_limit: 5 * enabledDepartments.length,
+         runs_limit: 200 * enabledDepartments.length,
+         users_limit: 5 + (enabledDepartments.length * 3),
+       };
+     }
 
     if (workspaces && workspaces.length > 0) {
       for (const ws of workspaces) {
@@ -182,6 +242,8 @@ serve(async (req) => {
             plan: plan,
             status: hasActiveSub ? 'active' : 'inactive',
             is_full_company: isFullCompany,
+             is_starter: isStarter,
+             enabled_departments: enabledDepartments,
             stripe_customer_id: hasActiveSub ? customerId : null,
             stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
             current_period_end: subscriptionEnd,
@@ -195,6 +257,8 @@ serve(async (req) => {
       subscribed: hasActiveSub,
       plan,
       is_full_company: isFullCompany,
+       is_starter: isStarter,
+       enabled_departments: enabledDepartments,
       subscription_end: subscriptionEnd,
       features,
     }), {
