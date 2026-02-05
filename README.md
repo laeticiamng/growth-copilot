@@ -157,7 +157,7 @@ Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
 - **Google APIs** : Analytics, Search Console, Ads, YouTube, Business Profile
 - **Meta APIs** : Marketing API, Instagram, Conversions API
 - **Stripe** : Checkout, Webhooks, Customer Portal
-- **Lovable AI Gateway** : GPT-5, Gemini
+- **Lovable AI Gateway** : Gemini 3 Pro, Gemini 3 Flash, Gemini 2.5 Pro
 
 > **Documentation architecture** : [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 
@@ -332,7 +332,7 @@ npm run test src/test/smoke.test.ts
 │                    EXTERNAL SERVICES                             │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
 │  │ Google   │  │ Meta     │  │ Stripe   │  │ Lovable AI       │ │
-│  │ APIs     │  │ APIs     │  │ Payments │  │ GPT-5 + Gemini   │ │
+│  │ APIs     │  │ APIs     │  │ Payments │  │ Gemini 3 Pro+Flash│ │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```

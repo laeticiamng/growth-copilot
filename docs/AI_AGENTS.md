@@ -30,7 +30,7 @@ Growth OS utilise une **AI Gateway centralisée** (`supabase/functions/ai-gatewa
 │         ▼                                  ▼                     │
 │  ┌─────────────┐              ┌─────────────────────┐           │
 │  │ Log to DB   │              │ Lovable AI Gateway  │           │
-│  │ ai_requests │              │ (GPT-5, Gemini)     │           │
+│  │ ai_requests │              │ (Gemini 3 Pro/Flash)│           │
 │  └─────────────┘              └─────────────────────┘           │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -43,11 +43,11 @@ Growth OS utilise une **AI Gateway centralisée** (`supabase/functions/ai-gatewa
 
 | Purpose | Modèle | Temperature | Max Tokens | Raison |
 |---------|--------|-------------|------------|--------|
-| `cgo_plan` | openai/gpt-5.2 | 0.3 | 8192 | Orchestration stratégique, raisonnement complexe |
-| `qa_review` | openai/gpt-5.2 | 0.1 | 4096 | Validation précise, compliance |
-| `seo_audit` | openai/gpt-5-mini | 0.2 | 4096 | Analyse bulk, coût optimisé |
-| `copywriting` | openai/gpt-5.2 | 0.7 | 4096 | Créativité, qualité du texte |
-| `analysis` | openai/gpt-5-mini | 0.3 | 4096 | Analyses génériques |
+| `cgo_plan` | google/gemini-3-pro-preview | 0.3 | 8192 | Orchestration stratégique, raisonnement complexe |
+| `qa_review` | google/gemini-3-pro-preview | 0.1 | 4096 | Validation précise, compliance |
+| `seo_audit` | google/gemini-3-flash-preview | 0.2 | 4096 | Analyse bulk, coût optimisé |
+| `copywriting` | google/gemini-2.5-pro | 0.7 | 4096 | Créativité, qualité du texte |
+| `analysis` | google/gemini-3-flash-preview | 0.3 | 4096 | Analyses génériques |
 | `bulk_cheap` | google/gemini-2.5-flash-lite | 0.2 | 2048 | Tâches haute volumétrie |
 
 ### Modèles Disponibles
@@ -55,16 +55,14 @@ Growth OS utilise une **AI Gateway centralisée** (`supabase/functions/ai-gatewa
 ```typescript
 // Via Lovable AI Gateway (https://ai.gateway.lovable.dev)
 const SUPPORTED_MODELS = {
-  // OpenAI GPT-5 Series
-  "openai/gpt-5.2": "Latest, best reasoning",
-  "openai/gpt-5": "Powerful all-rounder",
-  "openai/gpt-5-mini": "Balanced cost/performance",
-  "openai/gpt-5-nano": "Fast, high-volume tasks",
+  // Google Gemini 3 Series (Latest)
+  "google/gemini-3-pro-preview": "Strongest reasoning, orchestration",
+  "google/gemini-3-flash-preview": "Balanced speed/quality, analysis",
   
-  // Google Gemini Series
-  "google/gemini-2.5-pro": "Best multimodal + reasoning",
+  // Google Gemini 2.5 Series
+  "google/gemini-2.5-pro": "Best multimodal + creative writing",
   "google/gemini-2.5-flash": "Good balance, lower cost",
-  "google/gemini-2.5-flash-lite": "Fastest, cheapest",
+  "google/gemini-2.5-flash-lite": "Fastest, cheapest, high-volume",
 };
 ```
 
@@ -104,18 +102,18 @@ interface AgentActionV2 {
 ### Direction (3) — Couche de supervision transverse
 | Agent | Rôle | Purpose | Modèle |
 |-------|------|---------|--------|
-| **Sophie Marchand** | Chief Growth Officer | `cgo_plan` | gpt-5.2 |
-| **Lucas Bertrand** | Quality & Compliance Officer | `qa_review` | gpt-5.2 |
-| **Emma Rousseau** | Chief of Staff | `analysis` | gpt-5-mini |
+| **Sophie Marchand** | Chief Growth Officer | `cgo_plan` | gemini-3-pro-preview |
+| **Lucas Bertrand** | Quality & Compliance Officer | `qa_review` | gemini-3-pro-preview |
+| **Emma Rousseau** | Chief of Staff | `analysis` | gemini-3-flash-preview |
 
 ### Marketing (5)
 | Agent | Rôle | Purpose | Modèle |
 |-------|------|---------|--------|
-| **Marie Dupont** | SEO Tech Auditor | `seo_audit` | gpt-5-mini |
-| **Thomas Laurent** | Content Strategist | `copywriting` | gpt-5.2 |
-| **Julie Martin** | Ads Optimizer | `analysis` | gpt-5-mini |
-| **Pierre Moreau** | Social Media Manager | `copywriting` | gpt-5-mini |
-| **Claire Bernard** | CRO Specialist | `analysis` | gpt-5-mini |
+| **Marie Dupont** | SEO Tech Auditor | `seo_audit` | gemini-3-flash-preview |
+| **Thomas Laurent** | Content Strategist | `copywriting` | gemini-2.5-pro |
+| **Julie Martin** | Ads Optimizer | `analysis` | gemini-3-flash-preview |
+| **Pierre Moreau** | Social Media Manager | `copywriting` | gemini-2.5-pro |
+| **Claire Bernard** | CRO Specialist | `analysis` | gemini-3-flash-preview |
 
 ### Sales (4)
 | Agent | Rôle | Purpose |

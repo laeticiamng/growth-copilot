@@ -140,14 +140,14 @@ function getModelConfig(agentType: string): { model: string; temperature: number
   switch (agentType) {
     case 'media_strategy':
     case 'ads_creative':
-      return { model: 'openai/gpt-5.2', temperature: 0.7 };
+      return { model: 'google/gemini-2.5-pro', temperature: 0.7 };
     case 'youtube_optimizer':
     case 'streaming_packager':
     case 'shortform_repurposer':
-      return { model: 'openai/gpt-5.2', temperature: 0.8 };
+      return { model: 'google/gemini-2.5-pro', temperature: 0.8 };
     case 'media_competitive_analyst':
     case 'media_analytics_guardian':
-      return { model: 'openai/gpt-5-mini', temperature: 0.3 };
+      return { model: 'google/gemini-3-flash-preview', temperature: 0.3 };
     default:
       return { model: 'google/gemini-3-flash-preview', temperature: 0.7 };
   }

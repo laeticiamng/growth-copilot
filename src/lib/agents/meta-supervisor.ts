@@ -216,7 +216,7 @@ export function generateThrottleRecommendations(
     });
     recommendations.push({
       type: "switch_model",
-      target: "gpt-5-nano",
+      target: "gemini-2.5-flash-lite",
       reason: "Basculer vers modèle économique pour préserver le budget",
       severity: "medium",
     });
@@ -246,7 +246,7 @@ export function generateThrottleRecommendations(
   if (latencyStatus === "critical") {
     recommendations.push({
       type: "switch_model",
-      target: "gpt-5-nano",
+      target: "gemini-2.5-flash-lite",
       reason: "Latence critique - basculer vers modèle plus rapide",
       severity: "high",
     });
