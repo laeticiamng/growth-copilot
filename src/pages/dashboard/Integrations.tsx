@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import { Link } from "react-router-dom";
 import { GoogleSuperConnector } from "@/components/integrations/GoogleSuperConnector";
 import { MetaSuperConnector } from "@/components/integrations/MetaSuperConnector";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useSites } from "@/hooks/useSites";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -187,8 +189,34 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
 
 const Integrations = () => {
   const { currentWorkspace } = useWorkspace();
+  const { currentSite } = useSites();
   const [activeTab, setActiveTab] = useState("overview");
   const [authorizing, setAuthorizing] = useState<string | null>(null);
+
+  // Fetch all integrations status
+  const { data: integrations, isLoading: integrationsLoading, refetch } = useQuery({
+    queryKey: ["integrations-status", currentWorkspace?.id],
+    queryFn: async () => {
+      if (!currentWorkspace?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("integrations")
+        .select("id, provider, status, account_id, last_sync_at")
+        .eq("workspace_id", currentWorkspace.id);
+      
+      if (error) {
+        console.error("Error fetching integrations:", error);
+        return [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!currentWorkspace?.id,
+    refetchInterval: 5000,
+  });
+
+  const googleConnected = integrations?.some(i => i.provider === "google_combined" && i.status === "active") ?? false;
+  const metaConnected = integrations?.some(i => i.provider === "meta" && i.status === "active") ?? false;
 
   const groupedTools = platformTools.reduce((acc, tool) => {
     if (!acc[tool.category]) acc[tool.category] = [];
@@ -203,6 +231,11 @@ const Integrations = () => {
   const handleAuthorize = async (provider: string) => {
     if (!currentWorkspace?.id) {
       toast.error("Workspace non sélectionné");
+      return;
+    }
+    
+    if (!currentSite) {
+      toast.error("Sélectionnez d'abord un site dans le menu Sites");
       return;
     }
 
@@ -300,37 +333,75 @@ const Integrations = () => {
 
           {/* Quick Access Cards */}
           <div className="grid md:grid-cols-2 gap-4">
-            <Card className="border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-red-500/5 hover:border-blue-500/50 transition-colors cursor-pointer" onClick={() => setActiveTab("google")}>
+            <Card className={`${googleConnected ? "border-green-500/50 bg-gradient-to-br from-green-500/5 to-blue-500/5" : "border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-red-500/5"} hover:border-blue-500/50 transition-colors cursor-pointer`} onClick={() => setActiveTab("google")}>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-red-500">
+                  <div className={`p-3 rounded-xl ${googleConnected ? "bg-gradient-to-br from-green-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-red-500"}`}>
                     <Search className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">Google Super-Connecteur</h3>
-                    <p className="text-sm text-muted-foreground">GA4, GSC, Ads, GBP, YouTube</p>
+                    <p className="text-sm text-muted-foreground">
+                      {googleConnected ? "Connecté • GA4, GSC actifs" : "GA4, GSC, Ads, GBP, YouTube"}
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("google_combined"); }} disabled={authorizing === "google_combined"}>
-                    {authorizing === "google_combined" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
-                    Autoriser
+                  <Button 
+                    variant={googleConnected ? "outline" : "default"} 
+                    size="sm" 
+                    onClick={(e) => { e.stopPropagation(); handleAuthorize("google_combined"); }} 
+                    disabled={authorizing === "google_combined" || integrationsLoading || !currentSite}
+                    className={!googleConnected ? "bg-gradient-to-r from-blue-500 to-red-500 hover:from-blue-600 hover:to-red-600 border-0" : ""}
+                  >
+                    {authorizing === "google_combined" || integrationsLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : googleConnected ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
+                        Connecté
+                      </>
+                    ) : (
+                      <>
+                        <Unlock className="w-4 h-4 mr-1" />
+                        Autoriser
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-purple-500/30 bg-gradient-to-br from-blue-600/5 to-purple-600/5 hover:border-purple-500/50 transition-colors cursor-pointer" onClick={() => setActiveTab("meta")}>
+            <Card className={`${metaConnected ? "border-green-500/50 bg-gradient-to-br from-green-500/5 to-purple-500/5" : "border-purple-500/30 bg-gradient-to-br from-blue-600/5 to-purple-600/5"} hover:border-purple-500/50 transition-colors cursor-pointer`} onClick={() => setActiveTab("meta")}>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600">
+                  <div className={`p-3 rounded-xl ${metaConnected ? "bg-gradient-to-br from-green-500 to-purple-500" : "bg-gradient-to-br from-blue-600 to-purple-600"}`}>
                     <Instagram className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">Meta Super-Connecteur</h3>
-                    <p className="text-sm text-muted-foreground">Ads, Instagram, Messenger, CAPI</p>
+                    <p className="text-sm text-muted-foreground">
+                      {metaConnected ? "Connecté • Ads, Instagram actifs" : "Ads, Instagram, Messenger, CAPI"}
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleAuthorize("meta"); }} disabled={authorizing === "meta"}>
-                    {authorizing === "meta" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4 mr-1" />}
-                    Autoriser
+                  <Button 
+                    variant={metaConnected ? "outline" : "default"} 
+                    size="sm" 
+                    onClick={(e) => { e.stopPropagation(); handleAuthorize("meta"); }} 
+                    disabled={authorizing === "meta" || integrationsLoading || !currentSite}
+                    className={!metaConnected ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0" : ""}
+                  >
+                    {authorizing === "meta" || integrationsLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : metaConnected ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
+                        Connecté
+                      </>
+                    ) : (
+                      <>
+                        <Unlock className="w-4 h-4 mr-1" />
+                        Autoriser
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
