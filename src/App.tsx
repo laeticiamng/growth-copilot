@@ -64,6 +64,7 @@ import DemoOAuth from "./pages/DemoOAuth";
 import Contact from "./pages/Contact";
 import LegalPage from "./pages/Legal";
 import About from "./pages/About";
+import Install from "./pages/Install";
 
 // Crisp Chat widget
 import { CrispChat } from "@/components/CrispChat";
@@ -227,6 +228,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/install" element={<Install />} />
               <Route path="/demo-oauth" element={<DemoOAuth />} />
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
