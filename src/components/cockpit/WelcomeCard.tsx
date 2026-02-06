@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bot, Download, Sparkles, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { fr, enUS, es, de, it, pt, nl } from "date-fns/locale";
-
-const dateLocaleMap: Record<string, typeof enUS> = { fr, en: enUS, es, de, it, pt, nl };
+import { getDateLocale } from "@/lib/date-locale";
 
 interface WelcomeCardProps {
   agentName: string;
@@ -32,7 +30,7 @@ export function WelcomeCard({
 }: WelcomeCardProps) {
   const { t, i18n } = useTranslation();
   const greeting = getGreeting(t);
-  const dateLocale = dateLocaleMap[i18n.language] || enUS;
+  const dateLocale = getDateLocale(i18n.language);
   
   return (
     <Card className={cn("relative overflow-hidden", className)}>
@@ -75,7 +73,7 @@ export function WelcomeCard({
               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 {t("cockpit.welcomeLastSync", { 
-                  date: format(lastSync, i18n.language === 'fr' ? "dd MMM 'à' HH:mm" : "MMM dd 'at' HH:mm", { locale: dateLocale })
+                  date: format(lastSync, "PPp", { locale: dateLocale })
                 })}
               </div>
             )}
