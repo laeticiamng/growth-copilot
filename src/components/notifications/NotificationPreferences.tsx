@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -24,13 +25,13 @@ interface NotificationChannel {
   name: string;
   icon: React.ElementType;
   enabled: boolean;
-  description: string;
+  descriptionKey: string;
 }
 
 interface NotificationType {
   id: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   channels: {
     email: boolean;
     push: boolean;
@@ -39,52 +40,23 @@ interface NotificationType {
 }
 
 export function NotificationPreferences() {
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [digestFrequency, setDigestFrequency] = useState("daily");
   
   const [channels, setChannels] = useState<NotificationChannel[]>([
-    { id: "email", name: "Email", icon: Mail, enabled: true, description: "Notifications par email" },
-    { id: "push", name: "Push", icon: Smartphone, enabled: false, description: "Notifications push navigateur" },
-    { id: "inApp", name: "In-App", icon: Bell, enabled: true, description: "Notifications dans l'application" },
+    { id: "email", name: "Email", icon: Mail, enabled: true, descriptionKey: "components.notifications.channelEmail" },
+    { id: "push", name: "Push", icon: Smartphone, enabled: false, descriptionKey: "components.notifications.channelPush" },
+    { id: "inApp", name: "In-App", icon: Bell, enabled: true, descriptionKey: "components.notifications.channelInApp" },
   ]);
 
   const [notificationTypes, setNotificationTypes] = useState<NotificationType[]>([
-    {
-      id: "approvals",
-      label: "Approbations en attente",
-      description: "Quand une action IA nécessite votre validation",
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: "runs_completed",
-      label: "Exécutions terminées",
-      description: "Quand un agent termine son travail",
-      channels: { email: false, push: false, inApp: true },
-    },
-    {
-      id: "errors",
-      label: "Erreurs et alertes",
-      description: "Problèmes détectés par les agents",
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: "security",
-      label: "Alertes sécurité",
-      description: "Connexions suspectes, permissions modifiées",
-      channels: { email: true, push: true, inApp: true },
-    },
-    {
-      id: "quota",
-      label: "Quotas et limites",
-      description: "Quand vous approchez de vos limites",
-      channels: { email: true, push: false, inApp: true },
-    },
-    {
-      id: "reports",
-      label: "Rapports générés",
-      description: "Nouveaux rapports disponibles",
-      channels: { email: true, push: false, inApp: true },
-    },
+    { id: "approvals", labelKey: "components.notifications.typeApprovals", descriptionKey: "components.notifications.typeApprovalsDesc", channels: { email: true, push: true, inApp: true } },
+    { id: "runs_completed", labelKey: "components.notifications.typeRuns", descriptionKey: "components.notifications.typeRunsDesc", channels: { email: false, push: false, inApp: true } },
+    { id: "errors", labelKey: "components.notifications.typeErrors", descriptionKey: "components.notifications.typeErrorsDesc", channels: { email: true, push: true, inApp: true } },
+    { id: "security", labelKey: "components.notifications.typeSecurity", descriptionKey: "components.notifications.typeSecurityDesc", channels: { email: true, push: true, inApp: true } },
+    { id: "quota", labelKey: "components.notifications.typeQuota", descriptionKey: "components.notifications.typeQuotaDesc", channels: { email: true, push: false, inApp: true } },
+    { id: "reports", labelKey: "components.notifications.typeReports", descriptionKey: "components.notifications.typeReportsDesc", channels: { email: true, push: false, inApp: true } },
   ]);
 
   const toggleChannel = (channelId: string) => {
@@ -94,20 +66,19 @@ export function NotificationPreferences() {
   };
 
   const toggleNotificationType = (typeId: string, channel: keyof NotificationType["channels"]) => {
-    setNotificationTypes(prev => prev.map(t => 
-      t.id === typeId ? { 
-        ...t, 
-        channels: { ...t.channels, [channel]: !t.channels[channel] }
-      } : t
+    setNotificationTypes(prev => prev.map(nt => 
+      nt.id === typeId ? { 
+        ...nt, 
+        channels: { ...nt.channels, [channel]: !nt.channels[channel] }
+      } : nt
     ));
   };
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setSaving(false);
-    toast.success("Préférences sauvegardées");
+    toast.success(t("components.notifications.saved"));
   };
 
   const getTypeIcon = (typeId: string) => {
@@ -122,13 +93,10 @@ export function NotificationPreferences() {
 
   return (
     <div className="space-y-6">
-      {/* Channels */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Canaux de notification</CardTitle>
-          <CardDescription>
-            Activez ou désactivez les canaux de communication
-          </CardDescription>
+          <CardTitle className="text-lg">{t("components.notifications.channelsTitle")}</CardTitle>
+          <CardDescription>{t("components.notifications.channelsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {channels.map((channel) => {
@@ -139,26 +107,20 @@ export function NotificationPreferences() {
                   <Icon className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium text-sm">{channel.name}</p>
-                    <p className="text-xs text-muted-foreground">{channel.description}</p>
+                    <p className="text-xs text-muted-foreground">{t(channel.descriptionKey)}</p>
                   </div>
                 </div>
-                <Switch 
-                  checked={channel.enabled} 
-                  onCheckedChange={() => toggleChannel(channel.id)}
-                />
+                <Switch checked={channel.enabled} onCheckedChange={() => toggleChannel(channel.id)} />
               </div>
             );
           })}
         </CardContent>
       </Card>
 
-      {/* Notification Types */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Types de notifications</CardTitle>
-          <CardDescription>
-            Configurez quelles notifications vous souhaitez recevoir
-          </CardDescription>
+          <CardTitle className="text-lg">{t("components.notifications.typesTitle")}</CardTitle>
+          <CardDescription>{t("components.notifications.typesDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {notificationTypes.map((type) => (
@@ -166,8 +128,8 @@ export function NotificationPreferences() {
               <div className="flex items-start gap-3 mb-3">
                 {getTypeIcon(type.id)}
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{type.label}</p>
-                  <p className="text-xs text-muted-foreground">{type.description}</p>
+                  <p className="font-medium text-sm">{t(type.labelKey)}</p>
+                  <p className="text-xs text-muted-foreground">{t(type.descriptionKey)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 pl-7">
@@ -188,37 +150,33 @@ export function NotificationPreferences() {
         </CardContent>
       </Card>
 
-      {/* Digest Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Récapitulatif</CardTitle>
-          <CardDescription>
-            Recevez un résumé de l'activité par email
-          </CardDescription>
+          <CardTitle className="text-lg">{t("components.notifications.digestTitle")}</CardTitle>
+          <CardDescription>{t("components.notifications.digestDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <Label htmlFor="digest-frequency">Fréquence du récapitulatif</Label>
+            <Label htmlFor="digest-frequency">{t("components.notifications.digestFrequency")}</Label>
             <Select value={digestFrequency} onValueChange={setDigestFrequency}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Désactivé</SelectItem>
-                <SelectItem value="daily">Quotidien</SelectItem>
-                <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                <SelectItem value="monthly">Mensuel</SelectItem>
+                <SelectItem value="none">{t("components.notifications.freqNone")}</SelectItem>
+                <SelectItem value="daily">{t("components.notifications.freqDaily")}</SelectItem>
+                <SelectItem value="weekly">{t("components.notifications.freqWeekly")}</SelectItem>
+                <SelectItem value="monthly">{t("components.notifications.freqMonthly")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>
           {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Sauvegarder les préférences
+          {t("components.notifications.savePreferences")}
         </Button>
       </div>
     </div>

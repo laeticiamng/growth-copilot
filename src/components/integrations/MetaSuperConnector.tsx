@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ interface MetaSuperConnectorProps {
 }
 
 export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const { moduleStatus, syncAds, syncInstagram, loading, isOAuthConnected, refetch } = useMeta();
@@ -36,12 +38,12 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
 
   const handleConnect = async () => {
     if (!currentWorkspace) {
-      toast.error("Aucun workspace actif");
+      toast.error(t("components.connectors.noWorkspace"));
       return;
     }
     
     if (!currentSite) {
-      toast.error("Sélectionnez d'abord un site dans le menu Sites");
+      toast.error(t("components.connectors.selectSiteFirst"));
       return;
     }
 
@@ -60,11 +62,11 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
       if (data.auth_url) {
         window.location.href = data.auth_url;
       } else {
-        toast.error(data.error || "Erreur OAuth");
+        toast.error(data.error || t("components.connectors.oauthError"));
       }
     } catch (error) {
       console.error("OAuth init error:", error);
-      toast.error("Erreur lors de l'initialisation OAuth");
+      toast.error(t("components.connectors.oauthInitError"));
     } finally {
       setConnecting(false);
     }
@@ -88,7 +90,6 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
     setSyncingIG(false);
   };
 
-  // Use OAuth status as primary indicator, fall back to module status
   const anyConnected = isOAuthConnected || 
     moduleStatus.ads.connected ||
     moduleStatus.instagram.connected;
@@ -115,8 +116,8 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
               <CardTitle className="text-lg">Meta Super-Connecteur</CardTitle>
               <CardDescription>
                 {anyConnected 
-                  ? `Connecté • ${connectedModulesCount}/5 modules actifs` 
-                  : "5 modules : Ads, CAPI, Instagram, Messaging, Webhooks"}
+                  ? t("components.connectors.connectedModules", { count: connectedModulesCount })
+                  : t("components.connectors.metaModules")}
               </CardDescription>
             </div>
           </div>
@@ -125,7 +126,7 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
             {anyConnected && (
               <Badge variant="success" className="text-xs">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                {connectedModulesCount}/5 actifs
+                {connectedModulesCount}/5 {t("components.connectors.active")}
               </Badge>
             )}
             {anyConnected && (
@@ -145,11 +146,11 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
               ) : anyConnected ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
-                  Connecté
+                  {t("components.connectors.connected")}
                 </>
               ) : (
                 <>
-                  Autoriser l'accès
+                  {t("components.connectors.authorizeAccess")}
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </>
               )}
@@ -159,87 +160,72 @@ export function MetaSuperConnector({ onConnect }: MetaSuperConnectorProps) {
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Info box */}
         <div className="flex items-start gap-3 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-foreground mb-1">Comment ça fonctionne ?</p>
-            <p>
-              <strong>Nos outils</strong> analysent vos contenus Meta automatiquement.
-              Pour des actions d'optimisation (publication, ads), <strong>autorisez l'accès</strong> à vos comptes.
-            </p>
-            <p className="mt-1">Toutes les actions passent par l'Approval Center. Vous gardez le contrôle total.</p>
+            <p className="font-medium text-foreground mb-1">{t("components.connectors.howItWorks")}</p>
+            <p>{t("components.connectors.metaInfoText")}</p>
+            <p className="mt-1">{t("components.connectors.metaApprovalNote")}</p>
           </div>
         </div>
 
-        {/* 5 Modules Grid */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {/* 1. Marketing API + Insights */}
           <MetaModuleCard
             title="Meta Ads"
-            description="Marketing API + Insights (campagnes, adsets, reporting)"
+            description={t("components.connectors.metaAdsDesc")}
             icon={Megaphone}
             status={moduleStatus.ads.connected ? "connected" : "disconnected"}
             lastSync={moduleStatus.ads.lastSync}
             stats={moduleStatus.ads.connected ? [
-              { label: "Comptes", value: moduleStatus.ads.accountCount },
+              { label: t("components.connectors.accounts"), value: moduleStatus.ads.accountCount },
             ] : undefined}
             onSync={handleSyncAds}
             syncing={syncingAds}
           />
-
-          {/* 2. Conversions API */}
           <MetaModuleCard
             title="Conversions API"
-            description="Tracking server-side (CAPI) pour les événements"
+            description={t("components.connectors.capiDesc")}
             icon={Target}
             status={moduleStatus.capi.configured ? "configured" : "disconnected"}
             stats={moduleStatus.capi.configured ? [
-              { label: "Events 24h", value: moduleStatus.capi.eventsToday },
+              { label: t("components.connectors.events24h"), value: moduleStatus.capi.eventsToday },
             ] : undefined}
           />
-
-          {/* 3. Instagram Platform */}
           <MetaModuleCard
             title="Instagram"
-            description="Content Publishing + Insights média/stories"
+            description={t("components.connectors.igDesc")}
             icon={Instagram}
             status={moduleStatus.instagram.connected ? "connected" : "disconnected"}
             lastSync={moduleStatus.instagram.lastSync}
             stats={moduleStatus.instagram.connected ? [
-              { label: "Comptes", value: moduleStatus.instagram.accountCount },
+              { label: t("components.connectors.accounts"), value: moduleStatus.instagram.accountCount },
             ] : undefined}
             onSync={handleSyncIG}
             syncing={syncingIG}
-            note="Publishing dépend des permissions (Business vs Creator)"
+            note={t("components.connectors.igNote")}
           />
-
-          {/* 4. Business Messaging */}
           <MetaModuleCard
             title="Messaging"
-            description="Messenger + WhatsApp + Instagram DM"
+            description={t("components.connectors.messagingDesc")}
             icon={MessageCircle}
             status={moduleStatus.messaging.connected ? "connected" : "coming_soon"}
             stats={moduleStatus.messaging.connected ? [
-              { label: "Conversations", value: moduleStatus.messaging.conversationCount },
-              { label: "Non lus", value: moduleStatus.messaging.unreadCount },
+              { label: t("components.connectors.conversations"), value: moduleStatus.messaging.conversationCount },
+              { label: t("components.connectors.unread"), value: moduleStatus.messaging.unreadCount },
             ] : undefined}
-            note="WhatsApp Cloud API nécessite configuration supplémentaire"
+            note={t("components.connectors.whatsappNote")}
           />
-
-          {/* 5. Webhooks */}
           <MetaModuleCard
             title="Webhooks"
-            description="Events temps réel (leads, messages, commentaires)"
+            description={t("components.connectors.webhooksDesc")}
             icon={Webhook}
             status={moduleStatus.webhooks.configured ? "configured" : "disconnected"}
             stats={moduleStatus.webhooks.configured ? [
-              { label: "Events 24h", value: moduleStatus.webhooks.eventsToday },
+              { label: t("components.connectors.events24h"), value: moduleStatus.webhooks.eventsToday },
             ] : undefined}
           />
         </div>
 
-        {/* Webhook URL info */}
         <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded border">
           <span className="font-medium">Webhook URL:</span>{" "}
           <code className="text-xs bg-muted px-1 py-0.5 rounded">

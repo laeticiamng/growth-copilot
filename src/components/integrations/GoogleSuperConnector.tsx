@@ -23,8 +23,8 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { getDateLocale } from "@/lib/date-locale";
 
- export function GoogleSuperConnector() {
-  const { i18n } = useTranslation();
+export function GoogleSuperConnector() {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [connecting, setConnecting] = useState(false);
@@ -59,12 +59,12 @@ import { getDateLocale } from "@/lib/date-locale";
  
   const handleConnectAll = async () => {
     if (!currentWorkspace) {
-      toast.error("Aucun workspace actif");
+      toast.error(t("components.connectors.noWorkspace"));
       return;
     }
     
     if (!currentSite) {
-      toast.error("Sélectionnez d'abord un site dans le menu Sites");
+      toast.error(t("components.connectors.selectSiteFirst"));
       return;
     }
 
@@ -84,11 +84,11 @@ import { getDateLocale } from "@/lib/date-locale";
       if (data.auth_url) {
         window.location.href = data.auth_url;
       } else {
-        toast.error(data.error || "Erreur OAuth");
+        toast.error(data.error || t("components.connectors.oauthError"));
       }
     } catch (error) {
       console.error("OAuth init error:", error);
-      toast.error("Erreur lors de l'initialisation OAuth");
+      toast.error(t("components.connectors.oauthInitError"));
     } finally {
       setConnecting(false);
     }
@@ -110,35 +110,35 @@ import { getDateLocale } from "@/lib/date-locale";
     { 
       key: "ga4", 
       title: "Google Analytics 4", 
-      description: "Trafic, comportement, conversions",
+      description: t("components.connectors.ga4Desc"),
       icon: BarChart3,
        status: moduleStatus.ga4 as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gsc", 
       title: "Search Console", 
-      description: "Positions, clics, impressions SEO",
+      description: t("components.connectors.gscDesc"),
       icon: Search,
        status: moduleStatus.gsc as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gads", 
       title: "Google Ads", 
-      description: "Campagnes, CPC, ROAS",
+      description: t("components.connectors.gadsDesc"),
       icon: Megaphone,
        status: moduleStatus.gads as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "gbp", 
       title: "Business Profile", 
-      description: "Fiches locales, avis, posts",
+      description: t("components.connectors.gbpDesc"),
       icon: MapPin,
        status: moduleStatus.gbp as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
     { 
       key: "youtube", 
       title: "YouTube", 
-      description: "Chaîne, analytics, vidéos",
+      description: t("components.connectors.youtubeDesc"),
       icon: Youtube,
        status: moduleStatus.youtube as { connected: boolean; lastSync?: string | null; accountName?: string | null },
     },
@@ -160,7 +160,7 @@ import { getDateLocale } from "@/lib/date-locale";
             <div>
               <CardTitle className="text-lg">Google Suite</CardTitle>
               <CardDescription>
-                 {isConnected ? `Connecté • ${connectedCount}/5 services actifs` : "5 services : GA4, Search Console, Ads, GBP, YouTube"}
+                 {isConnected ? t("components.connectors.connectedServices", { count: connectedCount }) : t("components.connectors.googleServices")}
               </CardDescription>
             </div>
           </div>
@@ -169,7 +169,7 @@ import { getDateLocale } from "@/lib/date-locale";
              {isConnected && (
               <Badge variant="success" className="text-xs">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                {connectedCount}/5 actifs
+                {connectedCount}/5 {t("components.connectors.active")}
               </Badge>
             )}
              {isConnected && (
@@ -189,11 +189,11 @@ import { getDateLocale } from "@/lib/date-locale";
                ) : isConnected ? (
                  <>
                    <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
-                   Connecté
-                 </>
-              ) : (
-                <>
-                  Autoriser l'accès
+                    {t("components.connectors.connected")}
+                  </>
+               ) : (
+                 <>
+                   {t("components.connectors.authorizeAccess")}
                   <ExternalLink className="w-3 h-3 ml-1" />
                 </>
               )}
@@ -207,12 +207,8 @@ import { getDateLocale } from "@/lib/date-locale";
         <div className="flex items-start gap-3 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
           <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-foreground mb-1">Comment ça fonctionne ?</p>
-            <p>
-              <strong>Nos outils</strong> analysent déjà votre site automatiquement. 
-              Pour des données enrichies ou des actions d'optimisation, <strong>autorisez l'accès</strong> à vos comptes Google. 
-              Vous gardez le contrôle total et pouvez révoquer l'accès à tout moment.
-            </p>
+            <p className="font-medium text-foreground mb-1">{t("components.connectors.howItWorks")}</p>
+            <p>{t("components.connectors.googleInfoText")}</p>
           </div>
         </div>
 
@@ -249,7 +245,7 @@ import { getDateLocale } from "@/lib/date-locale";
                     variant={isConnected ? "success" : "outline"} 
                     className="text-xs"
                   >
-                    {isConnected ? "Connecté" : "Non connecté"}
+                    {isConnected ? t("components.connectors.connected") : t("components.connectors.notConnected")}
                   </Badge>
                 </div>
                 {module.status.lastSync && (
