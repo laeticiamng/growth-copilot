@@ -207,7 +207,7 @@ export function Pricing() {
           <p className="text-muted-foreground mb-4">
             {t("landing.pricing.roiNote", { total: TOTAL_EMPLOYEES, cost: (TOTAL_EMPLOYEES * 4500).toLocaleString(), savings: ((TOTAL_EMPLOYEES * 4500) - 9000).toLocaleString() })}
           </p>
-          <p className="text-xs text-muted-foreground">{t("landing.pricing.roiDisclaimer")}</p>
+          <p className="text-sm text-muted-foreground/80 mt-2 italic">{t("landing.pricing.roiDisclaimer")}</p>
         </div>
       </div>
     </section>

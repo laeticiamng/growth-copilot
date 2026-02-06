@@ -234,7 +234,7 @@ export function TeamOrgChart() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-6 max-w-2xl mx-auto">
+        <p className="text-center text-sm text-muted-foreground/80 mt-6 max-w-2xl mx-auto italic">
           {t("landing.orgChart.costComparison", { total: totalEmployees, cost: (totalEmployees * 4500).toLocaleString(), savings: ((totalEmployees * 4500) - 9000).toLocaleString() })}
         </p>
       </div>

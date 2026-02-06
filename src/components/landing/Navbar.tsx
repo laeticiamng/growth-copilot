@@ -54,7 +54,7 @@ export function Navbar() {
             <Link to="/auth">
               <Button variant="ghost" size="sm">{t("landing.navbar.login")}</Button>
             </Link>
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button variant="gradient" size="sm">{t("landing.navbar.getStarted")}</Button>
             </Link>
           </div>
@@ -88,7 +88,7 @@ export function Navbar() {
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">{t("landing.navbar.login")}</Button>
                     </Link>
-                    <Link to="/auth" onClick={() => setIsOpen(false)}>
+                    <Link to="/auth?tab=signup" onClick={() => setIsOpen(false)}>
                       <Button variant="gradient" className="w-full">{t("landing.navbar.getStarted")}</Button>
                     </Link>
                   </div>

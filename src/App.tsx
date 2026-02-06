@@ -67,6 +67,7 @@ import Install from "./pages/Install";
 
 // Crisp Chat widget
 import { CrispChat } from "@/components/CrispChat";
+import { CookieConsent } from "@/components/CookieConsent";
 
 // Dashboard pages - Foundation
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -229,7 +230,8 @@ function App() {
         <InnerProviders>
           <Toaster />
           <Sonner />
-          <CrispChat />
+           <CrispChat />
+            <CookieConsent />
           <BrowserRouter>
             <SentryRouteTracker />
             <Routes>

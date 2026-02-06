@@ -41,6 +41,10 @@ export function Testimonials() {
           </p>
         </div>
 
+        <p className="text-center text-xs text-muted-foreground mb-8 italic">
+          {t("landing.testimonials.disclaimer")}
+        </p>
+
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map((item) => (
             <Card

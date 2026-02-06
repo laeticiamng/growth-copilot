@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { TrustBar } from "@/components/landing/TrustBar";
@@ -16,6 +17,7 @@ import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   const { t } = useTranslation();
+  useAnalytics(); // Track landing page views
 
   const organizationSchema = {
     "@context": "https://schema.org",

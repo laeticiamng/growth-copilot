@@ -247,6 +247,7 @@ export const en = {
         company: "Freelance",
         quote: "I use Growth OS for my clients. The automatic reports and SEO audit save me 10 hours per week. Immediate ROI.",
       },
+      disclaimer: "* Illustrative profiles based on real platform use cases.",
     },
     pricing: {
       heading: "Your AI Workforce, Ready to Deploy",
@@ -3870,6 +3871,12 @@ export const en = {
     expiresAt: "Expires", noExpiry: "No expiry", failuresLabel: "failures",
     tokenAudit: "Token audit", noEvent: "No event",
     costBreakdown: "Cost breakdown", renderCosts: "Render costs", aiCosts: "AI costs", total30d: "Total 30d",
+  },
+  cookies: {
+    message: "We use cookies to improve your experience and provide customer support.",
+    learnMore: "Learn more",
+    accept: "Accept",
+    decline: "Decline",
   },
 };
 
