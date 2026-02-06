@@ -24,6 +24,7 @@ export const en = {
     noData: "No data",
     markAllRead: "Mark all read",
     noNotifications: "No notifications",
+    comingSoon: "Coming soon!",
     verifyingAuth: "Verifying authentication...",
     verifyingPermissions: "Verifying permissions...",
     verifyingAccess: "Verifying your access...",

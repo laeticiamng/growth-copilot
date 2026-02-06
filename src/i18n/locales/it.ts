@@ -24,6 +24,7 @@ export const it = {
     noData: "Nessun dato",
     markAllRead: "Segna tutto come letto",
     noNotifications: "Nessuna notifica",
+    comingSoon: "Prossimamente!",
   },
 
   // Navigation
