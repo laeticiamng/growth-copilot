@@ -6,9 +6,11 @@ import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle, Building2, Zap, 
 import { Link, useNavigate } from "react-router-dom";
 import { urlSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function Hero() {
   const { t } = useTranslation();
+  const { track } = useAnalytics();
   
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -46,8 +48,17 @@ export function Hero() {
 
   const handleGetStarted = async () => {
     setIsLoading(true);
+    track("cta_click", { cta: "hero_get_started", url: url || null });
     await new Promise(resolve => setTimeout(resolve, 300));
-    navigate('/auth?tab=signup');
+    const params = new URLSearchParams({ tab: 'signup' });
+    if (url) {
+      let urlToPass = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        urlToPass = `https://${url}`;
+      }
+      params.set('url', urlToPass);
+    }
+    navigate(`/auth?${params.toString()}`);
   };
 
   return (

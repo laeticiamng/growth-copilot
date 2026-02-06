@@ -222,10 +222,12 @@ export default function Auth() {
       }
       toast({ title: txt.error, description: message, variant: "destructive" });
     } else {
+      const siteUrl = searchParams.get("url");
       localStorage.setItem("signup_data", JSON.stringify({
         fullName: fullName.trim(),
         companyName: companyName.trim(),
         email: email,
+        ...(siteUrl ? { siteUrl } : {}),
       }));
       toast({ title: txt.accountCreated, description: txt.checkEmail });
     }

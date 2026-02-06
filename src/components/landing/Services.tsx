@@ -108,7 +108,7 @@ export function Services() {
         </div>
 
         <div className="text-center">
-          <Link to="/onboarding">
+          <Link to="/auth?tab=signup">
             <Button variant="hero" size="lg">
               {t("landing.services.buildPackage")}
               <ArrowRight className="w-4 h-4 ml-2" />

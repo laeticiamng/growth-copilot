@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
+const CONSENT_KEY = "cookie_consent";
+
 // Crisp global type declaration
 declare global {
   interface Window {
@@ -31,6 +33,12 @@ export function CrispChat() {
     // Skip in development/preview unless explicitly enabled
     if (import.meta.env.DEV) {
       console.info("[Crisp] Skipping in development mode");
+      return;
+    }
+
+    // Respect cookie consent
+    const consent = localStorage.getItem(CONSENT_KEY);
+    if (consent === "false") {
       return;
     }
 
