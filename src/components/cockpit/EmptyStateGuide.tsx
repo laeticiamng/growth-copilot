@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Circle } from "lucide-react";
@@ -18,6 +19,7 @@ interface EmptyStateGuideProps {
 }
 
 export function EmptyStateGuide({ title, description, steps }: EmptyStateGuideProps) {
+  const { t } = useTranslation();
   const completedCount = steps.filter(s => s.completed).length;
   const progress = (completedCount / steps.length) * 100;
 
@@ -34,7 +36,7 @@ export function EmptyStateGuide({ title, description, steps }: EmptyStateGuidePr
 
         <div className="max-w-md mx-auto mb-6">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Progression</span>
+            <span className="text-muted-foreground">{t("cockpit.guideProgress")}</span>
             <span className="font-medium">{completedCount}/{steps.length}</span>
           </div>
           <div className="h-2 bg-secondary rounded-full overflow-hidden">

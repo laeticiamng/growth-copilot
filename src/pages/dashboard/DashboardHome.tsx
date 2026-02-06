@@ -56,7 +56,7 @@ export default function DashboardHome() {
   const { enabledServices, servicesLoading, hasService } = useServices();
 
   // Get translated persona role
-  const getCGORole = () => i18n.language === 'fr' ? "Directrice de la Croissance" : "Chief Growth Officer";
+  const getCGORole = () => t("cockpit.welcomeCgoRole");
 
   // Fetch real KPI data - current period (last 30 days)
   const { data: kpiData, isLoading: kpiLoading } = useQuery({
@@ -210,7 +210,7 @@ export default function DashboardHome() {
   const approvalsForWidget = pendingApprovals.map((a) => ({
     id: a.id,
     title: a.action_type.replace(/_/g, " "),
-    description: `Par ${a.agent_type}`,
+    description: t("cockpit.welcomeByAgent", { agent: a.agent_type }),
     actionType: a.action_type,
     riskLevel: a.risk_level as "low" | "medium" | "high",
     createdAt: a.created_at || "",
@@ -338,9 +338,7 @@ export default function DashboardHome() {
             <Badge variant="secondary" className="ml-auto">39 {t("cockpit.agents")}</Badge>
           </CardTitle>
           <CardDescription>
-            {i18n.language === 'fr' 
-              ? "Votre équipe d'agents spécialisés travaille 24h/24"
-              : "Your specialized agent team works 24/7"}
+            {t("cockpit.welcomeAiTeamDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -369,19 +367,19 @@ export default function DashboardHome() {
         hasData={!!kpiData}
         kpis={[
           { 
-            label: "Clics organiques", 
+            label: t("dashboard.home.organicClicks"), 
             currentValue: kpiData?.organicClicks ?? null, 
             previousValue: previousKpiData?.organicClicks ?? null,
             format: "number" 
           },
           { 
-            label: "Conversions", 
+            label: t("dashboard.home.conversions"), 
             currentValue: kpiData?.conversions ?? null, 
             previousValue: previousKpiData?.conversions ?? null,
             format: "number" 
           },
           { 
-            label: "Position moyenne", 
+            label: t("dashboard.home.avgPosition"), 
             currentValue: kpiData?.avgPosition ?? null, 
             previousValue: previousKpiData?.avgPosition ?? null,
             format: "number" 
