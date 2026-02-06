@@ -349,7 +349,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="font-bold">Growth OS</span>
           </div>
         </div>
-        <NotificationCenter />
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+          <NotificationCenter />
+        </div>
       </header>
 
       {/* Sidebar */}

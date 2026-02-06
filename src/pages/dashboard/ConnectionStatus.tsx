@@ -19,7 +19,8 @@ import {
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 
 interface ConnectionInfo {
   id: string;
@@ -43,6 +44,7 @@ const CONNECTION_CONFIGS = [
 ];
 
 const ConnectionStatus = () => {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -220,9 +222,9 @@ const ConnectionStatus = () => {
                   
                   {connection.lastSync && (
                     <p className="text-xs text-muted-foreground mt-3">
-                      Dernière sync : {formatDistanceToNow(new Date(connection.lastSync), { 
+                      {t("connectionStatusPage.lastSync")} {formatDistanceToNow(new Date(connection.lastSync), { 
                         addSuffix: true, 
-                        locale: fr 
+                        locale: getDateLocale(i18n.language) 
                       })}
                     </p>
                   )}

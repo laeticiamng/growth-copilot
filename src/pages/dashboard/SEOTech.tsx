@@ -37,7 +37,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { GSCMetricsWidget } from "@/components/integrations";
 
@@ -95,6 +96,7 @@ interface AuditHistoryItem {
 }
 
 export default function SEOTech() {
+  const { t, i18n } = useTranslation();
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
   
@@ -360,7 +362,7 @@ export default function SEOTech() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              Dernière analyse : {format(new Date(result.generated_at), "PPp", { locale: fr })}
+              Dernière analyse : {format(new Date(result.generated_at), "PPp", { locale: getDateLocale(i18n.language) })}
             </div>
             <Button variant="outline" onClick={runAudit} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
@@ -635,7 +637,7 @@ export default function SEOTech() {
               >
                 <div>
                   <p className="font-medium">
-                    Audit du {format(new Date(item.created_at), "PPp", { locale: fr })}
+                    Audit du {format(new Date(item.created_at), "PPp", { locale: getDateLocale(i18n.language) })}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Score : {item.outputs?.score || "N/A"}/100 • {item.outputs?.issues?.length || 0} problèmes

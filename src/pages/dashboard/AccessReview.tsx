@@ -28,7 +28,8 @@ import {
   Lock
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ const FINDING_ICONS: Record<string, React.ElementType> = {
 };
 
 export default function AccessReview() {
+  const { t, i18n } = useTranslation();
   const { 
     reviews, 
     latestReview, 
@@ -120,12 +122,12 @@ export default function AccessReview() {
           <CardContent>
             <div className="text-2xl font-bold">
               {stats.lastReviewDate 
-                ? format(new Date(stats.lastReviewDate), 'dd MMM', { locale: fr })
+                ? format(new Date(stats.lastReviewDate), 'dd MMM', { locale: getDateLocale(i18n.language) })
                 : '-'}
             </div>
             <p className="text-xs text-muted-foreground">
               {stats.lastReviewDate 
-                ? formatDistanceToNow(new Date(stats.lastReviewDate), { addSuffix: true, locale: fr })
+                ? formatDistanceToNow(new Date(stats.lastReviewDate), { addSuffix: true, locale: getDateLocale(i18n.language) })
                 : 'Aucune revue'}
             </p>
           </CardContent>
@@ -258,7 +260,7 @@ export default function AccessReview() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                        {format(new Date(review.review_date), 'dd MMM yyyy', { locale: fr })}
+                        {format(new Date(review.review_date), 'dd MMM yyyy', { locale: getDateLocale(i18n.language) })}
                       </div>
                     </TableCell>
                     <TableCell>{review.total_users}</TableCell>
@@ -299,7 +301,7 @@ export default function AccessReview() {
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Revue du {selectedReview && format(new Date(selectedReview.review_date), 'dd MMMM yyyy', { locale: fr })}
+              Revue du {selectedReview && format(new Date(selectedReview.review_date), 'dd MMMM yyyy', { locale: getDateLocale(i18n.language) })}
             </DialogTitle>
           </DialogHeader>
           
@@ -344,8 +346,8 @@ export default function AccessReview() {
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
                             {entry.last_action_at 
-                              ? formatDistanceToNow(new Date(entry.last_action_at), { addSuffix: true, locale: fr })
-                              : 'Jamais'}
+                              ? formatDistanceToNow(new Date(entry.last_action_at), { addSuffix: true, locale: getDateLocale(i18n.language) })
+                              : t("accessReviewPage.never")}
                           </TableCell>
                           <TableCell>
                             <Badge className={`${riskConfig.bgColor} ${riskConfig.color} border-0`}>

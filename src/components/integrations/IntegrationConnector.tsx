@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { formatDistanceToNow } from "date-fns";
+import { getDateLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +57,7 @@ export function IntegrationConnector({
   onConfigure,
   compact = false,
 }: IntegrationConnectorProps) {
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [action, setAction] = useState<string | null>(null);
 
@@ -63,9 +67,9 @@ export function IntegrationConnector({
     setAction('connect');
     try {
       await onConnect();
-      toast.success(`${integration.name} connecté avec succès`);
+      toast.success(t("integrationConnector.connectedSuccess", { name: integration.name }));
     } catch (error) {
-      toast.error(`Erreur de connexion à ${integration.name}`);
+      toast.error(t("integrationConnector.connectionError", { name: integration.name }));
     } finally {
       setIsLoading(false);
       setAction(null);
@@ -78,9 +82,9 @@ export function IntegrationConnector({
     setAction('disconnect');
     try {
       await onDisconnect();
-      toast.success(`${integration.name} déconnecté`);
+      toast.success(t("integrationConnector.disconnected", { name: integration.name }));
     } catch (error) {
-      toast.error(`Erreur lors de la déconnexion`);
+      toast.error(t("integrationConnector.disconnectError"));
     } finally {
       setIsLoading(false);
       setAction(null);
@@ -93,9 +97,9 @@ export function IntegrationConnector({
     setAction('refresh');
     try {
       await onRefresh();
-      toast.success(`Token ${integration.name} renouvelé`);
+      toast.success(t("integrationConnector.tokenRefreshed", { name: integration.name }));
     } catch (error) {
-      toast.error(`Erreur de renouvellement du token`);
+      toast.error(t("integrationConnector.refreshError"));
     } finally {
       setIsLoading(false);
       setAction(null);
@@ -108,28 +112,28 @@ export function IntegrationConnector({
         return (
           <Badge variant="success" className="gap-1">
             <CheckCircle2 className="w-3 h-3" />
-            Connecté
+            {t("integrationConnector.connected")}
           </Badge>
         );
       case 'error':
         return (
           <Badge variant="destructive" className="gap-1">
             <AlertCircle className="w-3 h-3" />
-            Erreur
+            {t("integrationConnector.error")}
           </Badge>
         );
       case 'expired':
         return (
           <Badge variant="secondary" className="gap-1">
             <Clock className="w-3 h-3" />
-            Expiré
+            {t("integrationConnector.expired")}
           </Badge>
         );
       default:
         return (
           <Badge variant="outline" className="gap-1">
             <Link2Off className="w-3 h-3" />
-            Non connecté
+            {t("integrationConnector.notConnected")}
           </Badge>
         );
     }
@@ -137,16 +141,7 @@ export function IntegrationConnector({
 
   const formatLastSync = (date?: Date) => {
     if (!date) return null;
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    
-    if (minutes < 1) return "À l'instant";
-    if (minutes < 60) return `Il y a ${minutes}min`;
-    if (hours < 24) return `Il y a ${hours}h`;
-    return `Il y a ${days}j`;
+    return formatDistanceToNow(date, { addSuffix: true, locale: getDateLocale(i18n.language) });
   };
 
   if (compact) {
@@ -160,7 +155,7 @@ export function IntegrationConnector({
             <p className="font-medium text-sm">{integration.name}</p>
             {integration.lastSyncAt && (
               <p className="text-xs text-muted-foreground">
-                Sync: {formatLastSync(integration.lastSyncAt)}
+                {t("integrationConnector.lastSync")} {formatLastSync(integration.lastSyncAt)}
               </p>
             )}
           </div>
@@ -189,7 +184,7 @@ export function IntegrationConnector({
             
             {integration.status === 'connected' && integration.lastSyncAt && (
               <p className="text-xs text-muted-foreground mt-2">
-                Dernière sync: {formatLastSync(integration.lastSyncAt)}
+                {t("integrationConnector.lastSync")} {formatLastSync(integration.lastSyncAt)}
               </p>
             )}
             
@@ -230,7 +225,7 @@ export function IntegrationConnector({
                         )}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Rafraîchir le token</TooltipContent>
+                    <TooltipContent>{t("integrationConnector.refreshToken")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}
@@ -247,7 +242,7 @@ export function IntegrationConnector({
                         <Settings className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Configurer</TooltipContent>
+                    <TooltipContent>{t("common.configure")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}
@@ -267,7 +262,7 @@ export function IntegrationConnector({
                   ) : (
                     <Link2Off className="w-4 h-4 mr-2" />
                   )}
-                  Déconnecter
+                  {t("integrationConnector.disconnect")}
                 </Button>
               )}
             </>
@@ -284,7 +279,7 @@ export function IntegrationConnector({
               ) : (
                 <Link2 className="w-4 h-4 mr-2" />
               )}
-              Connecter {integration.name}
+              {t("integrationConnector.connect")} {integration.name}
             </Button>
           )}
         </div>

@@ -44,7 +44,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 
 interface ActionLog {
   id: string;
@@ -94,6 +95,7 @@ interface AIRequest {
 }
 
 const Logs = () => {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [actionLogs, setActionLogs] = useState<ActionLog[]>([]);
   const [agentRuns, setAgentRuns] = useState<AgentRun[]>([]);
@@ -402,7 +404,7 @@ const Logs = () => {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(req.created_at), "dd MMM HH:mm", { locale: fr })}
+                          {format(new Date(req.created_at), "dd MMM HH:mm", { locale: getDateLocale(i18n.language) })}
                         </p>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -558,7 +560,7 @@ const Logs = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(run.created_at), "dd MMM HH:mm", { locale: fr })}
+                          {format(new Date(run.created_at), "dd MMM HH:mm", { locale: getDateLocale(i18n.language) })}
                         </p>
                       </div>
                     </div>
@@ -636,7 +638,7 @@ const Logs = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(log.created_at), "dd MMM HH:mm", { locale: fr })}
+                          {format(new Date(log.created_at), "dd MMM HH:mm", { locale: getDateLocale(i18n.language) })}
                         </p>
                         {log.result && (
                           <Badge variant={log.result === "success" ? "success" : "destructive"} className="mt-1">

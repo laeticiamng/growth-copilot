@@ -1,5 +1,4 @@
-import { useState } from "react";
- import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +31,8 @@ import {
   Network,
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
@@ -61,6 +61,7 @@ const TIME_OFF_LABELS: Record<TimeOffType, string> = {
 };
 
 export default function HR() {
+  const { t, i18n } = useTranslation();
   const { employees, loading: loadingEmployees, stats, createEmployee, isCreating, deleteEmployee } = useEmployees();
    const { currentWorkspace } = useWorkspace();
   const { reviews, loading: loadingReviews, stats: reviewStats, createReview, submitReview } = usePerformanceReviews();
@@ -444,7 +445,7 @@ export default function HR() {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Début: {new Date(emp.hire_date).toLocaleDateString('fr-FR')}
+                          Début: {new Date(emp.hire_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'es' ? 'es-ES' : i18n.language === 'de' ? 'de-DE' : 'en-US')}
                         </p>
                       </div>
                     </div>
@@ -576,7 +577,7 @@ export default function HR() {
                           <div>
                             <p className="font-medium">{emp ? `${emp.first_name} ${emp.last_name}` : 'Employé'}</p>
                             <p className="text-sm text-muted-foreground">
-                              Période: {format(new Date(review.review_period_start), 'MMM yyyy', { locale: fr })} - {format(new Date(review.review_period_end), 'MMM yyyy', { locale: fr })}
+                              Période: {format(new Date(review.review_period_start), 'MMM yyyy', { locale: getDateLocale(i18n.language) })} - {format(new Date(review.review_period_end), 'MMM yyyy', { locale: getDateLocale(i18n.language) })}
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
@@ -719,7 +720,7 @@ export default function HR() {
                               {TIME_OFF_LABELS[request.request_type]} • {request.total_days} jour(s)
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {format(new Date(request.start_date), 'dd MMM', { locale: fr })} - {format(new Date(request.end_date), 'dd MMM yyyy', { locale: fr })}
+                              {format(new Date(request.start_date), 'dd MMM', { locale: getDateLocale(i18n.language) })} - {format(new Date(request.end_date), 'dd MMM yyyy', { locale: getDateLocale(i18n.language) })}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
