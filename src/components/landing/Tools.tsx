@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  Globe, Zap, Link2, ArrowRight, 
+  Globe, Zap, Link2, ArrowRight, LineChart,
   Search, BarChart3, Target, MapPin, Share2, Code, 
   CheckCircle2, type LucideIcon 
 } from "lucide-react";
@@ -16,6 +16,7 @@ export function Tools() {
     { titleKey: "landing.tools.step1Title", descKey: "landing.tools.step1Desc", icon: Globe, badge: "1" },
     { titleKey: "landing.tools.step2Title", descKey: "landing.tools.step2Desc", icon: Zap, badge: "2" },
     { titleKey: "landing.tools.step3Title", descKey: "landing.tools.step3Desc", icon: Link2, badge: "3" },
+    { titleKey: "landing.tools.step4Title", descKey: "landing.tools.step4Desc", icon: LineChart, badge: "4" },
   ];
 
   const integrations: { name: string; descKey: string; category: string; icon: LucideIcon; phase: "instant" | "oauth" }[] = [
@@ -44,7 +45,7 @@ export function Tools() {
         </div>
 
         {/* 3-step progressive journey */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
           {steps.map((step, index) => (
             <div key={index} className="relative">
               <Card variant="feature" className="group fade-in-up h-full" style={{ animationDelay: `${index * 0.15}s` }}>
