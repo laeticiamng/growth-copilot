@@ -15,7 +15,7 @@ import { Loader2, Zap, ArrowLeft, Mail, KeyRound, User, Building2 } from "lucide
 
 export default function Auth() {
   const { t, i18n } = useTranslation();
-  const isEn = i18n.language === "en";
+  // isEn removed — all texts now use t()
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode");
   const tabParam = searchParams.get("tab");

@@ -11,149 +11,26 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const DEPARTMENTS = [
-  { 
-    id: "marketing", 
-    icon: TrendingUp, 
-    color: "text-blue-500", 
-    bgColor: "bg-blue-500/10",
-    nameEn: "Marketing",
-    nameFr: "Marketing",
-    descEn: "SEO, Content, Ads, Social Media, CRO",
-    descFr: "SEO, Contenu, Ads, Réseaux sociaux, CRO",
-    employees: 5,
-    features: ["SEO Audit", "Content Calendar", "Ad Optimization", "Social Distribution"]
-  },
-  { 
-    id: "sales", 
-    icon: Briefcase, 
-    color: "text-green-500", 
-    bgColor: "bg-green-500/10",
-    nameEn: "Sales",
-    nameFr: "Commercial",
-    descEn: "Pipeline, Outreach, CRM, Lead Scoring",
-    descFr: "Pipeline, Prospection, CRM, Lead Scoring",
-    employees: 4,
-    features: ["Pipeline Review", "Outreach Sequences", "Lead Qualification"]
-  },
-  { 
-    id: "finance", 
-    icon: BarChart3, 
-    color: "text-yellow-500", 
-    bgColor: "bg-yellow-500/10",
-    nameEn: "Finance",
-    nameFr: "Finance",
-    descEn: "ROI Tracking, Budget Alerts, Reporting",
-    descFr: "Suivi ROI, Alertes budget, Reporting",
-    employees: 3,
-    features: ["ROI Summaries", "Budget Alerts", "Monthly Reports"]
-  },
-  { 
-    id: "security", 
-    icon: Shield, 
-    color: "text-red-500", 
-    bgColor: "bg-red-500/10",
-    nameEn: "Security",
-    nameFr: "Sécurité",
-    descEn: "Access Review, Compliance, Audit Logs",
-    descFr: "Revue des accès, Conformité, Audit logs",
-    employees: 3,
-    features: ["Access Review", "Secrets Hygiene", "Compliance Checks"]
-  },
-  { 
-    id: "product", 
-    icon: Puzzle, 
-    color: "text-purple-500", 
-    bgColor: "bg-purple-500/10",
-    nameEn: "Product",
-    nameFr: "Produit",
-    descEn: "Roadmap, OKRs, Prioritization",
-    descFr: "Roadmap, OKRs, Priorisation",
-    employees: 4,
-    features: ["Roadmap Planning", "OKR Drafts", "Priority Scoring"]
-  },
-  { 
-    id: "engineering", 
-    icon: Code, 
-    color: "text-orange-500", 
-    bgColor: "bg-orange-500/10",
-    nameEn: "Engineering",
-    nameFr: "Ingénierie",
-    descEn: "Release Gates, QA, Delivery Health",
-    descFr: "Release Gates, QA, Santé delivery",
-    employees: 5,
-    features: ["Release Gates", "QA Summaries", "Delivery Reports"]
-  },
-  { 
-    id: "data", 
-    icon: BarChart3, 
-    color: "text-cyan-500", 
-    bgColor: "bg-cyan-500/10",
-    nameEn: "Data",
-    nameFr: "Data",
-    descEn: "Analytics, Funnels, Cohorts",
-    descFr: "Analytics, Funnels, Cohortes",
-    employees: 4,
-    features: ["Funnel Diagnostics", "Cohort Analysis", "Tracking Setup"]
-  },
-  { 
-    id: "support", 
-    icon: HeadphonesIcon, 
-    color: "text-pink-500", 
-    bgColor: "bg-pink-500/10",
-    nameEn: "Support",
-    nameFr: "Support",
-    descEn: "Tickets, Knowledge Base, Reviews",
-    descFr: "Tickets, Base de connaissances, Avis",
-    employees: 3,
-    features: ["Ticket Triage", "KB Updates", "Review Management"]
-  },
-  { 
-    id: "governance", 
-    icon: Settings, 
-    color: "text-gray-500", 
-    bgColor: "bg-gray-500/10",
-    nameEn: "Governance",
-    nameFr: "Gouvernance",
-    descEn: "Policies, IT Hygiene, Access Control",
-    descFr: "Politiques, Hygiène IT, Contrôle d'accès",
-    employees: 3,
-    features: ["Policy Management", "IT Hygiene", "Access Governance"]
-  },
-  { 
-    id: "hr", 
-    icon: Users, 
-    color: "text-indigo-500", 
-    bgColor: "bg-indigo-500/10",
-    nameEn: "HR",
-    nameFr: "RH",
-    descEn: "Onboarding, Team Management, Talent",
-    descFr: "Onboarding, Gestion d'équipe, Talents",
-    employees: 2,
-    features: ["Team Onboarding", "Role Management", "Talent Tracking"]
-  },
-  { 
-    id: "legal", 
-    icon: Scale, 
-    color: "text-slate-500", 
-    bgColor: "bg-slate-500/10",
-    nameEn: "Legal",
-    nameFr: "Juridique",
-    descEn: "Contracts, GDPR, Compliance",
-    descFr: "Contrats, RGPD, Conformité",
-    employees: 1,
-    features: ["Contract Tracking", "GDPR Requests", "Legal Alerts"]
-  },
+  { id: "marketing", icon: TrendingUp, color: "text-blue-500", bgColor: "bg-blue-500/10", employees: 5, features: ["SEO Audit", "Content Calendar", "Ad Optimization", "Social Distribution"] },
+  { id: "sales", icon: Briefcase, color: "text-green-500", bgColor: "bg-green-500/10", employees: 4, features: ["Pipeline Review", "Outreach Sequences", "Lead Qualification"] },
+  { id: "finance", icon: BarChart3, color: "text-yellow-500", bgColor: "bg-yellow-500/10", employees: 3, features: ["ROI Summaries", "Budget Alerts", "Monthly Reports"] },
+  { id: "security", icon: Shield, color: "text-red-500", bgColor: "bg-red-500/10", employees: 3, features: ["Access Review", "Secrets Hygiene", "Compliance Checks"] },
+  { id: "product", icon: Puzzle, color: "text-purple-500", bgColor: "bg-purple-500/10", employees: 4, features: ["Roadmap Planning", "OKR Drafts", "Priority Scoring"] },
+  { id: "engineering", icon: Code, color: "text-orange-500", bgColor: "bg-orange-500/10", employees: 5, features: ["Release Gates", "QA Summaries", "Delivery Reports"] },
+  { id: "data", icon: BarChart3, color: "text-cyan-500", bgColor: "bg-cyan-500/10", employees: 4, features: ["Funnel Diagnostics", "Cohort Analysis", "Tracking Setup"] },
+  { id: "support", icon: HeadphonesIcon, color: "text-pink-500", bgColor: "bg-pink-500/10", employees: 3, features: ["Ticket Triage", "KB Updates", "Review Management"] },
+  { id: "governance", icon: Settings, color: "text-gray-500", bgColor: "bg-gray-500/10", employees: 3, features: ["Policy Management", "IT Hygiene", "Access Governance"] },
+  { id: "hr", icon: Users, color: "text-indigo-500", bgColor: "bg-indigo-500/10", employees: 2, features: ["Team Onboarding", "Role Management", "Talent Tracking"] },
+  { id: "legal", icon: Scale, color: "text-slate-500", bgColor: "bg-slate-500/10", employees: 1, features: ["Contract Tracking", "GDPR Requests", "Legal Alerts"] },
 ];
 
 const PRICE_PER_DEPT = 1900;
 const FULL_COMPANY_PRICE = 9000;
-// 37 employees in departments + 2 Direction (CGO + QCO) = 39 total
-const DEPT_EMPLOYEES = DEPARTMENTS.reduce((sum, d) => sum + d.employees, 0); // = 37
-const TOTAL_EMPLOYEES = DEPT_EMPLOYEES + 2; // + CGO & QCO = 39
+const DEPT_EMPLOYEES = DEPARTMENTS.reduce((sum, d) => sum + d.employees, 0);
+const TOTAL_EMPLOYEES = DEPT_EMPLOYEES + 2;
 
 export function Services() {
-  const { i18n } = useTranslation();
-  const isEn = i18n.language === "en";
+  const { t } = useTranslation();
 
   const totalSeparatePrice = DEPARTMENTS.length * PRICE_PER_DEPT;
   const savings = totalSeparatePrice - FULL_COMPANY_PRICE;
@@ -161,34 +38,22 @@ export function Services() {
   return (
     <section id="departments" className="py-24 bg-background relative scroll-mt-20">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">
             <Building2 className="w-3 h-3 mr-1" />
-            {isEn ? "Modular Departments" : "Départements modulaires"}
+            {t("landing.services.badge")}
           </Badge>
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            {isEn ? "Your company, your way" : "Votre entreprise, à votre façon"}
-          </h2>
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">{t("landing.services.title")}</h2>
           <p className="text-lg text-muted-foreground">
-            {isEn 
-              ? `${TOTAL_EMPLOYEES} AI employees across ${DEPARTMENTS.length} departments. Choose Full Company or select only what you need.`
-              : `${TOTAL_EMPLOYEES} employés IA répartis dans ${DEPARTMENTS.length} départements. Choisissez Full Company ou sélectionnez uniquement ce dont vous avez besoin.`
-            }
+            {t("landing.services.subtitle", { total: TOTAL_EMPLOYEES, depts: DEPARTMENTS.length })}
           </p>
         </div>
 
-        {/* Departments Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {DEPARTMENTS.map((dept, index) => {
             const Icon = dept.icon;
             return (
-              <Card 
-                key={dept.id}
-                variant="feature"
-                className="group fade-in-up hover:border-primary/30 transition-all"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
+              <Card key={dept.id} variant="feature" className="group fade-in-up hover:border-primary/30 transition-all" style={{ animationDelay: `${index * 0.05}s` }}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className={cn("p-3 rounded-xl", dept.bgColor)}>
@@ -196,17 +61,15 @@ export function Services() {
                     </div>
                     <Badge variant="secondary" className="text-xs font-semibold flex items-center gap-1">
                       <Bot className="w-3 h-3" />
-                      {dept.employees} {isEn ? "AI" : "IA"}
+                      {dept.employees} {t("landing.services.ai")}
                     </Badge>
                   </div>
-                  
                   <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
-                    {isEn ? dept.nameEn : dept.nameFr}
+                    {t(`landing.services.depts.${dept.id}.name`)}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {isEn ? dept.descEn : dept.descFr}
+                    {t(`landing.services.depts.${dept.id}.desc`)}
                   </p>
-                  
                   <div className="space-y-1">
                     {dept.features.slice(0, 3).map((feature) => (
                       <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -221,56 +84,41 @@ export function Services() {
           })}
         </div>
 
-        {/* Core OS Highlight */}
         <Card variant="gradient" className="max-w-3xl mx-auto border-2 border-primary/20 mb-12">
           <CardContent className="p-6 text-center">
-            <Badge variant="gradient" className="mb-4">
-              {isEn ? "Always Included" : "Toujours inclus"}
-            </Badge>
+            <Badge variant="gradient" className="mb-4">{t("landing.services.alwaysIncluded")}</Badge>
             <h3 className="text-xl font-bold mb-2">Core OS</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {isEn 
-                ? "Workspace, RBAC, Approval Gate, Audit Logs, Scheduler, Integrations Center — included with every plan at no extra cost."
-                : "Workspace, RBAC, Approbations, Audit Logs, Planificateur, Centre d'intégrations — inclus avec chaque formule sans frais supplémentaires."
-              }
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">{t("landing.services.coreOSDesc")}</p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
               {["Workspace", "RBAC", "Approvals", "Audit Log", "Scheduler", "Integrations"].map((item) => (
                 <span key={item} className="flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-primary" />
-                  {item}
+                  <CheckCircle2 className="w-3 h-3 text-primary" />{item}
                 </span>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Pricing Summary */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="grid grid-cols-2 gap-4 text-center">
             <Card variant="feature" className="p-6">
               <p className="text-3xl font-bold">{PRICE_PER_DEPT.toLocaleString()}€</p>
-              <p className="text-sm text-muted-foreground">
-                {isEn ? "per department/month" : "par département/mois"}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("landing.services.perDeptMonth")}</p>
             </Card>
             <Card variant="gradient" className="p-6 border-primary/30">
               <p className="text-3xl font-bold gradient-text">{FULL_COMPANY_PRICE.toLocaleString()}€</p>
-              <p className="text-sm text-muted-foreground">
-                {isEn ? "Full Company/month" : "Full Company/mois"}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("landing.services.fullCompanyMonth")}</p>
               <Badge variant="outline" className="mt-2 text-xs text-green-600">
-                {isEn ? `Save ${savings.toLocaleString()}€/mo` : `Économisez ${savings.toLocaleString()}€/mois`}
+                {t("landing.services.save", { amount: savings.toLocaleString() })}
               </Badge>
             </Card>
           </div>
         </div>
 
-        {/* CTA */}
         <div className="text-center">
           <Link to="/onboarding">
             <Button variant="hero" size="lg">
-              {isEn ? "Build Your Package" : "Composer votre offre"}
+              {t("landing.services.buildPackage")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>

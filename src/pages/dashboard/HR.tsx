@@ -445,7 +445,7 @@ export default function HR() {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Début: {new Date(emp.hire_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'es' ? 'es-ES' : i18n.language === 'de' ? 'de-DE' : 'en-US')}
+                          {t("dashboard.hr.startDate")}: {new Date(emp.hire_date).toLocaleDateString(getIntlLocale(i18n.language))}
                         </p>
                       </div>
                     </div>
