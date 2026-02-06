@@ -24,6 +24,7 @@ export const fr = {
     noData: "Aucune donnée",
     markAllRead: "Tout lire",
     noNotifications: "Aucune notification",
+    comingSoon: "Bientôt disponible !",
     verifyingAuth: "Vérification de l'authentification...",
     verifyingPermissions: "Vérification des permissions...",
     verifyingAccess: "Vérification de vos accès...",

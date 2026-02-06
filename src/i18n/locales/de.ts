@@ -24,6 +24,7 @@ export const de = {
     noData: "Keine Daten",
     markAllRead: "Alle als gelesen markieren",
     noNotifications: "Keine Benachrichtigungen",
+    comingSoon: "Demnächst verfügbar!",
   },
 
   // Navigation

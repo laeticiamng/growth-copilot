@@ -62,7 +62,7 @@ export default function CRO() {
   const [submitting, setSubmitting] = useState(false);
  
   const handleViewAudit = (auditId: string) => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleDeclareWinner = async (experimentId: string, variantId: string) => {
@@ -75,27 +75,27 @@ export default function CRO() {
   };
 
   const handleOpenSuggestion = (suggestionId: string) => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleDismissSuggestion = (suggestionId: string) => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleCreateTaskFromSuggestion = (suggestionId: string) => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleCreateExperimentFromSuggestion = (suggestionId: string) => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleCreateAudit = () => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleAISuggestions = () => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   const handleRealtimeUpdate = useCallback(() => {

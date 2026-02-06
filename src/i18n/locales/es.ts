@@ -24,6 +24,7 @@ export const es = {
     noData: "Sin datos",
     markAllRead: "Marcar todo leído",
     noNotifications: "Sin notificaciones",
+    comingSoon: "¡Próximamente!",
   },
 
   // Navigation

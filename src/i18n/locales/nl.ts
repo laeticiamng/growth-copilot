@@ -24,6 +24,7 @@ export const nl = {
     noData: "Geen gegevens",
     markAllRead: "Alles als gelezen markeren",
     noNotifications: "Geen meldingen",
+    comingSoon: "Binnenkort beschikbaar!",
   },
 
   // Navigation
