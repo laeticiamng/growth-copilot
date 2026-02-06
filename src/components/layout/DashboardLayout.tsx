@@ -139,6 +139,8 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
       { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
       { path: "/dashboard/media", label: t("nav.media"), icon: () => <span className="text-base">🎬</span> },
       { path: "/dashboard/media/kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
+      { path: "/dashboard/media/creatives", label: "Creatives Studio", icon: () => <span className="text-base">🎨</span> },
+      { path: "/dashboard/media/ads-factory", label: "Ads Factory", icon: () => <span className="text-base">🏭</span> },
     ],
   },
   {
@@ -175,6 +177,8 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/logs", label: t("nav.logs"), icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
       { path: "/dashboard/status", label: "Status Page", icon: () => <span className="text-base">🟢</span> },
+      { path: "/dashboard/roi", label: "ROI Dashboard", icon: () => <span className="text-base">💰</span> },
+      { path: "/dashboard/ai-costs", label: "AI Costs", icon: () => <span className="text-base">🤖</span>, requiresRole: "admin" },
     ],
   },
   {
@@ -189,6 +193,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
       { path: "/dashboard/connections", label: "Access", icon: () => <span className="text-base">🔑</span> },
       { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
       { path: "/dashboard/billing", label: t("layout.billing"), icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
+      { path: "/dashboard/settings", label: t("common.configure"), icon: Settings },
       { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
     ],
   },
