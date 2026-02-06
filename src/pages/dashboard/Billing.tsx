@@ -147,7 +147,7 @@ export default function Billing() {
   // Create Stripe Checkout session
   const handleCheckout = async (type: "full" | "department" | "starter") => {
     if (!currentWorkspace) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("dashboard.home.noWorkspace"));
       return;
     }
 
