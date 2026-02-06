@@ -198,26 +198,26 @@ export function BusinessHealthScore({ className }: BusinessHealthScoreProps) {
     <Card className={cn("overflow-hidden flex flex-col", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-         <CardTitle className="text-base flex items-center gap-2">
-             <span className="relative">
-               {t("cockpit.businessWeather")}
-               <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-             </span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="focus:outline-none">
-                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-xs">
-                    {t("cockpit.healthTooltip")}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </CardTitle>
+          <CardTitle className="text-base">
+              <span className="relative">
+                {t("cockpit.businessWeather")}
+                <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+              </span>
+           </CardTitle>
+           <TooltipProvider>
+             <Tooltip>
+               <TooltipTrigger asChild>
+                 <button type="button" className="focus:outline-none">
+                   <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                 </button>
+               </TooltipTrigger>
+               <TooltipContent className="max-w-xs">
+                 <p className="text-xs">
+                   {t("cockpit.healthTooltip")}
+                 </p>
+               </TooltipContent>
+             </Tooltip>
+           </TooltipProvider>
           <Badge variant="outline" className={weather.color}>
             {weather.label}
           </Badge>
