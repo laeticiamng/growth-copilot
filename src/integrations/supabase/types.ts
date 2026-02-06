@@ -2176,6 +2176,13 @@ export type Database = {
             foreignKeyName: "contracts_related_employee_id_fkey"
             columns: ["related_employee_id"]
             isOneToOne: false
+            referencedRelation: "employees_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_related_employee_id_fkey"
+            columns: ["related_employee_id"]
+            isOneToOne: false
             referencedRelation: "employees_safe"
             referencedColumns: ["id"]
           },
@@ -2972,6 +2979,13 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_directory"
             referencedColumns: ["id"]
           },
           {
@@ -6766,6 +6780,13 @@ export type Database = {
             foreignKeyName: "performance_reviews_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employees_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees_safe"
             referencedColumns: ["id"]
           },
@@ -8090,6 +8111,13 @@ export type Database = {
             foreignKeyName: "time_off_requests_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employees_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees_safe"
             referencedColumns: ["id"]
           },
@@ -8637,6 +8665,77 @@ export type Database = {
           },
         ]
       }
+      employees_directory: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          first_name: string | null
+          hire_date: string | null
+          id: string | null
+          job_title: string | null
+          last_name: string | null
+          manager_id: string | null
+          status: string | null
+          user_id: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          first_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          job_title?: string | null
+          last_name?: string | null
+          manager_id?: string | null
+          status?: string | null
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          first_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          job_title?: string | null
+          last_name?: string | null
+          manager_id?: string | null
+          status?: string | null
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees_safe: {
         Row: {
           contract_type: string | null
@@ -8716,6 +8815,13 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees_directory"
             referencedColumns: ["id"]
           },
           {
