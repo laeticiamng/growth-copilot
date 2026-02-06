@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bot, Download, Sparkles, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { fr, enUS, es, de, it, pt, nl } from "date-fns/locale";
+
+const dateLocaleMap: Record<string, typeof enUS> = { fr, en: enUS, es, de, it, pt, nl };
 
 interface WelcomeCardProps {
   agentName: string;
@@ -29,18 +31,16 @@ export function WelcomeCard({
   className,
 }: WelcomeCardProps) {
   const { t, i18n } = useTranslation();
-  const greeting = getGreeting(i18n.language);
-  const dateLocale = i18n.language === 'fr' ? fr : enUS;
+  const greeting = getGreeting(t);
+  const dateLocale = dateLocaleMap[i18n.language] || enUS;
   
   return (
     <Card className={cn("relative overflow-hidden", className)}>
-      {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
       
       <CardContent className="relative pt-6 pb-5">
         <div className="flex flex-col sm:flex-row items-start gap-4">
-          {/* Avatar */}
           <div className="relative flex-shrink-0">
             <div className="text-4xl sm:text-5xl">{agentAvatar}</div>
             <span className="absolute -bottom-1 -right-1 flex h-3 w-3 sm:h-4 sm:w-4">
@@ -49,7 +49,6 @@ export function WelcomeCard({
             </span>
           </div>
           
-          {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <h2 className="font-bold text-base sm:text-lg">{agentName}</h2>
@@ -61,54 +60,27 @@ export function WelcomeCard({
             
             <p className="text-muted-foreground">
               {greeting}{" "}
-              {i18n.language === 'fr' ? (
-                <>
-                  Voici l'état de{" "}
-                  <span className="font-medium text-foreground">{siteName}</span>.{" "}
-                  {pendingCount > 0 ? (
-                    <span>
-                      Vous avez{" "}
-                      <span className="font-semibold text-primary">
-                        {pendingCount} décision{pendingCount > 1 ? "s" : ""}
-                      </span>{" "}
-                      en attente de validation.
-                    </span>
-                  ) : (
-                    <span className="text-chart-3">Tout est à jour, aucune action requise.</span>
-                  )}
-                </>
+              {t("cockpit.welcomeStatusOf")}{" "}
+              <span className="font-medium text-foreground">{siteName}</span>.{" "}
+              {pendingCount > 0 ? (
+                <span className="font-semibold text-primary">
+                  {t("cockpit.welcomeDecisionsPending", { count: pendingCount })}
+                </span>
               ) : (
-                <>
-                  Here's the status of{" "}
-                  <span className="font-medium text-foreground">{siteName}</span>.{" "}
-                  {pendingCount > 0 ? (
-                    <span>
-                      You have{" "}
-                      <span className="font-semibold text-primary">
-                        {pendingCount} decision{pendingCount > 1 ? "s" : ""}
-                      </span>{" "}
-                      pending approval.
-                    </span>
-                  ) : (
-                    <span className="text-chart-3">All up to date, no action required.</span>
-                  )}
-                </>
+                <span className="text-chart-3">{t("cockpit.welcomeAllUpToDate")}</span>
               )}
             </p>
             
-            {/* Sync Info */}
             {lastSync && (
               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
-                {i18n.language === 'fr' 
-                  ? `Dernière synchronisation : ${format(lastSync, "dd MMM à HH:mm", { locale: dateLocale })}`
-                  : `Last sync: ${format(lastSync, "MMM dd at HH:mm", { locale: dateLocale })}`
-                }
+                {t("cockpit.welcomeLastSync", { 
+                  date: format(lastSync, i18n.language === 'fr' ? "dd MMM 'à' HH:mm" : "MMM dd 'at' HH:mm", { locale: dateLocale })
+                })}
               </div>
             )}
           </div>
           
-          {/* Export Button */}
           {onExport && (
             <Button variant="outline" size="sm" onClick={onExport} className="shrink-0">
               <Download className="w-4 h-4 mr-2" />
@@ -117,22 +89,21 @@ export function WelcomeCard({
           )}
         </div>
         
-        {/* Quick Stats Bar */}
         <div className="mt-4 pt-4 border-t border-border/50">
           <div className="grid grid-cols-3 gap-4 text-sm">
             <QuickStat 
               icon={<Sparkles className="w-4 h-4 text-primary flex-shrink-0" />}
-              label={i18n.language === 'fr' ? "Agents actifs" : "Active agents"}
+              label={t("cockpit.welcomeActiveAgents")}
               value="39"
             />
             <QuickStat 
               icon={<span className="text-sm flex-shrink-0">📊</span>}
-              label={i18n.language === 'fr' ? "Départements" : "Departments"}
+              label={t("cockpit.welcomeDepartments")}
               value="11"
             />
             <QuickStat 
               icon={<span className="text-sm flex-shrink-0">⚡</span>}
-              label={i18n.language === 'fr' ? "Disponibilité" : "Availability"}
+              label={t("cockpit.welcomeAvailability")}
               value="24/7"
             />
           </div>
@@ -142,15 +113,7 @@ export function WelcomeCard({
   );
 }
 
-function QuickStat({ 
-  icon, 
-  label, 
-  value 
-}: { 
-  icon: React.ReactNode; 
-  label: string; 
-  value: string;
-}) {
+function QuickStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2">
       {icon}
@@ -162,15 +125,9 @@ function QuickStat({
   );
 }
 
-function getGreeting(lang: string): string {
+function getGreeting(t: (key: string) => string): string {
   const hour = new Date().getHours();
-  if (lang === 'fr') {
-    if (hour < 12) return "Bonjour !";
-    if (hour < 18) return "Bon après-midi !";
-    return "Bonsoir !";
-  } else {
-    if (hour < 12) return "Good morning!";
-    if (hour < 18) return "Good afternoon!";
-    return "Good evening!";
-  }
+  if (hour < 12) return t("cockpit.welcomeGreetingMorning");
+  if (hour < 18) return t("cockpit.welcomeGreetingAfternoon");
+  return t("cockpit.welcomeGreetingEvening");
 }
