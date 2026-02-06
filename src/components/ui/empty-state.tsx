@@ -2,6 +2,7 @@ import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -34,10 +35,7 @@ export function EmptyState({
         "flex flex-col items-center justify-center text-center",
         compact ? "py-8" : "py-12"
       )}>
-        <div className={cn(
-          "rounded-full bg-primary/10 mb-4",
-          compact ? "p-3" : "p-4"
-        )}>
+        <div className={cn("rounded-full bg-primary/10 mb-4", compact ? "p-3" : "p-4")}>
           <Icon className={cn("text-primary", compact ? "w-6 h-6" : "w-8 h-8")} />
         </div>
         <h3 className={cn("font-semibold mb-2", compact ? "text-base" : "text-lg")}>{title}</h3>
@@ -84,6 +82,7 @@ interface ConnectionRequiredProps {
 }
 
 export function ConnectionRequired({ provider, icon: Icon, onConnect, description }: ConnectionRequiredProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardContent className="flex items-center gap-4 py-4">
@@ -91,14 +90,14 @@ export function ConnectionRequired({ provider, icon: Icon, onConnect, descriptio
           <Icon className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1">
-          <p className="font-medium">Autorisation requise</p>
+          <p className="font-medium">{t("components.emptyState.authRequired")}</p>
           <p className="text-sm text-muted-foreground">
-            {description || `Autorisez l'accès à ${provider} pour activer ces fonctionnalités`}
+            {description || t("components.emptyState.authRequiredDesc", { provider })}
           </p>
         </div>
         {onConnect && (
           <Button size="sm" onClick={onConnect}>
-            Autoriser
+            {t("components.emptyState.authorize")}
           </Button>
         )}
       </CardContent>
@@ -112,15 +111,16 @@ interface SiteRequiredProps {
 }
 
 export function SiteRequired({ onNavigate, message }: SiteRequiredProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-primary/50 bg-primary/5">
       <CardContent className="flex items-center gap-4 py-4">
         <p className="flex-1 text-sm">
-          <span className="font-medium">Site requis.</span>{" "}
-          {message || "Sélectionnez ou créez un site pour accéder à ces données."}
+          <span className="font-medium">{t("components.emptyState.siteRequired")}</span>{" "}
+          {message || t("components.emptyState.siteRequiredDesc")}
         </p>
         <Button size="sm" onClick={onNavigate}>
-          Gérer les sites
+          {t("components.emptyState.manageSites")}
         </Button>
       </CardContent>
     </Card>
@@ -133,15 +133,16 @@ interface DataLoadingErrorProps {
 }
 
 export function DataLoadingError({ message, onRetry }: DataLoadingErrorProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-destructive/50 bg-destructive/5">
       <CardContent className="flex items-center gap-4 py-4">
         <p className="flex-1 text-sm text-destructive">
-          {message || "Erreur lors du chargement des données"}
+          {message || t("components.emptyState.loadError")}
         </p>
         {onRetry && (
           <Button size="sm" variant="outline" onClick={onRetry}>
-            Réessayer
+            {t("components.emptyState.retry")}
           </Button>
         )}
       </CardContent>
@@ -154,9 +155,10 @@ interface DemoModeBannerProps {
 }
 
 export function DemoModeBanner({ message }: DemoModeBannerProps) {
+  const { t } = useTranslation();
   return (
     <div className="text-sm text-muted-foreground bg-secondary/50 px-4 py-2 rounded-lg border border-border/50">
-      ⚠️ {message || "Autorisez l'accès à vos outils pour voir vos vraies données"}
+      ⚠️ {message || t("components.emptyState.demoMode")}
     </div>
   );
 }

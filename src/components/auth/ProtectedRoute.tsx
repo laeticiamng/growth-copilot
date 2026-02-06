@@ -2,6 +2,7 @@ import { ReactNode, forwardRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingState } from '@/components/ui/loading-state';
+import { useTranslation } from 'react-i18next';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -14,11 +15,12 @@ interface ProtectedRouteProps {
  */
 export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
   function ProtectedRoute({ children, redirectTo = '/auth' }, ref) {
+    const { t } = useTranslation();
     const { user, loading } = useAuth();
     const location = useLocation();
 
     if (loading) {
-      return <LoadingState message="Vérification de l'authentification..." />;
+      return <LoadingState message={t("common.verifyingAuth")} />;
     }
 
     if (!user) {
@@ -35,10 +37,11 @@ export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
  */
 export const PublicOnlyRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
   function PublicOnlyRoute({ children, redirectTo = '/dashboard' }, ref) {
+    const { t } = useTranslation();
     const { user, loading } = useAuth();
 
     if (loading) {
-      return <LoadingState message="Chargement..." />;
+      return <LoadingState message={t("common.loading")} />;
     }
 
     if (user) {

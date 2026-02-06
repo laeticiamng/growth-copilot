@@ -8,6 +8,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { Phone, PhoneOff, Volume2, VolumeX, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface VoiceAssistantProps {
   className?: string;
@@ -15,6 +16,7 @@ interface VoiceAssistantProps {
 }
 
 export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -23,7 +25,7 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
   const conversation = useConversation({
     onConnect: () => {
       console.log("[VoiceAssistant] Connected to agent");
-      toast.success("Assistant vocal connecté");
+      toast.success(t("components.voice.connected"));
     },
     onDisconnect: () => {
       console.log("[VoiceAssistant] Disconnected from agent");
@@ -31,34 +33,31 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
     },
     onMessage: (message) => {
       console.log("[VoiceAssistant] Message:", message);
-      // Handle message payload - types are dynamic from ElevenLabs
       const msg = message as unknown as Record<string, unknown>;
       if (msg.user_transcription_event) {
         const event = msg.user_transcription_event as { user_transcript?: string };
-        setTranscript(`Vous: ${event.user_transcript || ''}`);
+        setTranscript(`${t("components.voice.you")} ${event.user_transcript || ''}`);
       } else if (msg.agent_response_event) {
         const event = msg.agent_response_event as { agent_response?: string };
-        setTranscript(`Assistant: ${event.agent_response || ''}`);
+        setTranscript(`${t("components.voice.assistant")} ${event.agent_response || ''}`);
       }
     },
     onError: (error) => {
       console.error("[VoiceAssistant] Error:", error);
-      toast.error("Erreur de connexion vocale");
+      toast.error(t("components.voice.connectionError"));
     },
   });
 
   const startConversation = useCallback(async () => {
     if (!currentWorkspace?.id) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("components.voice.noWorkspace"));
       return;
     }
 
     setIsConnecting(true);
     try {
-      // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Get token from edge function
       const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token", {
         body: { 
           workspace_id: currentWorkspace.id,
@@ -72,7 +71,6 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
         throw new Error("No token received");
       }
 
-      // Start the conversation with WebRTC
       await conversation.startSession({
         conversationToken: data.token,
         connectionType: "webrtc",
@@ -80,23 +78,22 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
     } catch (error) {
       console.error("[VoiceAssistant] Failed to start:", error);
       if ((error as Error).name === 'NotAllowedError') {
-        toast.error("Accès microphone refusé. Veuillez autoriser l'accès.");
+        toast.error(t("components.voice.micDenied"));
       } else {
-        toast.error("Impossible de démarrer l'assistant vocal");
+        toast.error(t("components.voice.startError"));
       }
     } finally {
       setIsConnecting(false);
     }
-  }, [conversation, currentWorkspace?.id, agentId]);
+  }, [conversation, currentWorkspace?.id, agentId, t]);
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
-    toast.info("Conversation terminée");
-  }, [conversation]);
+    toast.info(t("components.voice.ended"));
+  }, [conversation, t]);
 
   const toggleMute = useCallback(() => {
     setIsMuted(!isMuted);
-    // Note: Volume control would be handled by conversation.setVolume
   }, [isMuted]);
 
   const isConnected = conversation.status === "connected";
@@ -108,7 +105,6 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
     <Card className={cn("bg-gradient-to-br from-background to-muted/30 border-primary/20", className)}>
       <CardContent className="p-6">
         <div className="flex flex-col items-center gap-4">
-          {/* Status Badge */}
           <Badge 
             variant={isConnected ? "default" : "secondary"}
             className={cn(
@@ -116,10 +112,9 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
               isConnected && "bg-primary/20 text-primary border-primary/30"
             )}
           >
-            {isConnected ? (isSpeaking ? "En écoute..." : "Parlez maintenant") : "Déconnecté"}
+            {isConnected ? (isSpeaking ? t("components.voice.listening") : t("components.voice.speakNow")) : t("components.voice.disconnected")}
           </Badge>
 
-          {/* Voice Animation */}
           <div className={cn(
             "relative w-24 h-24 rounded-full flex items-center justify-center",
             "transition-all duration-500",
@@ -127,7 +122,6 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
               ? "bg-gradient-to-br from-primary to-primary/60" 
               : "bg-muted"
           )}>
-            {/* Pulse animation when speaking */}
             {isSpeaking && (
               <>
                 <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
@@ -147,14 +141,12 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
             )}
           </div>
 
-          {/* Transcript Display */}
           {transcript && (
             <div className="w-full max-w-xs text-center">
               <p className="text-sm text-muted-foreground truncate">{transcript}</p>
             </div>
           )}
 
-          {/* Controls */}
           <div className="flex items-center gap-3">
             {isConnected ? (
               <>
@@ -174,7 +166,7 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
                   className="gap-2"
                 >
                   <PhoneOff className="h-5 w-5" />
-                  Terminer
+                  {t("components.voice.end")}
                 </Button>
               </>
             ) : (
@@ -189,16 +181,15 @@ export function VoiceAssistant({ className, agentId }: VoiceAssistantProps) {
                 ) : (
                   <Phone className="h-5 w-5" />
                 )}
-                {isConnecting ? "Connexion..." : "Parler à Growth OS"}
+                {isConnecting ? t("components.voice.connecting") : t("components.voice.talkTo")}
               </Button>
             )}
           </div>
 
-          {/* Helper text */}
           <p className="text-xs text-muted-foreground text-center max-w-xs">
             {isConnected 
-              ? "Posez vos questions sur votre entreprise, demandez des rapports ou lancez des actions."
-              : "Activez l'assistant vocal pour piloter votre entreprise par la voix."}
+              ? t("components.voice.helpConnected")
+              : t("components.voice.helpDisconnected")}
           </p>
         </div>
       </CardContent>

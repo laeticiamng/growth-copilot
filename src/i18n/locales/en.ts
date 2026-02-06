@@ -24,6 +24,12 @@ export const en = {
     noData: "No data",
     markAllRead: "Mark all read",
     noNotifications: "No notifications",
+    verifyingAuth: "Verifying authentication...",
+    verifyingPermissions: "Verifying permissions...",
+    verifyingAccess: "Verifying your access...",
+    accessDenied: "Access denied",
+    accessDeniedDesc: "You don't have the required permissions to access this section.",
+    contactAdmin: "Contact an administrator to get access",
   },
 
   // Navigation
@@ -2133,6 +2139,10 @@ export const en = {
     rejectionError: "Rejection error",
     rejected: "Action rejected",
     updateError: "Update error",
+    rejectionDialogTitle: "Reject this action",
+    rejectionReasonLabel: "Reason for rejection",
+    rejectionReasonPlaceholder: "Explain why you're rejecting this action...",
+    confirmRejection: "Confirm rejection",
   },
 
   // Nav additions
@@ -3430,4 +3440,28 @@ export const en = {
       emailAutomation: "Email automation",
     },
   },
+
+  // ServiceGuard
+  serviceGuard: {
+    activateService: "Activate this service to access this feature.",
+    marketingDesc: "Boost your visibility with our complete marketing suite: SEO, content, ads and social media.",
+    marketingF1: "Automated technical SEO audit", marketingF2: "AI content strategy", marketingF3: "Ad campaign management", marketingF4: "Social media scheduling", marketingF5: "Competitive analysis",
+    salesDesc: "Optimize your sales pipeline with our smart CRM and prospecting automations.",
+    salesF1: "Sales pipeline management", salesF2: "Automated lead scoring", salesF3: "Personalized email sequences", salesF4: "Offer and quote tracking", salesF5: "AI sales forecasts",
+    financeDesc: "Stay in control of your finances with automated ROI reports and budget alerts.",
+    financeF1: "ROI reports by channel", financeF2: "Marketing spend tracking", financeF3: "Real-time budget alerts", financeF4: "Financial forecasts", financeF5: "Accounting export",
+    securityDesc: "Protect your access and ensure compliance with our integrated security suite.",
+    securityF1: "Regular access audits", securityF2: "Anomaly detection", securityF3: "Automated GDPR compliance", securityF4: "Complete logs and traceability", securityF5: "Secrets management",
+    productDesc: "Drive your product roadmap with user insights and intelligent prioritization.",
+    productF1: "Impact-based prioritization", productF2: "OKR tracking", productF3: "Centralized user feedback", productF4: "Collaborative roadmap", productF5: "Product metrics",
+    engineeringDesc: "Optimize your releases with quality gates and technical health monitoring.",
+    engineeringF1: "Automated release gates", engineeringF2: "Daily QA summary", engineeringF3: "Technical debt tracking", engineeringF4: "Delivery metrics", engineeringF5: "Performance alerts",
+    dataDesc: "Leverage your data with funnel analysis and retention cohorts.",
+    dataF1: "Complete funnel diagnostic", dataF2: "Cohort analysis", dataF3: "Multi-touch attribution", dataF4: "Custom dashboards", dataF5: "Data warehouse export",
+    supportDesc: "Improve your reputation with centralized review and customer support management.",
+    supportF1: "Automatic ticket triage", supportF2: "Google/Meta review management", supportF3: "AI knowledge base", supportF4: "Suggested responses", supportF5: "NPS/CSAT metrics",
+    governanceDesc: "Centralize your business management with our governance hub.",
+    governanceF1: "Multi-client management (Agency)", governanceF2: "Advanced automations", governanceF3: "Third-party integrations", governanceF4: "Granular roles and permissions", governanceF5: "Complete audit trail",
+  },
 };
+
