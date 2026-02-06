@@ -1,41 +1,36 @@
 
-# Pre-Publication Fix: Remaining Hardcoded French Strings
+# Pre-Publication Fix: Pricing Component i18n
 
-## Findings
+## Finding
 
-4 files still contain hardcoded French strings that break the non-French user experience:
+The **Pricing section** on the landing page displays hardcoded French strings visible to all users regardless of language. This is the only remaining i18n issue on the public-facing landing page.
 
-| File | Hardcoded strings | i18n keys exist? |
-|------|-------------------|------------------|
-| `src/pages/dashboard/Sites.tsx` | ~30 strings (dialogs, labels, buttons, sectors) | Yes (`sitesPage.*`) |
-| `src/pages/dashboard/HR.tsx` | ~15 strings (dialog titles, empty states, buttons) | Yes (`hrPage.*`) |
-| `src/pages/dashboard/Legal.tsx` | ~10 strings (empty states, buttons, descriptions) | Yes (`legalPage.*`) |
-| `src/pages/dashboard/Ops.tsx` | ~20 strings (card titles, empty states, token labels) | No -- keys need to be added to `en.ts` and `fr.ts` |
+**Affected file**: `src/components/landing/Pricing.tsx`
+
+**Hardcoded French strings** (in the `SERVICE_MODULES` static array):
+- Department names: "Commercial", "Securite", "Produit", "Ingenierie", "Gouvernance", "RH", "Juridique"
+- Role titles: "Directeur Marketing IA", "Directeur Commercial IA", "DAF IA", "Comptable Analytique", "Controleur de Gestion", "RSSI IA", "Auditeur Securite", "CPO IA", "CTO IA", "CDO IA", "Head of Support IA", "Chief of Staff IA", "DRH IA", "Directeur Juridique IA"
+
+All other landing page components (Hero, Features, HowItWorks, Services, TeamOrgChart, Testimonials, FAQ, CTA, Footer) are already fully translated.
 
 ## Plan
 
-### 1. `src/pages/dashboard/Sites.tsx`
-- Replace all hardcoded strings with `t("sitesPage.*")` calls
-- Convert `sectors` array to dynamic `getSectors(t)` function using existing `sitesPage.sector*` keys
-- Covers: dialog titles, descriptions, labels, buttons, empty states, delete confirmation
+### 1. Add locale keys for department names and role titles
 
-### 2. `src/pages/dashboard/HR.tsx`
-- Replace remaining hardcoded strings with `t("hrPage.*")` calls
-- Covers: "Nouvel employe", "Ajouter un employe", "Aucun employe trouve", "Aucun onboarding en cours", form labels
+Add a `landing.pricing.modules` namespace to both `en.ts` and `fr.ts` with:
+- 11 department name keys (marketing, sales, finance, security, product, engineering, data, support, governance, hr, legal)
+- ~37 role title keys (one per role across all departments)
 
-### 3. `src/pages/dashboard/Legal.tsx`
-- Replace remaining hardcoded strings with `t("legalPage.*")` calls
-- Covers: "Aucun contrat trouve", "Aucun template", "Supprimer", contract count labels
+### 2. Convert `SERVICE_MODULES` to a dynamic getter function
 
-### 4. `src/pages/dashboard/Ops.tsx`
-- Add `opsPage` namespace to both `en.ts` and `fr.ts` with ~20 keys
-- Replace hardcoded strings: "Incidents recents", "Etat des tokens", "Audit des tokens", "Aucun incident", "Aucune integration active", "Aucun evenement", "Resoudre", "Pas d'expiration", "echecs"
+Replace the static `SERVICE_MODULES` const with a `getServiceModules(t)` function called inside the component, using `t("landing.pricing.modules.*")` for names and roles.
 
-## Technical Details
+### 3. Files modified
 
-- All files already have `useTranslation` imported
-- Sites.tsx needs the `sectors` array converted to a getter function (same pattern as HR/Legal label refactoring done in previous rounds)
-- Ops.tsx is the only file needing new locale keys -- approximately 20 keys per language file
-- No structural changes, only string replacement
+| File | Changes |
+|------|---------|
+| `src/i18n/locales/en.ts` | Add ~48 keys under `landing.pricing.modules` |
+| `src/i18n/locales/fr.ts` | Add ~48 keys under `landing.pricing.modules` |
+| `src/components/landing/Pricing.tsx` | Convert `SERVICE_MODULES` to `getServiceModules(t)` |
 
-**Files modified: 6** (4 components + 2 locale files)
+**3 files modified, no structural changes.**
