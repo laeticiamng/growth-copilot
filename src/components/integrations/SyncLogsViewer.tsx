@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { formatDistanceToNow } from "date-fns";
+import { getDateLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +39,7 @@ interface SyncLogsViewerProps {
 }
 
 export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogsViewerProps) {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [expanded, setExpanded] = useState(false);
 
@@ -86,14 +90,14 @@ export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogs
 
   const getActionLabel = (action: string): string => {
     const labels: Record<string, string> = {
-      token_created: 'Token créé',
-      token_refreshed: 'Token rafraîchi',
-      token_expired: 'Token expiré',
-      auth_failure: 'Échec authentification',
-      sync_started: 'Synchronisation démarrée',
-      sync_completed: 'Synchronisation terminée',
-      sync_failed: 'Synchronisation échouée',
-      scope_updated: 'Scopes mis à jour',
+      token_created: t("syncLogs.tokenCreated"),
+      token_refreshed: t("syncLogs.tokenRefreshed"),
+      token_expired: t("syncLogs.tokenExpired"),
+      auth_failure: t("syncLogs.authFailure"),
+      sync_started: t("syncLogs.syncStarted"),
+      sync_completed: t("syncLogs.syncCompleted"),
+      sync_failed: t("syncLogs.syncFailed"),
+      scope_updated: t("syncLogs.scopeUpdated"),
     };
     return labels[action] || action;
   };
@@ -109,23 +113,7 @@ export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogs
   };
 
   const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return "À l'instant";
-    if (diffMins < 60) return `Il y a ${diffMins} min`;
-    
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    
-    return date.toLocaleDateString('fr-FR', { 
-      day: '2-digit', 
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: getDateLocale(i18n.language) });
   };
 
   const displayLogs = expanded ? logs : logs.slice(0, 5);
@@ -138,10 +126,10 @@ export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogs
           <div>
             <CardTitle className="text-base flex items-center gap-2">
               <Database className="w-4 h-4" />
-              Historique de synchronisation
+              {t("syncLogs.title")}
             </CardTitle>
             <CardDescription className="text-xs">
-              {logs.length} événement{logs.length !== 1 ? 's' : ''} récent{logs.length !== 1 ? 's' : ''}
+              {logs.length} {t("syncLogs.events")}
             </CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={() => refetch()}>
@@ -157,7 +145,7 @@ export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogs
         ) : logs.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Aucun événement de synchronisation</p>
+            <p className="text-sm">{t("syncLogs.noSyncEvent")}</p>
           </div>
         ) : (
           <>
@@ -221,12 +209,12 @@ export function SyncLogsViewer({ integrationId, provider, limit = 20 }: SyncLogs
                 {expanded ? (
                   <>
                     <ChevronUp className="w-4 h-4 mr-1" />
-                    Voir moins
+                    {t("syncLogs.viewLess")}
                   </>
                 ) : (
                   <>
                     <ChevronDown className="w-4 h-4 mr-1" />
-                    Voir tout ({logs.length})
+                    {t("syncLogs.viewAll")} ({logs.length})
                   </>
                 )}
               </Button>

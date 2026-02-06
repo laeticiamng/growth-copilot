@@ -66,14 +66,15 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleReportProblem = () => {
-    const subject = encodeURIComponent('Signalement erreur Growth OS');
+    const t = (key: string, fallback: string) => i18next.t(key, fallback);
+    const subject = encodeURIComponent(t('errorBoundaryEmail.subject', 'Error report - Growth OS'));
     const body = encodeURIComponent(
-      `Bonjour,\n\nJ'ai rencontré une erreur sur Growth OS.\n\n` +
-      `ID de l'erreur : ${this.state.eventId || 'Non disponible'}\n` +
-      `URL : ${window.location.href}\n` +
-      `Date : ${new Date().toLocaleString('fr-FR')}\n\n` +
-      `Description du problème :\n[Décrivez ce que vous faisiez quand l'erreur est survenue]\n\n` +
-      `Cordialement`
+      `${t('errorBoundaryEmail.greeting', 'Hello,')}\n\n${t('errorBoundaryEmail.body', 'I encountered an error on Growth OS.')}\n\n` +
+      `${t('errorBoundaryEmail.errorId', 'Error ID:')} ${this.state.eventId || t('errorBoundaryEmail.notAvailable', 'Not available')}\n` +
+      `${t('errorBoundaryEmail.url', 'URL:')} ${window.location.href}\n` +
+      `${t('errorBoundaryEmail.date', 'Date:')} ${new Date().toLocaleString()}\n\n` +
+      `${t('errorBoundaryEmail.describeIssue', 'Issue description:')}\n${t('errorBoundaryEmail.describePrompt', '[Describe what you were doing when the error occurred]')}\n\n` +
+      t('errorBoundaryEmail.regards', 'Best regards')
     );
     window.location.href = `mailto:support@agent-growth-automator.com?subject=${subject}&body=${body}`;
   };

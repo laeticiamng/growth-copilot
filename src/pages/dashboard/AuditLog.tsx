@@ -35,13 +35,15 @@ import {
   XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { getDateLocale } from '@/lib/date-locale';
+import { useTranslation } from 'react-i18next';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { usePagination, getPaginationProps } from '@/hooks/usePagination';
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 
 export default function AuditLogPage() {
+  const { t, i18n } = useTranslation();
   const { 
     entries, 
     incidents, 
@@ -370,7 +372,7 @@ export default function AuditLogPage() {
                         >
                           <td className="p-3 text-sm">
                             <div className="flex flex-col">
-                              <span>{format(new Date(entry.created_at), 'dd MMM yyyy', { locale: fr })}</span>
+                              <span>{format(new Date(entry.created_at), 'dd MMM yyyy', { locale: getDateLocale(i18n.language) })}</span>
                               <span className="text-xs text-muted-foreground">
                                 {format(new Date(entry.created_at), 'HH:mm:ss')}
                               </span>
@@ -423,7 +425,7 @@ export default function AuditLogPage() {
                                       </div>
                                       <div>
                                         <p className="text-sm font-medium text-muted-foreground">Date</p>
-                                        <p>{format(new Date(selectedEntry.created_at), 'dd MMM yyyy HH:mm:ss', { locale: fr })}</p>
+                                        <p>{format(new Date(selectedEntry.created_at), 'dd MMM yyyy HH:mm:ss', { locale: getDateLocale(i18n.language) })}</p>
                                       </div>
                                       <div>
                                         <p className="text-sm font-medium text-muted-foreground">Acteur</p>
@@ -555,7 +557,7 @@ export default function AuditLogPage() {
                           <p className="text-xs text-primary mt-1">💡 {incident.suggested_fix}</p>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(incident.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                          {format(new Date(incident.created_at), 'dd/MM/yyyy HH:mm', { locale: getDateLocale(i18n.language) })}
                         </p>
                       </div>
                       {!incident.is_resolved && (

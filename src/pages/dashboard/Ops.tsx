@@ -17,13 +17,15 @@ import {
   XCircle
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { getDateLocale } from '@/lib/date-locale';
+import { useTranslation } from 'react-i18next';
 import { useOpsMetrics } from '@/hooks/useOpsMetrics';
 import { useTokenLifecycle } from '@/hooks/useTokenLifecycle';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 export default function Ops() {
+  const { t, i18n } = useTranslation();
   const { 
     metrics, 
     incidents, 
@@ -256,7 +258,7 @@ export default function Ops() {
                               <p className="text-xs text-primary mt-1">💡 {incident.suggested_fix}</p>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">
-                              {format(new Date(incident.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                              {format(new Date(incident.created_at), 'dd/MM/yyyy HH:mm', { locale: getDateLocale(i18n.language) })}
                             </p>
                           </div>
                           {!incident.resolved_at && (
