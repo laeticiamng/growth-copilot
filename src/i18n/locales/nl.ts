@@ -238,4 +238,26 @@ export const nl = {
     manageBilling: "Facturering beheren",
     allIncluded: "Alles inbegrepen",
   },
+
+  // Components
+  components: {
+    voice: {
+      connected: "Verbonden met assistent",
+      disconnected: "Niet verbonden",
+      listening: "Luistert...",
+      speakNow: "Spreek nu",
+      connecting: "Verbinden...",
+      talkTo: "Praat met Sophie",
+      end: "Beëindigen",
+      you: "Jij: ",
+      assistant: "Sophie: ",
+      connectionError: "Verbindingsfout",
+      noWorkspace: "Geen actieve werkruimte",
+      micDenied: "Microfoon toegang geweigerd",
+      startError: "Kon gesprek niet starten",
+      ended: "Gesprek beëindigd",
+      helpConnected: "Sophie luistert. Vraag naar uw bedrijfscijfers, goedkeuringen of andere onderwerpen.",
+      helpDisconnected: "Klik om een spraakgesprek te starten met uw AI-assistent.",
+    },
+  },
 };

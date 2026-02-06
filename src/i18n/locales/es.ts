@@ -554,4 +554,26 @@ export const es = {
     validation: "Error de validación",
     network: "Error de red",
   },
+
+  // Components
+  components: {
+    voice: {
+      connected: "Conectado al asistente",
+      disconnected: "Desconectado",
+      listening: "Escuchando...",
+      speakNow: "Hable ahora",
+      connecting: "Conectando...",
+      talkTo: "Hablar con Sophie",
+      end: "Finalizar",
+      you: "Tú: ",
+      assistant: "Sophie: ",
+      connectionError: "Error de conexión",
+      noWorkspace: "Sin espacio de trabajo activo",
+      micDenied: "Acceso al micrófono denegado",
+      startError: "No se pudo iniciar la conversación",
+      ended: "Conversación finalizada",
+      helpConnected: "Sophie está escuchando. Pregunte sobre sus métricas, aprobaciones o cualquier otra consulta.",
+      helpDisconnected: "Haga clic para iniciar una conversación de voz con su asistente IA.",
+    },
+  },
 };

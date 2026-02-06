@@ -238,4 +238,26 @@ export const it = {
     manageBilling: "Gestisci fatturazione",
     allIncluded: "Tutto incluso",
   },
+
+  // Components
+  components: {
+    voice: {
+      connected: "Connesso all'assistente",
+      disconnected: "Disconnesso",
+      listening: "In ascolto...",
+      speakNow: "Parla ora",
+      connecting: "Connessione...",
+      talkTo: "Parla con Sophie",
+      end: "Termina",
+      you: "Tu: ",
+      assistant: "Sophie: ",
+      connectionError: "Errore di connessione",
+      noWorkspace: "Nessuno spazio di lavoro attivo",
+      micDenied: "Accesso al microfono negato",
+      startError: "Impossibile avviare la conversazione",
+      ended: "Conversazione terminata",
+      helpConnected: "Sophie è in ascolto. Chiedi dei tuoi KPI, approvazioni o qualsiasi altra domanda.",
+      helpDisconnected: "Clicca per avviare una conversazione vocale con la tua assistente IA.",
+    },
+  },
 };

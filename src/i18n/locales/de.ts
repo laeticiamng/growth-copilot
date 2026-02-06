@@ -554,4 +554,26 @@ export const de = {
     validation: "Validierungsfehler",
     network: "Netzwerkfehler",
   },
+
+  // Components
+  components: {
+    voice: {
+      connected: "Mit Assistent verbunden",
+      disconnected: "Getrennt",
+      listening: "Hört zu...",
+      speakNow: "Sprechen Sie jetzt",
+      connecting: "Verbindung wird hergestellt...",
+      talkTo: "Mit Sophie sprechen",
+      end: "Beenden",
+      you: "Sie: ",
+      assistant: "Sophie: ",
+      connectionError: "Verbindungsfehler",
+      noWorkspace: "Kein aktiver Arbeitsbereich",
+      micDenied: "Mikrofonzugriff verweigert",
+      startError: "Konversation konnte nicht gestartet werden",
+      ended: "Konversation beendet",
+      helpConnected: "Sophie hört zu. Fragen Sie nach Ihren Geschäftskennzahlen, Genehmigungen oder anderen Themen.",
+      helpDisconnected: "Klicken Sie, um ein Sprachgespräch mit Ihrer KI-Assistentin zu starten.",
+    },
+  },
 };
