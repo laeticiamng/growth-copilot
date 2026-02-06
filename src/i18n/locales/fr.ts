@@ -406,6 +406,8 @@ export const fr = {
       qualityLabel: "Gardien Qualité",
       employeesLabel: "employés",
       costComparison: "Une équipe traditionnelle de {{total}} employés coûte ~{{cost}}€/mois. Avec Full Company à 9 000€/mois, vous économisez {{savings}}€/mois.",
+      showAll: "Voir {{count}} départements de plus",
+      showLess: "Voir moins",
     },
     teamOrg: {
       title: "Ton équipe marketing IA",

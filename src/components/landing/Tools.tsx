@@ -3,18 +3,18 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Search, BarChart3, Target, MapPin, Share2, Code, type LucideIcon } from "lucide-react";
 
 export function Tools() {
   const { t } = useTranslation();
 
-  const tools = [
-    { name: "Google Search Console", descKey: "landing.tools.gsc", category: "SEO", required: true },
-    { name: "Google Analytics 4", descKey: "landing.tools.ga4", category: "Analytics", required: true },
-    { name: "Google Ads", descKey: "landing.tools.googleAds", category: "Ads", required: false },
-    { name: "Google Business Profile", descKey: "landing.tools.gbp", category: "Local", required: false },
-    { name: "Meta Business Suite", descKey: "landing.tools.meta", category: "Social", required: false },
-    { name: "WordPress / Shopify", descKey: "landing.tools.cms", category: "CMS", required: false },
+  const tools: { name: string; descKey: string; category: string; required: boolean; icon: LucideIcon }[] = [
+    { name: "Google Search Console", descKey: "landing.tools.gsc", category: "SEO", required: true, icon: Search },
+    { name: "Google Analytics 4", descKey: "landing.tools.ga4", category: "Analytics", required: true, icon: BarChart3 },
+    { name: "Google Ads", descKey: "landing.tools.googleAds", category: "Ads", required: false, icon: Target },
+    { name: "Google Business Profile", descKey: "landing.tools.gbp", category: "Local", required: false, icon: MapPin },
+    { name: "Meta Business Suite", descKey: "landing.tools.meta", category: "Social", required: false, icon: Share2 },
+    { name: "WordPress / Shopify", descKey: "landing.tools.cms", category: "CMS", required: false, icon: Code },
   ];
 
   return (
@@ -33,8 +33,8 @@ export function Tools() {
             <Card key={tool.name} variant="feature" className="group fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center text-xl font-bold text-primary">
-                    {tool.name.charAt(0)}
+                  <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
+                    <tool.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div className="flex items-center gap-2">
                     {tool.required && (

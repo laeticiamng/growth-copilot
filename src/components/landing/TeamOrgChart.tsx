@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Bot, Brain, Search, FileText, BarChart3, Megaphone, Shield, Zap, PenTool, Target, Share2, Music, Eye, CheckCircle, Users, Building2, Briefcase, Code, HeadphonesIcon, Database, Settings } from "lucide-react";
+import { Bot, Brain, Search, FileText, BarChart3, Megaphone, Shield, Zap, PenTool, Target, Share2, Music, Eye, CheckCircle, Users, Building2, Briefcase, Code, HeadphonesIcon, Database, Settings, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // Department data uses lang-keyed objects instead of isEn ternary
 interface Employee { name: string; role: string; description: Record<string, string>; }
@@ -116,8 +118,11 @@ export function TeamOrgChart() {
   const totalEmployees = DEPARTMENTS.reduce((sum, dept) => sum + dept.employees.length, 0);
   const totalDepartments = DEPARTMENTS.filter(d => d.id !== "direction").length;
 
+  const [showAll, setShowAll] = useState(false);
+
   const leadership = DEPARTMENTS.find(d => d.id === "direction");
   const otherDepartments = DEPARTMENTS.filter(d => d.id !== "direction");
+  const visibleDepartments = showAll ? otherDepartments : otherDepartments.slice(0, 4);
 
   return (
     <section id="services" className="py-20 px-4 bg-secondary/30">
@@ -165,8 +170,8 @@ export function TeamOrgChart() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {otherDepartments.map((dept) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {visibleDepartments.map((dept) => {
             const Icon = dept.icon;
             return (
               <Card key={dept.id} className="overflow-hidden hover:border-primary/30 transition-colors">
@@ -202,6 +207,18 @@ export function TeamOrgChart() {
             );
           })}
         </div>
+
+        {otherDepartments.length > 4 && (
+          <div className="flex justify-center mb-12">
+            <Button variant="ghost" size="lg" onClick={() => setShowAll(!showAll)} className="gap-2">
+              {showAll ? (
+                <><ChevronUp className="w-4 h-4" />{t("landing.orgChart.showLess")}</>
+              ) : (
+                <><ChevronDown className="w-4 h-4" />{t("landing.orgChart.showAll", { count: otherDepartments.length - 4 })}</>
+              )}
+            </Button>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           {[
