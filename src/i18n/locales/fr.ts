@@ -181,6 +181,8 @@ export const fr = {
       step2Desc: "Audit technique, recommandations et opportunités sans créer de compte",
       step3Title: "Connectez vos comptes",
       step3Desc: "Débloquez Analytics, Ads et données avancées en 1 clic",
+      step4Title: "Pilotez votre croissance",
+      step4Desc: "Reporting automatique, recommandations IA et amélioration continue",
       instantTitle: "Analyse instantanée (sans compte)",
       noAccountNeeded: "Aucun compte requis",
       oauthTitle: "Données avancées (connexion 1 clic)",
