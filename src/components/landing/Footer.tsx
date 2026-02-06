@@ -14,8 +14,8 @@ export function Footer() {
       { label: t("landing.footer.integrations"), href: "#tools" },
     ],
     [t("landing.footer.resources")]: [
-      { label: t("landing.footer.documentation"), href: "/dashboard/guide" },
-      { label: t("landing.footer.status"), href: "/dashboard/status" },
+      { label: t("landing.footer.documentation"), href: "/about" },
+      { label: t("landing.footer.status"), href: "/contact" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
     ],
     [t("landing.footer.company")]: [

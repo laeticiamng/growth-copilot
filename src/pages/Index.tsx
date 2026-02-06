@@ -30,11 +30,6 @@ const Index = () => {
       "priceCurrency": "EUR",
       "description": t("pages.index.trialOffer"),
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "127",
-    },
     "provider": {
       "@type": "Organization",
       "name": "Growth OS",

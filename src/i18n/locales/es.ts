@@ -25,6 +25,7 @@ export const es = {
     markAllRead: "Marcar todo leído",
     noNotifications: "Sin notificaciones",
     comingSoon: "¡Próximamente!",
+    frenchOnly: "Este documento solo está disponible en francés",
   },
 
   // Navigation
