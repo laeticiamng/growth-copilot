@@ -277,18 +277,25 @@ export const SERVICE_ROUTES: Record<string, string[]> = {
     '/dashboard/cro',
     '/dashboard/brand-kit',
     '/dashboard/media',
-    '/dashboard/competitors'
+    '/dashboard/media/kpis',
+    '/dashboard/media/creatives',
+    '/dashboard/media/ads-factory',
+    '/dashboard/media/launch',
+    '/dashboard/competitors',
+    '/dashboard/cms'
   ],
   'sales': [
     '/dashboard/lifecycle',
     '/dashboard/offers'
   ],
   'finance': [
-    '/dashboard/reports'
+    '/dashboard/reports',
+    '/dashboard/roi'
   ],
   'security': [
     '/dashboard/diagnostics',
-    '/dashboard/ops'
+    '/dashboard/ops',
+    '/dashboard/access-review'
   ],
   'product': [],
   'engineering': [],
@@ -301,7 +308,8 @@ export const SERVICE_ROUTES: Record<string, string[]> = {
   'governance': [
     '/dashboard/integrations',
     '/dashboard/automations',
-    '/dashboard/agency'
+    '/dashboard/agency',
+    '/dashboard/ai-costs'
   ],
   'hr': [
     '/dashboard/hr'
