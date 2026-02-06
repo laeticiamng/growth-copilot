@@ -71,6 +71,21 @@ export function Footer() {
                       >
                         {link.label}
                       </Link>
+                    ) : link.href.startsWith('#') ? (
+                      <a
+                        href={link.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const targetId = link.href.replace('#', '');
+                          const element = document.getElementById(targetId);
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                        }}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      >
+                        {link.label}
+                      </a>
                     ) : (
                       <a
                         href={link.href}

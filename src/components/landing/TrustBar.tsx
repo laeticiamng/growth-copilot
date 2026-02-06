@@ -3,15 +3,19 @@
  * Displayed under the hero section
  */
 import { Shield, Lock, Flag, Award } from "lucide-react";
-
-const TRUST_ITEMS = [
-  { icon: Shield, label: "Conforme RGPD" },
-  { icon: Flag, label: "Données hébergées en Europe" },
-  { icon: Lock, label: "Chiffrement AES-256" },
-  { icon: Award, label: "SOC 2 en cours" },
-];
+import { useTranslation } from "react-i18next";
 
 export function TrustBar() {
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === "en";
+
+  const TRUST_ITEMS = [
+    { icon: Shield, label: isEn ? "GDPR Compliant" : "Conforme RGPD" },
+    { icon: Flag, label: isEn ? "EU-hosted data" : "Données hébergées en Europe" },
+    { icon: Lock, label: isEn ? "AES-256 encryption" : "Chiffrement AES-256" },
+    { icon: Award, label: isEn ? "SOC 2 in progress" : "SOC 2 en cours" },
+  ];
+
   return (
     <section className="py-6 border-b border-border/50 bg-card/30">
       <div className="container mx-auto px-4">
