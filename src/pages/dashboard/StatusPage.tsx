@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,29 +27,29 @@ interface ModuleStatus {
   employees?: number;
 }
 
-const STATUS_CONFIG = {
+const getStatusConfig = (t: (key: string) => string) => ({
   complete: { 
     icon: CheckCircle2, 
     color: "text-green-500", 
     bg: "bg-green-500/10",
-    label: "Complet",
+    label: t("statusPage.complete"),
     emoji: "✅"
   },
   partial: { 
     icon: AlertCircle, 
     color: "text-yellow-500", 
     bg: "bg-yellow-500/10",
-    label: "En cours",
+    label: t("statusPage.inProgress"),
     emoji: "🟡"
   },
   planned: { 
     icon: Clock, 
     color: "text-muted-foreground", 
     bg: "bg-muted",
-    label: "Planifié",
+    label: t("statusPage.planned"),
     emoji: "🔴"
   },
-};
+});
 
 // Core OS Features
 const CORE_OS: ModuleStatus = {
@@ -250,8 +251,8 @@ const INTEGRATIONS: FeatureStatus[] = [
   { name: "Slack", status: "planned", details: "Notifications, commands" },
 ];
 
-function StatusBadge({ status }: { status: Status }) {
-  const config = STATUS_CONFIG[status];
+function StatusBadge({ status, statusConfig }: { status: Status; statusConfig: ReturnType<typeof getStatusConfig> }) {
+  const config = statusConfig[status];
   return (
     <Badge variant="outline" className={`${config.bg} ${config.color} border-0`}>
       <config.icon className="w-3 h-3 mr-1" />
@@ -260,7 +261,8 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-function ModuleCard({ module }: { module: ModuleStatus }) {
+function ModuleCard({ module, statusConfig }: { module: ModuleStatus; statusConfig: ReturnType<typeof getStatusConfig> }) {
+  const { t } = useTranslation();
   const Icon = module.icon;
   const completedCount = module.features.filter(f => f.status === "complete").length;
   const totalCount = module.features.length;
@@ -269,10 +271,10 @@ function ModuleCard({ module }: { module: ModuleStatus }) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${STATUS_CONFIG[module.status].bg}`}>
-              <Icon className={`w-5 h-5 ${STATUS_CONFIG[module.status].color}`} />
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${statusConfig[module.status].bg}`}>
+                <Icon className={`w-5 h-5 ${statusConfig[module.status].color}`} />
             </div>
             <div>
               <CardTitle className="text-base flex items-center gap-2">
@@ -285,18 +287,18 @@ function ModuleCard({ module }: { module: ModuleStatus }) {
                 )}
               </CardTitle>
               <CardDescription className="text-xs">
-                {completedCount}/{totalCount} fonctionnalités ({percentage}%)
+                {completedCount}/{totalCount} {t("statusPage.features")} ({percentage}%)
               </CardDescription>
             </div>
           </div>
-          <StatusBadge status={module.status} />
+          <StatusBadge status={module.status} statusConfig={statusConfig} />
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           {module.features.map((feature) => (
             <div key={feature.name} className="flex items-start gap-2 text-sm">
-              <span className="mt-0.5">{STATUS_CONFIG[feature.status].emoji}</span>
+              <span className="mt-0.5">{statusConfig[feature.status].emoji}</span>
               <div className="flex-1">
                 <span className="font-medium">{feature.name}</span>
                 {feature.details && (
@@ -312,6 +314,8 @@ function ModuleCard({ module }: { module: ModuleStatus }) {
 }
 
 export default function StatusPage() {
+  const { t } = useTranslation();
+  const STATUS_CONFIG = getStatusConfig(t);
   // Calculate overall stats
   const allFeatures = [
     ...CORE_OS.features,
@@ -329,11 +333,9 @@ export default function StatusPage() {
       <header>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
           <Eye className="w-8 h-8 text-primary" />
-          What's Implemented
+          {t("statusPage.title")}
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Transparence complète sur l'état de la plateforme Growth OS.
-        </p>
+        <p className="text-muted-foreground mt-1">{t("statusPage.subtitle")}</p>
       </header>
 
       {/* Summary Stats */}
@@ -341,25 +343,25 @@ export default function StatusPage() {
         <Card className="bg-green-500/10 border-green-500/20">
           <CardContent className="pt-6 text-center">
             <div className="text-3xl font-bold text-green-500">{completeCount}</div>
-            <p className="text-sm text-muted-foreground">✅ Complet</p>
+            <p className="text-sm text-muted-foreground">✅ {t("statusPage.complete")}</p>
           </CardContent>
         </Card>
         <Card className="bg-yellow-500/10 border-yellow-500/20">
           <CardContent className="pt-6 text-center">
             <div className="text-3xl font-bold text-yellow-500">{partialCount}</div>
-            <p className="text-sm text-muted-foreground">🟡 En cours</p>
+            <p className="text-sm text-muted-foreground">🟡 {t("statusPage.inProgress")}</p>
           </CardContent>
         </Card>
         <Card className="bg-muted border-border">
           <CardContent className="pt-6 text-center">
             <div className="text-3xl font-bold text-muted-foreground">{plannedCount}</div>
-            <p className="text-sm text-muted-foreground">🔴 Planifié</p>
+            <p className="text-sm text-muted-foreground">🔴 {t("statusPage.planned")}</p>
           </CardContent>
         </Card>
         <Card className="bg-primary/10 border-primary/20">
           <CardContent className="pt-6 text-center">
             <div className="text-3xl font-bold text-primary">{totalEmployees}</div>
-            <p className="text-sm text-muted-foreground">👤 Employés IA</p>
+            <p className="text-sm text-muted-foreground">👤 {t("statusPage.aiEmployees")}</p>
           </CardContent>
         </Card>
       </div>
@@ -367,19 +369,19 @@ export default function StatusPage() {
       {/* Tabs */}
       <Tabs defaultValue="core" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="core">Core OS</TabsTrigger>
-          <TabsTrigger value="departments">Départements ({DEPARTMENTS.length})</TabsTrigger>
-          <TabsTrigger value="integrations">Intégrations ({INTEGRATIONS.length})</TabsTrigger>
+          <TabsTrigger value="core">{t("statusPage.coreOS")}</TabsTrigger>
+          <TabsTrigger value="departments">{t("statusPage.departments")} ({DEPARTMENTS.length})</TabsTrigger>
+          <TabsTrigger value="integrations">{t("statusPage.integrationsTab")} ({INTEGRATIONS.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="core" className="space-y-6">
-          <ModuleCard module={CORE_OS} />
+          <ModuleCard module={CORE_OS} statusConfig={STATUS_CONFIG} />
         </TabsContent>
 
         <TabsContent value="departments" className="space-y-6">
           <div className="grid lg:grid-cols-2 gap-6">
             {DEPARTMENTS.map((dept) => (
-              <ModuleCard key={dept.slug} module={dept} />
+              <ModuleCard key={dept.slug} module={dept} statusConfig={STATUS_CONFIG} />
             ))}
           </div>
         </TabsContent>
@@ -389,11 +391,9 @@ export default function StatusPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="w-5 h-5" />
-                Intégrations Tierces
+                {t("statusPage.thirdPartyIntegrations")}
               </CardTitle>
-              <CardDescription>
-                Connexions aux plateformes externes pour synchronisation des données
-              </CardDescription>
+              <CardDescription>{t("statusPage.thirdPartyDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 gap-3">
@@ -420,15 +420,15 @@ export default function StatusPage() {
           <div className="flex flex-wrap gap-6 justify-center text-sm">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span><strong>Complet</strong> — Fonctionnel et testé en production</span>
+              <span><strong>{t("statusPage.complete")}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-yellow-500" />
-              <span><strong>En cours</strong> — Partiellement implémenté, améliorations prévues</span>
+              <span><strong>{t("statusPage.inProgress")}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              <span><strong>Planifié</strong> — Sur la roadmap, non encore développé</span>
+              <span><strong>{t("statusPage.planned")}</strong></span>
             </div>
           </div>
         </CardContent>

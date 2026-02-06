@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,7 @@ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function CRO() {
+  const { t } = useTranslation();
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
   const { audits, experiments, variants, loading, createExperiment, updateExperimentStatus, declareWinner, refetch } = useCRO();
@@ -59,40 +61,74 @@ export default function CRO() {
   });
   const [submitting, setSubmitting] = useState(false);
  
-   // Real-time subscription for experiments
-   const handleRealtimeUpdate = useCallback(() => {
-     refetch();
-   }, [refetch]);
- 
-   useRealtimeSubscription(
-     `cro-experiments-${currentWorkspace?.id}`,
-     {
-       table: 'experiments',
-       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
-     },
-     handleRealtimeUpdate,
-     !!currentWorkspace?.id
-   );
- 
-   useRealtimeSubscription(
-     `cro-variants-${currentWorkspace?.id}`,
-     {
-       table: 'experiment_variants',
-       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
-     },
-     handleRealtimeUpdate,
-     !!currentWorkspace?.id
-   );
+  const handleViewAudit = (auditId: string) => {
+    toast.info("Coming soon!");
+  };
 
-  // Calculate metrics from real data only
+  const handleDeclareWinner = async (experimentId: string, variantId: string) => {
+    const { error } = await declareWinner(experimentId, variantId);
+    if (error) {
+      toast.error(t("croPage.declareWinnerError"));
+    } else {
+      toast.success(t("croPage.declareWinnerSuccess"));
+    }
+  };
+
+  const handleOpenSuggestion = (suggestionId: string) => {
+    toast.info("Coming soon!");
+  };
+
+  const handleDismissSuggestion = (suggestionId: string) => {
+    toast.info("Coming soon!");
+  };
+
+  const handleCreateTaskFromSuggestion = (suggestionId: string) => {
+    toast.info("Coming soon!");
+  };
+
+  const handleCreateExperimentFromSuggestion = (suggestionId: string) => {
+    toast.info("Coming soon!");
+  };
+
+  const handleCreateAudit = () => {
+    toast.info("Coming soon!");
+  };
+
+  const handleAISuggestions = () => {
+    toast.info("Coming soon!");
+  };
+
+  const handleRealtimeUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  useRealtimeSubscription(
+    `cro-experiments-${currentWorkspace?.id}`,
+    {
+      table: 'experiments',
+      filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+    },
+    handleRealtimeUpdate,
+    !!currentWorkspace?.id
+  );
+
+  useRealtimeSubscription(
+    `cro-variants-${currentWorkspace?.id}`,
+    {
+      table: 'experiment_variants',
+      filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+    },
+    handleRealtimeUpdate,
+    !!currentWorkspace?.id
+  );
+
   const conversionMetrics = [
-    { label: "Taux de conversion", value: experiments.length > 0 ? `${(variants.reduce((a, v) => a + (v.conversion_rate || 0), 0) / Math.max(variants.length, 1)).toFixed(1)}%` : "—", change: "", trend: "up" },
-    { label: "Visiteurs", value: variants.reduce((a, v) => a + (v.visitors || 0), 0).toLocaleString() || "0", change: "", trend: "up" },
-    { label: "Conversions", value: variants.reduce((a, v) => a + (v.conversions || 0), 0).toString(), change: "", trend: "up" },
-    { label: "Tests actifs", value: experiments.filter(e => e.status === 'running').length.toString(), change: "", trend: "up" },
+    { label: t("croPage.conversionRate"), value: experiments.length > 0 ? `${(variants.reduce((a, v) => a + (v.conversion_rate || 0), 0) / Math.max(variants.length, 1)).toFixed(1)}%` : "—", change: "", trend: "up" },
+    { label: t("croPage.visitors"), value: variants.reduce((a, v) => a + (v.visitors || 0), 0).toLocaleString() || "0", change: "", trend: "up" },
+    { label: t("croPage.conversions"), value: variants.reduce((a, v) => a + (v.conversions || 0), 0).toString(), change: "", trend: "up" },
+    { label: t("croPage.activeTests"), value: experiments.filter(e => e.status === 'running').length.toString(), change: "", trend: "up" },
   ];
 
-  // Real page audits only - no demo data
   const pageAudits = audits.map(a => ({
     page: a.page_type || "Page",
     url: "/",
@@ -102,65 +138,46 @@ export default function CRO() {
     status: (a.friction_score || 50) < 40 ? "optimized" : (a.friction_score || 50) < 60 ? "in_progress" : "needs_work",
   }));
 
-  // Real experiments only - no demo data
   const displayExperiments = experiments.map(exp => {
     const expVariants = variants.filter(v => v.experiment_id === exp.id);
     const controlVariant = expVariants.find(v => v.is_control);
     const testVariant = expVariants.find(v => !v.is_control);
-    
-    // Calculate real confidence
     const confidence = controlVariant && testVariant
-      ? calculateConfidence(
-          controlVariant.visitors || 0,
-          controlVariant.conversions || 0,
-          testVariant.visitors || 0,
-          testVariant.conversions || 0
-        )
+      ? calculateConfidence(controlVariant.visitors || 0, controlVariant.conversions || 0, testVariant.visitors || 0, testVariant.conversions || 0)
       : 0;
-    
     const rateA = controlVariant?.conversion_rate || 0;
     const rateB = testVariant?.conversion_rate || 0;
     const uplift = calculateUplift(rateA, rateB);
     const recommendation = getTestRecommendation(confidence, rateA, rateB);
-    
     return {
-      id: exp.id,
-      name: exp.name,
-      page: exp.page_url || "Page",
-      status: exp.status || "draft",
-      variants: expVariants.length,
-      visitors: expVariants.reduce((a, v) => a + (v.visitors || 0), 0),
-      conversionA: rateA,
-      conversionB: rateB,
-      confidence,
-      uplift,
-      recommendation,
+      id: exp.id, name: exp.name, page: exp.page_url || "Page", status: exp.status || "draft",
+      variants: expVariants.length, visitors: expVariants.reduce((a, v) => a + (v.visitors || 0), 0),
+      conversionA: rateA, conversionB: rateB, confidence, uplift, recommendation,
       winner: exp.winner_variant_id ? "B" : undefined,
     };
   });
 
-  // CRO backlog - derived from audits recommendations (no hardcoded demo data)
   const croBacklog = audits.flatMap(a => 
     (a.recommendations as Array<{ title?: string; impact?: number; effort?: string; status?: string }> || []).map((rec, i) => ({
-      task: rec.title || `Recommandation ${i + 1}`,
+      task: rec.title || `${t("seoPage.recommendation")} ${i + 1}`,
       impact: rec.impact || 50,
-      effort: rec.effort || "Moyen",
+      effort: rec.effort || t("seoPage.medium"),
       status: rec.status || "todo",
     }))
   ).slice(0, 10);
 
   const handleCreateExperiment = async () => {
     if (!experimentForm.name) {
-      toast.error("Nom de l'expérimentation requis");
+      toast.error(t("croPage.experimentNameRequired"));
       return;
     }
     setSubmitting(true);
     const { error } = await createExperiment(experimentForm);
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de la création");
+      toast.error(t("croPage.createError"));
     } else {
-      toast.success("Expérimentation créée");
+      toast.success(t("croPage.experimentCreated"));
       setShowExperimentDialog(false);
       setExperimentForm({ name: "", hypothesis: "", page_url: "", test_type: "ab" });
     }
@@ -170,30 +187,28 @@ export default function CRO() {
     const newStatus = currentStatus === "running" ? "paused" : "running";
     const { error } = await updateExperimentStatus(experimentId, newStatus);
     if (error) {
-      toast.error("Erreur lors de la mise à jour");
+      toast.error(t("croPage.updateError"));
     } else {
-      toast.success(`Test ${newStatus === "running" ? "démarré" : "en pause"}`);
+      toast.success(newStatus === "running" ? t("croPage.testStarted") : t("croPage.testPaused"));
     }
   };
 
   if (loading) {
-    return <LoadingState message="Chargement des données CRO..." />;
+    return <LoadingState message={t("croPage.loadingCRO")} />;
   }
 
-  // Empty state - no site selected
   if (!currentSite) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">CRO Autopilot</h1>
-          <p className="text-muted-foreground">Optimisation du taux de conversion</p>
+          <h1 className="text-2xl font-bold">{t("croPage.title")}</h1>
+          <p className="text-muted-foreground">{t("croPage.subtitle")}</p>
         </div>
         <NoSiteEmptyState moduleName="CRO" icon={Target} />
       </div>
     );
   }
 
-  // Empty state - no experiments
   const hasData = experiments.length > 0 || audits.length > 0;
   if (!hasData) {
     return (
@@ -201,19 +216,19 @@ export default function CRO() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              CRO Autopilot
+              {t("croPage.title")}
               <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
             </h1>
-            <p className="text-muted-foreground">Optimisation du taux de conversion</p>
+            <p className="text-muted-foreground">{t("croPage.subtitle")}</p>
           </div>
         </div>
         <ModuleEmptyState
           icon={Target}
           moduleName="CRO"
-          description="Testez des variations de vos pages, analysez la friction utilisateur et obtenez des suggestions IA pour améliorer vos taux de conversion. Le module calcule la significativité statistique de vos tests."
-          features={["Tests A/B", "Audit de friction", "Suggestions IA", "Calcul de confiance statistique"]}
+          description={t("croPage.emptyDescription")}
+          features={[t("croPage.emptyFeature1"), t("croPage.emptyFeature2"), t("croPage.emptyFeature3"), t("croPage.emptyFeature4")]}
           primaryAction={{
-            label: "Créer un test A/B",
+            label: t("croPage.createABTest"),
             onClick: () => setShowExperimentDialog(true),
             icon: Plus,
           }}
@@ -224,31 +239,26 @@ export default function CRO() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-           <h1 className="text-2xl font-bold flex items-center gap-2">
-             CRO Autopilot
-             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
-           </h1>
-          <p className="text-muted-foreground">
-            Optimisation du taux de conversion
-          </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            {t("croPage.title")}
+            <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+          </h1>
+          <p className="text-muted-foreground">{t("croPage.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">
             <BarChart3 className="w-4 h-4 mr-2" />
-            Rapport CRO
+            {t("croPage.croReport")}
           </Button>
           <Button variant="hero" onClick={() => setShowExperimentDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau test
+            {t("croPage.newTest")}
           </Button>
         </div>
       </div>
 
-      {/* Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {conversionMetrics.map((metric, i) => (
           <Card key={i} variant="kpi">
@@ -257,7 +267,7 @@ export default function CRO() {
               <p className="text-3xl font-bold mt-1">{metric.value}</p>
               {metric.change && (
                 <p className={`text-xs mt-1 ${metric.trend === 'up' ? 'text-green-500' : 'text-destructive'}`}>
-                  {metric.change} ce mois
+                  {metric.change} {t("croPage.thisMonth")}
                 </p>
               )}
             </CardContent>
@@ -267,10 +277,10 @@ export default function CRO() {
 
       <Tabs defaultValue="experiments" className="space-y-6">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="experiments">Expérimentations</TabsTrigger>
-          <TabsTrigger value="suggestions">Suggestions IA</TabsTrigger>
-          <TabsTrigger value="audits">Audits pages</TabsTrigger>
-          <TabsTrigger value="backlog">Backlog CRO</TabsTrigger>
+          <TabsTrigger value="experiments">{t("croPage.experimentsTab")}</TabsTrigger>
+          <TabsTrigger value="suggestions">{t("croPage.suggestionsTab")}</TabsTrigger>
+          <TabsTrigger value="audits">{t("croPage.auditsTab")}</TabsTrigger>
+          <TabsTrigger value="backlog">{t("croPage.backlogTab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="experiments" className="space-y-6">
@@ -278,18 +288,18 @@ export default function CRO() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Tests A/B & Expérimentations</CardTitle>
-                  <CardDescription>Tests en cours et résultats</CardDescription>
+                  <CardTitle>{t("croPage.abTests")}</CardTitle>
+                  <CardDescription>{t("croPage.testsResults")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setShowExperimentDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Nouveau test
+                  {t("croPage.newTest")}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {displayExperiments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Aucune expérimentation. Créez votre premier test A/B.</p>
+                <p className="text-center text-muted-foreground py-8">{t("croPage.noExperiments")}</p>
               ) : (
                 displayExperiments.map((exp) => (
                   <div key={exp.id} className="p-4 rounded-lg bg-secondary/50">
@@ -297,22 +307,11 @@ export default function CRO() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{exp.name}</p>
-                          <Badge
-                            variant={
-                              exp.status === "running"
-                                ? "gradient"
-                                : exp.status === "completed"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {exp.status === "running"
-                              ? "En cours"
-                              : exp.status === "completed"
-                              ? "Terminé"
-                              : exp.status === "paused"
-                              ? "En pause"
-                              : "Brouillon"}
+                          <Badge variant={exp.status === "running" ? "gradient" : exp.status === "completed" ? "secondary" : "outline"}>
+                            {exp.status === "running" ? t("croPage.running")
+                              : exp.status === "completed" ? t("croPage.completed")
+                              : exp.status === "paused" ? t("croPage.paused")
+                              : t("croPage.draftStatus")}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{exp.page}</p>
@@ -321,15 +320,11 @@ export default function CRO() {
                         {exp.winner && (
                           <Badge variant="gradient">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Gagnant: {exp.winner}
+                            {t("croPage.winner")}: {exp.winner}
                           </Badge>
                         )}
                         {exp.status !== "completed" && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleToggleExperiment(exp.id, exp.status)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleToggleExperiment(exp.id, exp.status)}>
                             {exp.status === "running" ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                           </Button>
                         )}
@@ -338,7 +333,7 @@ export default function CRO() {
                     {exp.status !== "draft" && (
                       <div className="grid grid-cols-5 gap-4 mt-4">
                         <div>
-                          <p className="text-xs text-muted-foreground">Visiteurs</p>
+                          <p className="text-xs text-muted-foreground">{t("croPage.visitors")}</p>
                           <p className="font-medium">{exp.visitors.toLocaleString()}</p>
                         </div>
                         <div>
@@ -347,9 +342,7 @@ export default function CRO() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Conv. B</p>
-                          <p className={`font-medium ${exp.conversionB > exp.conversionA ? 'text-green-500' : ''}`}>
-                            {exp.conversionB}%
-                          </p>
+                          <p className={`font-medium ${exp.conversionB > exp.conversionA ? 'text-green-500' : ''}`}>{exp.conversionB}%</p>
                         </div>
                         <div>
                           <TooltipProvider>
@@ -357,11 +350,9 @@ export default function CRO() {
                               <TooltipTrigger asChild>
                                 <div className="cursor-help">
                                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                    Confiance <Info className="w-3 h-3" />
+                                    {t("croPage.confidence")} <Info className="w-3 h-3" />
                                   </p>
-                                  <p className={`font-medium ${exp.confidence >= 95 ? 'text-green-500' : exp.confidence >= 80 ? 'text-amber-500' : ''}`}>
-                                    {exp.confidence}%
-                                  </p>
+                                  <p className={`font-medium ${exp.confidence >= 95 ? 'text-green-500' : exp.confidence >= 80 ? 'text-amber-500' : ''}`}>{exp.confidence}%</p>
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -391,9 +382,7 @@ export default function CRO() {
           ) : (
             <Card variant="feature">
               <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground py-8">
-                  Sélectionnez un workspace pour utiliser les suggestions IA
-                </p>
+                <p className="text-center text-muted-foreground py-8">{t("croPage.selectWorkspace")}</p>
               </CardContent>
             </Card>
           )}
@@ -404,62 +393,48 @@ export default function CRO() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Audit des pages clés</CardTitle>
-                  <CardDescription>Score de friction et opportunités</CardDescription>
+                  <CardTitle>{t("croPage.keyPageAudit")}</CardTitle>
+                  <CardDescription>{t("croPage.frictionScoreOpportunities")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm">
                   <Plus className="w-4 h-4 mr-2" />
-                  Auditer une page
+                  {t("croPage.auditPage")}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {pageAudits.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Aucun audit de page. Lancez un audit pour voir les opportunités d'optimisation.</p>
+                <p className="text-center text-muted-foreground py-8">{t("croPage.noAudits")}</p>
               ) : (
                 pageAudits.map((audit, i) => (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{audit.page}</p>
-                        <Badge
-                          variant={
-                            audit.status === "optimized"
-                              ? "gradient"
-                              : audit.status === "in_progress"
-                              ? "secondary"
-                              : "destructive"
-                          }
-                        >
-                          {audit.status === "optimized"
-                            ? "Optimisé"
-                            : audit.status === "in_progress"
-                            ? "En cours"
-                            : "À améliorer"}
+                        <Badge variant={audit.status === "optimized" ? "gradient" : audit.status === "in_progress" ? "secondary" : "destructive"}>
+                          {audit.status === "optimized" ? t("croPage.optimized")
+                            : audit.status === "in_progress" ? t("croPage.inProgress")
+                            : t("croPage.needsWork")}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{audit.url}</p>
                     </div>
                     <div className="text-center">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Friction</span>
+                        <span className="text-sm text-muted-foreground">{t("croPage.friction")}</span>
                         <Progress value={100 - audit.frictionScore} className="w-20 h-2" />
                       </div>
-                      <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-primary'}`}>
-                        {audit.frictionScore}/100
-                      </p>
+                      <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-primary'}`}>{audit.frictionScore}/100</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Issues</p>
+                      <p className="text-sm text-muted-foreground">{t("croPage.issues")}</p>
                       <p className="font-medium">{audit.issues}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Opportunités</p>
+                      <p className="text-sm text-muted-foreground">{t("croPage.opportunitiesLabel")}</p>
                       <p className="font-medium text-primary">{audit.opportunities}</p>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
+                    <Button variant="ghost" size="sm"><ArrowRight className="w-4 h-4" /></Button>
                   </div>
                 ))
               )}
@@ -472,18 +447,18 @@ export default function CRO() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Backlog CRO</CardTitle>
-                  <CardDescription>Optimisations priorisées par impact</CardDescription>
+                  <CardTitle>{t("croPage.backlogTitle")}</CardTitle>
+                  <CardDescription>{t("croPage.backlogDesc")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Suggestions IA
+                  {t("croPage.aiSuggestions")}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {croBacklog.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Aucune recommandation CRO. Lancez un audit de page pour obtenir des suggestions.</p>
+                <p className="text-center text-muted-foreground py-8">{t("croPage.noBacklog")}</p>
               ) : (
                 croBacklog.map((item, i) => (
                   <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
@@ -496,9 +471,7 @@ export default function CRO() {
                         <div className="w-3 h-3 rounded-full border-2 border-muted-foreground" />
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium">{item.task}</p>
-                    </div>
+                    <div className="flex-1 min-w-0"><p className="font-medium">{item.task}</p></div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">Impact</span>
                       <Progress value={item.impact} className="w-16 h-1.5" />
@@ -513,43 +486,30 @@ export default function CRO() {
         </TabsContent>
       </Tabs>
 
-      {/* Create Experiment Dialog */}
       <Dialog open={showExperimentDialog} onOpenChange={setShowExperimentDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouvelle expérimentation</DialogTitle>
+            <DialogTitle>{t("croPage.newExperiment")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Nom du test</label>
-              <Input 
-                placeholder="Ex: Hero CTA - Couleur"
-                value={experimentForm.name}
-                onChange={(e) => setExperimentForm({ ...experimentForm, name: e.target.value })}
-              />
+              <label className="text-sm font-medium">{t("croPage.testName")}</label>
+              <Input placeholder={t("croPage.testNamePlaceholder")} value={experimentForm.name} onChange={(e) => setExperimentForm({ ...experimentForm, name: e.target.value })} />
             </div>
             <div>
-              <label className="text-sm font-medium">Hypothèse</label>
-              <Textarea 
-                placeholder="Ex: Changer la couleur du CTA en vert augmentera les conversions de 10%"
-                value={experimentForm.hypothesis}
-                onChange={(e) => setExperimentForm({ ...experimentForm, hypothesis: e.target.value })}
-              />
+              <label className="text-sm font-medium">{t("croPage.hypothesis")}</label>
+              <Textarea placeholder={t("croPage.hypothesisPlaceholder")} value={experimentForm.hypothesis} onChange={(e) => setExperimentForm({ ...experimentForm, hypothesis: e.target.value })} />
             </div>
             <div>
-              <label className="text-sm font-medium">URL de la page</label>
-              <Input 
-                placeholder="Ex: /pricing"
-                value={experimentForm.page_url}
-                onChange={(e) => setExperimentForm({ ...experimentForm, page_url: e.target.value })}
-              />
+              <label className="text-sm font-medium">{t("croPage.pageUrl")}</label>
+              <Input placeholder={t("croPage.pageUrlPlaceholder")} value={experimentForm.page_url} onChange={(e) => setExperimentForm({ ...experimentForm, page_url: e.target.value })} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowExperimentDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowExperimentDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateExperiment} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-              Créer
+              {t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -557,3 +517,4 @@ export default function CRO() {
     </div>
   );
 }
+
