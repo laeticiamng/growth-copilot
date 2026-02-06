@@ -32,26 +32,28 @@ import {
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
-const CONTRACT_STATUS_LABELS: Record<ContractStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  draft: { label: "Brouillon", variant: "secondary" },
-  pending_signature: { label: "En attente de signature", variant: "outline" },
-  active: { label: "Actif", variant: "default" },
-  expired: { label: "Expiré", variant: "destructive" },
-  terminated: { label: "Résilié", variant: "destructive" },
-};
+const getContractStatusLabels = (t: any): Record<ContractStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> => ({
+  draft: { label: t("legalPage.statusDraft"), variant: "secondary" },
+  pending_signature: { label: t("legalPage.statusPending"), variant: "outline" },
+  active: { label: t("legalPage.statusActive"), variant: "default" },
+  expired: { label: t("legalPage.statusExpired"), variant: "destructive" },
+  terminated: { label: t("legalPage.statusTerminated"), variant: "destructive" },
+});
 
-const CONTRACT_TYPES = [
-  { value: "employment", label: "Contrat de travail" },
+const getContractTypes = (t: any) => [
+  { value: "employment", label: t("legalPage.typeEmployment") },
   { value: "nda", label: "NDA" },
-  { value: "service", label: "Prestation de service" },
-  { value: "license", label: "Licence" },
-  { value: "partnership", label: "Partenariat" },
-  { value: "other", label: "Autre" },
+  { value: "service", label: t("legalPage.typeService") },
+  { value: "license", label: t("legalPage.typeLicense") },
+  { value: "partnership", label: t("legalPage.typePartnership") },
+  { value: "other", label: t("legalPage.typeOther") },
 ];
 
 export default function Legal() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
+  const CONTRACT_STATUS_LABELS = getContractStatusLabels(t);
+  const CONTRACT_TYPES = getContractTypes(t);
   const { contracts, loading: loadingContracts, stats: contractStats, expiringContracts, createContract, isCreating } = useContracts();
   const { complianceItems, gdprRequests, loading: loadingCompliance, complianceStats, gdprStats } = useCompliance();
    const { currentWorkspace } = useWorkspace();
@@ -124,9 +126,9 @@ export default function Legal() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Juridique & Conformité</h1>
+          <h1 className="text-3xl font-bold">{t("legalPage.title")}</h1>
           <p className="text-muted-foreground">
-            Gestion des contrats, conformité RGPD et obligations légales
+            {t("legalPage.subtitle")}
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

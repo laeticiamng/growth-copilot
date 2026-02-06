@@ -1,4 +1,5 @@
  import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -304,13 +305,13 @@ const Integrations = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-             Outils & Intégrations
-             <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
-           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Connectez vos comptes pour permettre aux agents d'agir sur vos ressources.
-          </p>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              {t("integrationsPage.title")}
+              <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
+            </h1>
+           <p className="text-muted-foreground text-sm sm:text-base">
+             {t("integrationsPage.subtitle")}
+           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           {connectedCount > 0 && (
