@@ -8,8 +8,7 @@ import { urlSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
 export function Hero() {
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === "en";
+  const { t } = useTranslation();
   
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -17,19 +16,16 @@ export function Hero() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Real-time URL validation
   const validateUrl = useCallback((value: string) => {
     if (!value) {
       setUrlError(null);
       setUrlValid(false);
       return false;
     }
-    
     let urlToValidate = value;
     if (!value.startsWith('http://') && !value.startsWith('https://')) {
       urlToValidate = `https://${value}`;
     }
-    
     const result = urlSchema.safeParse(urlToValidate);
     if (result.success) {
       setUrlError(null);
@@ -50,69 +46,57 @@ export function Hero() {
 
   const handleGetStarted = async () => {
     setIsLoading(true);
-    // Simulate a brief loading state for better UX feedback
     await new Promise(resolve => setTimeout(resolve, 300));
     navigate('/onboarding');
   };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-      {/* Background Effects */}
       <div className="absolute inset-0 hero-grid opacity-50" />
       <div className="absolute inset-0 radial-overlay" />
-      
-      {/* Floating orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
           <div className="fade-in-up mb-8">
             <Badge variant="agent" className="px-4 py-2 text-sm">
               <Building2 className="w-4 h-4 mr-2" />
-              {isEn ? "Your Portable Company" : "Votre Entreprise Portable"}
+              {t("landing.hero.badge")}
             </Badge>
           </div>
 
-          {/* Headline */}
           <h1 className="fade-in-up text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-balance" style={{ animationDelay: "0.1s" }}>
-            {isEn ? "The Complete" : "L'entreprise digitale"}
+            {t("landing.hero.headline1")}
             <br />
             <span className="gradient-text">
-              {isEn ? "Digital Company" : "complète"}
+              {t("landing.hero.headlineHighlight")}
             </span>
           </h1>
 
-          {/* Subheadline */}
           <p className="fade-in-up text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6" style={{ animationDelay: "0.2s" }}>
-            {isEn 
-              ? "Subscribe to the full digital enterprise or only the departments you need. Marketing, Sales, Finance, Security, and more — all with premium competence standards."
-              : "Abonnez-vous à l'entreprise digitale complète ou seulement aux départements dont vous avez besoin. Marketing, Commercial, Finance, Sécurité et plus — tous avec des standards de compétence premium."
-            }
+            {t("landing.hero.subheadline")}
           </p>
 
-          {/* Key benefits */}
           <div className="fade-in-up flex flex-wrap items-center justify-center gap-4 mb-10" style={{ animationDelay: "0.25s" }}>
             {[
-              { icon: Zap, text: isEn ? "Auto-generated briefs" : "Briefs auto-générés" },
-              { icon: CheckCircle2, text: isEn ? "Approval-driven" : "Approbations intégrées" },
-              { icon: Sparkles, text: isEn ? "Evidence-based" : "Basé sur les données" },
+              { icon: Zap, key: "landing.hero.benefitBriefs" },
+              { icon: CheckCircle2, key: "landing.hero.benefitApprovals" },
+              { icon: Sparkles, key: "landing.hero.benefitEvidence" },
             ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div key={item.key} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <item.icon className="w-4 h-4 text-primary" />
-                <span>{item.text}</span>
+                <span>{t(item.key)}</span>
               </div>
             ))}
           </div>
 
-          {/* URL Input + CTA */}
           <div className="fade-in-up max-w-xl mx-auto mb-8" style={{ animationDelay: "0.3s" }}>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
                 <input
                   type="url"
-                  placeholder={isEn ? "https://yourcompany.com" : "https://votreentreprise.com"}
+                  placeholder={t("landing.hero.urlPlaceholder")}
                   value={url}
                   onChange={handleUrlChange}
                   className={cn(
@@ -145,17 +129,16 @@ export function Hero() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    {isEn ? "Loading..." : "Chargement..."}
+                    {t("landing.hero.loading")}
                   </>
                 ) : (
                   <>
-                    {isEn ? "Get Started" : "Commencer"}
+                    {t("landing.hero.getStarted")}
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
               </Button>
             </div>
-            {/* Validation feedback */}
             <div className="h-5 mt-2">
               {urlError && (
                 <p id="url-error" className="text-sm text-destructive flex items-center justify-center gap-1">
@@ -166,13 +149,12 @@ export function Hero() {
               {urlValid && (
                 <p id="url-valid" className="text-sm text-chart-3 flex items-center justify-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  {isEn ? "Valid URL — ready to set up" : "URL valide — prêt pour la configuration"}
+                  {t("landing.hero.urlValid")}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Secondary CTA */}
           <div className="fade-in-up flex flex-wrap items-center justify-center gap-4" style={{ animationDelay: "0.4s" }}>
             <a 
               href="#pricing"
@@ -183,26 +165,25 @@ export function Hero() {
             >
               <Button variant="hero-outline">
                 <Play className="w-4 h-4 mr-2" />
-                {isEn ? "See Pricing" : "Voir les tarifs"}
+                {t("landing.hero.seePricing")}
               </Button>
             </a>
           </div>
 
-          {/* Value props */}
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
             <p className="text-sm text-muted-foreground mb-6">
-              {isEn ? "Premium competence, delivered simply" : "Compétence premium, livrée simplement"}
+              {t("landing.hero.premiumCompetence")}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
               {[
-                { value: "11", label: isEn ? "Departments" : "Départements" },
-                { value: "24/7", label: isEn ? "Automation" : "Automatisation" },
-                { value: "100%", label: isEn ? "Auditable" : "Auditable" },
-                { value: "39", label: isEn ? "AI Employees" : "Employés IA" },
+                { value: "11", key: "landing.hero.statDepartments" },
+                { value: "24/7", key: "landing.hero.statAutomation" },
+                { value: "100%", key: "landing.hero.statAuditable" },
+                { value: "39", key: "landing.hero.statAIEmployees" },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
+                <div key={stat.key} className="text-center">
                   <p className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-xs text-muted-foreground">{t(stat.key)}</p>
                 </div>
               ))}
             </div>

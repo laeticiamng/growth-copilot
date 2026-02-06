@@ -10,72 +10,14 @@ import {
 } from "lucide-react";
 
 export function HowItWorks() {
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === "en";
+  const { t } = useTranslation();
 
-  const stepsFr = [
-    {
-      number: "01",
-      icon: LinkIcon,
-      title: "Colle ton URL",
-      description: "Entre l'adresse de ton site, ton secteur, et tes objectifs. 30 secondes chrono.",
-      details: ["Détection automatique du CMS", "Analyse secteur et concurrence", "Définition des KPIs"],
-    },
-    {
-      number: "02",
-      icon: Scan,
-      title: "Audit automatique",
-      description: "Nos agents analysent technique, contenu, local, conversion, et concurrents.",
-      details: ["Crawl technique complet", "Analyse mots-clés GSC", "Scoring opportunités"],
-    },
-    {
-      number: "03",
-      icon: Bot,
-      title: "Exécution & Optimisation",
-      description: "Actions priorisées, correctifs appliqués, campagnes lancées. Tu valides, on exécute.",
-      details: ["Corrections SEO auto", "Briefs et drafts IA", "Campagnes Ads optimisées"],
-    },
-    {
-      number: "04",
-      icon: LineChart,
-      title: "Reporting & Amélioration",
-      description: "Dashboard live, alertes, rapports mensuels. On apprend, on s'améliore.",
-      details: ["KPIs temps réel", "Rapports PDF auto", "Cycle d'amélioration continue"],
-    },
+  const steps = [
+    { number: "01", icon: LinkIcon, key: "step1" },
+    { number: "02", icon: Scan, key: "step2" },
+    { number: "03", icon: Bot, key: "step3" },
+    { number: "04", icon: LineChart, key: "step4" },
   ];
-
-  const stepsEn = [
-    {
-      number: "01",
-      icon: LinkIcon,
-      title: "Paste your URL",
-      description: "Enter your site address, industry, and objectives. 30 seconds flat.",
-      details: ["Automatic CMS detection", "Industry & competition analysis", "KPI definition"],
-    },
-    {
-      number: "02",
-      icon: Scan,
-      title: "Automatic audit",
-      description: "Our agents analyze technical, content, local, conversion, and competitors.",
-      details: ["Complete technical crawl", "GSC keyword analysis", "Opportunity scoring"],
-    },
-    {
-      number: "03",
-      icon: Bot,
-      title: "Execution & Optimization",
-      description: "Prioritized actions, fixes applied, campaigns launched. You validate, we execute.",
-      details: ["Auto SEO fixes", "AI briefs and drafts", "Optimized Ads campaigns"],
-    },
-    {
-      number: "04",
-      icon: LineChart,
-      title: "Reporting & Improvement",
-      description: "Live dashboard, alerts, monthly reports. We learn, we improve.",
-      details: ["Real-time KPIs", "Auto PDF reports", "Continuous improvement cycle"],
-    },
-  ];
-
-  const steps = isEn ? stepsEn : stepsFr;
 
   return (
     <section id="how-it-works" className="py-24 relative">
@@ -114,15 +56,19 @@ export function HowItWorks() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                <p className="text-muted-foreground mb-6">{step.description}</p>
+                <h3 className="text-xl font-semibold mb-3">
+                  {t(`landing.howItWorks.${step.key}.title`)}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {t(`landing.howItWorks.${step.key}.description`)}
+                </p>
 
                 {/* Details */}
                 <ul className="space-y-2">
-                  {step.details.map((detail) => (
-                    <li key={detail} className="flex items-center gap-2 text-sm">
+                  {[1, 2, 3].map((d) => (
+                    <li key={d} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span>{detail}</span>
+                      <span>{t(`landing.howItWorks.${step.key}.detail${d}`)}</span>
                     </li>
                   ))}
                 </ul>
