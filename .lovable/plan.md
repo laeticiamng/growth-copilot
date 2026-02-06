@@ -1,239 +1,242 @@
 
 
-# Audit UX Detaille - Perspective Beta-Testeur (Round 4)
+# Audit Technique Senior Developer - Round 5
 
-## Resume de l'Audit
+## Resume Executif
 
-Suite aux corrections precedentes, j'ai parcouru l'integralite de la plateforme en simulant le parcours d'un utilisateur final non technique, de la page d'accueil jusqu'au dashboard complet. Voici les problemes identifies et les corrections a apporter.
-
----
-
-## Parcours Teste
-
-1. Page d'accueil (Landing) - Navigation, Hero, Pricing, FAQ, Footer
-2. Authentification - Connexion, Inscription, Mot de passe oublie
-3. Onboarding - Tunnel complet de creation de workspace
-4. Dashboard - Cockpit, tous les modules, parametres
-5. Pages legales - CGU, Confidentialite, A propos, Contact
-6. Responsive - Mobile et desktop
+Apres analyse approfondie du codebase (hooks, providers, layout, routing, securite, patterns), j'ai identifie **12 problemes techniques** classes par severite. Les corrections visent la stabilite, la performance et la maintenabilite.
 
 ---
 
 ## Problemes Identifies
 
-### 1. Dashboard Layout - Textes hardcodes en francais (P1)
-**Symptome:** Dans le DashboardLayout, plusieurs textes sont fixes en francais meme en mode anglais:
-- "Besoin d'aide ?" (ligne 458)
-- "Abonnement" (ligne 466)
-- "Facturation" (ligne 491)
-- Tous les labels de navigation des departements ("Operations", "Marketing", "Ventes", etc.)
+### P0 - Critiques (Bugs / Risques de crash)
 
-**Impact:** Incoherence linguistique pour les utilisateurs anglophones qui utilisent le dashboard.
+#### 1. Double OfflineBanner - Rendu en double
+**Fichiers:** `src/App.tsx` (ligne 218) + `src/components/layout/DashboardLayout.tsx` (ligne 339)
 
-**Correction:** Utiliser les cles i18n pour tous ces textes.
+Deux composants `OfflineBanner` differents sont rendus simultanement :
+- `App.tsx` importe depuis `error-helpers.tsx` (position bottom)
+- `DashboardLayout.tsx` importe depuis `offline-banner.tsx` (position top fixed z-100)
 
----
+**Impact:** Deux bannieres hors-ligne affichees en meme temps sur les pages dashboard. Duplication de listeners `online`/`offline`.
 
-### 2. DashboardHome - Textes uniquement en francais (P1)
-**Symptome:** La page cockpit principale contient de nombreux textes non traduits:
-- "Bienvenue sur Growth OS"
-- "Creez votre premier espace de travail pour commencer"
-- "Demarrer"
-- "Execution lancee avec succes"
-- "Aucun workspace selectionne"
-- "Plan hebdomadaire", "Brief executif"
-- "Votre equipe d'agents specialises travaille 24h/24"
-- "11 departements..."
-
-**Impact:** Experience incoherente pour les utilisateurs anglophones.
-
-**Correction:** Integrer i18n dans DashboardHome.tsx.
+**Correction:** Supprimer le `OfflineBanner` de `App.tsx` (le DashboardLayout gere deja les pages protegees, et les pages publiques n'ont pas besoin d'un banner offline persistant).
 
 ---
 
-### 3. Page Settings - Textes uniquement en francais (P1)
-**Symptome:** Toute la page parametres est en francais:
-- "Parametres"
-- "Gerez les parametres de votre workspace"
-- Tous les onglets et labels de formulaire
-- Messages toast
+#### 2. QueryClient sans configuration - Aucun retry/staleTime global
+**Fichier:** `src/App.tsx` (ligne 124)
 
-**Impact:** Rupture d'experience pour les utilisateurs anglophones.
+```typescript
+const queryClient = new QueryClient(); // Zero config
+```
 
-**Correction:** Integrer i18n dans Settings.tsx.
+Le QueryClient est instancie sans `defaultOptions`. Cela signifie :
+- 3 retries automatiques par defaut sur les erreurs 4xx (inclus 401/403)
+- `staleTime: 0` partout (re-fetch a chaque mount)
+- Pas de `gcTime` global
 
----
+**Impact:** Requetes inutiles, retries sur des erreurs d'auth, surcharge reseau.
 
-### 4. Page Billing - Textes uniquement en francais (P1)
-**Symptome:** La page facturation est uniquement en francais:
-- "Facturation"
-- "Gerez vos services et votre abonnement"
-- "Passez a Full Company"
-- "Departements disponibles"
-- Tous les labels et messages
-
-**Impact:** Experience utilisateur incoherente.
-
-**Correction:** Integrer i18n dans Billing.tsx.
+**Correction:** Configurer le QueryClient avec des defaults raisonnables :
+- `staleTime: 5 * 60 * 1000` (5 min)
+- `retry: (count, error) => count < 2 && !isAuthError(error)`
+- `refetchOnWindowFocus: false`
 
 ---
 
-### 5. Pages Terms et Privacy - Uniquement en francais (P2)
-**Symptome:** Les pages CGU et Politique de confidentialite sont uniquement en francais, sans option de traduction.
+#### 3. useSites - useEffect avec dependance objet (infinite loop risk)
+**Fichier:** `src/hooks/useSites.tsx` (ligne 76-78)
 
-**Impact:** Probleme legal potentiel pour les utilisateurs anglophones.
+```typescript
+useEffect(() => {
+  fetchSites();
+}, [currentWorkspace]); // Object reference changes on every render
+```
 
-**Correction:** Ajouter une version anglaise des documents legaux ou au minimum un selecteur de langue sur ces pages.
+`currentWorkspace` est un objet. Sa reference change a chaque re-render du provider parent, causant potentiellement des re-fetches en cascade.
 
----
+**Impact:** Requetes en boucle, latence, surcharge API.
 
-### 6. Navigation items du dashboard - Labels hardcodes (P1)
-**Symptome:** Dans DashboardLayout, les labels de navigation des departements sont hardcodes:
-- "Operations", "Marketing", "Ventes", "Data & Analytics", "Ressources & RH", "Gouvernance", "Conformite RGPD", "Configuration"
-- Descriptions: "Reunions, approbations, historique", etc.
-
-**Impact:** Navigation inconstante selon la langue.
-
-**Correction:** Utiliser des cles de traduction pour tous les labels de navigation.
+**Correction:** Utiliser `currentWorkspace?.id` comme dependance.
 
 ---
 
-### 7. Onboarding Page Dashboard - Differente de Onboarding.tsx (P2)
-**Symptome:** Il existe deux pages d'onboarding:
-- `/onboarding` (src/pages/Onboarding.tsx) - Tunnel complet
-- `/dashboard/guide` (src/pages/dashboard/Onboarding.tsx) - Guide de demarrage
+#### 4. useRealtimeSubscription - Instabilite du callback dans les deps
+**Fichier:** `src/hooks/useRealtimeSubscription.tsx` (ligne 42)
 
-Ces deux pages ont des styles et traductions differents, creant une confusion.
+```typescript
+const subscribe = useCallback(() => { ... }, [channelName, config, onPayload, enabled]);
+```
 
-**Impact:** Confusion utilisateur, incoherence visuelle.
+`config` (objet) et `onPayload` (callback) changent a chaque render de l'appelant, causant des subscribe/unsubscribe en boucle du channel Realtime.
 
-**Correction:** Harmoniser les deux pages ou clarifier leur role respectif.
+**Impact:** Connexions WebSocket instables, messages perdus, memory leaks.
 
----
-
-### 8. BillingOverview Component - A verifier (P2)
-**Symptome:** Le composant BillingOverview est importe mais non visible dans le code examine. Il pourrait contenir des textes non traduits.
-
-**Impact:** Potentiels textes non traduits.
-
-**Correction:** Verifier et traduire BillingOverview.tsx.
+**Correction:** Utiliser `useRef` pour `onPayload` et serialiser `config` pour la stabilite des deps.
 
 ---
 
-### 9. Messages toast et erreurs - Partiellement traduits (P1)
-**Symptome:** Les messages toast sont partiellement traduits dans certains composants:
-- Settings.tsx: "Informations mises a jour", "Erreur lors de la sauvegarde"
-- Billing.tsx: "Tous les services sont inclus dans Full Company"
-- DashboardHome.tsx: "Execution lancee avec succes"
+### P1 - Importants (Performance / DX)
 
-**Impact:** Experience utilisateur incoherente.
+#### 5. DashboardLayout - advancedDepartments recalcule sans deps stables
+**Fichier:** `src/components/layout/DashboardLayout.tsx` (lignes 210-211, 244, 262)
 
-**Correction:** Centraliser et traduire tous les messages toast.
+`useMemo` sur `filteredMainItems` a `[hasService]` comme dep, mais `hasService` est un `useCallback` qui depend de `enabledSlugs` (un `Set` recree a chaque render dans `useServices`).
+
+**Impact:** Le memo est invalide a chaque render, annulant son benefice.
+
+**Correction:** Stabiliser `enabledSlugs` dans `useServices` avec `useMemo` sur les IDs.
 
 ---
 
-### 10. Composants cockpit - Textes en francais (P1)
-**Symptome:** Les composants du cockpit (WelcomeCard, DailyBriefing, DepartmentSemaphores, etc.) contiennent probablement des textes en francais.
+#### 6. useWorkspace - eslint-disable sur les deps de useEffect
+**Fichier:** `src/hooks/useWorkspace.tsx` (lignes 63-66)
 
-**Impact:** Incoherence linguistique dans la page principale.
+```typescript
+useEffect(() => {
+  fetchWorkspaces();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [user?.id]);
+```
 
-**Correction:** Auditer et traduire tous les composants du repertoire cockpit.
+`fetchWorkspaces` n'est pas dans les deps et n'est pas wrappee dans `useCallback`. Si `fetchWorkspaces` capture des closures stales, les donnees affichees seront incorrectes.
+
+**Impact:** Donnees potentiellement stale apres changement de workspace.
+
+**Correction:** Wrapper `fetchWorkspaces` dans `useCallback` avec les bonnes deps, supprimer le `eslint-disable`.
+
+---
+
+#### 7. useSessionExpiry - Textes toast hardcodes en francais
+**Fichier:** `src/hooks/useSessionExpiry.tsx` (lignes 36-38, 52-54)
+
+Les messages "Session expiree" et "Session expire bientot" sont hardcodes en francais, sans passer par i18n.
+
+**Impact:** Incoherence linguistique en mode anglais.
+
+**Correction:** Passer les textes via i18n dans le composant appelant ou ajouter `useTranslation` au hook.
+
+---
+
+#### 8. ErrorBoundary et error-helpers - Textes non traduits
+**Fichiers:** `src/components/ErrorBoundary.tsx`, `src/components/ui/error-helpers.tsx`
+
+Tous les textes sont en francais uniquement :
+- "Une erreur inattendue s'est produite"
+- "Recharger la page"
+- "Hors ligne"
+- "Reessayer"
+
+**Impact:** Experience cassee pour les utilisateurs anglophones en cas d'erreur.
+
+**Correction:** Integrer i18n. Note : le `ErrorBoundary` est un class component, donc il faut soit wrapper les textes dans un composant fonctionnel interne, soit utiliser `i18next.t()` directement.
+
+---
+
+### P2 - Normal (Qualite de code / Maintenabilite)
+
+#### 9. Deux implementations OfflineBanner en parallele
+**Fichiers:** `src/components/ui/error-helpers.tsx` et `src/components/ui/offline-banner.tsx`
+
+Deux fichiers exportent un composant `OfflineBanner` avec des implementations differentes (positions, styles, hooks utilises). C'est du code mort / duplique.
+
+**Correction:** Supprimer `error-helpers.tsx::OfflineBanner` ou unifier les deux dans un seul fichier. Garder `offline-banner.tsx` comme source unique.
+
+---
+
+#### 10. useGenericCRUD - Type safety contournee avec `as unknown as`
+**Fichier:** `src/hooks/useGenericCRUD.tsx` (lignes 186-188, 206-208, 226-228)
+
+Les operations `insert`, `update`, `delete` sont castees avec `as unknown as { insert: ... }`, contournant completement le type system de Supabase.
+
+**Impact:** Aucune detection d'erreur de typage a la compilation, bugs silencieux possibles.
+
+**Correction:** Utiliser des generics corrects avec `Database['public']['Tables'][T]['Insert']` etc, ou au minimum documenter les raisons du contournement.
+
+---
+
+#### 11. DemoModeProvider non utilise dans App.tsx
+**Fichier:** `src/hooks/useDemoMode.tsx`
+
+Le `DemoModeProvider` est defini mais n'est pas inclus dans l'arbre de providers dans `App.tsx`. Tout appel a `useDemoMode()` plantera avec "must be used within a DemoModeProvider".
+
+**Impact:** Crash si un composant utilise `useDemoMode()`.
+
+**Correction:** Soit ajouter le provider dans `App.tsx`, soit verifier qu'aucun composant ne l'appelle (et le supprimer si inutile).
+
+---
+
+#### 12. RLS Policy `USING (true)` detectee par le linter Supabase
+**Source:** Supabase linter
+
+Une politique RLS utilise `USING (true)` sur une operation INSERT/UPDATE/DELETE, ce qui rend la table accessible a tout utilisateur authentifie.
+
+**Impact:** Risque de securite - donnees accessibles sans filtre workspace.
+
+**Correction:** Auditer la politique concernee et remplacer par un filtre `workspace_id` ou role-based.
 
 ---
 
 ## Corrections Techniques a Implementer
 
-| Fichier | Correction | Priorite |
-|---------|-----------|----------|
-| `src/components/layout/DashboardLayout.tsx` | Integrer i18n pour navigation + textes fixes | P1 |
-| `src/pages/dashboard/DashboardHome.tsx` | Integrer i18n complet | P1 |
-| `src/pages/dashboard/Settings.tsx` | Integrer i18n complet | P1 |
-| `src/pages/dashboard/Billing.tsx` | Integrer i18n complet | P1 |
-| `src/components/cockpit/*.tsx` | Auditer et traduire tous les composants | P1 |
-| `src/pages/Terms.tsx` | Ajouter version EN ou note linguistique | P2 |
-| `src/pages/Privacy.tsx` | Ajouter version EN ou note linguistique | P2 |
-| `src/i18n/locales/en.ts` | Ajouter cles dashboard manquantes | P1 |
-| `src/i18n/locales/fr.ts` | Ajouter cles dashboard manquantes | P1 |
+| # | Fichier | Correction | Priorite |
+|---|---------|-----------|----------|
+| 1 | `src/App.tsx` | Supprimer `OfflineBanner` import et rendu | P0 |
+| 2 | `src/App.tsx` | Configurer `QueryClient` avec defaultOptions | P0 |
+| 3 | `src/hooks/useSites.tsx` | Changer dep `currentWorkspace` en `currentWorkspace?.id` | P0 |
+| 4 | `src/hooks/useRealtimeSubscription.tsx` | Stabiliser deps avec useRef pour callback | P0 |
+| 5 | `src/hooks/useServices.tsx` | Stabiliser `enabledSlugs` avec useMemo | P1 |
+| 6 | `src/hooks/useWorkspace.tsx` | Wrapper fetchWorkspaces dans useCallback | P1 |
+| 7 | `src/hooks/useSessionExpiry.tsx` | Ajouter i18n pour les messages toast | P1 |
+| 8 | `src/components/ErrorBoundary.tsx` + `error-helpers.tsx` | Integrer i18n | P1 |
+| 9 | `src/components/ui/error-helpers.tsx` | Supprimer OfflineBanner duplique | P2 |
+| 10 | `src/hooks/useGenericCRUD.tsx` | Documenter/ameliorer les type casts | P2 |
+| 11 | `src/App.tsx` ou `src/hooks/useDemoMode.tsx` | Ajouter provider ou nettoyer code mort | P2 |
+| 12 | Database RLS | Auditer et corriger la politique permissive | P2 |
 
 ---
 
-## Nouvelles Cles i18n a Ajouter
+## Details d'Implementation
 
+### QueryClient Configuration (P0)
 ```text
-dashboard:
-  cockpit: "Cockpit"
-  myTeam: "My AI Team" / "Mon equipe IA"
-  operations: "Operations"
-  operationsDesc: "Meetings, approvals, history"
-  marketing: "Marketing"
-  marketingDesc: "SEO, content, social, ads"
-  sales: "Sales"
-  salesDesc: "Pipeline, offers, lifecycle"
-  dataAnalytics: "Data & Analytics"
-  dataAnalyticsDesc: "CMS, assets, KPIs"
-  resources: "Resources & HR"
-  resourcesDesc: "Teams, HR, legal"
-  governance: "Governance"
-  governanceDesc: "Audit, compliance, security"
-  compliance: "GDPR Compliance"
-  complianceDesc: "Data protection, export"
-  configuration: "Configuration"
-  configurationDesc: "Sites, integrations, billing"
-  needHelp: "Need help?"
-  subscription: "Subscription"
-  billing: "Billing"
-  welcome: "Welcome to Growth OS"
-  createFirst: "Create your first workspace to get started"
-  start: "Start"
-  noWorkspace: "No workspace selected"
-  runSuccess: "Run launched successfully"
-  weeklyPlan: "Weekly plan"
-  execBrief: "Executive brief"
-  // ... etc
+new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: (failureCount, error) => {
+        if (error?.message?.includes('401') || error?.message?.includes('403')) return false;
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+```
+
+### useRealtimeSubscription Fix (P0)
+Utiliser `useRef` pour le callback `onPayload` afin d'eviter les re-subscriptions :
+```text
+const onPayloadRef = useRef(onPayload);
+onPayloadRef.current = onPayload;
+// Dans subscribe: onPayloadRef.current(payload)
+```
+
+### ErrorBoundary i18n (P1)
+Le class component ne peut pas utiliser `useTranslation`. Solution: importer `i18next` directement :
+```text
+import i18next from 'i18next';
+// Dans render: i18next.t('errorBoundary.title')
 ```
 
 ---
 
-## Priorites d'Implementation
+## Resume
 
-1. **P1 (Critique):** DashboardLayout + DashboardHome + Settings + Billing i18n
-2. **P1 (Important):** Composants cockpit i18n
-3. **P2 (Normal):** Pages legales bilingues
-4. **P3 (Nice-to-have):** Harmonisation des deux pages onboarding
-
----
-
-## Resume des Corrections
-
-- 10 problemes identifies
-- ~15 fichiers a modifier
-- Focus principal: Dashboard i18n complet
-- ~50+ nouvelles cles de traduction a ajouter
-- Impact: Experience utilisateur coherente EN/FR
-
----
-
-## Approche d'Implementation
-
-### Phase 1: Infrastructure i18n Dashboard
-1. Ajouter toutes les cles manquantes dans en.ts et fr.ts
-2. Creer une section `dashboard` dans les fichiers de traduction
-
-### Phase 2: DashboardLayout
-1. Importer useTranslation
-2. Remplacer tous les textes hardcodes par des cles t()
-3. Traduire les labels de navigation
-
-### Phase 3: Pages Dashboard
-1. DashboardHome.tsx - i18n complet
-2. Settings.tsx - i18n complet
-3. Billing.tsx - i18n complet
-
-### Phase 4: Composants Cockpit
-1. Auditer chaque composant
-2. Integrer i18n la ou necessaire
-
-### Phase 5: Pages Legales (optionnel)
-1. Ajouter un toggle de langue sur Terms et Privacy
-2. Ou ajouter une note indiquant que le document est en francais
+- 12 problemes identifies (4 P0, 4 P1, 4 P2)
+- 10 fichiers a modifier
+- Focus principal: stabilite React (deps, memoization), performance (QueryClient), coherence (OfflineBanner duplique)
+- 1 audit RLS a effectuer
 
