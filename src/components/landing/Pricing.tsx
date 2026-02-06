@@ -8,29 +8,38 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import type { TFunction } from "i18next";
 
-const SERVICE_MODULES = [
-  { id: "marketing", name: "Marketing", icon: TrendingUp, price: "1 900", color: "text-blue-500", employees: 5, roles: ["Directeur Marketing IA", "SEO Strategist", "Content Manager", "Ads Optimizer", "Social Media Manager"] },
-  { id: "sales", name: "Commercial", icon: Briefcase, price: "1 900", color: "text-green-500", employees: 4, roles: ["Directeur Commercial IA", "Lead Qualifier", "Sales Closer", "Account Manager"] },
-  { id: "finance", name: "Finance", icon: BarChart3, price: "1 900", color: "text-yellow-500", employees: 3, roles: ["DAF IA", "Comptable Analytique", "Contrôleur de Gestion"] },
-  { id: "security", name: "Sécurité", icon: Shield, price: "1 900", color: "text-red-500", employees: 3, roles: ["RSSI IA", "Compliance Officer", "Auditeur Sécurité"] },
-  { id: "product", name: "Produit", icon: Puzzle, price: "1 900", color: "text-purple-500", employees: 4, roles: ["CPO IA", "Product Manager", "UX Researcher", "Product Analyst"] },
-  { id: "engineering", name: "Ingénierie", icon: Code, price: "1 900", color: "text-orange-500", employees: 5, roles: ["CTO IA", "Lead Developer", "DevOps Engineer", "QA Specialist", "Technical Writer"] },
-  { id: "data", name: "Data", icon: BarChart3, price: "1 900", color: "text-cyan-500", employees: 4, roles: ["CDO IA", "Data Engineer", "Data Analyst", "ML Engineer"] },
-  { id: "support", name: "Support", icon: HeadphonesIcon, price: "1 900", color: "text-pink-500", employees: 3, roles: ["Head of Support IA", "Customer Success Manager", "Technical Support"] },
-  { id: "governance", name: "Gouvernance", icon: Settings, price: "1 900", color: "text-gray-500", employees: 3, roles: ["Chief of Staff IA", "Project Manager", "Operations Analyst"] },
-  { id: "hr", name: "RH", icon: Users, price: "1 900", color: "text-indigo-500", employees: 2, roles: ["DRH IA", "Talent Manager"] },
-  { id: "legal", name: "Juridique", icon: Shield, price: "1 900", color: "text-slate-500", employees: 1, roles: ["Directeur Juridique IA"] },
-];
+const MODULE_META = [
+  { id: "marketing", icon: TrendingUp, price: "1 900", color: "text-blue-500", employees: 5, roleKeys: ["marketingDirector", "seoStrategist", "contentManager", "adsOptimizer", "socialMediaManager"] },
+  { id: "sales", icon: Briefcase, price: "1 900", color: "text-green-500", employees: 4, roleKeys: ["salesDirector", "leadQualifier", "salesCloser", "accountManager"] },
+  { id: "finance", icon: BarChart3, price: "1 900", color: "text-yellow-500", employees: 3, roleKeys: ["cfo", "analyticalAccountant", "managementController"] },
+  { id: "security", icon: Shield, price: "1 900", color: "text-red-500", employees: 3, roleKeys: ["ciso", "complianceOfficer", "securityAuditor"] },
+  { id: "product", icon: Puzzle, price: "1 900", color: "text-purple-500", employees: 4, roleKeys: ["cpo", "productManager", "uxResearcher", "productAnalyst"] },
+  { id: "engineering", icon: Code, price: "1 900", color: "text-orange-500", employees: 5, roleKeys: ["cto", "leadDeveloper", "devopsEngineer", "qaSpecialist", "technicalWriter"] },
+  { id: "data", icon: BarChart3, price: "1 900", color: "text-cyan-500", employees: 4, roleKeys: ["cdo", "dataEngineer", "dataAnalyst", "mlEngineer"] },
+  { id: "support", icon: HeadphonesIcon, price: "1 900", color: "text-pink-500", employees: 3, roleKeys: ["headOfSupport", "customerSuccessManager", "technicalSupport"] },
+  { id: "governance", icon: Settings, price: "1 900", color: "text-gray-500", employees: 3, roleKeys: ["chiefOfStaff", "projectManager", "operationsAnalyst"] },
+  { id: "hr", icon: Users, price: "1 900", color: "text-indigo-500", employees: 2, roleKeys: ["hrDirector", "talentManager"] },
+  { id: "legal", icon: Shield, price: "1 900", color: "text-slate-500", employees: 1, roleKeys: ["legalDirector"] },
+] as const;
 
-const DEPT_EMPLOYEES = SERVICE_MODULES.reduce((sum, s) => sum + s.employees, 0);
+function getServiceModules(t: TFunction) {
+  return MODULE_META.map((m) => ({
+    ...m,
+    name: t(`landing.pricing.modules.${m.id}`),
+    roles: m.roleKeys.map((k) => t(`landing.pricing.modules.${k}`)),
+  }));
+}
+
+const DEPT_EMPLOYEES = MODULE_META.reduce((sum, s) => sum + s.employees, 0);
 const TOTAL_EMPLOYEES = DEPT_EMPLOYEES + 2;
-const TOTAL_DEPARTMENTS = SERVICE_MODULES.length;
+const TOTAL_DEPARTMENTS = MODULE_META.length;
 const TOTAL_SEPARATE_PRICE = TOTAL_DEPARTMENTS * 1900;
 
 export function Pricing() {
   const { t } = useTranslation();
-
+  const serviceModules = getServiceModules(t);
   return (
     <section id="pricing" className="py-24 bg-secondary/30 relative scroll-mt-20">
       <div className="container mx-auto px-4">
@@ -105,7 +114,7 @@ export function Pricing() {
                 {t("landing.pricing.fullCompanySavings", { amount: (TOTAL_SEPARATE_PRICE - 9000).toLocaleString() })}
               </p>
               <div className="grid grid-cols-3 gap-2 mb-6">
-                {SERVICE_MODULES.map((s) => {
+                {serviceModules.map((s) => {
                   const Icon = s.icon;
                   return (
                     <div key={s.id} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
@@ -147,7 +156,7 @@ export function Pricing() {
               </div>
               <p className="text-sm text-muted-foreground mb-6">{t("landing.pricing.aLaCarteNote")}</p>
               <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2">
-                {SERVICE_MODULES.map((s) => {
+                {serviceModules.map((s) => {
                   const Icon = s.icon;
                   return (
                     <div key={s.id} className="group p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-left">
