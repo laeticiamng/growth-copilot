@@ -22,7 +22,7 @@ const MODULE_META = [
   { id: "governance", icon: Settings, price: "1 900", color: "text-gray-500", employees: 3, roleKeys: ["chiefOfStaff", "projectManager", "operationsAnalyst"] },
   { id: "hr", icon: Users, price: "1 900", color: "text-indigo-500", employees: 2, roleKeys: ["hrDirector", "talentManager"] },
   { id: "legal", icon: Shield, price: "1 900", color: "text-slate-500", employees: 1, roleKeys: ["legalDirector"] },
-] as const;
+] as const; // i18n-ready
 
 function getServiceModules(t: TFunction) {
   return MODULE_META.map((m) => ({
