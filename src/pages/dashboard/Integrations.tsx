@@ -190,6 +190,7 @@ const categoryConfig: Record<string, { label: string; color: string; icon: React
 };
 
 const Integrations = () => {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [activeTab, setActiveTab] = useState("overview");
