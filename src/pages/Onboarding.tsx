@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteAnalysisPreview, type SiteAnalysis } from "@/components/onboarding/SiteAnalysisPreview";
 
 type OnboardingStep = "url" | "plan" | "services" | "objectives" | "payment" | "summary";
 type PlanType = "starter" | "full" | "alacarte";
@@ -96,6 +97,35 @@ export default function Onboarding() {
   const [urlTouched, setUrlTouched] = useState(false);
   const [detectedInfo, setDetectedInfo] = useState<{ name: string } | null>(null);
   const [useTrial, setUseTrial] = useState(false);
+  const [siteAnalysis, setSiteAnalysis] = useState<SiteAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisTriggered, setAnalysisTriggered] = useState(false);
+
+  const triggerSiteAnalysis = useCallback(async (url: string) => {
+    if (isAnalyzing || analysisTriggered) return;
+    setIsAnalyzing(true);
+    setAnalysisTriggered(true);
+    try {
+      const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
+      const { data, error } = await supabase.functions.invoke("site-analyze", {
+        body: { url: formattedUrl },
+      });
+      if (!error && data?.success && data?.analysis) {
+        setSiteAnalysis(data.analysis);
+        // Auto-fill site name from page title if available
+        if (data.analysis.title && !siteName) {
+          const cleanTitle = data.analysis.title.split(/[|\-–—]/)[0].trim();
+          if (cleanTitle.length > 2 && cleanTitle.length < 60) {
+            setSiteName(cleanTitle);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Site analysis failed:", e);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [isAnalyzing, analysisTriggered, siteName]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -117,8 +147,15 @@ export default function Onboarding() {
       const name = extractDomainName(siteUrl);
       setDetectedInfo({ name });
       if (!siteName) setSiteName(name);
+      // Auto-trigger analysis after 1s debounce
+      if (!analysisTriggered) {
+        const timer = setTimeout(() => triggerSiteAnalysis(siteUrl), 1000);
+        return () => clearTimeout(timer);
+      }
     } else {
       setDetectedInfo(null);
+      setSiteAnalysis(null);
+      setAnalysisTriggered(false);
     }
   }, [siteUrl]);
 
@@ -302,6 +339,12 @@ export default function Onboarding() {
                     </div>
                   </div>
                 )}
+
+                <SiteAnalysisPreview 
+                  analysis={siteAnalysis} 
+                  isLoading={isAnalyzing} 
+                  url={siteUrl} 
+                />
 
                 <Button 
                   onClick={handleUrlNext} 

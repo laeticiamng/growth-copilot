@@ -1,60 +1,130 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Search, BarChart3, Target, MapPin, Share2, Code, type LucideIcon } from "lucide-react";
+import { 
+  Globe, Zap, Link2, ArrowRight, 
+  Search, BarChart3, Target, MapPin, Share2, Code, 
+  CheckCircle2, type LucideIcon 
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Tools() {
   const { t } = useTranslation();
 
-  const tools: { name: string; descKey: string; category: string; required: boolean; icon: LucideIcon }[] = [
-    { name: "Google Search Console", descKey: "landing.tools.gsc", category: "SEO", required: true, icon: Search },
-    { name: "Google Analytics 4", descKey: "landing.tools.ga4", category: "Analytics", required: true, icon: BarChart3 },
-    { name: "Google Ads", descKey: "landing.tools.googleAds", category: "Ads", required: false, icon: Target },
-    { name: "Google Business Profile", descKey: "landing.tools.gbp", category: "Local", required: false, icon: MapPin },
-    { name: "Meta Business Suite", descKey: "landing.tools.meta", category: "Social", required: false, icon: Share2 },
-    { name: "WordPress / Shopify", descKey: "landing.tools.cms", category: "CMS", required: false, icon: Code },
+  const steps: { titleKey: string; descKey: string; icon: LucideIcon; badge: string }[] = [
+    { titleKey: "landing.tools.step1Title", descKey: "landing.tools.step1Desc", icon: Globe, badge: "1" },
+    { titleKey: "landing.tools.step2Title", descKey: "landing.tools.step2Desc", icon: Zap, badge: "2" },
+    { titleKey: "landing.tools.step3Title", descKey: "landing.tools.step3Desc", icon: Link2, badge: "3" },
   ];
+
+  const integrations: { name: string; descKey: string; category: string; icon: LucideIcon; phase: "instant" | "oauth" }[] = [
+    { name: "SEO Technique", descKey: "landing.tools.seoTech", category: "SEO", icon: Search, phase: "instant" },
+    { name: "Contenu & Branding", descKey: "landing.tools.contentBranding", category: "Content", icon: Code, phase: "instant" },
+    { name: "Google Search Console", descKey: "landing.tools.gsc", category: "SEO", icon: Search, phase: "oauth" },
+    { name: "Google Analytics 4", descKey: "landing.tools.ga4", category: "Analytics", icon: BarChart3, phase: "oauth" },
+    { name: "Google Ads", descKey: "landing.tools.googleAds", category: "Ads", icon: Target, phase: "oauth" },
+    { name: "Google Business Profile", descKey: "landing.tools.gbp", category: "Local", icon: MapPin, phase: "oauth" },
+    { name: "Meta Business Suite", descKey: "landing.tools.meta", category: "Social", icon: Share2, phase: "oauth" },
+    { name: "WordPress / Shopify", descKey: "landing.tools.cms", category: "CMS", icon: Code, phase: "oauth" },
+  ];
+
+  const instantIntegrations = integrations.filter(i => i.phase === "instant");
+  const oauthIntegrations = integrations.filter(i => i.phase === "oauth");
 
   return (
     <section id="tools" className="py-24 bg-secondary/30 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">
-            {t("landing.footer.integrations")}
+            {t("landing.tools.badge")}
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold mb-6">{t("landing.tools.title")}</h2>
           <p className="text-lg text-muted-foreground">{t("landing.tools.subtitle")}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {tools.map((tool, index) => (
-            <Card key={tool.name} variant="feature" className="group fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
-                    <tool.icon className="w-6 h-6 text-primary" />
+        {/* 3-step progressive journey */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+          {steps.map((step, index) => (
+            <div key={index} className="relative">
+              <Card variant="feature" className="group fade-in-up h-full" style={{ animationDelay: `${index * 0.15}s` }}>
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4">
+                    <step.icon className="w-6 h-6 text-primary-foreground" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    {tool.required && (
-                      <Badge variant="success" className="text-xs">{t("landing.tools.recommended")}</Badge>
-                    )}
-                    <Badge variant="secondary" className="text-xs">{tool.category}</Badge>
-                  </div>
+                  <Badge variant="outline" className="mb-3">{t("landing.tools.stepLabel")} {step.badge}</Badge>
+                  <h3 className="text-lg font-semibold mb-2">{t(step.titleKey)}</h3>
+                  <p className="text-sm text-muted-foreground">{t(step.descKey)}</p>
+                </CardContent>
+              </Card>
+              {index < steps.length - 1 && (
+                <div className="hidden md:flex absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
+                  <ArrowRight className="w-6 h-6 text-primary/40" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">{tool.name}</h3>
-                <p className="text-sm text-muted-foreground">{t(tool.descKey)}</p>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           ))}
         </div>
 
+        {/* Instant analysis (no OAuth) */}
+        <div className="max-w-5xl mx-auto mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="w-5 h-5 text-chart-3" />
+            <h3 className="text-lg font-semibold">{t("landing.tools.instantTitle")}</h3>
+            <Badge variant="success" className="text-xs">{t("landing.tools.noAccountNeeded")}</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {instantIntegrations.map((tool) => (
+              <Card key={tool.name} variant="feature" className="group">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center flex-shrink-0">
+                    <tool.icon className="w-5 h-5 text-chart-3" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-sm">{tool.name}</h4>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-chart-3" />
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t(tool.descKey)}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* OAuth integrations */}
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <Link2 className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">{t("landing.tools.oauthTitle")}</h3>
+            <Badge variant="secondary" className="text-xs">{t("landing.tools.oneClick")}</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {oauthIntegrations.map((tool) => (
+              <Card key={tool.name} variant="feature" className="group">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+                    <tool.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-sm">{tool.name}</h4>
+                      <Badge variant="outline" className="text-[10px]">{tool.category}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t(tool.descKey)}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         <div className="text-center mt-12">
-          <Link to="/dashboard/integrations">
+          <Link to="/auth?tab=signup">
             <Button variant="outline" size="lg">
-              {t("landing.tools.seeAll")}
-              <ExternalLink className="w-4 h-4 ml-2" />
+              {t("landing.tools.startNow")}
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>
