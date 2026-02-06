@@ -31,7 +31,7 @@ import {
   Network,
 } from "lucide-react";
 import { format } from "date-fns";
-import { getDateLocale } from "@/lib/date-locale";
+import { getDateLocale, getIntlLocale } from "@/lib/date-locale";
 import { useTranslation } from "react-i18next";
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
