@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export function EvidenceBundleViewer({
   title = "Evidence Bundle",
   defaultExpanded = false,
 }: EvidenceBundleViewerProps) {
+  const { t } = useTranslation();
   const { fetchBundleWithDetails, getBundleForRun } = useEvidenceBundles();
   const [bundle, setBundle] = useState<EvidenceBundle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export function EvidenceBundleViewer({
       setBundle(result);
     } catch (err) {
       console.error('Error loading evidence bundle:', err);
-      setError('Erreur lors du chargement des preuves');
+      setError(t("components.evidence.loadError"));
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ export function EvidenceBundleViewer({
             <p className="text-destructive">{error}</p>
             <Button variant="outline" size="sm" onClick={loadBundle} className="mt-2">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Réessayer
+              {t("errors.tryAgain")}
             </Button>
           </div>
         </CardContent>
@@ -92,9 +94,9 @@ export function EvidenceBundleViewer({
         <CardContent className="pt-6">
           <div className="text-center py-8 text-muted-foreground">
             <Shield className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="font-medium">Aucun Evidence Bundle</p>
+            <p className="font-medium">{t("components.evidence.noBundle")}</p>
             <p className="text-sm mt-1">
-              Les preuves et justifications seront ajoutées lors de l'exécution
+              {t("components.evidence.noBundleDesc")}
             </p>
           </div>
         </CardContent>
@@ -115,8 +117,10 @@ interface EvidenceBundleListProps {
 export function EvidenceBundleList({ 
   bundles, 
   loading = false,
-  emptyMessage = "Aucun Evidence Bundle disponible"
+  emptyMessage,
 }: EvidenceBundleListProps) {
+  const { t } = useTranslation();
+  
   if (loading) {
     return (
       <div className="space-y-4">
@@ -140,7 +144,7 @@ export function EvidenceBundleList({
         <CardContent className="pt-6">
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>{emptyMessage}</p>
+            <p>{emptyMessage || t("components.evidence.noBundleAvailable")}</p>
           </div>
         </CardContent>
       </Card>

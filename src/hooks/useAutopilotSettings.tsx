@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
+import i18next from "i18next";
 
 interface AutopilotSettings {
   id: string;
@@ -84,11 +85,11 @@ export function useAutopilotSettings(siteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Paramètres Autopilot mis à jour");
+      toast.success(i18next.t("hooks.autopilot.settingsUpdated"));
     },
     onError: (error) => {
       console.error('Autopilot settings update error:', error);
-      toast.error("Erreur lors de la mise à jour");
+      toast.error(i18next.t("hooks.autopilot.updateError"));
     },
   });
 
@@ -110,14 +111,14 @@ export function useAutopilotSettings(siteId?: string) {
 
   // Available actions that can be automated
   const availableActions = [
-    { id: 'seo_fix', label: 'Corrections SEO techniques', category: 'seo' },
-    { id: 'meta_update', label: 'Mise à jour des meta tags', category: 'seo' },
-    { id: 'content_update', label: 'Optimisation de contenu', category: 'content' },
-    { id: 'image_optimization', label: 'Optimisation images', category: 'content' },
-    { id: 'ad_bid_adjustment', label: 'Ajustement enchères pub', category: 'ads' },
-    { id: 'ad_pause_underperforming', label: 'Pause pubs sous-performantes', category: 'ads' },
-    { id: 'social_scheduling', label: 'Planification posts sociaux', category: 'social' },
-    { id: 'email_automation', label: 'Automatisation emails', category: 'lifecycle' },
+    { id: 'seo_fix', label: i18next.t("hooks.autopilot.seoFixes"), category: 'seo' },
+    { id: 'meta_update', label: i18next.t("hooks.autopilot.metaUpdates"), category: 'seo' },
+    { id: 'content_update', label: i18next.t("hooks.autopilot.contentOptimization"), category: 'content' },
+    { id: 'image_optimization', label: i18next.t("hooks.autopilot.imageOptimization"), category: 'content' },
+    { id: 'ad_bid_adjustment', label: i18next.t("hooks.autopilot.adBidAdjustment"), category: 'ads' },
+    { id: 'ad_pause_underperforming', label: i18next.t("hooks.autopilot.pauseUnderperforming"), category: 'ads' },
+    { id: 'social_scheduling', label: i18next.t("hooks.autopilot.socialScheduling"), category: 'social' },
+    { id: 'email_automation', label: i18next.t("hooks.autopilot.emailAutomation"), category: 'lifecycle' },
   ];
 
   return {

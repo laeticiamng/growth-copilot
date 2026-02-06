@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 
 /**
  * Enhanced network status hook with retry logic
@@ -12,16 +13,16 @@ export function useNetworkOffline() {
     const handleOnline = () => {
       setIsOnline(true);
       setRetryCount(0);
-      toast.success("Connexion rétablie", {
-        description: "Vous êtes de nouveau connecté à Internet.",
+      toast.success(i18next.t("hooks.network.connectionRestored"), {
+        description: i18next.t("hooks.network.connectionRestoredDesc"),
         duration: 3000,
       });
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error("Connexion perdue", {
-        description: "Certaines fonctionnalités sont indisponibles hors ligne.",
+      toast.error(i18next.t("hooks.network.connectionLost"), {
+        description: i18next.t("hooks.network.connectionLostDesc"),
         duration: 5000,
       });
     };

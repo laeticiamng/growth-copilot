@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Lifecycle() {
+  const { t } = useTranslation();
   const { leads, deals, stages, loading, createLead, deleteLead, updateLead, updateDealStage, createDeal, refetch } = useLifecycle();
    const { currentWorkspace } = useWorkspace();
   
@@ -85,10 +87,10 @@ export default function Lifecycle() {
       color: stage.color || "bg-primary",
     };
   }) : [
-    { name: "Nouveaux", count: leads.filter(l => l.status === 'new').length, value: "€0", color: "bg-blue-500" },
-    { name: "Contactés", count: leads.filter(l => l.status === 'contacted').length, value: "€0", color: "bg-yellow-500" },
-    { name: "Qualifiés", count: leads.filter(l => l.status === 'qualified').length, value: "€0", color: "bg-orange-500" },
-    { name: "Gagnés", count: leads.filter(l => l.status === 'converted').length, value: "€0", color: "bg-green-500" },
+    { name: t("modules.lifecycle.stageNew"), count: leads.filter(l => l.status === 'new').length, value: "€0", color: "bg-blue-500" },
+    { name: t("modules.lifecycle.stageContacted"), count: leads.filter(l => l.status === 'contacted').length, value: "€0", color: "bg-yellow-500" },
+    { name: t("modules.lifecycle.stageQualified"), count: leads.filter(l => l.status === 'qualified').length, value: "€0", color: "bg-orange-500" },
+    { name: t("modules.lifecycle.stageWon"), count: leads.filter(l => l.status === 'converted').length, value: "€0", color: "bg-green-500" },
   ];
 
   // Calculate metrics
@@ -98,24 +100,24 @@ export default function Lifecycle() {
   const totalDealValue = deals.filter(d => d.won === true).reduce((sum, d) => sum + (d.value || 0), 0);
 
   const salesMetrics = [
-    { label: "Total Leads", value: totalLeads.toString() },
-    { label: "Qualifiés", value: qualifiedLeads.toString() },
-    { label: "Deals gagnés", value: closedDeals.toString() },
-    { label: "Valeur totale", value: `€${totalDealValue.toLocaleString()}` },
+    { label: t("modules.lifecycle.totalLeads"), value: totalLeads.toString() },
+    { label: t("modules.lifecycle.qualified"), value: qualifiedLeads.toString() },
+    { label: t("modules.lifecycle.dealsWon"), value: closedDeals.toString() },
+    { label: t("modules.lifecycle.totalValue"), value: `€${totalDealValue.toLocaleString()}` },
   ];
 
   const handleCreateLead = async () => {
     if (!leadForm.name || !leadForm.email) {
-      toast.error("Nom et email requis");
+      toast.error(t("modules.lifecycle.nameEmailRequired"));
       return;
     }
     setSubmitting(true);
     const { error } = await createLead(leadForm);
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de la création");
+      toast.error(t("modules.lifecycle.createError"));
     } else {
-      toast.success("Lead créé");
+      toast.success(t("modules.lifecycle.leadCreated"));
       setShowLeadDialog(false);
       setLeadForm({ name: "", email: "", company: "", phone: "", source: "direct" });
     }
@@ -124,16 +126,16 @@ export default function Lifecycle() {
   const handleDeleteLead = async (leadId: string) => {
     const { error } = await deleteLead(leadId);
     if (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("modules.lifecycle.deleteError"));
     } else {
-      toast.success("Lead supprimé");
+      toast.success(t("modules.lifecycle.leadDeleted"));
     }
   };
 
   const handleMoveDeal = async (dealId: string, newStageId: string) => {
     const { error } = await updateDealStage(dealId, newStageId);
     if (error) {
-      toast.error("Erreur lors du déplacement");
+      toast.error(t("modules.lifecycle.moveError"));
     }
   };
 
@@ -145,7 +147,7 @@ export default function Lifecycle() {
 
   const handleCreateDeal = async () => {
     if (!dealForm.title || !dealForm.lead_id) {
-      toast.error("Titre et lead requis");
+      toast.error(t("modules.lifecycle.titleLeadRequired"));
       return;
     }
     setSubmitting(true);
@@ -158,16 +160,16 @@ export default function Lifecycle() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de la création");
+      toast.error(t("modules.lifecycle.createError"));
     } else {
-      toast.success("Deal créé");
+      toast.success(t("modules.lifecycle.dealCreated"));
       setShowDealDialog(false);
       setDealForm({ title: "", lead_id: "", value: 0 });
     }
   };
 
   if (loading) {
-    return <LoadingState message="Chargement des données CRM..." />;
+    return <LoadingState message={t("modules.lifecycle.loadingCRM")} />;
   }
 
   // Empty state - no leads or deals
@@ -181,16 +183,16 @@ export default function Lifecycle() {
               Lifecycle & CRM
               <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
             </h1>
-            <p className="text-muted-foreground">Pipeline de vente et automatisations</p>
+            <p className="text-muted-foreground">{t("modules.lifecycle.pipelineSubtitle")}</p>
           </div>
         </div>
         <ModuleEmptyState
           icon={Kanban}
           moduleName="Lifecycle"
-          description="Gérez votre pipeline de vente avec un CRM Kanban intuitif. Suivez vos leads, créez des deals et générez des scripts de vente personnalisés avec l'IA."
-          features={["Pipeline Kanban", "Gestion de leads", "Scripts IA", "Automatisations"]}
+          description={t("modules.lifecycle.emptyDescription")}
+          features={[t("modules.lifecycle.featureKanban"), t("modules.lifecycle.featureLeads"), t("modules.lifecycle.featureScripts"), t("modules.lifecycle.featureAutomations")]}
           primaryAction={{
-            label: "Créer un lead",
+            label: t("modules.lifecycle.createLead"),
             onClick: () => setShowLeadDialog(true),
             icon: Plus,
           }}
@@ -209,7 +211,7 @@ export default function Lifecycle() {
              <span className="relative w-2 h-2 bg-primary rounded-full animate-pulse" />
            </h1>
           <p className="text-muted-foreground">
-            Pipeline de vente et automatisations
+            {t("modules.lifecycle.pipelineSubtitle")}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -219,7 +221,7 @@ export default function Lifecycle() {
           </Button>
           <Button variant="hero" onClick={() => setShowLeadDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau lead
+            {t("modules.lifecycle.newLead")}
           </Button>
         </div>
       </div>
@@ -240,7 +242,7 @@ export default function Lifecycle() {
         <TabsList>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
           <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="scripts">Scripts vente</TabsTrigger>
+          <TabsTrigger value="scripts">{t("modules.lifecycle.salesScripts")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pipeline" className="space-y-6">
@@ -248,9 +250,9 @@ export default function Lifecycle() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Pipeline de vente</CardTitle>
+                  <CardTitle>{t("modules.lifecycle.salesPipeline")}</CardTitle>
                   <CardDescription>
-                    {deals.length} opportunités • Drag & drop pour déplacer
+                    {deals.length} {t("modules.lifecycle.opportunities")} • {t("modules.lifecycle.dragDrop")}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
@@ -268,7 +270,7 @@ export default function Lifecycle() {
                     onClick={() => setPipelineView("grid")}
                   >
                     <List className="w-4 h-4 mr-1" />
-                    Grille
+                    {t("modules.lifecycle.grid")}
                   </Button>
                 </div>
               </div>
@@ -325,11 +327,11 @@ export default function Lifecycle() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Leads</CardTitle>
-                  <CardDescription>{leads.length} leads au total</CardDescription>
+                  <CardDescription>{leads.length} {t("modules.lifecycle.leadsTotal")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setShowLeadDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Ajouter
+                  {t("modules.lifecycle.add")}
                 </Button>
               </div>
             </CardHeader>
@@ -337,8 +339,8 @@ export default function Lifecycle() {
               {leads.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Aucun lead</p>
-                  <p className="text-sm mt-1">Créez votre premier lead</p>
+                  <p className="font-medium">{t("modules.lifecycle.noLead")}</p>
+                  <p className="text-sm mt-1">{t("modules.lifecycle.createFirstLead")}</p>
                 </div>
               ) : (
                 leads.map((lead) => (
@@ -360,7 +362,7 @@ export default function Lifecycle() {
                               : "outline"
                           }
                         >
-                          {lead.status === "new" ? "Nouveau" : lead.status === "qualified" ? "Qualifié" : lead.status === "converted" ? "Converti" : lead.status}
+                          {lead.status === "new" ? t("modules.lifecycle.statusNew") : lead.status === "qualified" ? t("modules.lifecycle.statusQualified") : lead.status === "converted" ? t("modules.lifecycle.statusConverted") : lead.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{lead.company || lead.email} • {lead.source}</p>
@@ -370,7 +372,7 @@ export default function Lifecycle() {
                         <Mail className="w-4 h-4" />
                       </Button>
                       {lead.phone && (
-                        <Button variant="ghost" size="sm" title="Téléphone">
+                        <Button variant="ghost" size="sm" title={t("modules.lifecycle.phone")}>
                           <Phone className="w-4 h-4" />
                         </Button>
                       )}
@@ -379,7 +381,7 @@ export default function Lifecycle() {
                         size="sm" 
                         className="text-destructive" 
                         onClick={() => handleDeleteLead(lead.id)}
-                        title="Supprimer"
+                        title={t("common.delete")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -400,11 +402,11 @@ export default function Lifecycle() {
       <Dialog open={showLeadDialog} onOpenChange={setShowLeadDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouveau lead</DialogTitle>
+            <DialogTitle>{t("modules.lifecycle.newLead")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Nom *</label>
+              <label className="text-sm font-medium">{t("modules.lifecycle.name")} *</label>
               <Input 
                 placeholder="Jean Dupont"
                 value={leadForm.name}
@@ -422,7 +424,7 @@ export default function Lifecycle() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Entreprise</label>
+                <label className="text-sm font-medium">{t("modules.lifecycle.company")}</label>
                 <Input 
                   placeholder="Acme Inc"
                   value={leadForm.company}
@@ -430,7 +432,7 @@ export default function Lifecycle() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Téléphone</label>
+                <label className="text-sm font-medium">{t("modules.lifecycle.phone")}</label>
                 <Input 
                   placeholder="+33 6 12 34 56 78"
                   value={leadForm.phone}
@@ -440,10 +442,10 @@ export default function Lifecycle() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowLeadDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowLeadDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateLead} disabled={submitting}>
               {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Créer
+              {t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -453,25 +455,25 @@ export default function Lifecycle() {
       <Dialog open={showDealDialog} onOpenChange={setShowDealDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouveau deal</DialogTitle>
+            <DialogTitle>{t("modules.lifecycle.newDeal")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Titre *</label>
+              <label className="text-sm font-medium">{t("modules.lifecycle.title")} *</label>
               <Input 
-                placeholder="Contrat annuel..."
+                placeholder={t("modules.lifecycle.dealPlaceholder")}
                 value={dealForm.title}
                 onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Lead associé *</label>
+              <label className="text-sm font-medium">{t("modules.lifecycle.associatedLead")} *</label>
               <Select 
                 value={dealForm.lead_id} 
                 onValueChange={(value) => setDealForm({ ...dealForm, lead_id: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un lead" />
+                  <SelectValue placeholder={t("modules.lifecycle.selectLead")} />
                 </SelectTrigger>
                 <SelectContent>
                   {leads.map(lead => (
@@ -483,7 +485,7 @@ export default function Lifecycle() {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Valeur estimée (€)</label>
+              <label className="text-sm font-medium">{t("modules.lifecycle.estimatedValue")}</label>
               <Input 
                 type="number"
                 placeholder="10000"
@@ -493,10 +495,10 @@ export default function Lifecycle() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowDealDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowDealDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateDeal} disabled={submitting || leads.length === 0}>
               {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Créer le deal
+              {t("modules.lifecycle.createDeal")}
             </Button>
           </DialogFooter>
         </DialogContent>
