@@ -3,6 +3,7 @@
  * Displays Instagram/Meta Business metrics from synced data
  */
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ interface MetaData {
 }
 
 export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,7 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
 
   const handleSync = async () => {
     if (!currentWorkspace?.id || !currentSite?.id) {
-      toast.error("Veuillez sélectionner un site");
+      toast.error(t("components.ga4Widget.selectSite"));
       return;
     }
 
@@ -151,15 +153,15 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
       if (error) throw error;
 
       if (data?.success) {
-        toast.success("Données Instagram synchronisées");
+        toast.success(t("components.metaWidget.igSynced"));
         await loadMetrics();
         await checkConnection();
       } else {
-        toast.error(data?.error || "Erreur lors de la synchronisation");
+        toast.error(data?.error || t("components.metaWidget.syncError"));
       }
     } catch (err) {
       console.error("Sync error:", err);
-      toast.error("Erreur lors de la synchronisation Meta");
+      toast.error(t("components.metaWidget.syncErrorMeta"));
     } finally {
       setSyncing(false);
     }
@@ -186,7 +188,7 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
       }
     } catch (err) {
       console.error("OAuth init error:", err);
-      toast.error("Erreur lors de l'initialisation OAuth");
+      toast.error(t("components.connectors.oauthInitError"));
     }
   };
 
@@ -228,18 +230,14 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
             </div>
             Instagram / Meta Business
           </CardTitle>
-          <CardDescription>
-            Connectez Meta pour voir vos métriques Instagram
-          </CardDescription>
+          <CardDescription>{t("components.metaWidget.connectDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="text-center py-8">
           <Instagram className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground mb-4">
-            Connectez votre compte Meta Business pour synchroniser vos données Instagram
-          </p>
+          <p className="text-sm text-muted-foreground mb-4">{t("components.metaWidget.connectPrompt")}</p>
           <Button variant="hero" onClick={handleConnect}>
             <ExternalLink className="w-4 h-4 mr-2" />
-            Connecter Instagram
+            {t("components.metaWidget.connectButton")}
           </Button>
         </CardContent>
       </Card>
@@ -258,7 +256,7 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
               Instagram
             </CardTitle>
             <CardDescription>
-              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
+              {t("components.ga4Widget.lastSync")}: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
@@ -343,14 +341,14 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
         ) : (
           <div className="text-center py-6 text-muted-foreground">
             <Instagram className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Aucune donnée disponible</p>
+            <p className="text-sm">{t("components.ga4Widget.noData")}</p>
           </div>
         )}
 
         {/* Top Posts */}
         {topPosts.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium">Top posts</p>
+            <p className="text-sm font-medium">{t("components.metaWidget.topPosts")}</p>
             <div className="flex gap-2">
               {topPosts.map((p, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">

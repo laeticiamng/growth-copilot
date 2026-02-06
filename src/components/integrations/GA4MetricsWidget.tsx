@@ -3,6 +3,7 @@
  * Displays Google Analytics 4 metrics from synced data
  */
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ interface KPIData {
 }
 
 export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(true);
@@ -115,7 +117,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
 
   const handleSync = async () => {
     if (!currentWorkspace?.id || !currentSite?.id) {
-      toast.error("Veuillez sélectionner un site");
+      toast.error(t("components.ga4Widget.selectSite"));
       return;
     }
 
@@ -131,15 +133,15 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
       if (error) throw error;
 
       if (data?.success) {
-        toast.success(`${data.rows_synced} jours de données synchronisés`);
+        toast.success(t("components.ga4Widget.daysSynced", { count: data.rows_synced }));
         await loadMetrics();
         await checkConnection();
       } else {
-        toast.error(data?.error || "Erreur lors de la synchronisation");
+        toast.error(data?.error || t("components.ga4Widget.syncError"));
       }
     } catch (err) {
       console.error("Sync error:", err);
-      toast.error("Erreur lors de la synchronisation GA4");
+      toast.error(t("components.ga4Widget.syncErrorGA4"));
     } finally {
       setSyncing(false);
     }
@@ -166,7 +168,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
       }
     } catch (err) {
       console.error("OAuth init error:", err);
-      toast.error("Erreur lors de l'initialisation OAuth");
+      toast.error(t("components.connectors.oauthInitError"));
     }
   };
 
@@ -211,18 +213,14 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
             <BarChart3 className="w-5 h-5 text-primary" />
             Google Analytics 4
           </CardTitle>
-          <CardDescription>
-            Connectez Google Analytics pour voir vos métriques
-          </CardDescription>
+          <CardDescription>{t("components.ga4Widget.connectDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="text-center py-8">
           <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground mb-4">
-            Connectez votre compte Google pour synchroniser vos données Analytics
-          </p>
+          <p className="text-sm text-muted-foreground mb-4">{t("components.ga4Widget.connectPrompt")}</p>
           <Button variant="hero" onClick={handleConnect}>
             <ExternalLink className="w-4 h-4 mr-2" />
-            Connecter Google Analytics
+            {t("components.ga4Widget.connectButton")}
           </Button>
         </CardContent>
       </Card>
@@ -239,7 +237,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
               Google Analytics 4
             </CardTitle>
             <CardDescription>
-              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
+              {t("components.ga4Widget.lastSync")}: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
@@ -281,7 +279,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-2 mb-1">
               <Eye className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Revenu</span>
+              <span className="text-xs text-muted-foreground">{t("components.ga4Widget.revenue")}</span>
             </div>
             <p className="text-xl font-bold">{totalRevenue.toFixed(0)}€</p>
           </div>
@@ -332,8 +330,8 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <BarChart3 className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Aucune donnée disponible</p>
-            <p className="text-xs mt-1">Cliquez sur sync pour récupérer les données</p>
+            <p className="text-sm">{t("components.ga4Widget.noData")}</p>
+            <p className="text-xs mt-1">{t("components.ga4Widget.noDataHint")}</p>
           </div>
         )}
       </CardContent>
