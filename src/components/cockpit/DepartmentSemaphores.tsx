@@ -5,7 +5,6 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { 
@@ -14,8 +13,6 @@ import {
   Megaphone, 
   Users, 
   TrendingUp,
-  ArrowRight,
-  AlertCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -38,7 +35,7 @@ interface DepartmentSemaphoresProps {
 }
 
 export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(true);
@@ -52,26 +49,21 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
       }
 
       try {
-        // Fetch data for each department in parallel
         const [contentRes, adsRes, commercialRes, financeRes] = await Promise.all([
-          // Content: Pending briefs count
           supabase
             .from('content_briefs')
             .select('id')
             .eq('workspace_id', currentWorkspace.id)
             .eq('status', 'draft'),
-          // Ads: Campaign performance
           supabase
             .from('campaigns')
             .select('cost_30d, conversions_30d')
             .eq('workspace_id', currentWorkspace.id)
             .eq('status', 'active'),
-          // Commercial: Lead conversion
           supabase
             .from('leads')
             .select('status')
             .eq('workspace_id', currentWorkspace.id),
-          // Finance: ROI data
           supabase
             .from('agent_runs')
             .select('cost_estimate')
@@ -79,38 +71,35 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
             .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
         ]);
 
-        // SEO status - simplified (no seo_audits table query)
         let seoStatus: DepartmentStatus = {
           id: "seo",
           name: "SEO",
           icon: Search,
           status: "gray",
-          message: "Non activé — Lancer le premier audit",
+          message: t("cockpit.seoNotActivated"),
           link: "/dashboard/seo",
-          linkLabel: "Auditer",
+          linkLabel: t("cockpit.audit"),
         };
 
-        // Calculate Content status
         const pendingBriefs = contentRes.data?.length || 0;
         let contentStatus: DepartmentStatus = {
           id: "content",
           name: "Content",
           icon: FileText,
           status: pendingBriefs === 0 ? "gray" : pendingBriefs <= 3 ? "green" : pendingBriefs <= 10 ? "orange" : "red",
-          message: pendingBriefs === 0 ? "Non activé — Créer un brief" : `${pendingBriefs} brief(s) en attente`,
+          message: pendingBriefs === 0 ? t("cockpit.contentNotActivated") : t("cockpit.briefsPending", { count: pendingBriefs }),
           link: "/dashboard/content",
-          linkLabel: "Gérer",
+          linkLabel: t("cockpit.manage"),
         };
 
-        // Calculate Ads status
         let adsStatus: DepartmentStatus = {
           id: "ads",
           name: "Ads",
           icon: Megaphone,
           status: "gray",
-          message: "Non activé — Configurer Google Ads",
+          message: t("cockpit.adsNotActivated"),
           link: "/dashboard/ads",
-          linkLabel: "Configurer",
+          linkLabel: t("cockpit.configureTool"),
         };
         
         if (adsRes.data && adsRes.data.length > 0) {
@@ -121,11 +110,10 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
           adsStatus = {
             ...adsStatus,
             status: cpa === 0 ? "gray" : cpa < 50 ? "green" : cpa < 100 ? "orange" : "red",
-            message: totalSpend > 0 ? `CPA: ${cpa.toFixed(0)}€` : "Aucune dépense",
+            message: totalSpend > 0 ? `CPA: ${cpa.toFixed(0)}€` : t("cockpit.noSpend"),
           };
         }
 
-        // Calculate Commercial status
         const leads = commercialRes.data || [];
         const wonLeads = leads.filter(l => l.status === 'won').length;
         const totalLeads = leads.length;
@@ -136,29 +124,27 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
           name: "Commercial",
           icon: Users,
           status: totalLeads === 0 ? "gray" : conversionRate >= 20 ? "green" : conversionRate >= 10 ? "orange" : "red",
-          message: totalLeads === 0 ? "Non activé — Qualifier un lead" : `Taux: ${conversionRate.toFixed(0)}%`,
+          message: totalLeads === 0 ? t("cockpit.commercialNotActivated") : `${t("cockpit.rate")}: ${conversionRate.toFixed(0)}%`,
           link: "/dashboard/lifecycle",
-          linkLabel: "Pipeline",
+          linkLabel: t("cockpit.pipeline"),
         };
 
-        // Calculate Finance status
         const totalCosts = financeRes.data?.reduce((sum, r) => sum + (r.cost_estimate || 0), 0) || 0;
         let financeStatus: DepartmentStatus = {
           id: "finance",
           name: "Finance",
           icon: TrendingUp,
           status: "gray",
-          message: "Non activé — Calculer le ROI",
+          message: t("cockpit.financeNotActivated"),
           link: "/dashboard/roi",
-          linkLabel: "Analyser",
+          linkLabel: t("cockpit.analyze"),
         };
         
         if (totalCosts > 0) {
-          // Simplified ROI calculation
           financeStatus = {
             ...financeStatus,
             status: "green",
-            message: `Coûts IA: ${totalCosts.toFixed(2)}€`,
+            message: `${t("cockpit.aiCosts")}: ${totalCosts.toFixed(2)}€`,
           };
         }
 
@@ -171,7 +157,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
     };
 
     fetchDepartmentHealth();
-  }, [currentWorkspace?.id, currentSite?.id]);
+  }, [currentWorkspace?.id, currentSite?.id, t]);
 
   const getStatusColor = (status: DepartmentStatus["status"]) => {
     switch (status) {

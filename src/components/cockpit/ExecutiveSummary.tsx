@@ -10,6 +10,7 @@ import {
   TrendingDown,
   Minus,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ServiceHealth {
   slug: string;
@@ -26,38 +27,40 @@ interface ExecutiveSummaryProps {
   loading?: boolean;
 }
 
-const statusConfig = {
-  green: {
-    icon: CheckCircle2,
-    color: "text-chart-3",
-    bg: "bg-chart-3/10",
-    border: "border-chart-3/30",
-    label: "Opérationnel",
-  },
-  yellow: {
-    icon: AlertTriangle,
-    color: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning/30",
-    label: "Attention requise",
-  },
-  red: {
-    icon: XCircle,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-    border: "border-destructive/30",
-    label: "Action urgente",
-  },
-  grey: {
-    icon: Minus,
-    color: "text-muted-foreground",
-    bg: "bg-muted/50",
-    border: "border-border",
-    label: "Non configuré",
-  },
-};
-
 export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSummaryProps) {
+  const { t } = useTranslation();
+
+  const statusConfig = {
+    green: {
+      icon: CheckCircle2,
+      color: "text-chart-3",
+      bg: "bg-chart-3/10",
+      border: "border-chart-3/30",
+      label: t("cockpit.operational"),
+    },
+    yellow: {
+      icon: AlertTriangle,
+      color: "text-warning",
+      bg: "bg-warning/10",
+      border: "border-warning/30",
+      label: t("cockpit.attentionRequired"),
+    },
+    red: {
+      icon: XCircle,
+      color: "text-destructive",
+      bg: "bg-destructive/10",
+      border: "border-destructive/30",
+      label: t("cockpit.urgentAction"),
+    },
+    grey: {
+      icon: Minus,
+      color: "text-muted-foreground",
+      bg: "bg-muted/50",
+      border: "border-border",
+      label: t("cockpit.notConfigured"),
+    },
+  };
+
   if (loading) {
     return (
       <Card variant="gradient">
@@ -83,21 +86,21 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
     <Card variant="gradient" className="border-2 border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">État de {siteName}</CardTitle>
+          <CardTitle className="text-lg">{t("cockpit.stateOf", { site: siteName })}</CardTitle>
           <div className="flex items-center gap-2">
             {redCount > 0 && (
               <Badge variant="destructive" className="text-xs">
-                {redCount} critique{redCount > 1 ? "s" : ""}
+                {t("cockpit.criticalCount", { count: redCount })}
               </Badge>
             )}
             {yellowCount > 0 && (
               <Badge variant="secondary" className="text-xs bg-warning/20 text-warning">
-                {yellowCount} attention
+                {t("cockpit.attention", { count: yellowCount })}
               </Badge>
             )}
             {greenCount > 0 && redCount === 0 && yellowCount === 0 && (
               <Badge variant="secondary" className="text-xs bg-chart-3/20 text-chart-3">
-                Tout va bien
+                {t("cockpit.allGood")}
               </Badge>
             )}
           </div>

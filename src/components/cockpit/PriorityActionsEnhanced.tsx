@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useApprovals } from "@/hooks/useApprovals";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface PriorityAction {
   id: string;
@@ -71,6 +72,7 @@ const priorityConfig = {
 };
 
 export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityActionsEnhancedProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { pendingApprovals, approveAction, rejectAction } = useApprovals();
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,6 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
       }
 
       try {
-        // Convert pending approvals to priority actions
         const approvalActions: PriorityAction[] = pendingApprovals.map(a => {
           const riskLevel = a.risk_level as string;
           const iceScore = riskLevel === 'high' ? 90 : riskLevel === 'medium' ? 70 : 50;
@@ -93,19 +94,18 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
           return {
             id: a.id,
             title: a.action_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            description: `Action proposée par ${a.agent_type}`,
+            description: t("cockpit.proposedBy", { agent: a.agent_type }),
             priority: riskLevel === 'high' ? 'critical' : riskLevel === 'medium' ? 'high' : 'medium',
             iceScore,
-            effort: 'Immédiat',
+            effort: t("cockpit.immediate"),
             link: `/dashboard/approvals?id=${a.id}`,
-            actionLabel: 'Voir',
+            actionLabel: t("cockpit.view"),
             service: a.agent_type,
             isApprovalItem: true,
             agentType: a.agent_type,
           } as PriorityAction;
         });
 
-        // Fetch agent recommendations from recent runs
         const { data: recentRuns } = await supabase
           .from('agent_runs')
           .select('outputs, agent_type, created_at')
@@ -132,7 +132,7 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
                     iceScore: Number(a.ice_score) || 60,
                     effort: String(a.effort || '10 min'),
                     link: String(a.link),
-                    actionLabel: String(a.action_label || 'Voir'),
+                    actionLabel: String(a.action_label || t("cockpit.view")),
                     service: run.agent_type,
                     isApprovalItem: false,
                   });
@@ -142,7 +142,6 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
           }
         }
 
-        // Combine and sort by ICE score
         const allActions = [...approvalActions, ...recommendationActions]
           .sort((a, b) => b.iceScore - a.iceScore)
           .slice(0, maxItems);
@@ -156,7 +155,7 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
     };
 
     fetchPriorityActions();
-  }, [currentWorkspace?.id, pendingApprovals, maxItems]);
+  }, [currentWorkspace?.id, pendingApprovals, maxItems, t]);
 
   const handleApprove = async (id: string) => {
     setProcessingId(id);
@@ -164,15 +163,15 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
     setProcessingId(null);
     
     if (error) {
-      toast.error("Erreur lors de l'approbation");
+      toast.error(t("cockpit.approvalError"));
     } else {
-      toast.success("Action approuvée");
+      toast.success(t("cockpit.approved"));
       setActions(prev => prev.filter(a => a.id !== id));
     }
   };
 
   const handleReject = async (id: string) => {
-    const reason = window.prompt("Raison du refus :");
+    const reason = window.prompt(t("cockpit.rejectionPrompt"));
     if (!reason) return;
     
     setProcessingId(id);
@@ -180,9 +179,9 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
     setProcessingId(null);
     
     if (error) {
-      toast.error("Erreur lors du refus");
+      toast.error(t("cockpit.rejectionError"));
     } else {
-      toast.success("Action refusée");
+      toast.success(t("cockpit.rejected"));
       setActions(prev => prev.filter(a => a.id !== id));
     }
   };
@@ -207,19 +206,19 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
     <Card variant="feature" className={cn("h-full flex flex-col", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Actions Prioritaires</CardTitle>
+          <CardTitle className="text-lg">{t("cockpit.priorityActions")}</CardTitle>
           <Badge variant="gradient">Top {actions.length}</Badge>
         </div>
         <CardDescription className="text-xs">
-          Classées par score ICE (Impact × Confiance × Facilité)
+          {t("cockpit.rankedByIceScore")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 flex-1">
         {actions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-primary/50" />
-            <p className="text-sm">Aucune action prioritaire</p>
-            <p className="text-xs mt-1">Vos agents travaillent en arrière-plan</p>
+            <p className="text-sm">{t("cockpit.noPriorityActionEnhanced")}</p>
+            <p className="text-xs mt-1">{t("cockpit.agentsWorkingBackground")}</p>
           </div>
         ) : (
           actions.map((action, index) => {
@@ -233,7 +232,6 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
                   config.bg
                 )}
               >
-                {/* ICE Score */}
                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
                   <div
                     className={cn(
@@ -250,7 +248,6 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
                   <span className="text-[10px] text-muted-foreground uppercase">ICE</span>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -304,7 +301,7 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
                           ) : (
                             <>
                               <CheckCircle2 className="w-3 h-3 mr-1" />
-                              Approuver
+                              {t("cockpit.approveAction")}
                             </>
                           )}
                         </Button>

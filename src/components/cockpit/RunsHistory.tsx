@@ -10,13 +10,12 @@ import {
   XCircle,
   Loader2,
   ChevronRight,
-  Eye,
   RefreshCw,
   Shield,
 } from "lucide-react";
 import { useExecutiveRuns, RUN_TYPE_LABELS, RUN_TYPE_ICONS, RunStatus } from "@/hooks/useExecutiveRuns";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, de } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
@@ -24,44 +23,48 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EvidenceBundleViewer } from "@/components/evidence";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
- import { useWorkspace } from "@/hooks/useWorkspace";
- import { useCallback } from "react";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useTranslation } from "react-i18next";
 
 interface RunsHistoryProps {
   maxItems?: number;
   showHeader?: boolean;
 }
 
-const STATUS_CONFIG: Record<RunStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
-  completed: { icon: CheckCircle2, color: "text-chart-3", label: "Terminé" },
-  failed: { icon: XCircle, color: "text-destructive", label: "Échec" },
-  running: { icon: Loader2, color: "text-primary", label: "En cours" },
-  queued: { icon: Clock, color: "text-muted-foreground", label: "En attente" },
-};
+const dateFnsLocales: Record<string, Locale> = { fr, en: enUS, es, de };
 
 export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProps) {
+  const { t, i18n } = useTranslation();
   const { runs, loading, refetch } = useExecutiveRuns();
-   const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace } = useWorkspace();
   const [selectedRun, setSelectedRun] = useState<typeof runs[0] | null>(null);
- 
-   // Real-time subscription for executive_runs
-   const handleRealtimeUpdate = useCallback(() => {
-     refetch();
-   }, [refetch]);
- 
-   useRealtimeSubscription(
-     `runs-history-${currentWorkspace?.id}`,
-     {
-       table: 'executive_runs',
-       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
-     },
-     handleRealtimeUpdate,
-     !!currentWorkspace?.id
-   );
+
+  const dateLocale = useMemo(() => dateFnsLocales[i18n.language] || enUS, [i18n.language]);
+
+  const STATUS_CONFIG: Record<RunStatus, { icon: typeof CheckCircle2; color: string; label: string }> = useMemo(() => ({
+    completed: { icon: CheckCircle2, color: "text-chart-3", label: t("cockpit.statusCompleted") },
+    failed: { icon: XCircle, color: "text-destructive", label: t("cockpit.statusFailed") },
+    running: { icon: Loader2, color: "text-primary", label: t("cockpit.statusRunning") },
+    queued: { icon: Clock, color: "text-muted-foreground", label: t("cockpit.statusQueued") },
+  }), [t]);
+
+  const handleRealtimeUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  useRealtimeSubscription(
+    `runs-history-${currentWorkspace?.id}`,
+    {
+      table: 'executive_runs',
+      filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+    },
+    handleRealtimeUpdate,
+    !!currentWorkspace?.id
+  );
 
   const displayedRuns = runs.slice(0, maxItems);
 
@@ -92,7 +95,7 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
             <div className="flex items-center justify-between">
              <CardTitle className="text-lg flex items-center gap-2">
                <span className="relative">
-                 Exécutions récentes
+                 {t("cockpit.recentRuns")}
                  <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
                </span>
              </CardTitle>
@@ -106,8 +109,8 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
           {displayedRuns.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Clock className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">Aucune exécution récente</p>
-              <p className="text-xs mt-1">Lancez une action depuis le cockpit</p>
+              <p className="text-sm">{t("cockpit.noRecentRun")}</p>
+              <p className="text-xs mt-1">{t("cockpit.launchFromCockpit")}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -129,7 +132,7 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
                       <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(run.created_at), {
                           addSuffix: true,
-                          locale: fr,
+                          locale: dateLocale,
                         })}
                       </p>
                     </div>
@@ -151,7 +154,6 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
         </CardContent>
       </Card>
 
-      {/* Run Details Modal */}
       <Dialog open={!!selectedRun} onOpenChange={() => setSelectedRun(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -164,7 +166,7 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
             <DialogDescription>
               {selectedRun && formatDistanceToNow(new Date(selectedRun.created_at), {
                 addSuffix: true,
-                locale: fr,
+                locale: dateLocale,
               })}
               {selectedRun?.duration_ms && ` • ${(selectedRun.duration_ms / 1000).toFixed(1)}s`}
             </DialogDescription>
@@ -173,15 +175,14 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
           {selectedRun && (
             <Tabs defaultValue="summary" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="summary">Résumé</TabsTrigger>
+                <TabsTrigger value="summary">{t("cockpit.summary")}</TabsTrigger>
                 <TabsTrigger value="evidence" className="flex items-center gap-1">
                   <Shield className="w-3 h-3" />
-                  Preuves
+                  {t("cockpit.evidence")}
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="summary" className="space-y-4">
-                {/* Status */}
                 <div className="flex items-center gap-2">
                   {(() => {
                     const status = STATUS_CONFIG[selectedRun.status as RunStatus] || STATUS_CONFIG.queued;
@@ -197,18 +198,16 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
                   })()}
                 </div>
 
-                {/* Executive Summary */}
                 {selectedRun.executive_summary && (
                   <div>
-                    <p className="text-sm font-medium mb-1">Résumé</p>
+                    <p className="text-sm font-medium mb-1">{t("cockpit.summary")}</p>
                     <p className="text-sm text-muted-foreground">{selectedRun.executive_summary}</p>
                   </div>
                 )}
 
-                {/* Outputs */}
                 {selectedRun.outputs && (
                   <div>
-                    <p className="text-sm font-medium mb-2">Résultats</p>
+                    <p className="text-sm font-medium mb-2">{t("cockpit.results")}</p>
                     <ScrollArea className="h-48 rounded-lg border bg-muted/30 p-3">
                       <pre className="text-xs whitespace-pre-wrap">
                         {JSON.stringify(selectedRun.outputs, null, 2)}
@@ -217,10 +216,9 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
                   </div>
                 )}
 
-                {/* Error */}
                 {selectedRun.error_message && (
                   <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <p className="text-sm font-medium text-destructive mb-1">Erreur</p>
+                    <p className="text-sm font-medium text-destructive mb-1">{t("cockpit.error")}</p>
                     <p className="text-xs text-destructive/80">{selectedRun.error_message}</p>
                   </div>
                 )}

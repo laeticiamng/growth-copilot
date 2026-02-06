@@ -1,38 +1,36 @@
- import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
- import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { 
   TrendingUp, 
-  DollarSign, 
   Clock, 
   Zap,
   Calculator,
   HelpCircle,
-  ArrowUpRight,
   Bot,
-   Users,
-   RefreshCw
+  Users,
 } from "lucide-react";
- import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface ROITrackerWidgetProps {
   className?: string;
 }
 
-// Constants for ROI calculation
-const HOURLY_RATE_HUMAN = 45; // €/hour for a marketing specialist
-const AI_MULTIPLIER = 3; // AI is 3x faster
-const MONTHLY_PLATFORM_COST = 299; // € per month
+const HOURLY_RATE_HUMAN = 45;
+const AI_MULTIPLIER = 3;
+const MONTHLY_PLATFORM_COST = 299;
 
 export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
-   const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const { data: metrics, isLoading } = useQuery({
     queryKey: ['roi-metrics', currentWorkspace?.id],
@@ -42,7 +40,6 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      // Fetch agent runs with duration
       const { data: runs, error } = await supabase
         .from('agent_runs')
         .select('duration_ms, agent_type, status, cost_estimate')
@@ -52,29 +49,17 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
 
       if (error) throw error;
 
-      // Calculate metrics
       const totalTasks = runs?.length || 0;
       const totalDurationMs = runs?.reduce((sum, r) => sum + (r.duration_ms || 0), 0) || 0;
       const totalDurationHours = totalDurationMs / (1000 * 60 * 60);
-      
-      // Time saved = AI time * multiplier (what it would have taken a human)
       const humanEquivalentHours = totalDurationHours * AI_MULTIPLIER;
       const timeSavedHours = humanEquivalentHours - totalDurationHours;
-      
-      // Money saved = human equivalent time * hourly rate
       const moneySavedFromTime = humanEquivalentHours * HOURLY_RATE_HUMAN;
-      
-      // AI costs
       const aiCosts = runs?.reduce((sum, r) => sum + (r.cost_estimate || 0), 0) || 0;
-      
-      // Net savings = money saved - platform cost - AI costs
       const netSavings = moneySavedFromTime - MONTHLY_PLATFORM_COST - aiCosts;
-      
-      // ROI percentage
       const totalInvestment = MONTHLY_PLATFORM_COST + aiCosts;
       const roi = totalInvestment > 0 ? ((moneySavedFromTime - totalInvestment) / totalInvestment) * 100 : 0;
 
-      // Tasks by agent type
       const tasksByAgent = runs?.reduce((acc, r) => {
         acc[r.agent_type] = (acc[r.agent_type] || 0) + 1;
         return acc;
@@ -94,24 +79,23 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
       };
     },
     enabled: !!currentWorkspace?.id,
-     refetchInterval: 60000,
-     staleTime: 30000,
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
- 
-   // Real-time subscription for agent_runs
-   const handleRealtimeUpdate = useCallback(() => {
-     queryClient.invalidateQueries({ queryKey: ['roi-metrics', currentWorkspace?.id] });
-   }, [queryClient, currentWorkspace?.id]);
- 
-   useRealtimeSubscription(
-     `roi-tracker-${currentWorkspace?.id}`,
-     {
-       table: 'agent_runs',
-       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
-     },
-     handleRealtimeUpdate,
-     !!currentWorkspace?.id
-   );
+
+  const handleRealtimeUpdate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['roi-metrics', currentWorkspace?.id] });
+  }, [queryClient, currentWorkspace?.id]);
+
+  useRealtimeSubscription(
+    `roi-tracker-${currentWorkspace?.id}`,
+    {
+      table: 'agent_runs',
+      filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
+    },
+    handleRealtimeUpdate,
+    !!currentWorkspace?.id
+  );
 
   const topAgents = useMemo(() => {
     if (!metrics?.tasksByAgent) return [];
@@ -147,10 +131,10 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Calculator className="w-4 h-4" />
-             <span className="relative">
-               ROI Temps Réel
-               <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-             </span>
+            <span className="relative">
+              {t("cockpit.roiRealtime")}
+              <span className="absolute -right-2 -top-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+            </span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -160,8 +144,7 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="text-xs">
-                    Calcul basé sur un coût horaire de {HOURLY_RATE_HUMAN}€/h,
-                    un multiplicateur IA de {AI_MULTIPLIER}x, et le coût plateforme de {MONTHLY_PLATFORM_COST}€/mois.
+                    {t("cockpit.roiTooltip", { rate: HOURLY_RATE_HUMAN, multiplier: AI_MULTIPLIER, cost: MONTHLY_PLATFORM_COST })}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -175,32 +158,30 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
             {metrics?.roi || 0}% ROI
           </Badge>
         </div>
-        <CardDescription>30 derniers jours</CardDescription>
+        <CardDescription>{t("cockpit.last30Days")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4 flex-1">
-        {/* Main Savings Display */}
         <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10">
           <div>
-            <p className="text-sm text-muted-foreground">Économies nettes</p>
+            <p className="text-sm text-muted-foreground">{t("cockpit.netSavings")}</p>
             <p className={cn("text-3xl font-bold", roiColor)}>
               {(metrics?.netSavings || 0) > 0 ? '+' : ''}{metrics?.netSavings || 0}€
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Temps gagné</p>
+            <p className="text-sm text-muted-foreground">{t("cockpit.timeSaved")}</p>
             <p className="text-2xl font-bold text-primary">
               {metrics?.timeSavedHours || 0}h
             </p>
           </div>
         </div>
 
-        {/* Metrics Grid */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-2 mb-1">
               <Bot className="w-4 h-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Tâches IA</span>
+              <span className="text-xs text-muted-foreground">{t("cockpit.aiTasks")}</span>
             </div>
             <p className="text-xl font-bold">{metrics?.totalTasks || 0}</p>
           </div>
@@ -208,7 +189,7 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-2 mb-1">
               <Clock className="w-4 h-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Durée IA</span>
+              <span className="text-xs text-muted-foreground">{t("cockpit.aiDuration")}</span>
             </div>
             <p className="text-xl font-bold">{metrics?.totalDurationHours || 0}h</p>
           </div>
@@ -216,7 +197,7 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-4 h-4 text-warning" />
-              <span className="text-xs text-muted-foreground">Équiv. humain</span>
+              <span className="text-xs text-muted-foreground">{t("cockpit.humanEquiv")}</span>
             </div>
             <p className="text-xl font-bold">{metrics?.humanEquivalentHours || 0}h</p>
           </div>
@@ -224,22 +205,21 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-4 h-4 text-warning" />
-              <span className="text-xs text-muted-foreground">Coûts IA</span>
+              <span className="text-xs text-muted-foreground">{t("cockpit.aiCostsLabel")}</span>
             </div>
             <p className="text-xl font-bold">{metrics?.aiCosts || 0}€</p>
           </div>
         </div>
 
-        {/* Top Agents */}
         {topAgents.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Agents les plus actifs</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("cockpit.mostActiveAgents")}</p>
             {topAgents.map((item, i) => (
               <div key={i} className="flex items-center gap-2">
                 <div className="flex-1">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="capitalize">{item.agent}</span>
-                    <span className="text-muted-foreground">{item.count} tâches</span>
+                    <span className="text-muted-foreground">{item.count} {t("cockpit.tasks")}</span>
                   </div>
                   <Progress 
                     value={(item.count / (metrics?.totalTasks || 1)) * 100} 
@@ -251,18 +231,17 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
           </div>
         )}
 
-        {/* Cost Breakdown Footer */}
         <div className="pt-3 border-t text-xs text-muted-foreground">
           <div className="flex justify-between">
-            <span>Valeur produite (équiv. humain)</span>
+            <span>{t("cockpit.valueProduced")}</span>
             <span className="font-medium text-foreground">+{metrics?.moneySavedFromTime || 0}€</span>
           </div>
           <div className="flex justify-between">
-            <span>Coût plateforme</span>
+            <span>{t("cockpit.platformCost")}</span>
             <span className="text-destructive">-{metrics?.platformCost || 0}€</span>
           </div>
           <div className="flex justify-between">
-            <span>Coûts IA (tokens)</span>
+            <span>{t("cockpit.aiCostsTokens")}</span>
             <span className="text-destructive">-{metrics?.aiCosts || 0}€</span>
           </div>
         </div>
