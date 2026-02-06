@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +22,12 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
 export function BillingOverview() {
+  const { t, i18n } = useTranslation();
   const {
     subscription,
     isLoading,
@@ -43,6 +45,7 @@ export function BillingOverview() {
   } = useSubscriptionStatus();
 
   const [portalLoading, setPortalLoading] = useState(false);
+  const dateLocale = i18n.language === "fr" ? fr : enUS;
 
   const openCustomerPortal = async () => {
     setPortalLoading(true);
@@ -53,7 +56,7 @@ export function BillingOverview() {
       
       if (data?.error) {
         if (data.code === "NO_STRIPE_CUSTOMER") {
-          toast.error("Aucun compte de facturation trouvé. Veuillez d'abord souscrire à un plan.");
+          toast.error(t("billing.toast.noStripeCustomer"));
         } else {
           throw new Error(data.error);
         }
@@ -65,7 +68,7 @@ export function BillingOverview() {
       }
     } catch (error) {
       console.error("Portal error:", error);
-      toast.error("Impossible d'ouvrir le portail de facturation");
+      toast.error(t("billing.toast.portalError"));
     } finally {
       setPortalLoading(false);
     }
@@ -85,17 +88,22 @@ export function BillingOverview() {
     return (
       <ModuleEmptyState
         icon={CreditCard}
-        moduleName="Facturation"
-        title="Aucun abonnement actif"
-        description="Choisissez un plan pour débloquer tous les agents IA et fonctionnalités de Growth OS."
-        features={["39 employés IA", "11 départements", "Runs illimités", "Support prioritaire"]}
+        moduleName={t("billing.moduleName")}
+        title={t("billing.noSubscription")}
+        description={t("billing.noSubscriptionDesc")}
+        features={[
+          t("billing.features.aiEmployees"),
+          t("billing.features.departments"),
+          t("billing.features.unlimitedRuns"),
+          t("billing.features.prioritySupport")
+        ]}
         primaryAction={{
-          label: "Choisir un plan",
+          label: t("billing.choosePlan"),
           href: "/onboarding",
           icon: Sparkles,
         }}
         secondaryAction={{
-          label: "Voir les tarifs",
+          label: t("billing.viewPricing"),
           href: "/#pricing",
         }}
       />
@@ -124,9 +132,9 @@ export function BillingOverview() {
                 <CardTitle className="text-xl">{planDisplayName}</CardTitle>
                 <CardDescription className="mt-0.5 flex items-center gap-2">
                   <Bot className="w-4 h-4" />
-                  {subscription?.is_full_company ? "39 employés IA • 11 départements" :
-                   subscription?.is_starter ? "11 employés IA • Accès Lite" :
-                   `${subscription?.enabled_departments?.length || 0} département(s)`}
+                  {subscription?.is_full_company ? t("billing.fullCompanyDesc") :
+                   subscription?.is_starter ? t("billing.starterDesc") :
+                   t("billing.departmentsCount", { count: subscription?.enabled_departments?.length || 0 })}
                 </CardDescription>
               </div>
             </div>
@@ -151,8 +159,7 @@ export function BillingOverview() {
             <div className="flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-border">
               <AlertTriangle className="w-4 h-4 text-warning" />
               <span className="text-sm">
-                Votre essai gratuit se termine dans <strong>{trialDaysRemaining} jours</strong>. 
-                Ajoutez un moyen de paiement pour continuer.
+                {t("billing.trialEndsIn", { days: trialDaysRemaining })}
               </span>
             </div>
           )}
@@ -162,7 +169,7 @@ export function BillingOverview() {
             <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
               <AlertTriangle className="w-4 h-4 text-destructive" />
               <span className="text-sm text-destructive">
-                Paiement en retard. Veuillez mettre à jour votre moyen de paiement pour éviter une interruption de service.
+                {t("billing.pastDueWarning")}
               </span>
             </div>
           )}
@@ -172,7 +179,7 @@ export function BillingOverview() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>
-                Prochain paiement le {format(nextBillingDate, "d MMMM yyyy", { locale: fr })}
+                {t("billing.nextPayment", { date: format(nextBillingDate, "d MMMM yyyy", { locale: dateLocale }) })}
               </span>
             </div>
           )}
@@ -182,9 +189,9 @@ export function BillingOverview() {
       {/* Subscription Management */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Gestion de l'abonnement</CardTitle>
+          <CardTitle className="text-lg">{t("billing.management.title")}</CardTitle>
           <CardDescription>
-            Gérez votre abonnement, vos factures et vos moyens de paiement via le portail Stripe.
+            {t("billing.management.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,7 +207,7 @@ export function BillingOverview() {
                 ) : (
                   <ExternalLink className="w-4 h-4 mr-2" />
                 )}
-                Gérer mon abonnement
+                {t("billing.management.manage")}
               </Button>
               
               <Button 
@@ -209,7 +216,7 @@ export function BillingOverview() {
                 disabled={portalLoading}
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Voir mes factures
+                {t("billing.management.viewInvoices")}
               </Button>
               
               {!isCancelled && (
@@ -220,19 +227,19 @@ export function BillingOverview() {
                   disabled={portalLoading}
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Annuler
+                  {t("billing.management.cancel")}
                 </Button>
               )}
             </div>
           ) : (
             <div className="text-center py-6">
               <p className="text-muted-foreground mb-4">
-                Votre compte n'est pas encore lié à un profil de facturation Stripe.
+                {t("billing.management.noStripeLink")}
               </p>
               <Button asChild>
                 <Link to="/onboarding">
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Configurer la facturation
+                  {t("billing.management.configureBilling")}
                 </Link>
               </Button>
             </div>

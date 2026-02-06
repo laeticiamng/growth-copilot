@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,7 @@ const DEPT_EMPLOYEES: Record<string, number> = {
 const TOTAL_AI_WORKFORCE = 39; // 37 in departments + 2 Direction (CGO + QCO)
 
 export default function Billing() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { 
     catalog, 
@@ -120,7 +122,7 @@ export default function Billing() {
   // Toggle a service (for demo/trial mode)
   const handleToggleService = async (service: Service, enabled: boolean) => {
     if (isFullCompany) {
-      toast.info("Tous les services sont inclus dans Full Company");
+      toast.info(t("billing.page.allServicesIncluded"));
       return;
     }
 
@@ -129,14 +131,14 @@ export default function Billing() {
       if (enabled) {
         const { error } = await enableService(service.id);
         if (error) throw error;
-        toast.success(`${service.name} activé`);
+        toast.success(t("billing.page.serviceEnabled", { name: service.name }));
       } else {
         const { error } = await disableService(service.id);
         if (error) throw error;
-        toast.success(`${service.name} désactivé`);
+        toast.success(t("billing.page.serviceDisabled", { name: service.name }));
       }
     } catch (error) {
-      toast.error("Erreur lors de la modification");
+      toast.error(t("billing.page.modifyError"));
     } finally {
       setTogglingService(null);
     }
@@ -175,7 +177,7 @@ export default function Billing() {
       }
     } catch (error) {
       console.error("Checkout error:", error);
-      toast.error("Erreur lors de la création du paiement. L'intégration Stripe sera bientôt disponible.");
+      toast.error(t("billing.page.checkoutError"));
     } finally {
       setCreatingCheckout(null);
     }
@@ -203,9 +205,9 @@ export default function Billing() {
       <div className="space-y-8">
         {/* Header */}
         <header>
-          <h1 className="text-3xl font-bold tracking-tight">Facturation</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("billing.page.title")}</h1>
           <p className="text-muted-foreground mt-1">
-            Gérez vos services et votre abonnement Portable Company.
+            {t("billing.page.subtitle")}
           </p>
         </header>
 
@@ -222,9 +224,9 @@ export default function Billing() {
                     <Crown className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Passez à Full Company</h3>
+                    <h3 className="font-semibold text-lg">{t("billing.page.upgradeToFull")}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {TOTAL_AI_WORKFORCE} employés IA • 11 départements • Runs illimités
+                      {t("billing.page.fullCompanyDetails", { employees: TOTAL_AI_WORKFORCE })}
                     </p>
                   </div>
                 </div>
@@ -232,10 +234,10 @@ export default function Billing() {
                   <div className="text-right">
                     <div className="text-2xl font-bold">
                       {FULL_COMPANY_PRICE.toLocaleString()}€
-                      <span className="text-sm font-normal text-muted-foreground">/mois</span>
+                      <span className="text-sm font-normal text-muted-foreground">{t("billing.page.perMonth")}</span>
                     </div>
                     <Badge variant="success" className="text-xs">
-                      Économisez {((9 * PRICE_PER_DEPT) - FULL_COMPANY_PRICE).toLocaleString()}€
+                      {t("billing.page.savings", { amount: ((9 * PRICE_PER_DEPT) - FULL_COMPANY_PRICE).toLocaleString() })}
                     </Badge>
                   </div>
                   <Button 
@@ -260,15 +262,15 @@ export default function Billing() {
         <section>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold">Départements disponibles</h2>
+              <h2 className="text-xl font-semibold">{t("billing.page.availableDepartments")}</h2>
               <p className="text-sm text-muted-foreground">
-                {PRICE_PER_DEPT.toLocaleString()}€/mois par département
+                {t("billing.page.pricePerDepartment", { price: PRICE_PER_DEPT.toLocaleString() })}
               </p>
             </div>
             {isFullCompany && (
               <Badge variant="success">
                 <Crown className="w-3 h-3 mr-1" />
-                Tout inclus
+                {t("billing.page.allIncluded")}
               </Badge>
             )}
           </div>
@@ -292,10 +294,10 @@ export default function Billing() {
                           <Icon className={`w-5 h-5 ${isEnabled ? "text-primary" : "text-muted-foreground"}`} />
                         </div>
                         <div>
-                          <p className="font-medium">{service.name}</p>
+                        <p className="font-medium">{service.name}</p>
                           <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
                             <Bot className="w-3 h-3" />
-                            {employees} employés IA
+                            {t("billing.page.aiEmployees", { count: employees })}
                           </p>
                         </div>
                       </div>
@@ -325,20 +327,20 @@ export default function Billing() {
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
             Core OS
-            <Badge variant="outline">Toujours inclus gratuitement</Badge>
+            <Badge variant="outline">{t("billing.page.alwaysFree")}</Badge>
           </h2>
           <Card variant="feature">
             <CardContent className="pt-6">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                 {[
-                  "Workspace & Sites",
-                  "RBAC & Permissions", 
-                  "Audit Log immuable",
-                  "Scheduler & Approbations",
-                  "AI Gateway",
-                  "Integrations Hub",
-                  "Voice Commands",
-                  "Executive Cockpit"
+                  t("billing.page.coreFeatures.workspaceSites"),
+                  t("billing.page.coreFeatures.rbac"),
+                  t("billing.page.coreFeatures.auditLog"),
+                  t("billing.page.coreFeatures.scheduler"),
+                  t("billing.page.coreFeatures.aiGateway"),
+                  t("billing.page.coreFeatures.integrations"),
+                  t("billing.page.coreFeatures.voiceCommands"),
+                  t("billing.page.coreFeatures.cockpit")
                 ].map(item => (
                   <div key={item} className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-primary" />
@@ -356,21 +358,21 @@ export default function Billing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CreditCard className="w-5 h-5" />
-                Paiement sécurisé
+                {t("billing.page.securePayment")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="p-6 rounded-xl bg-secondary/50 text-center border border-dashed border-border">
                 <CreditCard className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground mb-3">
-                  {isPaid ? "Votre carte est enregistrée" : "Aucune carte enregistrée"}
+                  {isPaid ? t("billing.page.cardRegistered") : t("billing.page.noCardRegistered")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {isPaid ? "Gérez vos moyens de paiement via le portail Stripe ci-dessus" : "Votre carte sera demandée lors du premier paiement"}
+                  {isPaid ? t("billing.page.manageViaPortal") : t("billing.page.cardOnFirstPayment")}
                 </p>
               </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">
-                🔒 Paiements sécurisés via Stripe • Pas d'engagement • Annulez à tout moment
+                🔒 {t("billing.page.secureViaStripe")}
               </p>
             </CardContent>
           </Card>
