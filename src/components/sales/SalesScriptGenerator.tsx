@@ -10,6 +10,8 @@ import { Sparkles, Copy, Download, RefreshCw, CheckCircle2, Loader2, Phone, Mail
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface SalesScript {
   id: string;
@@ -45,6 +47,7 @@ const COMMON_OBJECTIONS = [
 ];
 
 export function SalesScriptGenerator() {
+  const { i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [selectedType, setSelectedType] = useState<string>("discovery");
   const [context, setContext] = useState("");
@@ -153,7 +156,7 @@ Retourne un JSON avec:
     
     const content = `# ${generatedScript.title}
 Type: ${generatedScript.type}
-Généré le: ${new Date(generatedScript.createdAt).toLocaleDateString('fr-FR')}
+Généré le: ${new Date(generatedScript.createdAt).toLocaleDateString(getIntlLocale(i18n.language))}
 
 ## Script
 
@@ -268,7 +271,7 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
                 <CardTitle>{generatedScript.title}</CardTitle>
                 <CardDescription>
                   Script {SCRIPT_TYPES.find(t => t.value === generatedScript.type)?.label} généré le{" "}
-                  {new Date(generatedScript.createdAt).toLocaleString('fr-FR')}
+                  {new Date(generatedScript.createdAt).toLocaleString(getIntlLocale(i18n.language))}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -338,7 +341,7 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
                   <p className="font-medium">{script.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {SCRIPT_TYPES.find(t => t.value === script.type)?.label} •{" "}
-                    {new Date(script.createdAt).toLocaleDateString('fr-FR')}
+                    {new Date(script.createdAt).toLocaleDateString(getIntlLocale(i18n.language))}
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setGeneratedScript(script)}>

@@ -21,6 +21,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface HealthCheck {
   name: string;
@@ -42,6 +44,7 @@ interface DiagnosticData {
 }
 
 export function DiagnosticsPanel() {
+  const { i18n } = useTranslation();
   const { user, session } = useAuth();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
@@ -382,7 +385,7 @@ export function DiagnosticsPanel() {
         {/* Timestamp */}
         {diagnostics?.timestamp && (
           <p className="text-xs text-muted-foreground text-right">
-            Dernière vérification : {diagnostics.timestamp.toLocaleTimeString('fr-FR')}
+            Dernière vérification : {diagnostics.timestamp.toLocaleTimeString(getIntlLocale(i18n.language))}
           </p>
         )}
       </CardContent>

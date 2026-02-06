@@ -1928,6 +1928,12 @@ export const fr = {
       suggestFeature: "Proposez une fonctionnalité et votez pour celles qui vous intéressent.",
       suggestIdea: "Proposer une idée",
       implementationStatus: "Statut d'implémentation",
+      tags: {
+        product: "Produit",
+        integration: "Intégration",
+        security: "Sécurité",
+        ai: "IA",
+      },
     },
     mediaAssets: {
       title: "Media Assets",

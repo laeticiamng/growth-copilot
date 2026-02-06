@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getIntlLocale } from "@/lib/date-locale";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 
@@ -125,7 +126,7 @@ export function DailyBriefing({ className }: DailyBriefingProps) {
         recent_kpis: kpisRes.data?.slice(0, 3) || [],
         runs_last_24h: runsRes.data?.length || 0,
         pending_approvals: approvalsRes.data?.length || 0,
-        current_date: new Date().toLocaleDateString('fr-FR', { 
+        current_date: new Date().toLocaleDateString(getIntlLocale(i18n.language), { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +31,10 @@ import {
 import { useAgency } from "@/hooks/useAgency";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
+import { getIntlLocale } from "@/lib/date-locale";
 
 export default function Agency() {
+  const { i18n } = useTranslation();
   const { clients, metrics, tasks, team, loading, isAgency, addClient, removeClient, inviteTeamMember } = useAgency();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -232,7 +235,7 @@ export default function Agency() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {client.sites_count} site(s) • Dernière activité: {client.last_activity ? new Date(client.last_activity).toLocaleDateString('fr') : "Récent"}
+                        {client.sites_count} site(s) • Dernière activité: {client.last_activity ? new Date(client.last_activity).toLocaleDateString(getIntlLocale(i18n.language)) : "Récent"}
                       </p>
                     </div>
                     <div className="text-center px-4">

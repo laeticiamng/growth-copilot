@@ -1928,6 +1928,12 @@ export const en = {
       suggestFeature: "Suggest a feature and vote for the ones that interest you.",
       suggestIdea: "Suggest an idea",
       implementationStatus: "Implementation status",
+      tags: {
+        product: "Product",
+        integration: "Integration",
+        security: "Security",
+        ai: "AI",
+      },
     },
     mediaAssets: {
       title: "Media Assets",

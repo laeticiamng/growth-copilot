@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { useScheduledRuns, parseCronToHuman, generateCron, ScheduledRun } from "@/hooks/useScheduledRuns";
 import { RUN_TYPE_LABELS, RunType } from "@/hooks/useExecutiveRuns";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 const SCHEDULABLE_RUNS: { value: RunType; label: string }[] = [
   { value: 'DAILY_EXECUTIVE_BRIEF', label: 'Brief quotidien' },
@@ -48,6 +50,7 @@ interface ScheduleFormState {
 }
 
 export function ReportScheduler() {
+  const { i18n } = useTranslation();
   const { scheduledRuns, loading, createSchedule, deleteSchedule, toggleEnabled, isCreating } = useScheduledRuns();
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState<ScheduleFormState>({
@@ -88,7 +91,7 @@ export function ReportScheduler() {
   const formatNextRun = (nextRunAt: string | null) => {
     if (!nextRunAt) return 'Non planifié';
     const date = new Date(nextRunAt);
-    return date.toLocaleDateString('fr-FR', { 
+    return date.toLocaleDateString(getIntlLocale(i18n.language), { 
       weekday: 'short', 
       day: 'numeric', 
       month: 'short',

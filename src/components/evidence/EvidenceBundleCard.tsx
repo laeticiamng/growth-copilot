@@ -13,6 +13,8 @@ import {
   SOURCE_TYPE_LABELS,
   KeyMetric 
 } from "@/hooks/useEvidenceBundles";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -58,6 +60,7 @@ function MetricDisplay({ metric }: { metric: KeyMetric }) {
 }
 
 function SourceCard({ source }: { source: EvidenceSource }) {
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const sourceConfig = SOURCE_TYPE_LABELS[source.source_type];
   const confidenceConfig = CONFIDENCE_CONFIG[source.confidence];
@@ -99,7 +102,7 @@ function SourceCard({ source }: { source: EvidenceSource }) {
           )}
           {source.data_snapshot_at && (
             <p className="text-muted-foreground">
-              Capturé le {new Date(source.data_snapshot_at).toLocaleString('fr-FR')}
+              Capturé le {new Date(source.data_snapshot_at).toLocaleString(getIntlLocale(i18n.language))}
             </p>
           )}
           {source.reliability_notes && (
@@ -174,6 +177,7 @@ function ReasoningStep({ step, index }: { step: EvidenceReasoning; index: number
 }
 
 export function EvidenceBundleCard({ bundle, defaultExpanded = false }: EvidenceBundleCardProps) {
+  const { i18n } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const confidenceConfig = CONFIDENCE_CONFIG[bundle.overall_confidence];
 
@@ -292,7 +296,7 @@ export function EvidenceBundleCard({ bundle, defaultExpanded = false }: Evidence
 
             {/* Timestamp */}
             <p className="text-xs text-muted-foreground text-right">
-              Généré le {new Date(bundle.generated_at).toLocaleString('fr-FR')}
+              Généré le {new Date(bundle.generated_at).toLocaleString(getIntlLocale(i18n.language))}
             </p>
           </CollapsibleContent>
         </Collapsible>

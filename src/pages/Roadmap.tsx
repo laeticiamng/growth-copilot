@@ -25,36 +25,34 @@ export default function Roadmap() {
     considering: { label: t("pages.roadmap.underReview"), color: "bg-gray-400", icon: Vote },
   };
 
-  const isEn = !lang.startsWith("fr");
-
   const ROADMAP_ITEMS: Record<string, RoadmapItem[]> = {
     "Q1 2026": [
       { titleFr: "Evidence Bundles", titleEn: "Evidence Bundles", descriptionFr: "Traçabilité complète des décisions IA", descriptionEn: "Complete traceability of AI decisions", status: "done", tags: ["Core OS"] },
       { titleFr: "Voice Commands", titleEn: "Voice Commands", descriptionFr: "Contrôle vocal via ElevenLabs", descriptionEn: "Voice control via ElevenLabs", status: "done", tags: ["UX"] },
-      { titleFr: "HR & Legal Modules", titleEn: "HR & Legal Modules", descriptionFr: "Nouveaux départements RH et Juridique", descriptionEn: "New HR and Legal departments", status: "done", tags: [isEn ? "Product" : "Produit"] },
-      { titleFr: "Service Catalog", titleEn: "Service Catalog", descriptionFr: "Documentation détaillée par département", descriptionEn: "Detailed documentation per department", status: "done", tags: [isEn ? "Product" : "Produit"] },
+      { titleFr: "HR & Legal Modules", titleEn: "HR & Legal Modules", descriptionFr: "Nouveaux départements RH et Juridique", descriptionEn: "New HR and Legal departments", status: "done", tags: [t("pages.roadmap.tags.product")] },
+      { titleFr: "Service Catalog", titleEn: "Service Catalog", descriptionFr: "Documentation détaillée par département", descriptionEn: "Detailed documentation per department", status: "done", tags: [t("pages.roadmap.tags.product")] },
       { titleFr: "Mode Démo", titleEn: "Demo Mode", descriptionFr: "Toggle démo/production avec watermark", descriptionEn: "Demo/production toggle with watermark", status: "done", tags: ["UX"] },
       { titleFr: "Dashboard Coûts IA", titleEn: "AI Cost Dashboard", descriptionFr: "Suivi en temps réel des dépenses IA", descriptionEn: "Real-time AI cost tracking", status: "done", tags: ["Ops"] },
     ],
     "Q2 2026": [
-      { titleFr: "Salesforce Integration", titleEn: "Salesforce Integration", descriptionFr: "Sync bidirectionnel CRM", descriptionEn: "Bidirectional CRM sync", status: "planned", tags: [isEn ? "Integration" : "Intégration"], votes: 45 },
-      { titleFr: "HubSpot Integration", titleEn: "HubSpot Integration", descriptionFr: "Marketing automation sync", descriptionEn: "Marketing automation sync", status: "planned", tags: [isEn ? "Integration" : "Intégration"], votes: 38 },
-      { titleFr: "Slack Notifications", titleEn: "Slack Notifications", descriptionFr: "Alertes et commandes Slack", descriptionEn: "Slack alerts and commands", status: "in_progress", tags: [isEn ? "Integration" : "Intégration"], votes: 67 },
+      { titleFr: "Salesforce Integration", titleEn: "Salesforce Integration", descriptionFr: "Sync bidirectionnel CRM", descriptionEn: "Bidirectional CRM sync", status: "planned", tags: [t("pages.roadmap.tags.integration")], votes: 45 },
+      { titleFr: "HubSpot Integration", titleEn: "HubSpot Integration", descriptionFr: "Marketing automation sync", descriptionEn: "Marketing automation sync", status: "planned", tags: [t("pages.roadmap.tags.integration")], votes: 38 },
+      { titleFr: "Slack Notifications", titleEn: "Slack Notifications", descriptionFr: "Alertes et commandes Slack", descriptionEn: "Slack alerts and commands", status: "in_progress", tags: [t("pages.roadmap.tags.integration")], votes: 67 },
       { titleFr: "Mobile App (PWA)", titleEn: "Mobile App (PWA)", descriptionFr: "Application mobile responsive", descriptionEn: "Responsive mobile application", status: "planned", tags: ["UX"], votes: 89 },
-      { titleFr: "Multi-Factor Auth", titleEn: "Multi-Factor Auth", descriptionFr: "2FA pour sécurité renforcée", descriptionEn: "2FA for enhanced security", status: "planned", tags: [isEn ? "Security" : "Sécurité"], votes: 52 },
-      { titleFr: "API v2", titleEn: "API v2", descriptionFr: "API REST publique documentée", descriptionEn: "Documented public REST API", status: "in_progress", tags: [isEn ? "Product" : "Produit"], votes: 34 },
+      { titleFr: "Multi-Factor Auth", titleEn: "Multi-Factor Auth", descriptionFr: "2FA pour sécurité renforcée", descriptionEn: "2FA for enhanced security", status: "planned", tags: [t("pages.roadmap.tags.security")], votes: 52 },
+      { titleFr: "API v2", titleEn: "API v2", descriptionFr: "API REST publique documentée", descriptionEn: "Documented public REST API", status: "in_progress", tags: [t("pages.roadmap.tags.product")], votes: 34 },
     ],
     "Q3 2026": [
-      { titleFr: "Shopify Integration", titleEn: "Shopify Integration", descriptionFr: "E-commerce analytics et automation", descriptionEn: "E-commerce analytics and automation", status: "planned", tags: [isEn ? "Integration" : "Intégration"], votes: 23 },
+      { titleFr: "Shopify Integration", titleEn: "Shopify Integration", descriptionFr: "E-commerce analytics et automation", descriptionEn: "E-commerce analytics and automation", status: "planned", tags: [t("pages.roadmap.tags.integration")], votes: 23 },
       { titleFr: "Custom Dashboards", titleEn: "Custom Dashboards", descriptionFr: "Créez vos propres tableaux de bord", descriptionEn: "Create your own dashboards", status: "planned", tags: ["UX"], votes: 56 },
-      { titleFr: "White Label", titleEn: "White Label", descriptionFr: "Personnalisation marque pour agences", descriptionEn: "Brand customization for agencies", status: "considering", tags: [isEn ? "Product" : "Produit"], votes: 41 },
-      { titleFr: "AI Training", titleEn: "AI Training", descriptionFr: "Entraînement sur vos données", descriptionEn: "Training on your data", status: "considering", tags: [isEn ? "AI" : "IA"], votes: 78 },
+      { titleFr: "White Label", titleEn: "White Label", descriptionFr: "Personnalisation marque pour agences", descriptionEn: "Brand customization for agencies", status: "considering", tags: [t("pages.roadmap.tags.product")], votes: 41 },
+      { titleFr: "AI Training", titleEn: "AI Training", descriptionFr: "Entraînement sur vos données", descriptionEn: "Training on your data", status: "considering", tags: [t("pages.roadmap.tags.ai")], votes: 78 },
     ],
     "Future": [
-      { titleFr: "LinkedIn Integration", titleEn: "LinkedIn Integration", descriptionFr: "Gestion posts et analytics LinkedIn", descriptionEn: "LinkedIn posts and analytics management", status: "considering", tags: [isEn ? "Integration" : "Intégration"], votes: 112 },
-      { titleFr: "TikTok Ads", titleEn: "TikTok Ads", descriptionFr: "Gestion campagnes TikTok", descriptionEn: "TikTok campaign management", status: "considering", tags: [isEn ? "Integration" : "Intégration"], votes: 67 },
-      { titleFr: "Self-Hosted Version", titleEn: "Self-Hosted Version", descriptionFr: "Déploiement on-premise", descriptionEn: "On-premise deployment", status: "considering", tags: [isEn ? "Product" : "Produit"], votes: 34 },
-      { titleFr: "SOC 2 Compliance", titleEn: "SOC 2 Compliance", descriptionFr: "Certification sécurité", descriptionEn: "Security certification", status: "planned", tags: [isEn ? "Security" : "Sécurité"], votes: 29 },
+      { titleFr: "LinkedIn Integration", titleEn: "LinkedIn Integration", descriptionFr: "Gestion posts et analytics LinkedIn", descriptionEn: "LinkedIn posts and analytics management", status: "considering", tags: [t("pages.roadmap.tags.integration")], votes: 112 },
+      { titleFr: "TikTok Ads", titleEn: "TikTok Ads", descriptionFr: "Gestion campagnes TikTok", descriptionEn: "TikTok campaign management", status: "considering", tags: [t("pages.roadmap.tags.integration")], votes: 67 },
+      { titleFr: "Self-Hosted Version", titleEn: "Self-Hosted Version", descriptionFr: "Déploiement on-premise", descriptionEn: "On-premise deployment", status: "considering", tags: [t("pages.roadmap.tags.product")], votes: 34 },
+      { titleFr: "SOC 2 Compliance", titleEn: "SOC 2 Compliance", descriptionFr: "Certification sécurité", descriptionEn: "Security certification", status: "planned", tags: [t("pages.roadmap.tags.security")], votes: 29 },
     ],
   };
 
@@ -99,10 +97,10 @@ export default function Roadmap() {
                   {items.map((item, idx) => (
                     <div key={idx} className={`p-4 rounded-lg border ${item.status === "done" ? "bg-green-500/5 border-green-500/20" : item.status === "in_progress" ? "bg-blue-500/5 border-blue-500/20" : "bg-secondary/50 border-border"}`}>
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold">{isEn ? item.titleEn : item.titleFr}</h4>
+                        <h4 className="font-semibold">{lang.startsWith("fr") ? item.titleFr : item.titleEn}</h4>
                         <StatusBadge status={item.status} />
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{isEn ? item.descriptionEn : item.descriptionFr}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{lang.startsWith("fr") ? item.descriptionFr : item.descriptionEn}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex gap-1">{item.tags?.map(tag => (<Badge key={tag} variant="secondary" className="text-xs"><Tag className="w-2.5 h-2.5 mr-1" />{tag}</Badge>))}</div>
                         {item.votes && (<span className="text-sm text-muted-foreground flex items-center gap-1"><Vote className="w-3.5 h-3.5" />{item.votes}</span>)}

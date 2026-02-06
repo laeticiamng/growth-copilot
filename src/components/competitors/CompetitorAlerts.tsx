@@ -30,6 +30,8 @@ import {
   Settings,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface CompetitorAlert {
   id: string;
@@ -63,6 +65,7 @@ interface CompetitorAlertsProps {
 }
 
 export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsProps) {
+  const { i18n } = useTranslation();
   const [alerts, setAlerts] = useState<CompetitorAlert[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newAlert, setNewAlert] = useState({
@@ -183,7 +186,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
                 </div>
                 {alert.lastTriggered && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Dernière alerte : {alert.lastTriggered.toLocaleDateString('fr')}
+                    Dernière alerte : {alert.lastTriggered.toLocaleDateString(getIntlLocale(i18n.language))}
                   </p>
                 )}
               </div>
