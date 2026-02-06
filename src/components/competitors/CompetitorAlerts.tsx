@@ -43,13 +43,13 @@ interface CompetitorAlert {
   lastTriggered?: Date;
 }
 
-const alertTypeLabels = {
-  ranking: "Changement de position",
-  content: "Nouveau contenu",
-  backlinks: "Nouveaux backlinks",
-  social: "Activité sociale",
-  price: "Changement de prix",
-};
+const getAlertTypeLabels = (t: (key: string) => string) => ({
+  ranking: t("competitorAlerts.ranking"),
+  content: t("competitorAlerts.content"),
+  backlinks: t("competitorAlerts.backlinks"),
+  social: t("competitorAlerts.social"),
+  price: t("competitorAlerts.price"),
+});
 
 const alertTypeIcons = {
   ranking: Target,
@@ -65,7 +65,8 @@ interface CompetitorAlertsProps {
 }
 
 export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const alertTypeLabels = getAlertTypeLabels(t);
   const [alerts, setAlerts] = useState<CompetitorAlert[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newAlert, setNewAlert] = useState({
@@ -77,7 +78,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
 
   const handleAddAlert = async () => {
     if (!newAlert.competitorName) {
-      toast.error("Sélectionnez un concurrent");
+      toast.error(t("competitorAlerts.selectCompetitor"));
       return;
     }
 
@@ -99,7 +100,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
       condition: "change",
       threshold: 5,
     });
-    toast.success("Alerte créée");
+    toast.success(t("competitorAlerts.alertCreated"));
   };
 
   const toggleAlert = (id: string) => {
@@ -110,7 +111,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
 
   const deleteAlert = (id: string) => {
     setAlerts(prev => prev.filter(a => a.id !== id));
-    toast.success("Alerte supprimée");
+    toast.success(t("competitorAlerts.alertDeleted"));
   };
 
   return (
@@ -120,15 +121,15 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
           <div>
             <CardTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5" />
-              Alertes Concurrentielles
+              {t("competitorAlerts.title")}
             </CardTitle>
             <CardDescription>
-              Soyez notifié des changements importants
+              {t("competitorAlerts.subtitle")}
             </CardDescription>
           </div>
           <Button variant="hero" size="sm" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouvelle alerte
+            {t("competitorAlerts.newAlert")}
           </Button>
         </div>
       </CardHeader>
@@ -136,11 +137,11 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
         {alerts.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="font-medium">Aucune alerte configurée</p>
-            <p className="text-sm mt-1">Créez des alertes pour surveiller vos concurrents</p>
+            <p className="font-medium">{t("competitorAlerts.noAlerts")}</p>
+            <p className="text-sm mt-1">{t("competitorAlerts.noAlertsDesc")}</p>
             <Button variant="outline" className="mt-4" onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Créer une alerte
+              {t("competitorAlerts.createAlert")}
             </Button>
           </div>
         ) : (
@@ -164,9 +165,9 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {alert.condition === "increase" ? "Augmentation" :
-                         alert.condition === "decrease" ? "Diminution" : "Changement"} 
-                        {" "}de plus de {alert.threshold}%
+                        {alert.condition === "increase" ? t("competitorAlerts.increase") :
+                         alert.condition === "decrease" ? t("competitorAlerts.decrease") : t("competitorAlerts.change")} 
+                        {" > "}{alert.threshold}%
                       </p>
                     </div>
                   </div>
@@ -186,7 +187,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
                 </div>
                 {alert.lastTriggered && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Dernière alerte : {alert.lastTriggered.toLocaleDateString(getIntlLocale(i18n.language))}
+                    {t("competitorAlerts.lastAlert")}: {alert.lastTriggered.toLocaleDateString(getIntlLocale(i18n.language))}
                   </p>
                 )}
               </div>
@@ -199,17 +200,17 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouvelle alerte concurrentielle</DialogTitle>
+            <DialogTitle>{t("competitorAlerts.newAlertTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Concurrent</Label>
+              <Label>{t("competitorAlerts.competitor")}</Label>
               <Select
                 value={newAlert.competitorName}
                 onValueChange={(value) => setNewAlert(prev => ({ ...prev, competitorName: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un concurrent" />
+                  <SelectValue placeholder={t("competitorAlerts.selectCompetitor")} />
                 </SelectTrigger>
                 <SelectContent>
                   {competitors.map((c) => (
@@ -221,7 +222,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
               </Select>
             </div>
             <div>
-              <Label>Type d'alerte</Label>
+              <Label>{t("competitorAlerts.alertType")}</Label>
               <Select
                 value={newAlert.type}
                 onValueChange={(value) => setNewAlert(prev => ({ ...prev, type: value as CompetitorAlert["type"] }))}
@@ -239,7 +240,7 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
               </Select>
             </div>
             <div>
-              <Label>Condition</Label>
+              <Label>{t("competitorAlerts.condition")}</Label>
               <Select
                 value={newAlert.condition}
                 onValueChange={(value) => setNewAlert(prev => ({ ...prev, condition: value as CompetitorAlert["condition"] }))}
@@ -248,14 +249,14 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="increase">Augmentation</SelectItem>
-                  <SelectItem value="decrease">Diminution</SelectItem>
-                  <SelectItem value="change">Tout changement</SelectItem>
+                  <SelectItem value="increase">{t("competitorAlerts.increase")}</SelectItem>
+                  <SelectItem value="decrease">{t("competitorAlerts.decrease")}</SelectItem>
+                  <SelectItem value="change">{t("competitorAlerts.anyChange")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>Seuil (%)</Label>
+              <Label>{t("competitorAlerts.threshold")} (%)</Label>
               <Input
                 type="number"
                 min={1}
@@ -267,11 +268,11 @@ export function CompetitorAlerts({ competitors, onSaveAlert }: CompetitorAlertsP
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button variant="hero" onClick={handleAddAlert}>
               <Plus className="w-4 h-4 mr-2" />
-              Créer l'alerte
+              {t("competitorAlerts.createAlert")}
             </Button>
           </DialogFooter>
         </DialogContent>

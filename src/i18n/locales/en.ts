@@ -30,6 +30,7 @@ export const en = {
     accessDenied: "Access denied",
     accessDeniedDesc: "You don't have the required permissions to access this section.",
     contactAdmin: "Contact an administrator to get access",
+    days: "days",
   },
 
   // Navigation
@@ -3630,6 +3631,44 @@ export const en = {
     coreOS: "Core OS", departments: "Departments", integrationsTab: "Integrations",
     thirdPartyIntegrations: "Third-party Integrations",
     thirdPartyDesc: "Connections to external platforms for data synchronization",
+  },
+  contentPage: {
+    title: "Content & Keywords", subtitle: "Content strategy and SEO opportunities",
+    loading: "Loading content...", selectSite: "Select a site to see your data",
+    selectSiteFirst: "Select a site first", briefGenerated: "Brief generated successfully",
+    generationError: "Error during generation", generateBriefBtn: "Generate brief",
+    tabGenerate: "Generate content", tabKeywords: "Keywords", tabClusters: "Clusters", tabCalendar: "Calendar",
+    trackedKeywords: "Tracked keywords", totalVolume: "Total volume", opportunities: "Opportunities",
+    mainKeywords: "Main keywords", viewAll: "View all",
+    keyword: "Keyword", volume: "Volume", position: "Position", evolution: "Evolution",
+    mapped: "Mapped", new: "New",
+    contentPlan: "Content plan", contentPlanDesc: "In progress and planned articles",
+    newBrief: "New brief", target: "Target", words: "words",
+    published: "Published", draft: "Draft",
+    noBriefs: "No briefs created", noBriefsDesc: "Use the 'Generate content' tab to create your first brief",
+    emptyDesc: "Analyze your keywords, generate optimized SEO briefs and plan your content strategy.",
+    featureKeywords: "Keyword analysis", featureBriefs: "Automated SEO briefs",
+    featureClusters: "Semantic clusters", featureCalendar: "Editorial calendar",
+    connectGSC: "Connect Google Search Console", generateBrief: "Generate an AI brief",
+  },
+  competitorAlerts: {
+    title: "Competitor Alerts", subtitle: "Get notified of important changes",
+    newAlert: "New alert", noAlerts: "No alerts configured",
+    noAlertsDesc: "Create alerts to monitor your competitors", createAlert: "Create alert",
+    selectCompetitor: "Select a competitor", alertCreated: "Alert created", alertDeleted: "Alert deleted",
+    ranking: "Position change", content: "New content", backlinks: "New backlinks",
+    social: "Social activity", price: "Price change",
+    increase: "Increase", decrease: "Decrease", change: "Change", anyChange: "Any change",
+    lastAlert: "Last alert", newAlertTitle: "New competitor alert",
+    competitor: "Competitor", alertType: "Alert type", condition: "Condition", threshold: "Threshold",
+  },
+  backlinksAnalysis: {
+    selectSite: "Select a site to analyze", analysisDone: "Analysis complete",
+    demoMode: "Demo mode - simulated data", exportDownloaded: "Export downloaded",
+  },
+  roiCalculator: {
+    noWorkspace: "No workspace selected", analysisGenerated: "Analysis generated!",
+    generationError: "Error during generation", pdfInProgress: "PDF export in development",
   },
 };
 

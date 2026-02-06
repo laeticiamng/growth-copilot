@@ -24,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useTranslation } from "react-i18next";
 import { 
   LineChart, 
   Line, 
@@ -57,6 +58,7 @@ interface ExecutiveCommentary {
 }
 
 export function ROICalculator() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [costs, setCosts] = useState<CostsForm>({
     growthOS: 490,
@@ -104,7 +106,7 @@ export function ROICalculator() {
 
   const handleGenerateCommentary = async () => {
     if (!currentWorkspace) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("roiCalculator.noWorkspace"));
       return;
     }
 
@@ -113,7 +115,7 @@ export function ROICalculator() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Veuillez vous connecter");
+        toast.error(t("common.verifyingAuth"));
         setGenerating(false);
         return;
       }
@@ -185,20 +187,20 @@ Génère un commentaire exécutif avec des insights et recommandations.`;
 
       if (data?.success && data?.artifact?.executive_commentary) {
         setCommentary(data.artifact.executive_commentary as ExecutiveCommentary);
-        toast.success("Analyse générée !");
+        toast.success(t("roiCalculator.analysisGenerated"));
       } else {
-        throw new Error(data?.error || "Erreur lors de la génération");
+        throw new Error(data?.error || t("roiCalculator.generationError"));
       }
     } catch (err) {
       console.error("Commentary generation error:", err);
-      toast.error("Erreur lors de la génération");
+      toast.error(t("roiCalculator.generationError"));
     } finally {
       setGenerating(false);
     }
   };
 
   const handleExportPDF = async () => {
-    toast.info("Export PDF en cours de développement");
+    toast.info(t("roiCalculator.pdfInProgress"));
     // TODO: Call generate-report edge function
   };
 
