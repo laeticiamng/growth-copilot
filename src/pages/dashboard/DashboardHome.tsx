@@ -136,8 +136,8 @@ export default function DashboardHome() {
   const quickLaunchers = [
     {
       id: "weekly-plan",
-      label: t("cockpit.weeklyPlan"),
-      description: t("cockpit.weeklyPlanDesc"),
+      labelKey: "cockpit.weeklyPlan",
+      descriptionKey: "cockpit.weeklyPlanDesc",
       icon: Calendar,
       runType: "MARKETING_WEEK_PLAN",
       service: "marketing",
@@ -145,8 +145,8 @@ export default function DashboardHome() {
     },
     {
       id: "exec-brief",
-      label: t("cockpit.execBrief"),
-      description: t("cockpit.execBriefDesc"),
+      labelKey: "cockpit.execBrief",
+      descriptionKey: "cockpit.execBriefDesc",
       icon: FileText,
       runType: "DAILY_EXECUTIVE_BRIEF",
       service: "core-os",
