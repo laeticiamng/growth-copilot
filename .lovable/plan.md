@@ -1,129 +1,104 @@
 
 
-# Audit Multi-Roles Round 14 - Corrections Restantes
+# Group 2 - Final i18n String Migration (Round 14 Complete)
 
-## Constats
+## Scope
 
-Apres les rounds 12 et 13 (Batches 1-4), il reste encore des dettes techniques significatives dans 3 categories :
+Migrate all remaining ~300+ hardcoded French strings across dashboard pages, components, and hooks. This covers everything not yet handled by Batches 1-4 and Group 1.
 
-### 1. Dates/nombres hardcodes `'fr'`/`'fr-FR'` (55 occurrences dans 7 fichiers)
+## Files to Modify
 
-Les fichiers suivants n'ont pas ete migres vers `getIntlLocale(i18n.language)` :
+### Tier 1 - Dashboard Pages (~10 files, ~180 strings)
 
-| Fichier | Occurrences | Type |
-|---------|------------|------|
-| `src/components/cockpit/DailyBriefing.tsx` | 1 | `toLocaleDateString('fr-FR')` |
-| `src/pages/dashboard/Agency.tsx` | 1 | `toLocaleDateString('fr')` |
-| `src/components/team/TeamManagement.tsx` | 2 | `toLocaleDateString('fr')` |
-| `src/components/reports/ReportScheduler.tsx` | 1 | `toLocaleDateString('fr-FR')` |
-| `src/components/sales/SalesScriptGenerator.tsx` | 3 | `toLocaleDateString('fr-FR')` + `toLocaleString('fr-FR')` |
-| `src/components/competitors/CompetitorAlerts.tsx` | 1 | `toLocaleDateString('fr')` |
-| `src/components/webhooks/AdvancedWebhooks.tsx` | 1 | `toLocaleString('fr-FR')` |
-| `src/components/evidence/EvidenceBundleCard.tsx` | 2 | `toLocaleString('fr-FR')` |
-| `src/components/diagnostics/ConsoleLogsViewer.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
-| `src/components/diagnostics/SystemHealthDashboard.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
-| `src/components/diagnostics/DiagnosticsPanel.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
-| `src/components/kpi/KPITrendCard.tsx` | 2 | `Intl.NumberFormat('fr-FR')` + `toLocaleString('fr-FR')` |
-| `src/components/dashboard/KPISparkline.tsx` | 1 | `toLocaleString('fr-FR')` |
-| `src/components/dashboard/GoalsProgress.tsx` | 2 | `toLocaleString('fr-FR')` |
-| `src/lib/agents/report-generator.ts` | 3 | `toLocaleDateString('fr-FR')` (backend PDF - on conserve FR) |
+1. **Lifecycle.tsx** (~30 strings) - Pipeline stage names ("Nouveaux", "Contactes", "Qualifies", "Gagnes"), sales metric labels, toast messages, dialog labels, form placeholders, button labels. Add `useTranslation` import (missing).
 
-### 2. Textes francais hardcodes (~270 dans 29 fichiers components + 10 fichiers pages)
+2. **Agency.tsx** (~25 strings) - Already has `useTranslation` but only uses `i18n`. Add `t` destructuring. Migrate toasts, dialog labels, form labels, metric labels, status badges, empty state texts.
 
-Les pages dashboard non migrees :
-- `Agency.tsx` (~25 strings)
-- `Lifecycle.tsx` (~30 strings)
-- `CRO.tsx` (~20 strings)
-- `Integrations.tsx` (~20 strings)
-- `ApprovalsV2.tsx` (~15 strings restantes)
-- `Approvals.tsx` (~10 strings restantes)
-- `AccessReview.tsx` (~10 strings)
-- `MediaAssets.tsx` (~5 strings)
-- `Sites.tsx` (verifier)
-- `ConnectionStatus.tsx` (verifier)
+3. **CRO.tsx** (~20 strings) - Missing `useTranslation` entirely. Add import + hook. Migrate experiment form labels, toast messages, status badges, metric labels, confidence display text.
 
-Les composants non migres :
-- `TeamManagement.tsx` (~15 strings)
-- `ContentStrategyGenerator.tsx` (~8 strings)
-- `SocialPostGenerator.tsx` (~8 strings)
-- `AdsOptimizer.tsx` (~8 strings)
-- `LeadQualifier.tsx` (~10 strings)
-- `VoiceAssistant.tsx` (~4 strings)
-- `SmartResearchHub.tsx` (~4 strings)
-- `RepurposeEngine.tsx` (~4 strings)
-- `AlertRulesConfig.tsx` (~4 strings)
-- `AdvancedWebhooks.tsx` (~5 strings)
-- `EvidenceBundleCard.tsx` / `EvidenceBundleViewer.tsx` (~8 strings)
-- `GoogleSuperConnector.tsx` / `MetaSuperConnector.tsx` (~6 strings)
-- `BulkSiteImport.tsx` (~5 strings)
-- `DataExportButton.tsx` (~4 strings)
-- `NotificationPreferences.tsx` (~10 strings)
-- `ProtectedRoute.tsx` (1 string)
-- `PaginatedList.tsx` (2 strings)
-- `data-table-pagination.tsx` (1 string)
+4. **Integrations.tsx** (~20 strings) - Missing `useTranslation` entirely. All `platformTools` descriptions, capability labels, category names, status badges. Add import + hook.
 
-### 3. Imports doublons (4 fichiers)
+5. **ApprovalsV2.tsx** (~15 strings) - Already has `useTranslation`. Migrate remaining toast messages, approval/rejection labels, autopilot rule labels.
 
-| Fichier | Probleme |
-|---------|----------|
-| `Lifecycle.tsx` | `useState` et `useCallback` sur 2 lignes separees |
-| `Sites.tsx` | `useState` et `useCallback` sur 2 lignes separees |
-| `CRO.tsx` | `useState` et `useCallback` sur 2 lignes separees |
-| `Diagnostics.tsx` | `useState, useEffect` et `useCallback` sur 2 lignes separees |
+6. **AccessReview.tsx** (~10 strings) - Missing `useTranslation`. Add import + hook. Migrate risk config labels, table headers, status badges, date formatting.
 
-### 4. Roadmap.tsx - anti-pattern `isEn ?`
+7. **HR.tsx** - Verify; has `useTranslation` already. Check for remaining hardcoded strings ("Creation...", "Creer").
 
-`Roadmap.tsx` utilise encore `isEn ?` pour les tags (36 occurrences). Doit etre migre vers `t()`.
+8. **Legal.tsx** - Same verification needed ("Creation...", "Creer", "Annuler").
 
-## Plan de Corrections
+9. **Sites.tsx** - Language option labels ("Francais", "Anglais", "Espagnol") need to be localized.
 
-Le volume est trop important pour un seul message (~40 fichiers). Je propose de traiter en 2 groupes prioritaires :
+10. **ConnectionStatus.tsx** - Verify remaining strings.
 
-### Groupe 1 (ce message) - Dates + imports + Roadmap (~18 fichiers)
+### Tier 2 - Components (~20 files, ~120 strings)
 
-1. **Corriger toutes les dates/nombres hardcodes** dans les 14 fichiers frontend (exclure `report-generator.ts` qui genere du PDF serveur)
-2. **Fusionner les imports doublons** dans 4 fichiers
-3. **Migrer Roadmap.tsx** vers `t()` pour les tags
+11. **GoogleSuperConnector.tsx** (~6 strings) - Toast messages, button labels.
+12. **MetaSuperConnector.tsx** (~4 strings) - Same pattern.
+13. **GA4MetricsWidget.tsx** (~6 strings) - Toast messages, labels.
+14. **MetaMetricsWidget.tsx** (~6 strings) - Toast messages, labels.
+15. **SalesScriptGenerator.tsx** (~8 strings) - Toast messages, form labels.
+16. **LeadQualifier.tsx** (~10 strings) - Tab labels, form labels, toast messages.
+17. **ContentStrategyGenerator.tsx** (~8 strings) - Toast/labels.
+18. **SocialPostGenerator.tsx** (~8 strings) - Toast/labels.
+19. **AdsOptimizer.tsx** (~8 strings) - Toast/labels.
+20. **CROSuggestionsAI.tsx** (~6 strings) - Toast/labels.
+21. **RepurposeEngine.tsx** (~4 strings) - Toast/labels.
+22. **SmartResearchHub.tsx** (~4 strings) - Toast/labels.
+23. **AlertRulesConfig.tsx** (~4 strings) - Labels.
+24. **AdvancedWebhooks.tsx** (~5 strings) - Labels, toasts.
+25. **EvidenceBundleCard.tsx** / **EvidenceBundleViewer.tsx** (~8 strings) - Labels.
+26. **BulkSiteImport.tsx** (~5 strings) - Labels, toasts.
+27. **DataExportButton.tsx** (~4 strings) - Labels.
+28. **NotificationPreferences.tsx** (~10 strings) - Section labels, toggle labels.
+29. **TeamManagement.tsx** (~15 strings) - Labels, toasts, dialog text.
 
-Pour chaque fichier date :
-- Ajouter `import { getIntlLocale } from "@/lib/date-locale"` si absent
-- Ajouter `useTranslation` si absent
-- Remplacer `'fr'` / `'fr-FR'` par `getIntlLocale(i18n.language)`
+### Tier 3 - Hooks (~2 files, ~6 strings)
 
-### Groupe 2 (message suivant) - Textes hardcodes (~25 fichiers)
+30. **useNetworkOffline.tsx** (~4 strings) - Toast messages ("Connexion retablie", "Connexion perdue").
+31. **useAutopilotSettings.tsx** (~2 strings) - Toast messages.
 
-Migrer les ~270 strings francaises restantes dans les pages et composants listes ci-dessus.
+### Tier 4 - Agent Profile Data (Special Case)
 
-## Details Techniques - Groupe 1
+32. **AgentProfileDialog.tsx** - Contains ~240 hardcoded French strings for agent persona data (skills, education, languages, certifications). These are thematic/character data, not UI strings. Will be kept as-is since they define agent identities and localizing them would change the product's French business persona concept.
 
-### Fichiers a modifier :
+## i18n Key Organization
 
-1. `src/components/cockpit/DailyBriefing.tsx` - ajouter `getIntlLocale`, remplacer ligne 128
-2. `src/pages/dashboard/Agency.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 235
-3. `src/components/team/TeamManagement.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer lignes 188, 255
-4. `src/components/reports/ReportScheduler.tsx` - ajouter `getIntlLocale`, remplacer ligne 91
-5. `src/components/sales/SalesScriptGenerator.tsx` - ajouter `getIntlLocale`, remplacer lignes 156, 271, 341
-6. `src/components/competitors/CompetitorAlerts.tsx` - ajouter `getIntlLocale`, remplacer ligne 186
-7. `src/components/webhooks/AdvancedWebhooks.tsx` - ajouter `getIntlLocale`, remplacer ligne 527
-8. `src/components/evidence/EvidenceBundleCard.tsx` - ajouter `getIntlLocale`, remplacer lignes 102, 295
-9. `src/components/diagnostics/ConsoleLogsViewer.tsx` - ajouter `getIntlLocale`, remplacer ligne 154
-10. `src/components/diagnostics/SystemHealthDashboard.tsx` - ajouter `getIntlLocale`, remplacer ligne 244
-11. `src/components/diagnostics/DiagnosticsPanel.tsx` - ajouter `getIntlLocale`, remplacer ligne 385
-12. `src/components/kpi/KPITrendCard.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer lignes 55, 59
-13. `src/components/dashboard/KPISparkline.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 56
-14. `src/components/dashboard/GoalsProgress.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 143
+New keys will be added under existing namespaces in `en.ts` and `fr.ts`:
 
-### Imports doublons :
-15. `src/pages/dashboard/Lifecycle.tsx` - fusionner lignes 1-2
-16. `src/pages/dashboard/Sites.tsx` - fusionner lignes 1-2
-17. `src/pages/dashboard/CRO.tsx` - fusionner lignes 1-2
-18. `src/pages/dashboard/Diagnostics.tsx` - fusionner lignes 1-2
+- `modules.lifecycle.*` - Pipeline, leads, deals
+- `modules.agency.*` - Agency management
+- `modules.cro.*` - Conversion optimization
+- `modules.integrations.*` - Platform tools and connections
+- `modules.approvalsV2.*` - Advanced approvals
+- `modules.accessReview.*` - Access review
+- `components.connectors.*` - Google/Meta connectors
+- `components.sales.*` - Sales script generator
+- `components.leadQualifier.*` - Lead scoring
+- `components.notifications.*` - Notification preferences
+- `hooks.network.*` - Network status toasts
+- `hooks.autopilot.*` - Autopilot toasts
 
-### Roadmap :
-19. `src/pages/Roadmap.tsx` - migrer tags `isEn ?` vers des cles i18n `pages.roadmap.tags.*`
+## Technical Approach
 
-### Nouvelles cles i18n a ajouter :
-- `pages.roadmap.tags.product` / `pages.roadmap.tags.integration` / `pages.roadmap.tags.security` / `pages.roadmap.tags.ai` dans `en.ts` et `fr.ts`
+For each file:
+1. Add `import { useTranslation } from "react-i18next"` if missing
+2. Add `const { t } = useTranslation()` or add `t` to existing destructuring
+3. Replace every hardcoded French string with `t("namespace.key")`
+4. Add corresponding keys to `en.ts` and `fr.ts`
 
-**Total Groupe 1 : 19 fichiers + en.ts + fr.ts = 21 fichiers**
+For hooks (non-component files):
+- Use inline `i18next.t()` import from `i18next` directly since hooks don't have access to the React hook version at the module level
+
+## Estimated Impact
+
+- **~32 files modified** + `en.ts` + `fr.ts` = 34 files total
+- **~300 new i18n keys** added
+- **Zero hardcoded French strings remaining** in UI-facing code after this round (except agent persona data which is intentionally French)
+
+## Execution Strategy
+
+Due to the high volume, this will be split into 3 sub-batches:
+- **Sub-batch A**: Tier 1 dashboard pages (10 files)
+- **Sub-batch B**: Tier 2 components (20 files)
+- **Sub-batch C**: Tier 3 hooks + en.ts/fr.ts key additions
 
