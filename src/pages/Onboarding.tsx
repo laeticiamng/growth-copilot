@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Loader2, Globe, Target, Rocket, CheckCircle2, ArrowRight, Sparkles, 
   Building2, Crown, Puzzle, Briefcase, TrendingUp, Shield, Code, 
-  BarChart3, HeadphonesIcon, Settings, ArrowLeft, CreditCard, Gift
+  BarChart3, HeadphonesIcon, Settings, ArrowLeft, CreditCard, Gift,
+  Users, Scale
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,7 +64,7 @@ export default function Onboarding() {
   const { workspaces } = useWorkspace();
   const navigate = useNavigate();
 
-  // Translations
+  // Translations - including HR and Legal for 11 departments total
   const txt = {
     marketing: isEn ? "Marketing" : "Marketing",
     marketingDesc: isEn ? "SEO, Content, Ads, Social" : "SEO, Contenu, Ads, Social",
@@ -83,6 +84,10 @@ export default function Onboarding() {
     supportDesc: isEn ? "Tickets, Knowledge Base" : "Tickets, Knowledge Base",
     governance: isEn ? "Governance" : "Gouvernance",
     governanceDesc: isEn ? "IT, Policies, Access" : "IT, Policies, Access",
+    hr: isEn ? "Human Resources" : "Ressources Humaines",
+    hrDesc: isEn ? "Recruiting, Onboarding, Reviews" : "Recrutement, Onboarding, Évaluations",
+    legal: isEn ? "Legal" : "Juridique",
+    legalDesc: isEn ? "Contracts, Compliance, GDPR" : "Contrats, Conformité, RGPD",
     traffic: isEn ? "Increase organic traffic" : "Augmenter le trafic organique",
     leads: isEn ? "Generate qualified leads" : "Générer des leads qualifiés",
     brand: isEn ? "Develop brand awareness" : "Développer la notoriété",
@@ -150,6 +155,8 @@ export default function Onboarding() {
     { id: "data", name: txt.data, icon: BarChart3, description: txt.dataDesc, color: "text-cyan-500" },
     { id: "support", name: txt.support, icon: HeadphonesIcon, description: txt.supportDesc, color: "text-pink-500" },
     { id: "governance", name: txt.governance, icon: Settings, description: txt.governanceDesc, color: "text-gray-500" },
+    { id: "hr", name: txt.hr, icon: Users, description: txt.hrDesc, color: "text-emerald-500" },
+    { id: "legal", name: txt.legal, icon: Scale, description: txt.legalDesc, color: "text-indigo-500" },
   ];
 
   const OBJECTIVES = [

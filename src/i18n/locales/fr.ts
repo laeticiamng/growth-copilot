@@ -60,6 +60,7 @@ export const fr = {
   landing: {
     navbar: {
       features: "Fonctionnalités",
+      departments: "Départements",
       howItWorks: "Comment ça marche",
       pricing: "Tarifs",
       faq: "FAQ",
