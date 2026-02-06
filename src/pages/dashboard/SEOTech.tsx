@@ -144,7 +144,6 @@ export default function SEOTech() {
       
       setHistory(historyItems);
       
-      // Load the most recent completed audit as current result
       const lastCompleted = historyItems.find(h => h.status === "done" && h.outputs?.score);
       if (lastCompleted) {
         setResult(lastCompleted.outputs);
@@ -156,10 +155,9 @@ export default function SEOTech() {
     }
   };
 
-  // Run new audit
   const runAudit = async () => {
     if (!currentWorkspace?.id || !currentSite?.id) {
-      toast.error("Veuillez sélectionner un site");
+      toast.error(t("seoPage.selectSiteToast"));
       return;
     }
     
@@ -179,23 +177,22 @@ export default function SEOTech() {
       if (data?.outputs) {
         setResult(data.outputs as SEOAuditResult);
         await loadHistory();
-        toast.success("Audit SEO terminé !");
+        toast.success(t("seoPage.auditComplete"));
       } else if (data?.error) {
         throw new Error(data.error);
       }
     } catch (err) {
       console.error("Audit error:", err);
-      toast.error(err instanceof Error ? err.message : "Erreur lors de l'audit");
+      toast.error(err instanceof Error ? err.message : t("seoPage.auditError"));
     } finally {
       setLoading(false);
     }
   };
 
-  // Export results
-  const exportResults = (format: "json" | "csv") => {
+  const exportResults = (fmt: "json" | "csv") => {
     if (!result) return;
     
-    if (format === "json") {
+    if (fmt === "json") {
       const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -204,7 +201,7 @@ export default function SEOTech() {
       a.click();
       URL.revokeObjectURL(url);
     } else {
-      const headers = ["ID", "Sévérité", "Catégorie", "Titre", "Description", "Effort"];
+      const headers = ["ID", t("seoPage.critical"), t("seoPage.category"), "Title", t("seoPage.description"), "Effort"];
       const rows = result.issues.map((i) => [
         i.id,
         i.severity,
@@ -224,7 +221,6 @@ export default function SEOTech() {
     }
   };
 
-  // View historical audit
   const viewHistoricalAudit = (item: AuditHistoryItem) => {
     setSelectedHistoryItem(item);
     if (item.outputs) {
@@ -233,7 +229,6 @@ export default function SEOTech() {
     setShowHistoryDialog(false);
   };
 
-  // Severity icon
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case "critical":
@@ -245,21 +240,19 @@ export default function SEOTech() {
     }
   };
 
-  // Effort badge
   const getEffortBadge = (effort: string) => {
     switch (effort) {
       case "low":
-        return <Badge variant="success" className="text-xs">Facile</Badge>;
+        return <Badge variant="success" className="text-xs">{t("seoPage.easy")}</Badge>;
       case "medium":
-        return <Badge variant="secondary" className="text-xs">Moyen</Badge>;
+        return <Badge variant="secondary" className="text-xs">{t("seoPage.medium")}</Badge>;
       case "high":
-        return <Badge variant="destructive" className="text-xs">Complexe</Badge>;
+        return <Badge variant="destructive" className="text-xs">{t("seoPage.complex")}</Badge>;
       default:
         return null;
     }
   };
 
-  // Score color
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-chart-3";
     if (score >= 60) return "text-warning";
@@ -271,13 +264,13 @@ export default function SEOTech() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">SEO Technique</h1>
+          <h1 className="text-2xl font-bold">{t("seoPage.title")}</h1>
           <p className="text-muted-foreground">
-            Audit technique et optimisations du site
+            {t("seoPage.subtitle")}
           </p>
           {!currentSite && (
             <p className="text-sm text-warning mt-1">
-              ⚠️ Veuillez sélectionner un site pour lancer l'audit
+              {t("seoPage.selectSiteWarning")}
             </p>
           )}
         </div>
@@ -288,7 +281,7 @@ export default function SEOTech() {
             disabled={history.length === 0}
           >
             <History className="w-4 h-4 mr-2" />
-            Historique ({history.length})
+            {t("seoPage.history")} ({history.length})
           </Button>
           {result && (
             <Button variant="outline" onClick={() => exportResults("json")}>
@@ -307,17 +300,17 @@ export default function SEOTech() {
               <Target className="w-12 h-12 text-primary" />
             </div>
             <h3 className="text-2xl font-bold mb-2">
-              Lancer l'audit SEO de {currentSite.name || currentSite.url}
+              {t("seoPage.launchAuditOf", { name: currentSite.name || currentSite.url })}
             </h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Analysez votre site pour détecter les problèmes SEO techniques et obtenir un plan d'action prioritaire.
+              {t("seoPage.launchDesc")}
             </p>
             <Button variant="hero" size="lg" onClick={runAudit}>
               <Play className="w-5 h-5 mr-2" />
-              Lancer l'audit SEO
+              {t("seoPage.launchAudit")}
             </Button>
             <p className="text-xs text-muted-foreground mt-4">
-              Durée estimée : 30-60 secondes
+              {t("seoPage.estimatedTime")}
             </p>
           </CardContent>
         </Card>
@@ -325,7 +318,7 @@ export default function SEOTech() {
 
       {/* No Site Selected */}
       {!currentSite && (
-        <NoSiteEmptyState moduleName="SEO Technique" icon={Target} />
+        <NoSiteEmptyState moduleName={t("seoPage.title")} icon={Target} />
       )}
 
       {/* Loading State - Skeleton */}
@@ -334,9 +327,9 @@ export default function SEOTech() {
           <Card variant="gradient">
             <CardContent className="py-8 text-center">
               <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-lg font-medium">Analyse SEO en cours...</p>
+              <p className="text-lg font-medium">{t("seoPage.analyzing")}</p>
               <p className="text-sm text-muted-foreground">
-                L'IA analyse {currentSite?.name || currentSite?.url}
+                {t("seoPage.analyzingAI", { name: currentSite?.name || currentSite?.url })}
               </p>
             </CardContent>
           </Card>
@@ -362,11 +355,11 @@ export default function SEOTech() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              Dernière analyse : {format(new Date(result.generated_at), "PPp", { locale: getDateLocale(i18n.language) })}
+              {t("seoPage.lastAnalysis")} : {format(new Date(result.generated_at), "PPp", { locale: getDateLocale(i18n.language) })}
             </div>
             <Button variant="outline" onClick={runAudit} disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-              Relancer l'audit
+              {t("seoPage.rerunAudit")}
             </Button>
           </div>
 
@@ -377,24 +370,8 @@ export default function SEOTech() {
               <CardContent className="pt-6 text-center">
                 <div className="relative w-32 h-32 mx-auto mb-4">
                   <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      strokeWidth="12"
-                      fill="none"
-                      className="stroke-background/30"
-                    />
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      strokeWidth="12"
-                      fill="none"
-                      strokeDasharray={`${result.score * 3.52} 352`}
-                      className="stroke-primary-foreground transition-all duration-1000"
-                      strokeLinecap="round"
-                    />
+                    <circle cx="64" cy="64" r="56" strokeWidth="12" fill="none" className="stroke-background/30" />
+                    <circle cx="64" cy="64" r="56" strokeWidth="12" fill="none" strokeDasharray={`${result.score * 3.52} 352`} className="stroke-primary-foreground transition-all duration-1000" strokeLinecap="round" />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className={`text-4xl font-bold ${getScoreColor(result.score)}`}>
@@ -402,8 +379,8 @@ export default function SEOTech() {
                     </span>
                   </div>
                 </div>
-                <p className="font-medium text-lg">Score SEO</p>
-                <p className="text-sm opacity-80">{result.issues.length} problèmes détectés</p>
+                <p className="font-medium text-lg">{t("seoPage.seoScore")}</p>
+                <p className="text-sm opacity-80">{t("seoPage.issuesDetected", { count: result.issues.length })}</p>
               </CardContent>
             </Card>
 
@@ -415,7 +392,7 @@ export default function SEOTech() {
                     <Zap className={`w-5 h-5 ${result.metrics.estimated_page_speed === "fast" ? "text-chart-3" : result.metrics.estimated_page_speed === "medium" ? "text-warning" : "text-destructive"}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Vitesse</p>
+                    <p className="text-sm text-muted-foreground">{t("seoPage.speed")}</p>
                     <p className="font-medium capitalize">{result.metrics.estimated_page_speed}</p>
                   </div>
                 </div>
@@ -429,8 +406,8 @@ export default function SEOTech() {
                     <CheckCircle2 className={`w-5 h-5 ${result.metrics.mobile_friendly ? "text-chart-3" : "text-destructive"}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Mobile</p>
-                    <p className="font-medium">{result.metrics.mobile_friendly ? "Compatible" : "Problèmes"}</p>
+                    <p className="text-sm text-muted-foreground">{t("seoPage.mobile")}</p>
+                    <p className="font-medium">{result.metrics.mobile_friendly ? t("seoPage.compatible") : t("seoPage.problemsLabel")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -443,8 +420,8 @@ export default function SEOTech() {
                     <Shield className={`w-5 h-5 ${result.metrics.https_status ? "text-chart-3" : "text-destructive"}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">HTTPS</p>
-                    <p className="font-medium">{result.metrics.https_status ? "Sécurisé" : "Non sécurisé"}</p>
+                    <p className="text-sm text-muted-foreground">{t("seoPage.https")}</p>
+                    <p className="font-medium">{result.metrics.https_status ? t("seoPage.secured") : t("seoPage.unsecured")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -457,8 +434,10 @@ export default function SEOTech() {
                     <TrendingUp className={`w-5 h-5 ${result.metrics.indexation_risk === "low" ? "text-chart-3" : result.metrics.indexation_risk === "medium" ? "text-warning" : "text-destructive"}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Indexation</p>
-                    <p className="font-medium capitalize">Risque {result.metrics.indexation_risk === "low" ? "faible" : result.metrics.indexation_risk === "medium" ? "moyen" : "élevé"}</p>
+                    <p className="text-sm text-muted-foreground">{t("seoPage.indexation")}</p>
+                    <p className="font-medium capitalize">
+                      {result.metrics.indexation_risk === "low" ? t("seoPage.riskLow") : result.metrics.indexation_risk === "medium" ? t("seoPage.riskMedium") : t("seoPage.riskHigh")}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -468,22 +447,22 @@ export default function SEOTech() {
           {/* Issues */}
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Problèmes détectés</CardTitle>
+              <CardTitle>{t("seoPage.detectedIssues")}</CardTitle>
               <CardDescription>
-                {result.issues.length} problèmes à résoudre, triés par sévérité
+                {t("seoPage.issuesSorted", { count: result.issues.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="all">
                 <TabsList>
                   <TabsTrigger value="all">
-                    Tous ({result.issues.length})
+                    {t("seoPage.all")} ({result.issues.length})
                   </TabsTrigger>
                   <TabsTrigger value="critical">
-                    Critiques ({result.issues.filter((i) => i.severity === "critical").length})
+                    {t("seoPage.critical")} ({result.issues.filter((i) => i.severity === "critical").length})
                   </TabsTrigger>
                   <TabsTrigger value="warning">
-                    Warnings ({result.issues.filter((i) => i.severity === "warning").length})
+                    {t("seoPage.warnings")} ({result.issues.filter((i) => i.severity === "warning").length})
                   </TabsTrigger>
                 </TabsList>
 
@@ -514,13 +493,13 @@ export default function SEOTech() {
                           </div>
                           <Button variant="ghost" size="sm">
                             <Eye className="w-4 h-4 mr-1" />
-                            Voir
+                            {t("seoPage.seeDetail")}
                           </Button>
                         </div>
                       ))}
                     {result.issues.filter((i) => tabValue === "all" || i.severity === tabValue).length === 0 && (
                       <p className="text-muted-foreground text-center py-8">
-                        Aucun problème dans cette catégorie
+                        {t("seoPage.noCategoryIssues")}
                       </p>
                     )}
                   </TabsContent>
@@ -532,9 +511,9 @@ export default function SEOTech() {
           {/* Action Plan */}
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Plan d'action prioritaire</CardTitle>
+              <CardTitle>{t("seoPage.priorityActionPlan")}</CardTitle>
               <CardDescription>
-                Actions recommandées classées par priorité
+                {t("seoPage.recommendedActions")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -566,9 +545,9 @@ export default function SEOTech() {
           {/* Opportunities */}
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Opportunités d'amélioration</CardTitle>
+              <CardTitle>{t("seoPage.improvementOpportunities")}</CardTitle>
               <CardDescription>
-                Actions optionnelles pour aller plus loin
+                {t("seoPage.optionalActions")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -595,23 +574,23 @@ export default function SEOTech() {
               {selectedIssue?.title}
             </DialogTitle>
             <DialogDescription>
-              Catégorie : {selectedIssue?.category.replace(/_/g, " ")}
+              {t("seoPage.category")} : {selectedIssue?.category.replace(/_/g, " ")}
             </DialogDescription>
           </DialogHeader>
           {selectedIssue && (
             <div className="space-y-4">
               <div>
-                <h4 className="font-medium mb-2">Description</h4>
+                <h4 className="font-medium mb-2">{t("seoPage.description")}</h4>
                 <p className="text-muted-foreground">{selectedIssue.description}</p>
               </div>
               <Separator />
               <div>
-                <h4 className="font-medium mb-2">Recommandation</h4>
+                <h4 className="font-medium mb-2">{t("seoPage.recommendation")}</h4>
                 <p className="text-muted-foreground">{selectedIssue.recommendation}</p>
               </div>
               <Separator />
               <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">Effort estimé :</span>
+                <span className="text-sm text-muted-foreground">{t("seoPage.estimatedEffort")} :</span>
                 {getEffortBadge(selectedIssue.effort)}
               </div>
             </div>
@@ -623,9 +602,9 @@ export default function SEOTech() {
       <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Historique des audits</DialogTitle>
+            <DialogTitle>{t("seoPage.auditHistory")}</DialogTitle>
             <DialogDescription>
-              Consultez vos audits SEO précédents
+              {t("seoPage.previousAudits")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -637,20 +616,20 @@ export default function SEOTech() {
               >
                 <div>
                   <p className="font-medium">
-                    Audit du {format(new Date(item.created_at), "PPp", { locale: getDateLocale(i18n.language) })}
+                    {t("seoPage.auditOf", { date: format(new Date(item.created_at), "PPp", { locale: getDateLocale(i18n.language) }) })}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Score : {item.outputs?.score || "N/A"}/100 • {item.outputs?.issues?.length || 0} problèmes
+                    {t("seoPage.score")} : {item.outputs?.score || "N/A"}/100 • {item.outputs?.issues?.length || 0} {t("seoPage.issuesCount")}
                   </p>
                 </div>
                 <Badge variant={item.status === "done" ? "success" : "secondary"}>
-                  {item.status === "done" ? "Terminé" : item.status}
+                  {item.status === "done" ? t("seoPage.done") : item.status}
                 </Badge>
               </div>
             ))}
             {history.length === 0 && (
               <p className="text-center text-muted-foreground py-8">
-                Aucun audit précédent
+                {t("seoPage.noPreviousAudit")}
               </p>
             )}
           </div>

@@ -36,32 +36,29 @@ import { useTranslation } from "react-i18next";
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
-const STATUS_LABELS: Record<EmployeeStatus, { label: string; color: string }> = {
-  active: { label: "Actif", color: "bg-green-500" },
-  onboarding: { label: "Onboarding", color: "bg-blue-500" },
-  offboarding: { label: "Offboarding", color: "bg-orange-500" },
-  on_leave: { label: "En congé", color: "bg-yellow-500" },
-  terminated: { label: "Terminé", color: "bg-red-500" },
-};
+const getStatusLabels = (t: any): Record<EmployeeStatus, { label: string; color: string }> => ({
+  active: { label: t("hrPage.statusActive"), color: "bg-green-500" },
+  onboarding: { label: t("hrPage.statusOnboarding"), color: "bg-blue-500" },
+  offboarding: { label: t("hrPage.statusOffboarding"), color: "bg-orange-500" },
+  on_leave: { label: t("hrPage.statusOnLeave"), color: "bg-yellow-500" },
+  terminated: { label: t("hrPage.statusTerminated"), color: "bg-red-500" },
+});
 
-const CONTRACT_LABELS: Record<ContractType, string> = {
-  cdi: "CDI",
-  cdd: "CDD",
-  freelance: "Freelance",
-  internship: "Stage",
-  apprenticeship: "Alternance",
-};
+const getContractLabels = (t: any): Record<ContractType, string> => ({
+  cdi: t("hrPage.cdi"), cdd: t("hrPage.cdd"), freelance: t("hrPage.freelance"),
+  internship: t("hrPage.internship"), apprenticeship: t("hrPage.apprenticeship"),
+});
 
-const TIME_OFF_LABELS: Record<TimeOffType, string> = {
-  vacation: "Congés payés",
-  sick: "Maladie",
-  personal: "Personnel",
-  parental: "Parental",
-  other: "Autre",
-};
+const getTimeOffLabels = (t: any): Record<TimeOffType, string> => ({
+  vacation: t("hrPage.vacation"), sick: t("hrPage.sick"), personal: t("hrPage.personal"),
+  parental: t("hrPage.parental"), other: t("hrPage.other"),
+});
 
 export default function HR() {
   const { t, i18n } = useTranslation();
+  const STATUS_LABELS = getStatusLabels(t);
+  const CONTRACT_LABELS = getContractLabels(t);
+  const TIME_OFF_LABELS = getTimeOffLabels(t);
   const { employees, loading: loadingEmployees, stats, createEmployee, isCreating, deleteEmployee } = useEmployees();
    const { currentWorkspace } = useWorkspace();
   const { reviews, loading: loadingReviews, stats: reviewStats, createReview, submitReview } = usePerformanceReviews();
@@ -195,9 +192,9 @@ export default function HR() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Ressources Humaines</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("hrPage.title")}</h1>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Gestion des employés, onboarding et performance
+            {t("hrPage.subtitle")}
           </p>
         </div>
         <Dialog open={isEmployeeDialogOpen} onOpenChange={setIsEmployeeDialogOpen}>
