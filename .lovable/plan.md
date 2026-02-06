@@ -1,130 +1,57 @@
 
-# Audit Multi-Roles Round 12 - Corrections P4 + Dates Localisees
 
-## Constats par role
+# Batch 3 - i18n Migration for 12 Dashboard Files
 
-### CEO - Audit Strategique
-- **Liens sidebar** : Corriges dans le round precedent (P0 valide).
-- **Cockpit** : DashboardHome utilise `useTranslation()` correctement. Architecture solide.
-- **Onboarding** : Toujours 238 occurrences `isEn ?` dans `Onboarding.tsx` malgre les cles i18n `onboarding.*` ajoutees en round precedent. Le fichier n'a pas ete migre.
+## Overview
 
-### CTO - Audit Technique
-1. **`isEn` anti-pattern persistant** : `Onboarding.tsx` contient encore `const isEn = i18n.language === "en"` avec ~120 ternaires (lignes 62-140+). Les cles `onboarding.*` existent dans en.ts/fr.ts mais ne sont pas utilisees dans le fichier.
-2. **`toLocaleDateString('fr')` / `('fr-FR')` hardcodes** : 125 occurrences dans 17 fichiers. Le helper `getIntlLocale()` existe dans `src/lib/date-locale.ts` mais n'est pas utilise dans ces fichiers.
-3. **`window.prompt` non localise** : `Approvals.tsx` ligne 42 utilise `window.prompt("Raison du refus :")` en francais hardcode. `PriorityActionsEnhanced.tsx` l'a correctement migre vers `t("cockpit.rejectionPrompt")`.
-4. **Doubles imports** : `Ads.tsx` ligne 2, `Social.tsx` ligne 2, `Reputation.tsx` ligne 2, `Competitors.tsx` (pas de doublon mais `useCallback` importe sans etre utilise dans certains cas).
-5. **Textes francais hardcodes restants** : ~290 textes dans 16 fichiers dashboard (Offers, Ads, Social, Reputation, Competitors, LocalSEO, Reports, TemplateAdsFactory, BrandKit, ApprovalsV2, Approvals, CMS, Legal, Diagnostics).
+Migrate all hardcoded French strings (labels, toasts, placeholders, descriptions, status texts) to `t()` across 12 dashboard files. Add corresponding keys to `en.ts` and `fr.ts`.
 
-### CPO - Audit Produit
-- **Incoherence linguistique** : Un utilisateur EN verra "Chargement des offres...", "Campagne creee", "Erreur lors de la creation" etc. dans les toasts et labels de 16 pages dashboard.
-- **Dates hardcodees** : Toutes les dates sont formatees en francais meme si l'utilisateur est en allemand, espagnol, etc.
+## Scope
 
-### CISO - Audit Securite
-- **`window.prompt`** : Utilise pour saisir la raison de refus dans Approvals.tsx. Pas un risque de securite direct mais ne devrait pas contenir du texte hardcode.
-- Pas de nouvelle vulnerabilite identifiee. RLS et RBAC restent solides.
+The following files have hardcoded French strings that need migration:
 
-### DPO - Audit RGPD
-- Pas de nouveau probleme identifie. Export GDPR et anonymisation fonctionnels.
+### Group A - High volume (20+ strings each)
 
-### CDO - Audit Data
-- **Dates non localisees** : `formatMonth()` dans Reports.tsx utilise `'fr-FR'` hardcode. Les donnees temporelles sont toujours formatees en francais.
-- `AICostDashboard.tsx` utilise `Intl.NumberFormat('fr-FR')` hardcode pour le formatage des couts.
+1. **Offers.tsx** (~30 strings): Page title, subtitle, tab labels, dialog titles, form labels, toasts, guarantees defaults, badge labels, button labels, empty state descriptions, placeholders
+2. **Ads.tsx** (~25 strings): Metric labels, tab labels, table headers, toasts, status badges, empty state descriptions, button labels, form labels, dialog title
+3. **Social.tsx** (~25 strings): Tab labels, toasts, button labels, status badges, empty state descriptions, system prompts (kept in FR for AI context), dialog titles, export labels
+4. **Competitors.tsx** (~25 strings): Tab labels, toasts, button labels, table headers, SWOT export labels, compliance notice, empty state descriptions, dialog titles
+5. **LocalSEO.tsx** (~25 strings): Metric labels, tab labels, toasts, button labels, audit task labels, priority badges, empty state descriptions, dialog titles
+6. **Reports.tsx** (~20 strings): Tab labels, toasts, formatTimeAgo strings, empty state descriptions, KPI labels, button labels
 
-### COO - Audit Organisationnel
-- **Onboarding non migre** : Premier contact utilisateur toujours en `isEn ?` ternaire, degradant l'experience pour 5 langues.
+### Group B - Medium volume (10-20 strings each)
 
-### CFO - Audit Financier
-- ROIDashboard et AICostDashboard migres vers `t()` dans le round precedent. OK.
+7. **Reputation.tsx** (~18 strings): KPI labels, badge labels, toasts, dialog labels, form labels, alert messages, empty state descriptions
+8. **BrandKit.tsx** (~15 strings): Section titles, descriptions, labels, placeholders, toast messages, empty state text
+9. **CMS.tsx** (~18 strings): STATUS_CONFIG labels, PAGE_TYPES labels, dialog labels, button labels, empty state texts, tab labels
+10. **TemplateAdsFactory.tsx** (~15 strings): Form labels, select options, tab labels, empty state, button labels, date formatting fix
 
-### Head of Design - Audit UX
-- Coherence linguistique incomplete : les labels et toasts des modules metier restent en francais.
+### Group C - Low volume (< 10 strings each)
 
-### Beta Testeur
-- Je choisis l'allemand, je vais dans Offers : tout est en francais.
-- Je vais dans Ads : "Chargement des campagnes..." en francais.
-- Les dates sont toutes en format francais.
+11. **Diagnostics.tsx** (~12 strings): Health status labels, formatTimeAgo strings, section titles, button labels, system info labels
+12. **Approvals.tsx** (already partially done, 1 `window.prompt` was localized) - verify no remaining strings
 
----
+## Technical Approach
 
-## Plan de Corrections
+### For each file:
+1. Add `import { useTranslation } from "react-i18next"` if not already present
+2. Add `const { t } = useTranslation()` or `const { t, i18n } = useTranslation()` at component start
+3. Replace every hardcoded French string with `t("module.key")`
+4. Add all new keys to `en.ts` and `fr.ts` under the existing module namespaces (e.g., `offers`, `ads`, `social`)
 
-### Batch 1 : Migrer Onboarding.tsx vers t() (P0)
+### i18n key organization:
+- Use existing namespace structure in en.ts/fr.ts (e.g., `dashboard.offers.*`, `dashboard.ads.*`)
+- Group keys by function: labels, toasts, empty states, form fields, statuses
+- Reuse existing keys where available (e.g., `common.cancel`, `common.save`)
 
-Le fichier utilise encore `isEn ?` alors que les cles `onboarding.*` existent deja. Action :
-- Supprimer `const isEn = i18n.language === "en"` et le bloc `const txt = {...}`
-- Remplacer toutes les references `txt.xxx` par `t("onboarding.xxx")`
-- Verifier que toutes les cles existent dans en.ts/fr.ts
+### Special cases:
+- `TemplateAdsFactory.tsx` line 285: Fix `toLocaleDateString('fr-FR')` to use `getIntlLocale(i18n.language)`
+- `CMS.tsx` line 343: Fix `toLocaleDateString('fr-FR')` to use locale
+- `Diagnostics.tsx` `formatTimeAgo()`: Localize time-relative strings
+- `Reports.tsx` `formatTimeAgo()`: Same localization
+- AI system prompts (Social, LocalSEO, Reputation): Keep in target language or make dynamic - these are prompt instructions, not UI strings. Will keep as-is since they define AI behavior.
 
-**Fichier** : `src/pages/Onboarding.tsx`
+## Estimated new keys: ~200 across en.ts and fr.ts
 
-### Batch 2 : Localiser les dates (P1)
+## Files modified: 12 dashboard files + en.ts + fr.ts = 14 files total
 
-Remplacer toutes les occurrences de `toLocaleDateString('fr')`, `toLocaleDateString('fr-FR')`, `toLocaleString('fr-FR')`, `toLocaleTimeString('fr-FR')`, et `Intl.NumberFormat('fr-FR')` par des versions utilisant `getIntlLocale(i18n.language)` du helper centralise.
-
-**Fichiers concernes (17 fichiers)** :
-| Fichier | Occurrences |
-|---------|-------------|
-| `src/pages/dashboard/Approvals.tsx` | 2 dates + 1 window.prompt |
-| `src/pages/dashboard/ApprovalsV2.tsx` | 2 dates |
-| `src/pages/dashboard/Ads.tsx` | 1 date + 1 import doublon |
-| `src/pages/dashboard/Social.tsx` | 1 date + 1 import doublon |
-| `src/pages/dashboard/Reputation.tsx` | 1 date + 1 import doublon |
-| `src/pages/dashboard/Competitors.tsx` | 2 dates |
-| `src/pages/dashboard/LocalSEO.tsx` | 1 date |
-| `src/pages/dashboard/Reports.tsx` | 3 dates |
-| `src/pages/dashboard/Legal.tsx` | 2 dates |
-| `src/pages/dashboard/CMS.tsx` | 2 dates |
-| `src/pages/dashboard/TemplateAdsFactory.tsx` | 1 date |
-| `src/pages/dashboard/AICostDashboard.tsx` | 1 Intl.NumberFormat |
-| `src/components/diagnostics/LatencyHistoryChart.tsx` | 2 dates |
-| `src/components/diagnostics/DiagnosticsPanel.tsx` | 1 date |
-| `src/components/evidence/EvidenceBundleCard.tsx` | 2 dates |
-| `src/components/cockpit/DailyBriefing.tsx` | 1 date |
-| `src/components/reports/ReportScheduler.tsx` | 1 date |
-| `src/components/sales/SalesScriptGenerator.tsx` | 3 dates |
-| `src/components/webhooks/AdvancedWebhooks.tsx` | 1 date |
-| `src/components/competitors/CompetitorAlerts.tsx` | dates |
-
-Pour chaque fichier :
-1. Ajouter `import { useTranslation } from "react-i18next"` (si absent)
-2. Ajouter `import { getIntlLocale } from "@/lib/date-locale"` 
-3. Remplacer `'fr'` / `'fr-FR'` par `getIntlLocale(i18n.language)`
-
-### Batch 3 : Migrer les toasts et labels hardcodes (P2)
-
-Ajouter ~150 cles i18n pour les textes francais restants dans les 16 fichiers dashboard. Organiser par module :
-
-| Module | Fichier | Textes a migrer |
-|--------|---------|-----------------|
-| Offers | `Offers.tsx` | ~25 (labels, toasts, dialogs) |
-| Ads | `Ads.tsx` | ~20 (metrics, toasts, table headers) |
-| Social | `Social.tsx` | ~20 (labels, toasts, exports) |
-| Reputation | `Reputation.tsx` | ~15 (labels, dialogs) |
-| Competitors | `Competitors.tsx` | ~15 (labels, SWOT) |
-| LocalSEO | `LocalSEO.tsx` | ~15 (labels, metrics) |
-| Reports | `Reports.tsx` | ~15 (tabs, labels, toasts) |
-| Approvals | `Approvals.tsx` | ~10 (tabs, labels, window.prompt) |
-| ApprovalsV2 | `ApprovalsV2.tsx` | ~10 (tabs, labels) |
-| BrandKit | `BrandKit.tsx` | ~10 (labels, save) |
-| TemplateAdsFactory | `TemplateAdsFactory.tsx` | ~10 (labels, statuses) |
-| Diagnostics | `Diagnostics.tsx` | ~5 (labels) |
-
-### Batch 4 : Nettoyage imports doublons (P3)
-
-| Fichier | Action |
-|---------|--------|
-| `src/pages/dashboard/Ads.tsx` | Fusionner `import { useState } from "react"` et `import { useCallback } from "react"` |
-| `src/pages/dashboard/Social.tsx` | Idem |
-| `src/pages/dashboard/Reputation.tsx` | Idem |
-
----
-
-## Resume
-
-- **1 fichier majeur** avec anti-pattern `isEn ?` restant : `Onboarding.tsx` (238 occurrences)
-- **~125 dates hardcodees** en `'fr'`/`'fr-FR'` dans 20 fichiers
-- **~150 textes francais hardcodes** dans 16 fichiers dashboard
-- **3 imports doublons** a fusionner
-- **1 `window.prompt`** non localise
-
-**Total : ~25 fichiers a modifier, ~150 nouvelles cles i18n.**
