@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,10 +145,12 @@ export function Tools() {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            {seeAllLabel}
-            <ExternalLink className="w-4 h-4 ml-2" />
-          </Button>
+          <Link to="/dashboard/integrations">
+            <Button variant="outline" size="lg">
+              {seeAllLabel}
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

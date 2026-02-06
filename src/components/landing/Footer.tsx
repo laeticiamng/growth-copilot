@@ -16,9 +16,8 @@ export function Footer() {
     ],
     [isEn ? "Resources" : "Ressources"]: [
       { label: "Documentation", href: "/dashboard/guide" },
-      { label: "Blog", href: "#" },
       { label: isEn ? "Status" : "Statut", href: "/dashboard/status" },
-      { label: "API", href: "/dashboard/api-docs" },
+      { label: isEn ? "Roadmap" : "Feuille de route", href: "/roadmap" },
     ],
     [isEn ? "Company" : "Entreprise"]: [
       { label: isEn ? "About" : "À propos", href: "/about" },
