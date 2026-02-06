@@ -201,20 +201,20 @@ export default function HR() {
           <DialogTrigger asChild>
             <Button>
               <UserPlus className="w-4 h-4 mr-2" />
-              Nouvel employé
+              {t("hrPage.newEmployee")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Ajouter un employé</DialogTitle>
+              <DialogTitle>{t("hrPage.addEmployee")}</DialogTitle>
               <DialogDescription>
-                Créez une fiche pour un nouvel employé
+                {t("hrPage.addEmployeeDesc")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name">Prénom</Label>
+                  <Label htmlFor="first_name">{t("hrPage.firstName")}</Label>
                   <Input
                     id="first_name"
                     value={newEmployee.first_name}
@@ -222,7 +222,7 @@ export default function HR() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name">Nom</Label>
+                  <Label htmlFor="last_name">{t("hrPage.lastName")}</Label>
                   <Input
                     id="last_name"
                     value={newEmployee.last_name}
@@ -231,7 +231,7 @@ export default function HR() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("hrPage.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -240,7 +240,7 @@ export default function HR() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="job_title">Poste</Label>
+                <Label htmlFor="job_title">{t("hrPage.jobTitle")}</Label>
                 <Input
                   id="job_title"
                   value={newEmployee.job_title}
@@ -249,7 +249,7 @@ export default function HR() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="department">Département</Label>
+                  <Label htmlFor="department">{t("hrPage.department")}</Label>
                   <Input
                     id="department"
                     value={newEmployee.department}
@@ -257,7 +257,7 @@ export default function HR() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contract_type">Type de contrat</Label>
+                  <Label htmlFor="contract_type">{t("hrPage.contractType")}</Label>
                   <Select
                     value={newEmployee.contract_type}
                     onValueChange={(value) => setNewEmployee({ ...newEmployee, contract_type: value as ContractType })}
@@ -278,10 +278,10 @@ export default function HR() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEmployeeDialogOpen(false)}>
-                Annuler
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleCreateEmployee} disabled={isCreating}>
-                {isCreating ? "Création..." : "Créer"}
+                {isCreating ? t("common.creating") : t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -294,7 +294,7 @@ export default function HR() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total employés</p>
+                <p className="text-sm text-muted-foreground">{t("hrPage.totalEmployees")}</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-primary opacity-80" />
@@ -305,7 +305,7 @@ export default function HR() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Actifs</p>
+                <p className="text-sm text-muted-foreground">{t("hrPage.activeEmployees")}</p>
                 <p className="text-2xl font-bold status-success">{stats.active}</p>
               </div>
               <CheckCircle2 className="w-8 h-8 status-success opacity-80" />
@@ -316,7 +316,7 @@ export default function HR() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Évaluations en attente</p>
+                <p className="text-sm text-muted-foreground">{t("hrPage.pendingReviews")}</p>
                 <p className="text-2xl font-bold text-blue-600">{reviewStats.pending}</p>
               </div>
               <Star className="w-8 h-8 text-blue-500 opacity-80" />
@@ -327,7 +327,7 @@ export default function HR() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Congés en attente</p>
+                <p className="text-sm text-muted-foreground">{t("hrPage.pendingTimeOff")}</p>
                 <p className="text-2xl font-bold status-warning">{timeOffStats.pending}</p>
               </div>
               <Calendar className="w-8 h-8 status-warning opacity-80" />
@@ -339,18 +339,18 @@ export default function HR() {
       {/* Tabs */}
       <Tabs defaultValue="directory" className="space-y-4">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="directory">Annuaire</TabsTrigger>
-          <TabsTrigger value="orgchart">Organigramme</TabsTrigger>
-          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="timeoff">Congés</TabsTrigger>
+          <TabsTrigger value="directory">{t("hrPage.directory")}</TabsTrigger>
+          <TabsTrigger value="orgchart">{t("hrPage.orgChart")}</TabsTrigger>
+          <TabsTrigger value="onboarding">{t("hrPage.onboarding")}</TabsTrigger>
+          <TabsTrigger value="performance">{t("hrPage.performance")}</TabsTrigger>
+          <TabsTrigger value="timeoff">{t("hrPage.timeOff")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="directory" className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un employé..."
+              placeholder={t("hrPage.searchEmployee")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -359,16 +359,16 @@ export default function HR() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Annuaire des employés</CardTitle>
+              <CardTitle>{t("hrPage.employeeDirectory")}</CardTitle>
               <CardDescription>
-                {filteredEmployees.length} employé{filteredEmployees.length !== 1 ? "s" : ""}
+                {filteredEmployees.length} {t("hrPage.employee")}{filteredEmployees.length !== 1 ? "s" : ""}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {filteredEmployees.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun employé trouvé</p>
+                  <p>{t("hrPage.noEmployeeFound")}</p>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -414,16 +414,16 @@ export default function HR() {
         <TabsContent value="onboarding">
           <Card>
             <CardHeader>
-              <CardTitle>Onboarding en cours</CardTitle>
+              <CardTitle>{t("hrPage.onboardingInProgress")}</CardTitle>
               <CardDescription>
-                Suivez l'intégration des nouveaux employés
+                {t("hrPage.onboardingDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {employees.filter(e => e.status === 'onboarding').length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun onboarding en cours</p>
+                  <p>{t("hrPage.noOnboarding")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -442,7 +442,7 @@ export default function HR() {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {t("dashboard.hr.startDate")}: {new Date(emp.hire_date).toLocaleDateString(getIntlLocale(i18n.language))}
+                          {t("hrPage.start")} {new Date(emp.hire_date).toLocaleDateString(getIntlLocale(i18n.language))}
                         </p>
                       </div>
                     </div>
@@ -459,7 +459,7 @@ export default function HR() {
             first_name: e.first_name,
             last_name: e.last_name,
             role: e.job_title || '',
-            department: e.department || 'Non défini',
+            department: e.department || t("hrPage.notDefined"),
             manager_id: e.manager_id,
             avatar_url: null,
             status: e.status,
@@ -471,31 +471,31 @@ export default function HR() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Évaluations de performance</CardTitle>
+                  <CardTitle>{t("hrPage.performanceReviews")}</CardTitle>
                   <CardDescription>
-                    {reviewStats.total} évaluations • Score moyen: {reviewStats.averageScore.toFixed(1)}/5
+                    {reviewStats.total} {t("hrPage.performanceReviews").toLowerCase()} • {t("hrPage.globalScore")}: {reviewStats.averageScore.toFixed(1)}/5
                   </CardDescription>
                 </div>
                 <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
                       <Plus className="w-4 h-4 mr-2" />
-                      Nouvelle évaluation
+                      {t("hrPage.newReview")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Nouvelle évaluation</DialogTitle>
+                      <DialogTitle>{t("hrPage.newReview")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
-                        <Label>Employé</Label>
+                        <Label>{t("hrPage.employee")}</Label>
                         <Select
                           value={newReview.employee_id}
                           onValueChange={(value) => setNewReview({ ...newReview, employee_id: value })}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un employé" />
+                            <SelectValue placeholder={t("hrPage.selectEmployee")} />
                           </SelectTrigger>
                           <SelectContent>
                             {employees.map((emp) => (
@@ -508,7 +508,7 @@ export default function HR() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Début période</Label>
+                          <Label>{t("hrPage.periodStart")}</Label>
                           <Input
                             type="date"
                             value={newReview.review_period_start}
@@ -516,7 +516,7 @@ export default function HR() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Fin période</Label>
+                          <Label>{t("hrPage.periodEnd")}</Label>
                           <Input
                             type="date"
                             value={newReview.review_period_end}
@@ -525,7 +525,7 @@ export default function HR() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Score global (1-5)</Label>
+                        <Label>{t("hrPage.globalScore")}</Label>
                         <div className="flex items-center gap-2">
                           {[1, 2, 3, 4, 5].map((score) => (
                             <Button
@@ -541,17 +541,17 @@ export default function HR() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Commentaires</Label>
+                        <Label>{t("hrPage.comments")}</Label>
                         <Textarea
                           value={newReview.comments || ""}
                           onChange={(e) => setNewReview({ ...newReview, comments: e.target.value })}
-                          placeholder="Points forts, axes d'amélioration..."
+                          placeholder={t("hrPage.commentsPlaceholder")}
                         />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsReviewDialogOpen(false)}>Annuler</Button>
-                      <Button onClick={handleCreateReview}>Créer</Button>
+                      <Button variant="outline" onClick={() => setIsReviewDialogOpen(false)}>{t("common.cancel")}</Button>
+                      <Button onClick={handleCreateReview}>{t("common.create")}</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -561,8 +561,8 @@ export default function HR() {
               {reviews.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune évaluation</p>
-                  <p className="text-sm">Créez votre première évaluation de performance</p>
+                  <p>{t("hrPage.noReview")}</p>
+                  <p className="text-sm">{t("hrPage.noReviewDesc")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -572,9 +572,9 @@ export default function HR() {
                       <div key={review.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium">{emp ? `${emp.first_name} ${emp.last_name}` : 'Employé'}</p>
+                            <p className="font-medium">{emp ? `${emp.first_name} ${emp.last_name}` : t("hrPage.employee")}</p>
                             <p className="text-sm text-muted-foreground">
-                              Période: {format(new Date(review.review_period_start), 'MMM yyyy', { locale: getDateLocale(i18n.language) })} - {format(new Date(review.review_period_end), 'MMM yyyy', { locale: getDateLocale(i18n.language) })}
+                              {t("hrPage.period")} {format(new Date(review.review_period_start), 'MMM yyyy', { locale: getDateLocale(i18n.language) })} - {format(new Date(review.review_period_end), 'MMM yyyy', { locale: getDateLocale(i18n.language) })}
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
@@ -585,7 +585,7 @@ export default function HR() {
                               </div>
                             )}
                             <Badge variant={review.status === 'completed' ? 'default' : 'outline'}>
-                              {review.status === 'draft' ? 'Brouillon' : review.status === 'submitted' ? 'Soumis' : review.status === 'completed' ? 'Terminé' : review.status}
+                              {review.status === 'draft' ? t("hrPage.draft") : review.status === 'submitted' ? t("hrPage.submitted") : review.status === 'completed' ? t("hrPage.reviewCompleted") : review.status}
                             </Badge>
                           </div>
                         </div>
@@ -603,31 +603,31 @@ export default function HR() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Demandes de congés</CardTitle>
+                  <CardTitle>{t("hrPage.timeOffRequests")}</CardTitle>
                   <CardDescription>
-                    {timeOffStats.pending} demande(s) en attente • {timeOffStats.totalDaysApproved} jours approuvés
+                    {timeOffStats.pending} {t("hrPage.newRequest").toLowerCase()} • {timeOffStats.totalDaysApproved} {t("hrPage.approved").toLowerCase()}
                   </CardDescription>
                 </div>
                 <Dialog open={isTimeOffDialogOpen} onOpenChange={setIsTimeOffDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
                       <Plus className="w-4 h-4 mr-2" />
-                      Nouvelle demande
+                      {t("hrPage.newRequest")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Demande de congé</DialogTitle>
+                      <DialogTitle>{t("hrPage.timeOffRequest")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
-                        <Label>Employé</Label>
+                        <Label>{t("hrPage.employee")}</Label>
                         <Select
                           value={newTimeOff.employee_id}
                           onValueChange={(value) => setNewTimeOff({ ...newTimeOff, employee_id: value })}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un employé" />
+                            <SelectValue placeholder={t("hrPage.selectEmployee")} />
                           </SelectTrigger>
                           <SelectContent>
                             {employees.map((emp) => (
@@ -639,7 +639,7 @@ export default function HR() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Type de congé</Label>
+                        <Label>{t("hrPage.timeOffType")}</Label>
                         <Select
                           value={newTimeOff.request_type}
                           onValueChange={(value) => setNewTimeOff({ ...newTimeOff, request_type: value as TimeOffType })}
@@ -656,7 +656,7 @@ export default function HR() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Date début</Label>
+                          <Label>{t("hrPage.startDate")}</Label>
                           <Input
                             type="date"
                             value={newTimeOff.start_date}
@@ -664,7 +664,7 @@ export default function HR() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Date fin</Label>
+                          <Label>{t("hrPage.endDate")}</Label>
                           <Input
                             type="date"
                             value={newTimeOff.end_date}
@@ -673,7 +673,7 @@ export default function HR() {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Nombre de jours</Label>
+                        <Label>{t("hrPage.numberOfDays")}</Label>
                         <Input
                           type="number"
                           min="0.5"
@@ -683,7 +683,7 @@ export default function HR() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Motif (optionnel)</Label>
+                        <Label>{t("hrPage.reason")}</Label>
                         <Textarea
                           value={newTimeOff.reason || ""}
                           onChange={(e) => setNewTimeOff({ ...newTimeOff, reason: e.target.value })}
@@ -691,8 +691,8 @@ export default function HR() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsTimeOffDialogOpen(false)}>Annuler</Button>
-                      <Button onClick={handleCreateTimeOff}>Soumettre</Button>
+                      <Button variant="outline" onClick={() => setIsTimeOffDialogOpen(false)}>{t("common.cancel")}</Button>
+                      <Button onClick={handleCreateTimeOff}>{t("common.submit")}</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -702,7 +702,7 @@ export default function HR() {
               {timeOffRequests.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune demande de congé</p>
+                  <p>{t("hrPage.noTimeOff")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -712,9 +712,9 @@ export default function HR() {
                       <div key={request.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium">{emp ? `${emp.first_name} ${emp.last_name}` : 'Employé'}</p>
+                            <p className="font-medium">{emp ? `${emp.first_name} ${emp.last_name}` : t("hrPage.employee")}</p>
                             <p className="text-sm text-muted-foreground">
-                              {TIME_OFF_LABELS[request.request_type]} • {request.total_days} jour(s)
+                              {TIME_OFF_LABELS[request.request_type]} • {request.total_days} {t("hrPage.numberOfDays").toLowerCase()}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(request.start_date), 'dd MMM', { locale: getDateLocale(i18n.language) })} - {format(new Date(request.end_date), 'dd MMM yyyy', { locale: getDateLocale(i18n.language) })}
@@ -725,16 +725,16 @@ export default function HR() {
                               <>
                                 <Button size="sm" variant="outline" onClick={() => rejectRequest({ id: request.id })}>
                                   <XCircle className="w-4 h-4 mr-1" />
-                                  Refuser
+                                  {t("hrPage.reject")}
                                 </Button>
                                 <Button size="sm" onClick={() => approveRequest(request.id)}>
                                   <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  Approuver
+                                  {t("hrPage.approve")}
                                 </Button>
                               </>
                             ) : (
                               <Badge variant={request.status === 'approved' ? 'default' : request.status === 'rejected' ? 'destructive' : 'outline'}>
-                                {request.status === 'approved' ? 'Approuvé' : request.status === 'rejected' ? 'Refusé' : request.status === 'cancelled' ? 'Annulé' : request.status}
+                                {request.status === 'approved' ? t("hrPage.approved") : request.status === 'rejected' ? t("hrPage.rejected") : request.status === 'cancelled' ? t("hrPage.cancelled") : request.status}
                               </Badge>
                             )}
                           </div>
