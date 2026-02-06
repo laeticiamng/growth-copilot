@@ -1,10 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bot, Download, Sparkles, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS } from "date-fns/locale";
 
 interface WelcomeCardProps {
   agentName: string;
@@ -27,7 +28,9 @@ export function WelcomeCard({
   onExport,
   className,
 }: WelcomeCardProps) {
-  const greeting = getGreeting();
+  const { t, i18n } = useTranslation();
+  const greeting = getGreeting(i18n.language);
+  const dateLocale = i18n.language === 'fr' ? fr : enUS;
   
   return (
     <Card className={cn("relative overflow-hidden", className)}>
@@ -57,18 +60,39 @@ export function WelcomeCard({
             </div>
             
             <p className="text-muted-foreground">
-              {greeting} Voici l'état de{" "}
-              <span className="font-medium text-foreground">{siteName}</span>.{" "}
-              {pendingCount > 0 ? (
-                <span>
-                  Vous avez{" "}
-                  <span className="font-semibold text-primary">
-                    {pendingCount} décision{pendingCount > 1 ? "s" : ""}
-                  </span>{" "}
-                  en attente de validation.
-                </span>
+              {greeting}{" "}
+              {i18n.language === 'fr' ? (
+                <>
+                  Voici l'état de{" "}
+                  <span className="font-medium text-foreground">{siteName}</span>.{" "}
+                  {pendingCount > 0 ? (
+                    <span>
+                      Vous avez{" "}
+                      <span className="font-semibold text-primary">
+                        {pendingCount} décision{pendingCount > 1 ? "s" : ""}
+                      </span>{" "}
+                      en attente de validation.
+                    </span>
+                  ) : (
+                    <span className="text-chart-3">Tout est à jour, aucune action requise.</span>
+                  )}
+                </>
               ) : (
-                <span className="text-chart-3">Tout est à jour, aucune action requise.</span>
+                <>
+                  Here's the status of{" "}
+                  <span className="font-medium text-foreground">{siteName}</span>.{" "}
+                  {pendingCount > 0 ? (
+                    <span>
+                      You have{" "}
+                      <span className="font-semibold text-primary">
+                        {pendingCount} decision{pendingCount > 1 ? "s" : ""}
+                      </span>{" "}
+                      pending approval.
+                    </span>
+                  ) : (
+                    <span className="text-chart-3">All up to date, no action required.</span>
+                  )}
+                </>
               )}
             </p>
             
@@ -76,7 +100,10 @@ export function WelcomeCard({
             {lastSync && (
               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
-                Dernière synchronisation : {format(lastSync, "dd MMM à HH:mm", { locale: fr })}
+                {i18n.language === 'fr' 
+                  ? `Dernière synchronisation : ${format(lastSync, "dd MMM à HH:mm", { locale: dateLocale })}`
+                  : `Last sync: ${format(lastSync, "MMM dd at HH:mm", { locale: dateLocale })}`
+                }
               </div>
             )}
           </div>
@@ -85,7 +112,7 @@ export function WelcomeCard({
           {onExport && (
             <Button variant="outline" size="sm" onClick={onExport} className="shrink-0">
               <Download className="w-4 h-4 mr-2" />
-              Exporter
+              {t("common.export")}
             </Button>
           )}
         </div>
@@ -95,17 +122,17 @@ export function WelcomeCard({
           <div className="grid grid-cols-3 gap-4 text-sm">
             <QuickStat 
               icon={<Sparkles className="w-4 h-4 text-primary flex-shrink-0" />}
-              label="Agents actifs"
+              label={i18n.language === 'fr' ? "Agents actifs" : "Active agents"}
               value="39"
             />
             <QuickStat 
               icon={<span className="text-sm flex-shrink-0">📊</span>}
-              label="Départements"
+              label={i18n.language === 'fr' ? "Départements" : "Departments"}
               value="11"
             />
             <QuickStat 
               icon={<span className="text-sm flex-shrink-0">⚡</span>}
-              label="Disponibilité"
+              label={i18n.language === 'fr' ? "Disponibilité" : "Availability"}
               value="24/7"
             />
           </div>
@@ -135,9 +162,15 @@ function QuickStat({
   );
 }
 
-function getGreeting(): string {
+function getGreeting(lang: string): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Bonjour !";
-  if (hour < 18) return "Bon après-midi !";
-  return "Bonsoir !";
+  if (lang === 'fr') {
+    if (hour < 12) return "Bonjour !";
+    if (hour < 18) return "Bon après-midi !";
+    return "Bonsoir !";
+  } else {
+    if (hour < 12) return "Good morning!";
+    if (hour < 18) return "Good afternoon!";
+    return "Good evening!";
+  }
 }

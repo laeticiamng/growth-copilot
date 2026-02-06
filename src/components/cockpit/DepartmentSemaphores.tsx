@@ -2,6 +2,7 @@
  * Department Semaphores Component
  * Displays health status of each department with color coding
  */
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface DepartmentSemaphoresProps {
 }
 
 export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(true);
@@ -208,13 +210,13 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
     <Card variant="feature" className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          Sémaphores
+          {t("cockpit.semaphores")}
           <Badge variant="outline" className="text-xs font-normal">
-            5 départements
+            5 {t("cockpit.departmentsCount")}
           </Badge>
         </CardTitle>
         <CardDescription>
-          Vue d'ensemble de la santé de vos opérations
+          {t("cockpit.operationsHealth")}
         </CardDescription>
       </CardHeader>
       <CardContent>

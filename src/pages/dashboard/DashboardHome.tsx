@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,18 +41,22 @@ import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
 import { MoMComparison } from "@/components/dashboard/MoMComparison";
 import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
 
-// CGO Agent Persona
+// CGO Agent Persona - translated in component
 const CGO_PERSONA = {
   name: "Sophie Marchand",
-  role: "Directrice de la Croissance",
-  avatar: "👩‍💼",
+  avatarFr: "👩‍💼",
+  avatarEn: "👩‍💼",
 };
 
 export default function DashboardHome() {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace, loading: wsLoading } = useWorkspace();
   const { currentSite, loading: sitesLoading } = useSites();
   const { pendingApprovals, approveAction, rejectAction } = useApprovals();
   const { enabledServices, servicesLoading, hasService } = useServices();
+
+  // Get translated persona role
+  const getCGORole = () => i18n.language === 'fr' ? "Directrice de la Croissance" : "Chief Growth Officer";
 
   // Fetch real KPI data - current period (last 30 days)
   const { data: kpiData, isLoading: kpiLoading } = useQuery({
@@ -131,8 +136,8 @@ export default function DashboardHome() {
   const quickLaunchers = [
     {
       id: "weekly-plan",
-      label: "Plan hebdomadaire",
-      description: "Générer le plan de la semaine",
+      label: t("cockpit.weeklyPlan"),
+      description: t("cockpit.weeklyPlanDesc"),
       icon: Calendar,
       runType: "MARKETING_WEEK_PLAN",
       service: "marketing",
@@ -140,8 +145,8 @@ export default function DashboardHome() {
     },
     {
       id: "exec-brief",
-      label: "Brief exécutif",
-      description: "Résumé quotidien de la situation",
+      label: t("cockpit.execBrief"),
+      description: t("cockpit.execBriefDesc"),
       icon: FileText,
       runType: "DAILY_EXECUTIVE_BRIEF",
       service: "core-os",
@@ -152,7 +157,7 @@ export default function DashboardHome() {
   // Handle run launch
   const handleLaunchRun = useCallback(async (runType: string) => {
     if (!currentWorkspace?.id) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("cockpit.noWorkspace"));
       return;
     }
 
@@ -183,22 +188,22 @@ export default function DashboardHome() {
         });
         throw error;
       }
-      toast.success("Exécution lancée avec succès");
+      toast.success(t("cockpit.runSuccess"));
     } catch (error) {
       console.error("Run launch error:", error);
-      toast.error("Erreur lors du lancement. Réessayez plus tard.");
+      toast.error(t("cockpit.runError"));
     }
-  }, [currentWorkspace?.id, currentSite?.id]);
+  }, [currentWorkspace?.id, currentSite?.id, t]);
 
   // Handle approvals
   const handleApprove = async (id: string) => {
     await approveAction(id);
-    toast.success("Action approuvée");
+    toast.success(t("cockpit.approved"));
   };
 
   const handleReject = async (id: string) => {
-    await rejectAction(id, "Refusé par l'utilisateur");
-    toast.success("Action refusée");
+    await rejectAction(id, "Rejected by user");
+    toast.success(t("cockpit.rejected"));
   };
 
   // Transform pending approvals for widget
@@ -230,14 +235,14 @@ export default function DashboardHome() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <Bot className="w-16 h-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Bienvenue sur Growth OS</h2>
+        <h2 className="text-2xl font-bold mb-2">{t("cockpit.welcome")}</h2>
         <p className="text-muted-foreground mb-6">
-          Créez votre premier espace de travail pour commencer.
+          {t("cockpit.createFirst")}
         </p>
         <Link to="/onboarding">
           <Button size="lg">
             <Rocket className="w-5 h-5 mr-2" />
-            Démarrer
+            {t("cockpit.start")}
           </Button>
         </Link>
       </div>
@@ -249,8 +254,8 @@ export default function DashboardHome() {
       {/* Welcome Card - Apple-like */}
       <WelcomeCard
         agentName={CGO_PERSONA.name}
-        agentRole={CGO_PERSONA.role}
-        agentAvatar={CGO_PERSONA.avatar}
+        agentRole={getCGORole()}
+        agentAvatar={CGO_PERSONA.avatarFr}
         siteName={currentSite?.name || currentWorkspace.name}
         pendingCount={pendingApprovals.length}
         onExport={() => {}}
@@ -308,10 +313,10 @@ export default function DashboardHome() {
         <Card className="overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              🎙️ Assistant Vocal IA
+              🎙️ {t("cockpit.voiceAssistant")}
             </CardTitle>
             <CardDescription>
-              Pilotez votre entreprise par la voix
+              {t("cockpit.voiceAssistantDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -329,26 +334,28 @@ export default function DashboardHome() {
       <Card className="md:col-span-2">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
-            🤖 Agents IA disponibles
-            <Badge variant="secondary" className="ml-auto">39 agents</Badge>
+            🤖 {t("cockpit.aiTeamAvailable")}
+            <Badge variant="secondary" className="ml-auto">39 {t("cockpit.agents")}</Badge>
           </CardTitle>
           <CardDescription>
-            Votre équipe d'agents spécialisés travaille 24h/24
+            {i18n.language === 'fr' 
+              ? "Votre équipe d'agents spécialisés travaille 24h/24"
+              : "Your specialized agent team works 24/7"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                11 départements • Direction, Marketing, Sales, Finance, Sécurité, Product, Engineering, Data, Support, Governance, RH
+                11 {t("cockpit.departments")} • {t("cockpit.directionMarketing")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Prêts à exécuter vos demandes en toute conformité
+                {t("cockpit.readyToExecute")}
               </p>
             </div>
             <Link to="/dashboard/agents">
               <Button variant="outline" size="sm">
-                Voir l'équipe
+                {t("cockpit.viewTeam")}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
