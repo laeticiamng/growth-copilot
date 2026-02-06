@@ -6,20 +6,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className={`w-4 h-4 ${
-            i < rating ? "text-yellow-500 fill-yellow-500" : "text-muted"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
+// Simple StarRating component without ref forwarding to avoid React warning
+const StarRating = ({ rating }: { rating: number }) => (
+  <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < rating ? "text-yellow-500 fill-yellow-500" : "text-muted"
+        }`}
+        aria-hidden="true"
+      />
+    ))}
+  </div>
+);
 
 export function Testimonials() {
   const { t, i18n } = useTranslation();

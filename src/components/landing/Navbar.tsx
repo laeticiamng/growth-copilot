@@ -23,10 +23,14 @@ export function Navbar() {
 
   const navLinks = [
     { href: "#features", label: t("landing.navbar.features") },
-    { href: "#departments", label: isEn ? "Departments" : "Départements" },
+    { href: "#departments", label: t("landing.navbar.departments") },
     { href: "#tools", label: t("landing.tools.title") },
     { href: "#pricing", label: t("landing.navbar.pricing") },
   ];
+
+  // Translated aria-labels
+  const ariaMenuOpen = isEn ? "Open menu" : "Ouvrir le menu";
+  const ariaMenuClose = isEn ? "Close menu" : "Fermer le menu";
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -84,9 +88,9 @@ export function Navbar() {
             <LanguageToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <button
+              <button
                   className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                  aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                  aria-label={isOpen ? ariaMenuClose : ariaMenuOpen}
                 >
                   <Menu className="w-6 h-6" />
                 </button>
