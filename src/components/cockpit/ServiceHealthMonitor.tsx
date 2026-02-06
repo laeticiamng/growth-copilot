@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -18,7 +17,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enUS, es, de } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 
 interface ServiceStatus {
   slug: string;
@@ -30,12 +30,17 @@ interface ServiceStatus {
   errorRate?: number;
 }
 
+const dateFnsLocales: Record<string, Locale> = { fr, en: enUS, es, de };
+
 export function ServiceHealthMonitor() {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { enabledServices } = useServices();
   const [services, setServices] = useState<ServiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  const dateLocale = useMemo(() => dateFnsLocales[i18n.language] || enUS, [i18n.language]);
 
   const checkServiceHealth = async () => {
     if (!currentWorkspace?.id) return;
@@ -49,7 +54,6 @@ export function ServiceHealthMonitor() {
       let latency = 0;
       
       try {
-        // Check if service has recent successful operations
         const { data, error } = await supabase
           .from('agent_runs')
           .select('status, duration_ms')
@@ -92,7 +96,6 @@ export function ServiceHealthMonitor() {
 
   useEffect(() => {
     checkServiceHealth();
-    // Refresh every 60 seconds
     const interval = setInterval(checkServiceHealth, 60000);
     return () => clearInterval(interval);
   }, [currentWorkspace?.id, enabledServices.length]);
@@ -131,7 +134,7 @@ export function ServiceHealthMonitor() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Santé des Services
+            {t("cockpit.serviceHealth")}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge 
@@ -143,8 +146,8 @@ export function ServiceHealthMonitor() {
                 overallHealth === "down" && "bg-destructive/10 text-destructive"
               )}
             >
-              {overallHealth === "healthy" ? "Tous opérationnels" : 
-               overallHealth === "degraded" ? "Dégradé" : "Problème détecté"}
+              {overallHealth === "healthy" ? t("cockpit.allOperational") : 
+               overallHealth === "degraded" ? t("cockpit.degraded") : t("cockpit.issueDetected")}
             </Badge>
             <Button 
               variant="ghost" 
@@ -168,7 +171,7 @@ export function ServiceHealthMonitor() {
           </div>
         ) : services.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground text-sm">
-            Aucun service à surveiller
+            {t("cockpit.noServiceToMonitor")}
           </div>
         ) : (
           <>
@@ -200,9 +203,9 @@ export function ServiceHealthMonitor() {
                   </TooltipTrigger>
                   <TooltipContent>
                     <div className="text-xs space-y-1">
-                      <p>Dernière vérification: {formatDistanceToNow(service.lastCheck, { addSuffix: true, locale: fr })}</p>
+                      <p>{t("cockpit.lastCheck")} {formatDistanceToNow(service.lastCheck, { addSuffix: true, locale: dateLocale })}</p>
                       {service.errorRate !== undefined && (
-                        <p>Taux d'erreur: {service.errorRate}%</p>
+                        <p>{t("cockpit.errorRate")} {service.errorRate}%</p>
                       )}
                     </div>
                   </TooltipContent>
@@ -211,7 +214,7 @@ export function ServiceHealthMonitor() {
             ))}
             
             <p className="text-xs text-muted-foreground text-right pt-2">
-              Dernière mise à jour: {formatDistanceToNow(lastRefresh, { addSuffix: true, locale: fr })}
+              {t("cockpit.lastUpdate")} {formatDistanceToNow(lastRefresh, { addSuffix: true, locale: dateLocale })}
             </p>
           </>
         )}

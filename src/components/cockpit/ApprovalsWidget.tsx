@@ -14,6 +14,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface PendingApproval {
   id: string;
@@ -45,6 +46,8 @@ export function ApprovalsWidget({
   onApprove,
   onReject,
 }: ApprovalsWidgetProps) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <Card>
@@ -66,7 +69,7 @@ export function ApprovalsWidget({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Clock className="w-5 h-5 text-warning" />
-            En attente d'approbation
+            {t("cockpit.pendingApproval")}
           </CardTitle>
           {approvals.length > 0 && (
             <Badge variant="secondary" className="bg-warning/20 text-warning">
@@ -79,8 +82,8 @@ export function ApprovalsWidget({
         {approvals.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-chart-3/50" />
-            <p className="text-sm">Aucune action en attente</p>
-            <p className="text-xs mt-1">Vous êtes à jour !</p>
+            <p className="text-sm">{t("cockpit.noActionPending")}</p>
+            <p className="text-xs mt-1">{t("cockpit.youAreUpToDate")}</p>
           </div>
         ) : (
           <>
@@ -134,7 +137,7 @@ export function ApprovalsWidget({
                             onClick={() => onReject(approval.id)}
                           >
                             <XCircle className="w-3 h-3 mr-1" />
-                            Refuser
+                            {t("cockpit.reject")}
                           </Button>
                           <Button
                             size="sm"
@@ -142,13 +145,13 @@ export function ApprovalsWidget({
                             onClick={() => onApprove(approval.id)}
                           >
                             <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Approuver
+                            {t("cockpit.approve")}
                           </Button>
                         </>
                       ) : (
                         <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
                           <Link to={`/dashboard/approvals?id=${approval.id}`}>
-                            Voir détails
+                            {t("cockpit.viewDetails")}
                             <ArrowRight className="w-3 h-3 ml-1" />
                           </Link>
                         </Button>
@@ -161,7 +164,7 @@ export function ApprovalsWidget({
             {approvals.length > 3 && (
               <Button variant="ghost" className="w-full" asChild>
                 <Link to="/dashboard/approvals">
-                  Voir les {approvals.length - 3} autres
+                  {t("cockpit.viewOthers", { count: approvals.length - 3 })}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>

@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Clock, Zap, AlertTriangle, Info } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface PriorityAction {
   id: string;
@@ -56,6 +57,8 @@ const priorityConfig = {
 };
 
 export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActionsProps) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <Card>
@@ -78,16 +81,16 @@ export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActi
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Priorités</CardTitle>
+          <CardTitle className="text-lg">{t("cockpit.priorities")}</CardTitle>
           <Badge variant="gradient">Top {displayedActions.length}</Badge>
         </div>
-        <CardDescription className="text-xs">Actions classées par impact × confiance × facilité</CardDescription>
+        <CardDescription className="text-xs">{t("cockpit.rankedByIce")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 flex-1">
         {displayedActions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Zap className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Aucune action prioritaire pour le moment</p>
+            <p className="text-sm">{t("cockpit.noPriorityAction")}</p>
           </div>
         ) : (
           displayedActions.map((action, index) => {
@@ -101,7 +104,6 @@ export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActi
                   config.bg
                 )}
               >
-                {/* ICE Score */}
                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
                   <div
                     className={cn(
@@ -118,7 +120,6 @@ export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActi
                   <span className="text-[10px] text-muted-foreground uppercase">ICE</span>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>

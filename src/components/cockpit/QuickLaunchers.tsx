@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -7,19 +6,18 @@ import {
   Play,
   Calendar,
   Search,
-  FileText,
   TrendingUp,
-  Users,
   Shield,
   Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface QuickLauncher {
   id: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   icon: React.ElementType;
   runType: string;
   service?: string;
@@ -27,7 +25,7 @@ interface QuickLauncher {
 }
 
 interface QuickLaunchersProps {
-  launchers: QuickLauncher[];
+  launchers?: QuickLauncher[];
   loading?: boolean;
   onLaunch: (runType: string) => Promise<void>;
 }
@@ -35,32 +33,32 @@ interface QuickLaunchersProps {
 const defaultLaunchers: QuickLauncher[] = [
   {
     id: "weekly-plan",
-    label: "Plan de la semaine",
-    description: "Générer le plan marketing hebdomadaire",
+    labelKey: "cockpit.weeklyPlanLabel",
+    descriptionKey: "cockpit.weeklyPlanDescription",
     icon: Calendar,
     runType: "MARKETING_WEEK_PLAN",
     service: "marketing",
   },
   {
     id: "seo-audit",
-    label: "Audit SEO",
-    description: "Lancer un audit technique complet",
+    labelKey: "cockpit.seoAuditLabel",
+    descriptionKey: "cockpit.seoAuditDescription",
     icon: Search,
     runType: "SEO_AUDIT_REPORT",
     service: "marketing",
   },
   {
     id: "funnel-diagnostic",
-    label: "Diagnostic funnel",
-    description: "Analyser les points de friction",
+    labelKey: "cockpit.funnelDiagLabel",
+    descriptionKey: "cockpit.funnelDiagDescription",
     icon: TrendingUp,
     runType: "FUNNEL_DIAGNOSTIC",
     service: "data",
   },
   {
     id: "security-check",
-    label: "Vérification sécurité",
-    description: "Audit des accès et permissions",
+    labelKey: "cockpit.securityCheckLabel",
+    descriptionKey: "cockpit.securityCheckDescription",
     icon: Shield,
     runType: "ACCESS_REVIEW",
     service: "security",
@@ -72,20 +70,21 @@ export function QuickLaunchers({
   loading,
   onLaunch,
 }: QuickLaunchersProps) {
+  const { t } = useTranslation();
   const [launchingId, setLaunchingId] = useState<string | null>(null);
 
   const handleLaunch = async (launcher: QuickLauncher) => {
     if (launcher.disabled) {
-      toast.error("Ce service n'est pas activé");
+      toast.error(t("cockpit.serviceNotEnabled"));
       return;
     }
 
     setLaunchingId(launcher.id);
     try {
       await onLaunch(launcher.runType);
-      toast.success(`${launcher.label} lancé avec succès`);
+      toast.success(t("cockpit.launchedSuccess", { label: t(launcher.labelKey) }));
     } catch (error) {
-      toast.error("Erreur lors du lancement");
+      toast.error(t("cockpit.launchError"));
     } finally {
       setLaunchingId(null);
     }
@@ -112,10 +111,10 @@ export function QuickLaunchers({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Lancer une action</CardTitle>
+          <CardTitle className="text-lg">{t("cockpit.launchAction")}</CardTitle>
           <Badge variant="outline" className="text-xs">
             <Play className="w-3 h-3 mr-1" />
-            Quick Start
+            {t("cockpit.quickStart")}
           </Badge>
         </div>
       </CardHeader>
@@ -144,9 +143,9 @@ export function QuickLaunchers({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm">{launcher.label}</p>
+                  <p className="font-medium text-sm">{t(launcher.labelKey)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                    {launcher.description}
+                    {t(launcher.descriptionKey)}
                   </p>
                 </div>
               </button>
