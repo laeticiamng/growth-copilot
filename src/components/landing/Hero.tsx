@@ -47,7 +47,7 @@ export function Hero() {
   const handleGetStarted = async () => {
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 300));
-    navigate('/onboarding');
+    navigate('/auth?tab=signup');
   };
 
   return (
