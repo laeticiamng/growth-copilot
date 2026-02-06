@@ -20,7 +20,7 @@ export function Footer() {
     ],
     [t("landing.footer.company")]: [
       { label: t("landing.footer.about"), href: "/about" },
-      { label: "Contact", href: "/contact" },
+      { label: t("landing.footer.contact"), href: "/contact" },
       { label: t("landing.footer.legalNotice"), href: "/legal" },
     ],
     [t("landing.footer.legal")]: [

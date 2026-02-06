@@ -143,6 +143,14 @@ export const en = {
       fullCompanyMonth: "Full Company/month",
       save: "Save {{amount}}€/mo",
       buildPackage: "Build Your Package",
+      coreFeatures: {
+        workspace: "Workspace",
+        rbac: "RBAC",
+        approvals: "Approvals",
+        auditLog: "Audit Log",
+        scheduler: "Scheduler",
+        integrations: "Integrations",
+      },
       depts: {
         marketing: { name: "Marketing", desc: "SEO, Content, Ads, Social Media, CRO" },
         sales: { name: "Sales", desc: "Pipeline, Outreach, CRM, Lead Scoring" },

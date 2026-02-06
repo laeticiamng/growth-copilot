@@ -143,6 +143,14 @@ export const fr = {
       fullCompanyMonth: "Full Company/mois",
       save: "Économisez {{amount}}€/mois",
       buildPackage: "Composer votre offre",
+      coreFeatures: {
+        workspace: "Workspace",
+        rbac: "RBAC",
+        approvals: "Approbations",
+        auditLog: "Journal d'audit",
+        scheduler: "Planificateur",
+        integrations: "Intégrations",
+      },
       depts: {
         marketing: { name: "Marketing", desc: "SEO, Contenu, Ads, Réseaux sociaux, CRO" },
         sales: { name: "Commercial", desc: "Pipeline, Prospection, CRM, Lead Scoring" },
