@@ -58,114 +58,32 @@ const generateSlug = (name: string): string => {
 };
 
 export default function Onboarding() {
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === "en";
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const { workspaces } = useWorkspace();
   const navigate = useNavigate();
 
-  // Translations - including HR and Legal for 11 departments total
-  const txt = {
-    marketing: isEn ? "Marketing" : "Marketing",
-    marketingDesc: isEn ? "SEO, Content, Ads, Social" : "SEO, Contenu, Ads, Social",
-    sales: isEn ? "Sales" : "Commercial",
-    salesDesc: isEn ? "Pipeline, Outreach, CRM" : "Pipeline, Outreach, CRM",
-    finance: isEn ? "Finance" : "Finance",
-    financeDesc: isEn ? "ROI, Budget, Reporting" : "ROI, Budget, Reporting",
-    security: isEn ? "Security" : "Sécurité",
-    securityDesc: isEn ? "Access, Compliance, Audit" : "Accès, Compliance, Audit",
-    product: isEn ? "Product" : "Produit",
-    productDesc: isEn ? "Roadmap, OKRs, Priorities" : "Roadmap, OKRs, Priorités",
-    engineering: isEn ? "Engineering" : "Ingénierie",
-    engineeringDesc: isEn ? "Delivery, QA, Releases" : "Delivery, QA, Releases",
-    data: isEn ? "Data" : "Data",
-    dataDesc: isEn ? "Analytics, Cohorts, Funnels" : "Analytics, Cohorts, Funnels",
-    support: isEn ? "Support" : "Support",
-    supportDesc: isEn ? "Tickets, Knowledge Base" : "Tickets, Knowledge Base",
-    governance: isEn ? "Governance" : "Gouvernance",
-    governanceDesc: isEn ? "IT, Policies, Access" : "IT, Policies, Access",
-    hr: isEn ? "Human Resources" : "Ressources Humaines",
-    hrDesc: isEn ? "Recruiting, Onboarding, Reviews" : "Recrutement, Onboarding, Évaluations",
-    legal: isEn ? "Legal" : "Juridique",
-    legalDesc: isEn ? "Contracts, Compliance, GDPR" : "Contrats, Conformité, RGPD",
-    traffic: isEn ? "Increase organic traffic" : "Augmenter le trafic organique",
-    leads: isEn ? "Generate qualified leads" : "Générer des leads qualifiés",
-    brand: isEn ? "Develop brand awareness" : "Développer la notoriété",
-    local: isEn ? "Dominate local market" : "Dominer le marché local",
-    ecommerce: isEn ? "Boost e-commerce sales" : "Booster les ventes e-commerce",
-    content: isEn ? "Create quality content" : "Créer du contenu de qualité",
-    paymentConfirmed: isEn ? "Payment confirmed! Your workspace is being created..." : "Paiement confirmé ! Votre workspace est en cours de création...",
-    paymentCancelled: isEn ? "Payment cancelled. You can try again." : "Paiement annulé. Vous pouvez réessayer.",
-    enterValidUrl: isEn ? "Please enter a valid URL" : "Veuillez entrer une URL valide",
-    selectService: isEn ? "Select at least one service" : "Sélectionnez au moins un service",
-    paymentError: isEn ? "Unable to create payment session" : "Impossible de créer la session de paiement",
-    whatIsYourSite: isEn ? "What is your website?" : "Quel est votre site ?",
-    enterUrl: isEn ? "Enter your website URL." : "Entrez l'URL de votre site web.",
-    siteUrl: isEn ? "Site URL" : "URL du site",
-    autoDetect: isEn ? "Auto-detection" : "Détection automatique",
-    name: isEn ? "Name:" : "Nom :",
-    continue: isEn ? "Continue" : "Continuer",
-    goToDashboard: isEn ? "Go to dashboard" : "Aller au dashboard",
-    existingWorkspaces: isEn ? `You already have ${workspaces?.length} workspace(s).` : `Vous avez déjà ${workspaces?.length} workspace(s).`,
-    choosePlan: isEn ? "Choose your plan" : "Choisissez votre formule",
-    allPlansInclude: isEn ? "All plans include 14 days free trial" : "Tous les plans incluent 14 jours d'essai gratuit",
-    freeTrial: isEn ? "14 days free" : "14 jours gratuits",
-    starter: "Starter",
-    starterDesc: isEn ? "1 department • 50 runs/month • Ideal to start" : "1 département • 50 exécutions/mois • Idéal pour débuter",
-    fullCompany: "Full Company",
-    fullDesc: isEn ? "All departments activated. The complete digital company." : "Tous les départements activés. L'entreprise digitale complète.",
-    recommended: isEn ? "Recommended" : "Recommandé",
-    alacarte: isEn ? "À la carte" : "À la carte",
-    alacarteDesc: isEn ? "Choose only the departments you need." : "Choisissez uniquement les départements dont vous avez besoin.",
-    perDeptMonth: isEn ? "/dept/month" : "/dépt/mois",
-    perMonth: isEn ? "/month" : "/mois",
-    back: isEn ? "Back" : "Retour",
-    chooseServices: isEn ? "Choose your services" : "Choisissez vos services",
-    activateDepts: isEn ? "Activate the departments you need" : "Activez les départements dont vous avez besoin",
-    selected: isEn ? "selected" : "sélectionné",
-    objectives: isEn ? "What are your objectives?" : "Quels sont vos objectifs ?",
-    selectPriorities: isEn ? "Select your priorities (optional)" : "Sélectionnez vos priorités (optionnel)",
-    summaryPayment: isEn ? "Summary & Payment" : "Récapitulatif & Paiement",
-    verifyOrder: isEn ? "Verify your order and finalize activation" : "Vérifiez votre commande et finalisez l'activation",
-    deptsSelected: isEn ? "departments selected:" : "départements sélectionnés :",
-    deptSelected: isEn ? "department selected:" : "département sélectionné :",
-    monthlyTotal: isEn ? "Monthly total" : "Total mensuel",
-    freeTrialOption: isEn ? "14 days free trial" : "Essai gratuit 14 jours",
-    activated: isEn ? "Activated" : "Activé",
-    trialDesc: isEn ? "Test all features without commitment. Cancel anytime." : "Testez toutes les fonctionnalités sans engagement. Annulez à tout moment.",
-    startFreeTrial: isEn ? "Start free trial" : "Démarrer l'essai gratuit",
-    payAndActivate: isEn ? "Pay and activate" : "Payer et activer",
-    redirecting: isEn ? "Redirecting..." : "Redirection...",
-    securePayment: isEn ? "Secure payment by Stripe." : "Paiement sécurisé par Stripe.",
-    notChargedUntil: isEn ? "You won't be charged until the trial ends." : "Vous ne serez pas débité avant la fin de l'essai.",
-    billedMonthly: isEn ? "Billed monthly." : "Facturé mensuellement.",
-    perfect: isEn ? "Perfect!" : "Parfait !",
-    creatingWorkspace: isEn ? "Your workspace is being created..." : "Votre workspace est en cours de création...",
-    servicesActivated: isEn ? "services activated" : "services activés",
-    redirectingToDashboard: isEn ? "Redirecting to your dashboard..." : "Redirection vers votre tableau de bord...",
-  };
-
   const SERVICE_CATALOG = [
-    { id: "marketing", name: txt.marketing, icon: TrendingUp, description: txt.marketingDesc, color: "text-blue-500" },
-    { id: "sales", name: txt.sales, icon: Briefcase, description: txt.salesDesc, color: "text-green-500" },
-    { id: "finance", name: txt.finance, icon: BarChart3, description: txt.financeDesc, color: "text-yellow-500" },
-    { id: "security", name: txt.security, icon: Shield, description: txt.securityDesc, color: "text-red-500" },
-    { id: "product", name: txt.product, icon: Puzzle, description: txt.productDesc, color: "text-purple-500" },
-    { id: "engineering", name: txt.engineering, icon: Code, description: txt.engineeringDesc, color: "text-orange-500" },
-    { id: "data", name: txt.data, icon: BarChart3, description: txt.dataDesc, color: "text-cyan-500" },
-    { id: "support", name: txt.support, icon: HeadphonesIcon, description: txt.supportDesc, color: "text-pink-500" },
-    { id: "governance", name: txt.governance, icon: Settings, description: txt.governanceDesc, color: "text-gray-500" },
-    { id: "hr", name: txt.hr, icon: Users, description: txt.hrDesc, color: "text-emerald-500" },
-    { id: "legal", name: txt.legal, icon: Scale, description: txt.legalDesc, color: "text-indigo-500" },
+    { id: "marketing", name: t("onboardingFlow.marketing"), icon: TrendingUp, description: t("onboardingFlow.marketingDesc"), color: "text-blue-500" },
+    { id: "sales", name: t("onboardingFlow.sales"), icon: Briefcase, description: t("onboardingFlow.salesDesc"), color: "text-green-500" },
+    { id: "finance", name: t("onboardingFlow.finance"), icon: BarChart3, description: t("onboardingFlow.financeDesc"), color: "text-yellow-500" },
+    { id: "security", name: t("onboardingFlow.security"), icon: Shield, description: t("onboardingFlow.securityDesc"), color: "text-red-500" },
+    { id: "product", name: t("onboardingFlow.product"), icon: Puzzle, description: t("onboardingFlow.productDesc"), color: "text-purple-500" },
+    { id: "engineering", name: t("onboardingFlow.engineering"), icon: Code, description: t("onboardingFlow.engineeringDesc"), color: "text-orange-500" },
+    { id: "data", name: t("onboardingFlow.data"), icon: BarChart3, description: t("onboardingFlow.dataDesc"), color: "text-cyan-500" },
+    { id: "support", name: t("onboardingFlow.support"), icon: HeadphonesIcon, description: t("onboardingFlow.supportDesc"), color: "text-pink-500" },
+    { id: "governance", name: t("onboardingFlow.governance"), icon: Settings, description: t("onboardingFlow.governanceDesc"), color: "text-gray-500" },
+    { id: "hr", name: t("onboardingFlow.hr"), icon: Users, description: t("onboardingFlow.hrDesc"), color: "text-emerald-500" },
+    { id: "legal", name: t("onboardingFlow.legal"), icon: Scale, description: t("onboardingFlow.legalDesc"), color: "text-indigo-500" },
   ];
 
   const OBJECTIVES = [
-    { id: "traffic", label: txt.traffic, icon: "📈" },
-    { id: "leads", label: txt.leads, icon: "🎯" },
-    { id: "brand", label: txt.brand, icon: "⭐" },
-    { id: "local", label: txt.local, icon: "📍" },
-    { id: "ecommerce", label: txt.ecommerce, icon: "🛒" },
-    { id: "content", label: txt.content, icon: "✍️" },
+    { id: "traffic", label: t("onboardingFlow.traffic"), icon: "📈" },
+    { id: "leads", label: t("onboardingFlow.leads"), icon: "🎯" },
+    { id: "brand", label: t("onboardingFlow.brand"), icon: "⭐" },
+    { id: "local", label: t("onboardingFlow.local"), icon: "📍" },
+    { id: "ecommerce", label: t("onboardingFlow.ecommerce"), icon: "🛒" },
+    { id: "content", label: t("onboardingFlow.content"), icon: "✍️" },
   ];
 
   const [step, setStep] = useState<OnboardingStep>("url");
@@ -185,14 +103,14 @@ export default function Onboarding() {
     
     if (checkoutStatus === "success") {
       setStep("summary");
-      toast.success(txt.paymentConfirmed);
+      toast.success(t("onboardingFlow.paymentConfirmed"));
       window.history.replaceState({}, "", window.location.pathname);
       setTimeout(() => navigate("/dashboard"), 3000);
     } else if (checkoutStatus === "cancelled") {
-      toast.error(txt.paymentCancelled);
+      toast.error(t("onboardingFlow.paymentCancelled"));
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   useEffect(() => {
     if (isValidUrl(siteUrl) && siteUrl.length > 5) {
@@ -242,7 +160,7 @@ export default function Onboarding() {
 
   const handleUrlNext = () => {
     if (!isValidUrl(siteUrl)) {
-      toast.error(txt.enterValidUrl);
+      toast.error(t("onboardingFlow.enterValidUrl"));
       return;
     }
     setStep("plan");
@@ -262,7 +180,7 @@ export default function Onboarding() {
 
   const handleServicesNext = () => {
     if (selectedServices.length === 0) {
-      toast.error(txt.selectService);
+      toast.error(t("onboardingFlow.selectService"));
       return;
     }
     setStep("objectives");
@@ -298,12 +216,12 @@ export default function Onboarding() {
       });
 
       if (error) throw error;
-      if (!data?.url) throw new Error(txt.paymentError);
+      if (!data?.url) throw new Error(t("onboardingFlow.paymentError"));
 
       window.location.href = data.url;
     } catch (error) {
       console.error("Payment error:", error);
-      toast.error(error instanceof Error ? error.message : txt.paymentError);
+      toast.error(error instanceof Error ? error.message : t("onboardingFlow.paymentError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -330,7 +248,7 @@ export default function Onboarding() {
 
       <div className="max-w-2xl mx-auto w-full px-6 mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">{isEn ? "Configuration" : "Configuration"}</span>
+          <span className="text-sm text-muted-foreground">{t("onboardingFlow.configuration")}</span>
           <span className="text-sm font-medium">{getProgress()}%</span>
         </div>
         <Progress value={getProgress()} className="h-2" />
@@ -345,12 +263,12 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Globe className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">{txt.whatIsYourSite}</CardTitle>
-                <CardDescription className="text-base">{txt.enterUrl}</CardDescription>
+                <CardTitle className="text-2xl">{t("onboardingFlow.whatIsYourSite")}</CardTitle>
+                <CardDescription className="text-base">{t("onboardingFlow.enterUrl")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="url" className="text-base">{txt.siteUrl}</Label>
+                  <Label htmlFor="url" className="text-base">{t("onboardingFlow.siteUrl")}</Label>
                   <Input
                     id="url"
                     type="url"
@@ -362,7 +280,7 @@ export default function Onboarding() {
                     autoFocus
                   />
                   {urlTouched && siteUrl && !isValidUrl(siteUrl) && (
-                    <p className="text-sm text-destructive">{txt.enterValidUrl}</p>
+                    <p className="text-sm text-destructive">{t("onboardingFlow.enterValidUrl")}</p>
                   )}
                 </div>
 
@@ -370,11 +288,11 @@ export default function Onboarding() {
                   <div className="p-4 rounded-lg bg-chart-3/10 border border-chart-3/30 space-y-3">
                     <div className="flex items-center gap-2 text-chart-3">
                       <Sparkles className="w-4 h-4" />
-                      <span className="text-sm font-medium">{txt.autoDetect}</span>
+                      <span className="text-sm font-medium">{t("onboardingFlow.autoDetect")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{txt.name}</span>
+                      <span className="text-sm">{t("onboardingFlow.name")}</span>
                       <Input
                         value={siteName}
                         onChange={(e) => setSiteName(e.target.value)}
@@ -390,15 +308,15 @@ export default function Onboarding() {
                   className="w-full h-12 text-base"
                   disabled={!isValidUrl(siteUrl)}
                 >
-                  {txt.continue}
+                  {t("onboardingFlow.continue")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
 
                 {workspaces && workspaces.length > 0 && (
                   <p className="text-center text-sm text-muted-foreground">
-                    {txt.existingWorkspaces}{" "}
+                    {t("onboardingFlow.existingWorkspaces", { count: workspaces.length })}{" "}
                     <button onClick={() => navigate("/dashboard")} className="text-primary hover:underline">
-                      {txt.goToDashboard}
+                      {t("onboardingFlow.goToDashboard")}
                     </button>
                   </p>
                 )}
@@ -412,9 +330,9 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Crown className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">{txt.choosePlan}</CardTitle>
+                <CardTitle className="text-2xl">{t("onboardingFlow.choosePlan")}</CardTitle>
                 <CardDescription className="text-base">
-                  <strong>{txt.allPlansInclude}</strong>
+                  <strong>{t("onboardingFlow.allPlansInclude")}</strong>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -430,11 +348,11 @@ export default function Onboarding() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{txt.starter}</span>
-                        <Badge variant="outline" className="text-chart-3 border-chart-3">{txt.freeTrial}</Badge>
+                        <span className="font-bold text-lg">{t("onboardingFlow.starter")}</span>
+                        <Badge variant="outline" className="text-chart-3 border-chart-3">{t("onboardingFlow.freeTrial")}</Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{txt.starterDesc}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.starter.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{txt.perMonth}</span></p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.starterDesc")}</p>
+                      <p className="text-lg font-bold mt-2">{PRICING.starter.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perMonth")}</span></p>
                     </div>
                     {planType === "starter" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
                   </button>
@@ -450,11 +368,11 @@ export default function Onboarding() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{txt.fullCompany}</span>
-                        <Badge variant="gradient">{txt.recommended}</Badge>
+                        <span className="font-bold text-lg">{t("onboardingFlow.fullCompany")}</span>
+                        <Badge variant="gradient">{t("onboardingFlow.recommended")}</Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{txt.fullDesc}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.full.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{txt.perMonth}</span></p>
+                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.fullDesc")}</p>
+                      <p className="text-lg font-bold mt-2">{PRICING.full.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perMonth")}</span></p>
                     </div>
                     {planType === "full" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
                   </button>
@@ -469,9 +387,9 @@ export default function Onboarding() {
                       <Puzzle className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div className="flex-1">
-                      <span className="font-bold text-lg">{txt.alacarte}</span>
-                      <p className="text-sm text-muted-foreground mt-1">{txt.alacarteDesc}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.department.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{txt.perDeptMonth}</span></p>
+                      <span className="font-bold text-lg">{t("onboardingFlow.alacarte")}</span>
+                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.alacarteDesc")}</p>
+                      <p className="text-lg font-bold mt-2">{PRICING.department.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perDeptMonth")}</span></p>
                     </div>
                     {planType === "alacarte" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
                   </button>
@@ -479,10 +397,10 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep("url")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{txt.back}
+                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
                   </Button>
                   <Button onClick={handlePlanNext} className="flex-1 h-12">
-                    {txt.continue}<ArrowRight className="w-4 h-4 ml-2" />
+                    {t("onboardingFlow.continue")}<ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </CardContent>
@@ -495,8 +413,8 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Puzzle className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">{txt.chooseServices}</CardTitle>
-                <CardDescription className="text-base">{txt.activateDepts}</CardDescription>
+                <CardTitle className="text-2xl">{t("onboardingFlow.chooseServices")}</CardTitle>
+                <CardDescription className="text-base">{t("onboardingFlow.activateDepts")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -526,10 +444,10 @@ export default function Onboarding() {
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep("plan")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{txt.back}
+                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
                   </Button>
                   <Button onClick={handleServicesNext} className="flex-1 h-12" disabled={selectedServices.length === 0}>
-                    {txt.continue} ({selectedServices.length} {txt.selected}{selectedServices.length > 1 ? "s" : ""})
+                    {t("onboardingFlow.continue")} ({selectedServices.length} {t("onboardingFlow.selected")}{selectedServices.length > 1 ? "s" : ""})
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -543,8 +461,8 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Target className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">{txt.objectives}</CardTitle>
-                <CardDescription className="text-base">{txt.selectPriorities}</CardDescription>
+                <CardTitle className="text-2xl">{t("onboardingFlow.objectives")}</CardTitle>
+                <CardDescription className="text-base">{t("onboardingFlow.selectPriorities")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -573,10 +491,10 @@ export default function Onboarding() {
                     onClick={() => setStep(planType === "full" ? "plan" : "services")} 
                     className="flex-1 h-12"
                   >
-                    <ArrowLeft className="w-4 h-4 mr-2" />{txt.back}
+                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
                   </Button>
                   <Button onClick={handleObjectivesNext} className="flex-1 h-12">
-                    {txt.continue}<ArrowRight className="w-4 h-4 ml-2" />
+                    {t("onboardingFlow.continue")}<ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </CardContent>
@@ -589,8 +507,8 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <CreditCard className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">{txt.summaryPayment}</CardTitle>
-                <CardDescription className="text-base">{txt.verifyOrder}</CardDescription>
+                <CardTitle className="text-2xl">{t("onboardingFlow.summaryPayment")}</CardTitle>
+                <CardDescription className="text-base">{t("onboardingFlow.verifyOrder")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-4 rounded-lg bg-muted/50 space-y-4">
@@ -609,14 +527,14 @@ export default function Onboarding() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Crown className="w-4 h-4 text-primary" />
-                          <span>{txt.fullCompany}</span>
+                          <span>{t("onboardingFlow.fullCompany")}</span>
                         </div>
-                        <span className="font-bold">{PRICING.full.toLocaleString()} €{txt.perMonth}</span>
+                        <span className="font-bold">{PRICING.full.toLocaleString()} €{t("onboardingFlow.perMonth")}</span>
                       </div>
                     ) : (
                       <>
                         <div className="text-sm text-muted-foreground mb-2">
-                          {selectedServices.length} {selectedServices.length > 1 ? txt.deptsSelected : txt.deptSelected}
+                          {selectedServices.length} {selectedServices.length > 1 ? t("onboardingFlow.deptsSelected") : t("onboardingFlow.deptSelected")}
                         </div>
                         {selectedServices.map(serviceId => {
                           const service = SERVICE_CATALOG.find(s => s.id === serviceId);
@@ -634,8 +552,8 @@ export default function Onboarding() {
                   <Separator />
                   
                   <div className="flex items-center justify-between text-lg font-bold">
-                    <span>{txt.monthlyTotal}</span>
-                    <span className="text-primary">{getTotalPrice().toLocaleString()} €{txt.perMonth}</span>
+                    <span>{t("onboardingFlow.monthlyTotal")}</span>
+                    <span className="text-primary">{getTotalPrice().toLocaleString()} €{t("onboardingFlow.perMonth")}</span>
                   </div>
                 </div>
 
@@ -650,17 +568,17 @@ export default function Onboarding() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{txt.freeTrialOption}</span>
-                      {useTrial && <Badge variant="secondary" className="bg-chart-3/20 text-chart-3">{txt.activated}</Badge>}
+                      <span className="font-medium">{t("onboardingFlow.freeTrialOption")}</span>
+                      {useTrial && <Badge variant="secondary" className="bg-chart-3/20 text-chart-3">{t("onboardingFlow.activated")}</Badge>}
                     </div>
-                    <p className="text-sm text-muted-foreground">{txt.trialDesc}</p>
+                    <p className="text-sm text-muted-foreground">{t("onboardingFlow.trialDesc")}</p>
                   </div>
                   {useTrial && <CheckCircle2 className="w-5 h-5 text-chart-3 flex-shrink-0" />}
                 </button>
 
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep("objectives")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{txt.back}
+                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
                   </Button>
                   <Button 
                     onClick={handlePayment} 
@@ -668,17 +586,17 @@ export default function Onboarding() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{txt.redirecting}</>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("onboardingFlow.redirecting")}</>
                     ) : useTrial ? (
-                      <><Gift className="w-4 h-4 mr-2" />{txt.startFreeTrial}</>
+                      <><Gift className="w-4 h-4 mr-2" />{t("onboardingFlow.startFreeTrial")}</>
                     ) : (
-                      <><CreditCard className="w-4 h-4 mr-2" />{txt.payAndActivate}</>
+                      <><CreditCard className="w-4 h-4 mr-2" />{t("onboardingFlow.payAndActivate")}</>
                     )}
                   </Button>
                 </div>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  {txt.securePayment} {useTrial ? txt.notChargedUntil : txt.billedMonthly}
+                  {t("onboardingFlow.securePayment")} {useTrial ? t("onboardingFlow.notChargedUntil") : t("onboardingFlow.billedMonthly")}
                 </p>
               </CardContent>
             </Card>
@@ -690,14 +608,14 @@ export default function Onboarding() {
                 <div className="mx-auto p-3 rounded-full bg-chart-3/20 w-fit mb-4">
                   <CheckCircle2 className="w-8 h-8 text-chart-3" />
                 </div>
-                <CardTitle className="text-2xl">{txt.perfect}</CardTitle>
-                <CardDescription className="text-base">{txt.creatingWorkspace}</CardDescription>
+                <CardTitle className="text-2xl">{t("onboardingFlow.perfect")}</CardTitle>
+                <CardDescription className="text-base">{t("onboardingFlow.creatingWorkspace")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-center">
                 <Badge variant="gradient" className="text-sm">
-                  {planType === "full" ? txt.fullCompany : `${selectedServices.length} ${txt.servicesActivated}`}
+                  {planType === "full" ? t("onboardingFlow.fullCompany") : `${selectedServices.length} ${t("onboardingFlow.servicesActivated")}`}
                 </Badge>
-                <p className="text-muted-foreground">{txt.redirectingToDashboard}</p>
+                <p className="text-muted-foreground">{t("onboardingFlow.redirectingToDashboard")}</p>
                 <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
               </CardContent>
             </Card>

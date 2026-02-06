@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,8 @@ import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty
 import { LoadingState } from "@/components/ui/loading-state";
 
 export default function Ads() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { currentSite } = useSites();
    const { currentWorkspace } = useWorkspace();
   const { 
@@ -118,7 +121,7 @@ export default function Ads() {
   const displayNegatives = negatives.map(n => ({
     keyword: n.keyword,
     level: n.level || "compte",
-    added: n.created_at ? new Date(n.created_at).toLocaleDateString('fr') : "Récent"
+    added: n.created_at ? new Date(n.created_at).toLocaleDateString(locale) : "—"
   }));
 
   // Real alerts - only show if there's actual data

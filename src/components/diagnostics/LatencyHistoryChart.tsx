@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Activity } from "lucide-react";
@@ -16,6 +18,8 @@ interface LatencyHistoryChartProps {
 }
 
 export function LatencyHistoryChart({ data }: LatencyHistoryChartProps) {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const [historyData, setHistoryData] = useState<LatencyDataPoint[]>([]);
 
   useEffect(() => {
@@ -71,7 +75,7 @@ export function LatencyHistoryChart({ data }: LatencyHistoryChartProps) {
             <XAxis 
               dataKey="timestamp" 
               className="text-xs"
-              tickFormatter={(val) => new Date(val).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              tickFormatter={(val) => new Date(val).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
             />
             <YAxis 
               className="text-xs"
@@ -83,7 +87,7 @@ export function LatencyHistoryChart({ data }: LatencyHistoryChartProps) {
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
               }}
-              labelFormatter={(val) => new Date(val).toLocaleString('fr-FR')}
+              labelFormatter={(val) => new Date(val).toLocaleString(locale)}
               formatter={(value: number) => [`${value}ms`, '']}
             />
             <Legend />

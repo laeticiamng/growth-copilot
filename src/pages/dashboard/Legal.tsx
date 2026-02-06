@@ -1,5 +1,6 @@
-import { useState } from "react";
- import { useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,8 @@ const CONTRACT_TYPES = [
 ];
 
 export default function Legal() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { contracts, loading: loadingContracts, stats: contractStats, expiringContracts, createContract, isCreating } = useContracts();
   const { complianceItems, gdprRequests, loading: loadingCompliance, complianceStats, gdprStats } = useCompliance();
    const { currentWorkspace } = useWorkspace();
@@ -317,14 +320,14 @@ export default function Legal() {
                           <p className="font-medium">{contract.title}</p>
                           <p className="text-sm text-muted-foreground">
                             {contract.counterparty_name || "Non spécifié"}
-                            {contract.expiry_date && ` • Expire le ${new Date(contract.expiry_date).toLocaleDateString('fr-FR')}`}
+                            {contract.expiry_date && ` • Expire le ${new Date(contract.expiry_date).toLocaleDateString(locale)}`}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         {contract.value_amount && (
                           <span className="text-sm font-medium">
-                            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: contract.value_currency }).format(contract.value_amount)}
+                            {new Intl.NumberFormat(locale, { style: 'currency', currency: contract.value_currency }).format(contract.value_amount)}
                           </span>
                         )}
                         <Badge variant={CONTRACT_STATUS_LABELS[contract.status].variant}>
@@ -418,7 +421,7 @@ export default function Legal() {
                             {request.status}
                           </Badge>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Échéance: {new Date(request.response_deadline).toLocaleDateString('fr-FR')}
+                            Échéance: {new Date(request.response_deadline).toLocaleDateString(locale)}
                           </p>
                         </div>
                       </div>

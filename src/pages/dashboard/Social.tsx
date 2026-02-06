@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,8 @@ const repurposeIdeas = [
 ];
 
 export default function Social() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
   const { accounts, posts, loading, createPost, updatePost, deletePost, publishPost, refetch } = useSocial();
@@ -380,7 +383,7 @@ export default function Social() {
                     <div className="text-right flex-shrink-0">
                       {post.scheduled_for && (
                         <p className="text-sm font-medium">
-                          {new Date(post.scheduled_for).toLocaleDateString('fr', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(post.scheduled_for).toLocaleDateString(locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
                       <Badge variant={post.status === "scheduled" ? "gradient" : post.status === "published" ? "success" : "outline"} className="mt-1">

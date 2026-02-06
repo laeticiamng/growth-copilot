@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOpsMetrics } from "@/hooks/useOpsMetrics";
@@ -17,14 +18,15 @@ const MODEL_COSTS: Record<string, { input: number; output: number }> = {
 };
 
 export default function AICostDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { metrics, loading } = useOpsMetrics();
 
   const latestMetric = Array.isArray(metrics) ? metrics[0] : metrics;
   const aiCost = latestMetric?.ai_cost_usd || 0;
 
   const formatCost = (cost: number) => 
-    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cost);
+    new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(cost);
 
   return (
     <div className="space-y-8">

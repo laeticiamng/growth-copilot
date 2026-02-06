@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,8 @@ import { toast } from "sonner";
 // No mock data - all data comes from database via useApprovals hook
 
 export default function Approvals() {
+  const { t, i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { pendingApprovals, recentDecisions, autopilotSettings, loading, approveAction, rejectAction, updateAutopilotSettings } = useApprovals();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -32,23 +36,23 @@ export default function Approvals() {
     const { error } = await approveAction(id);
     setProcessingId(null);
     if (error) {
-      toast.error("Erreur lors de l'approbation");
+      toast.error(t("onboardingFlow.approvalError"));
     } else {
-      toast.success("Action approuvée");
+      toast.success(t("onboardingFlow.approved"));
     }
   };
 
   const handleReject = async (id: string) => {
-    const reason = window.prompt("Raison du refus :");
+    const reason = window.prompt(t("onboardingFlow.rejectionPrompt"));
     if (!reason) return;
     
     setProcessingId(id);
     const { error } = await rejectAction(id, reason);
     setProcessingId(null);
     if (error) {
-      toast.error("Erreur lors du refus");
+      toast.error(t("onboardingFlow.rejectionError"));
     } else {
-      toast.success("Action refusée");
+      toast.success(t("onboardingFlow.rejected"));
     }
   };
 
@@ -58,8 +62,8 @@ export default function Approvals() {
     agent: a.agent_type,
     action: a.action_type,
     riskLevel: a.risk_level,
-    createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString('fr') : 'Récent',
-    expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} jours` : '7 jours',
+    createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString(locale) : t("common.noData"),
+    expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} ${t("common.noData") === "Aucune donnée" ? "jours" : "days"}` : '7 days',
     details: a.action_data as Record<string, unknown>,
   }));
 
@@ -68,7 +72,7 @@ export default function Approvals() {
     agent: d.agent_type,
     action: d.action_type,
     decision: d.status === 'approved' ? 'approved' : 'rejected',
-    decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString('fr') : 'Récent',
+    decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString(locale) : t("common.noData"),
     autoApproved: d.auto_approved || false,
   }));
 

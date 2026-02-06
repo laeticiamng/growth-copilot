@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +46,8 @@ interface ApprovalPreview {
 }
 
 export default function ApprovalsV2() {
+  const { t, i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { pendingApprovals, recentDecisions, autopilotSettings, loading, approveAction, rejectAction, updateAutopilotSettings } = useApprovals();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<string | null>(null);
@@ -107,8 +111,8 @@ export default function ApprovalsV2() {
       agent: a.agent_type,
       action: a.action_type,
       riskLevel: a.risk_level,
-      createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString('fr') : 'Récent',
-      expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} jours` : '7 jours',
+      createdAt: a.created_at ? new Date(a.created_at).toLocaleDateString(locale) : t("common.noData"),
+      expiresIn: a.expires_at ? `${Math.ceil((new Date(a.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}d` : '7d',
       details: actionData,
       preview: previewUrls,
       variantId: (actionData as Record<string, unknown>).variant_id as string | undefined,
@@ -121,7 +125,7 @@ export default function ApprovalsV2() {
     agent: d.agent_type,
     action: d.action_type,
     decision: d.status === 'approved' ? 'approved' : 'rejected',
-    decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString('fr') : 'Récent',
+    decidedAt: d.reviewed_at ? new Date(d.reviewed_at).toLocaleDateString(locale) : t("common.noData"),
     autoApproved: d.auto_approved || false,
     reason: d.rejection_reason,
   }));
