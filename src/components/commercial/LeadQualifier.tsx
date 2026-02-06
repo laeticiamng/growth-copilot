@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
+import { useTranslation } from "react-i18next";
 
 interface LeadQualificationResult {
   score: number;
@@ -60,26 +61,28 @@ interface Lead {
   created_at: string;
 }
 
-const sources = [
-  { value: "web", label: "Site web" },
-  { value: "referral", label: "Recommandation" },
-  { value: "event", label: "Salon / Événement" },
-  { value: "cold", label: "Prospection froide" },
-  { value: "linkedin", label: "LinkedIn" },
-];
-
-const pipelineStages = [
-  { id: "new", label: "Nouveau", color: "bg-blue-500" },
-  { id: "qualified", label: "Qualifié", color: "bg-purple-500" },
-  { id: "meeting", label: "En discussion", color: "bg-yellow-500" },
-  { id: "proposal", label: "Proposé", color: "bg-orange-500" },
-  { id: "won", label: "Gagné", color: "bg-primary" },
-  { id: "lost", label: "Perdu", color: "bg-destructive" },
-];
-
 export function LeadQualifier() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
+
+  const sources = [
+    { value: "web", label: t("components.leadQualifier.sourceWeb") },
+    { value: "referral", label: t("components.leadQualifier.sourceReferral") },
+    { value: "event", label: t("components.leadQualifier.sourceEvent") },
+    { value: "cold", label: t("components.leadQualifier.sourceCold") },
+    { value: "linkedin", label: "LinkedIn" },
+  ];
+
+  const pipelineStages = [
+    { id: "new", label: t("components.leadQualifier.stageNew"), color: "bg-blue-500" },
+    { id: "qualified", label: t("components.leadQualifier.stageQualified"), color: "bg-purple-500" },
+    { id: "meeting", label: t("components.leadQualifier.stageMeeting"), color: "bg-yellow-500" },
+    { id: "proposal", label: t("components.leadQualifier.stageProposal"), color: "bg-orange-500" },
+    { id: "won", label: t("components.leadQualifier.stageWon"), color: "bg-primary" },
+    { id: "lost", label: t("components.leadQualifier.stageLost"), color: "bg-destructive" },
+  ];
+
   const [activeTab, setActiveTab] = useState("form");
   const [formData, setFormData] = useState({
     name: "",
@@ -95,12 +98,12 @@ export function LeadQualifier() {
 
   const handleQualify = async () => {
     if (!formData.name.trim() || !formData.company.trim()) {
-      toast.error("Nom et entreprise requis");
+      toast.error(t("components.leadQualifier.nameCompanyRequired"));
       return;
     }
 
     if (!currentWorkspace) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("components.leadQualifier.noWorkspace"));
       return;
     }
 
@@ -110,7 +113,7 @@ export function LeadQualifier() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Veuillez vous connecter");
+        toast.error(t("components.leadQualifier.pleaseLogin"));
         setGenerating(false);
         return;
       }
@@ -192,7 +195,6 @@ Génère :
         const qualification = data.artifact.lead_qualification as LeadQualificationResult;
         setResult(qualification);
         
-        // Save to leads table
         const newLead: Lead = {
           id: crypto.randomUUID(),
           name: formData.name,
@@ -207,7 +209,6 @@ Génère :
         
         setLeads(prev => [newLead, ...prev]);
         
-        // Save to Supabase
         await supabase.from("leads").insert([{
           workspace_id: currentWorkspace.id,
           name: formData.name,
@@ -218,13 +219,13 @@ Génère :
           status: newLead.status as "new" | "contacted" | "qualified" | "proposal" | "negotiation" | "won" | "lost",
         }]);
         
-        toast.success("Lead qualifié avec succès !");
+        toast.success(t("components.leadQualifier.qualifiedSuccess"));
       } else {
-        throw new Error(data?.error || "Erreur lors de la qualification");
+        throw new Error(data?.error || t("components.leadQualifier.qualificationError"));
       }
     } catch (err) {
       console.error("Lead qualification error:", err);
-      toast.error("Erreur lors de la qualification");
+      toast.error(t("components.leadQualifier.qualificationError"));
     } finally {
       setGenerating(false);
     }
@@ -235,7 +236,7 @@ Génère :
     const fullEmail = `Objet: ${result.email_template.subject}\n\n${result.email_template.body}`;
     navigator.clipboard.writeText(fullEmail);
     setCopied(true);
-    toast.success("Email copié !");
+    toast.success(t("components.leadQualifier.emailCopied"));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -246,9 +247,9 @@ Génère :
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 70) return { variant: "gradient" as const, label: "Qualifié" };
-    if (score >= 40) return { variant: "secondary" as const, label: "À nurture" };
-    return { variant: "destructive" as const, label: "Disqualifié" };
+    if (score >= 70) return { variant: "gradient" as const, label: t("components.leadQualifier.qualified") };
+    if (score >= 40) return { variant: "secondary" as const, label: t("components.leadQualifier.toNurture") };
+    return { variant: "destructive" as const, label: t("components.leadQualifier.disqualified") };
   };
 
   return (
@@ -259,7 +260,7 @@ Génère :
             <Target className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <CardTitle>Qualification de Leads</CardTitle>
+            <CardTitle>{t("components.leadQualifier.title")}</CardTitle>
             <CardDescription>
               Agent Alexandre Petit — Commercial Lead Qualifier
             </CardDescription>
@@ -269,15 +270,14 @@ Génère :
       <CardContent className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">Nouveau Lead</TabsTrigger>
+            <TabsTrigger value="form">{t("components.leadQualifier.newLead")}</TabsTrigger>
             <TabsTrigger value="pipeline">Pipeline ({leads.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="form" className="space-y-6">
-            {/* Form */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nom complet *</Label>
+                <Label htmlFor="name">{t("components.leadQualifier.fullName")} *</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -290,7 +290,7 @@ Génère :
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company">Entreprise *</Label>
+                <Label htmlFor="company">{t("components.leadQualifier.company")} *</Label>
                 <div className="relative">
                   <Building className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -335,7 +335,7 @@ Génère :
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
-                placeholder="Informations complémentaires sur le lead..."
+                placeholder={t("components.leadQualifier.notesPlaceholder")}
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 rows={3}
@@ -351,22 +351,20 @@ Génère :
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Qualification en cours...
+                  {t("components.leadQualifier.qualifying")}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Qualifier ce lead
+                  {t("components.leadQualifier.qualifyLead")}
                 </>
               )}
             </Button>
 
-            {/* Results */}
             {result && !generating && (
               <div className="space-y-6 pt-4 border-t">
-                {/* Score */}
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Score de qualification</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("components.leadQualifier.qualificationScore")}</p>
                   <div className="flex items-center justify-center gap-3">
                     <span className={`text-5xl font-bold ${getScoreColor(result.score)}`}>
                       {result.score}
@@ -378,7 +376,6 @@ Génère :
                   </Badge>
                 </div>
 
-                {/* BANT Breakdown */}
                 <div className="grid sm:grid-cols-2 gap-3">
                   {Object.entries(result.bant).map(([key, value]) => (
                     <div key={key} className="p-3 rounded-lg bg-secondary/50">
@@ -391,25 +388,23 @@ Génère :
                   ))}
                 </div>
 
-                {/* Next Step */}
                 <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                   <div className="flex items-center gap-2 mb-2">
                     <ArrowRight className="w-4 h-4 text-primary" />
-                    <span className="font-semibold">Prochaine étape</span>
+                    <span className="font-semibold">{t("components.leadQualifier.nextStep")}</span>
                     <Badge variant={result.next_step.priority === "high" ? "destructive" : "secondary"}>
-                      {result.next_step.priority === "high" ? "Prioritaire" : "Normal"}
+                      {result.next_step.priority === "high" ? t("components.leadQualifier.priority") : t("components.leadQualifier.normal")}
                     </Badge>
                   </div>
                   <p className="font-medium">{result.next_step.action}</p>
                   <p className="text-sm text-muted-foreground mt-1">{result.next_step.reasoning}</p>
                 </div>
 
-                {/* Email Template */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold flex items-center gap-2">
                       <Mail className="w-4 h-4" />
-                      Email personnalisé
+                      {t("components.leadQualifier.personalizedEmail")}
                     </h4>
                     <Button variant="outline" size="sm" onClick={handleCopyEmail}>
                       {copied ? (
@@ -421,7 +416,7 @@ Génère :
                   </div>
                   <div className="p-4 rounded-lg bg-secondary/50 space-y-2">
                     <p className="text-sm">
-                      <span className="font-medium">Objet :</span> {result.email_template.subject}
+                      <span className="font-medium">{t("components.leadQualifier.subject")} :</span> {result.email_template.subject}
                     </p>
                     <p className="text-sm whitespace-pre-wrap">{result.email_template.body}</p>
                   </div>
@@ -431,7 +426,6 @@ Génère :
           </TabsContent>
 
           <TabsContent value="pipeline" className="space-y-4">
-            {/* Pipeline Kanban */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {pipelineStages.map(stage => {
                 const stageLeads = leads.filter(l => l.status === stage.id);
@@ -463,8 +457,8 @@ Génère :
             {leads.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Aucun lead qualifié</p>
-                <p className="text-sm">Utilisez le formulaire pour qualifier votre premier lead</p>
+                <p>{t("components.leadQualifier.noLeads")}</p>
+                <p className="text-sm">{t("components.leadQualifier.noLeadsDesc")}</p>
               </div>
             )}
           </TabsContent>

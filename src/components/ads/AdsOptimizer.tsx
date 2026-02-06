@@ -1,7 +1,6 @@
 /**
  * Ads Optimizer Component
  * Agent: Marc Rousseau (Ads Optimization Manager)
- * Generates: Ad titles, descriptions, negative keywords, budget recommendations
  */
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,19 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Sparkles, 
-  Copy, 
-  Loader2, 
-  CheckCircle,
-  Target,
-  DollarSign,
-  Ban,
-  Megaphone
-} from "lucide-react";
+import { Sparkles, Copy, Loader2, CheckCircle, Target, DollarSign, Ban, Megaphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useTranslation } from "react-i18next";
 
 interface AdVariant {
   headline: string;
@@ -46,6 +37,7 @@ interface AdsOptimizerResult {
 }
 
 export function AdsOptimizer() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [formData, setFormData] = useState({
     product: "",
@@ -59,12 +51,12 @@ export function AdsOptimizer() {
 
   const handleGenerate = async () => {
     if (!formData.product.trim()) {
-      toast.error("Décrivez votre produit ou service");
+      toast.error(t("components.adsOptimizer.describeProduct"));
       return;
     }
 
     if (!currentWorkspace) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("components.adsOptimizer.noWorkspace"));
       return;
     }
 
@@ -74,7 +66,7 @@ export function AdsOptimizer() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Veuillez vous connecter");
+        toast.error(t("components.adsOptimizer.pleaseLogin"));
         setGenerating(false);
         return;
       }
@@ -120,13 +112,7 @@ RÈGLES :
 Produit/Service : ${formData.product}
 Budget mensuel disponible : ${formData.budget || "Non spécifié"}€
 Audience cible : ${formData.audience || "Non spécifiée"}
-Objectif : ${formData.objective === "conversions" ? "Maximiser les conversions" : formData.objective === "traffic" ? "Maximiser le trafic" : "Notoriété de marque"}
-
-Génère :
-1. 3 titres accrocheurs (30 caractères max chacun)
-2. 2 descriptions persuasives (90 caractères max chacune)
-3. 5-8 mots-clés négatifs à exclure
-4. Recommandation de budget optimal avec justification`;
+Objectif : ${formData.objective === "conversions" ? "Maximiser les conversions" : formData.objective === "traffic" ? "Maximiser le trafic" : "Notoriété de marque"}`;
 
       const { data, error } = await supabase.functions.invoke("ai-gateway", {
         body: {
@@ -150,13 +136,13 @@ Génère :
 
       if (data?.success && data?.artifact?.ads_optimization) {
         setResult(data.artifact.ads_optimization as AdsOptimizerResult);
-        toast.success("Annonces générées avec succès !");
+        toast.success(t("components.adsOptimizer.generated"));
       } else {
-        throw new Error(data?.error || "Erreur lors de la génération");
+        throw new Error(data?.error || t("components.adsOptimizer.generationError"));
       }
     } catch (err) {
       console.error("Ads optimization error:", err);
-      toast.error("Erreur lors de la génération des annonces");
+      toast.error(t("components.adsOptimizer.generationError"));
     } finally {
       setGenerating(false);
     }
@@ -165,7 +151,7 @@ Génère :
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(id);
-    toast.success("Copié !");
+    toast.success(t("components.adsOptimizer.copied"));
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
@@ -177,7 +163,7 @@ Génère :
             <Megaphone className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <CardTitle>Générateur d'Annonces Google Ads</CardTitle>
+            <CardTitle>{t("components.adsOptimizer.title")}</CardTitle>
             <CardDescription>
               Agent Marc Rousseau — Ads Optimization Manager
             </CardDescription>
@@ -188,10 +174,10 @@ Génère :
         {/* Form */}
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="product">Produit / Service *</Label>
+            <Label htmlFor="product">{t("components.adsOptimizer.product")} *</Label>
             <Textarea
               id="product"
-              placeholder="Décrivez votre produit ou service en quelques phrases..."
+              placeholder={t("components.adsOptimizer.productPlaceholder")}
               value={formData.product}
               onChange={(e) => setFormData(prev => ({ ...prev, product: e.target.value }))}
               rows={3}
@@ -199,7 +185,7 @@ Génère :
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="budget">Budget mensuel (€)</Label>
+              <Label htmlFor="budget">{t("components.adsOptimizer.monthlyBudget")}</Label>
               <Input
                 id="budget"
                 type="number"
@@ -209,10 +195,10 @@ Génère :
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="audience">Audience cible</Label>
+              <Label htmlFor="audience">{t("components.adsOptimizer.targetAudience")}</Label>
               <Input
                 id="audience"
-                placeholder="ex: PME B2B, 10-50 employés, France"
+                placeholder={t("components.adsOptimizer.audiencePlaceholder")}
                 value={formData.audience}
                 onChange={(e) => setFormData(prev => ({ ...prev, audience: e.target.value }))}
               />
@@ -226,9 +212,9 @@ Génère :
             value={formData.objective}
             onChange={(e) => setFormData(prev => ({ ...prev, objective: e.target.value }))}
           >
-            <option value="conversions">Maximiser les conversions</option>
-            <option value="traffic">Maximiser le trafic</option>
-            <option value="awareness">Notoriété de marque</option>
+            <option value="conversions">{t("components.adsOptimizer.objConversions")}</option>
+            <option value="traffic">{t("components.adsOptimizer.objTraffic")}</option>
+            <option value="awareness">{t("components.adsOptimizer.objAwareness")}</option>
           </select>
           <Button 
             variant="hero" 
@@ -239,12 +225,12 @@ Génère :
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Génération...
+                {t("components.adsOptimizer.generating")}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Générer les annonces
+                {t("components.adsOptimizer.generateAds")}
               </>
             )}
           </Button>
@@ -254,7 +240,7 @@ Génère :
         {generating && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
             <Loader2 className="w-12 h-12 text-primary animate-spin" />
-            <p className="text-muted-foreground">Marc Rousseau optimise vos annonces...</p>
+            <p className="text-muted-foreground">{t("components.adsOptimizer.optimizing")}</p>
           </div>
         )}
 
@@ -265,14 +251,14 @@ Génère :
             <div className="space-y-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Target className="w-4 h-4 text-primary" />
-                Titres (30 caractères max)
+                {t("components.adsOptimizer.titles")}
               </h4>
               <div className="grid gap-2">
                 {result.titles?.map((title, i) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                     <div className="flex-1">
                       <p className="font-medium">{title.headline}</p>
-                      <p className="text-xs text-muted-foreground">{title.charCount}/30 caractères</p>
+                      <p className="text-xs text-muted-foreground">{title.charCount}/30 {t("components.adsOptimizer.chars")}</p>
                     </div>
                     <Button 
                       variant="ghost" 
@@ -294,14 +280,14 @@ Génère :
             <div className="space-y-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Megaphone className="w-4 h-4 text-primary" />
-                Descriptions (90 caractères max)
+                {t("components.adsOptimizer.descriptions")}
               </h4>
               <div className="grid gap-2">
                 {result.descriptions?.map((desc, i) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                     <div className="flex-1">
                       <p className="text-sm">{desc.text}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{desc.charCount}/90 caractères</p>
+                      <p className="text-xs text-muted-foreground mt-1">{desc.charCount}/90 {t("components.adsOptimizer.chars")}</p>
                     </div>
                     <Button 
                       variant="ghost" 
@@ -323,7 +309,7 @@ Génère :
             <div className="space-y-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Ban className="w-4 h-4 text-destructive" />
-                Mots-clés négatifs recommandés
+                {t("components.adsOptimizer.negativeKeywords")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {result.negative_keywords?.map((kw, i) => (
@@ -345,16 +331,16 @@ Génère :
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                 <h4 className="font-semibold flex items-center gap-2 mb-3">
                   <DollarSign className="w-4 h-4 text-primary" />
-                  Recommandation Budget
+                  {t("components.adsOptimizer.budgetRecommendation")}
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-4 mb-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Budget journalier</p>
-                    <p className="text-xl font-bold">{result.budget_recommendation.daily}€/jour</p>
+                    <p className="text-sm text-muted-foreground">{t("components.adsOptimizer.dailyBudget")}</p>
+                    <p className="text-xl font-bold">{result.budget_recommendation.daily}€/{t("components.adsOptimizer.day")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Budget mensuel</p>
-                    <p className="text-xl font-bold text-primary">{result.budget_recommendation.monthly}€/mois</p>
+                    <p className="text-sm text-muted-foreground">{t("components.adsOptimizer.monthlyBudgetLabel")}</p>
+                    <p className="text-xl font-bold text-primary">{result.budget_recommendation.monthly}€/{t("components.adsOptimizer.month")}</p>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{result.budget_recommendation.reasoning}</p>
