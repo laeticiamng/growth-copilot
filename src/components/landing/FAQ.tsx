@@ -14,11 +14,11 @@ export function FAQ() {
   const faqsFr = [
     {
       question: "Qu'est-ce que la 'Portable Company' ?",
-      answer: "C'est une entreprise digitale complète que vous pouvez 'porter' avec vous. 9 départements spécialisés (Marketing, Commercial, Finance, Sécurité...) travaillent en coulisses pour vous livrer des outputs professionnels. Vous n'avez qu'à valider les décisions clés.",
+      answer: "C'est une entreprise digitale complète que vous pouvez 'porter' avec vous. 11 départements spécialisés (Marketing, Commercial, Finance, Sécurité...) travaillent en coulisses pour vous livrer des outputs professionnels. Vous n'avez qu'à valider les décisions clés.",
     },
     {
       question: "Quelle est la différence entre Full Company et À la carte ?",
-      answer: "Full Company vous donne accès aux 9 départements pour 299€/mois. À la carte vous permet de choisir uniquement les départements dont vous avez besoin (à partir de 19€/mois par département). Le Core OS (Workspace, Approbations, Audit) est toujours inclus.",
+      answer: "Full Company vous donne accès aux 11 départements pour 9 000€/mois. À la carte vous permet de choisir uniquement les départements dont vous avez besoin (à partir de 1 900€/mois par département). Le Core OS (Workspace, Approbations, Audit) est toujours inclus.",
     },
     {
       question: "Mes données sont-elles sécurisées ?",
@@ -45,11 +45,11 @@ export function FAQ() {
   const faqsEn = [
     {
       question: "What is the 'Portable Company'?",
-      answer: "It's a complete digital company you can 'carry' with you. 9 specialized departments (Marketing, Sales, Finance, Security...) work behind the scenes to deliver professional outputs. You just validate key decisions.",
+      answer: "It's a complete digital company you can 'carry' with you. 11 specialized departments (Marketing, Sales, Finance, Security...) work behind the scenes to deliver professional outputs. You just validate key decisions.",
     },
     {
       question: "What's the difference between Full Company and À la carte?",
-      answer: "Full Company gives you access to all 9 departments for €299/month. À la carte lets you choose only the departments you need (starting at €19/month per department). Core OS (Workspace, Approvals, Audit) is always included.",
+      answer: "Full Company gives you access to all 11 departments for €9,000/month. À la carte lets you choose only the departments you need (starting at €1,900/month per department). Core OS (Workspace, Approvals, Audit) is always included.",
     },
     {
       question: "Is my data secure?",

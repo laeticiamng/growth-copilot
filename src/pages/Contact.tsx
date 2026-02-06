@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,29 +39,37 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const contactFormSchema = z.object({
-  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Veuillez entrer un email valide"),
-  subject: z.enum(["bug", "question", "billing", "feature", "other"], {
-    required_error: "Veuillez sélectionner un sujet",
-  }),
-  message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
-});
-
 type ContactFormValues = z.infer<typeof contactFormSchema>;
 
-const subjectLabels: Record<string, string> = {
-  bug: "🐛 Signaler un bug",
-  question: "❓ Question générale",
-  billing: "💳 Facturation",
-  feature: "💡 Demande de fonctionnalité",
-  other: "📝 Autre",
-};
+const contactFormSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  subject: z.enum(["bug", "question", "billing", "feature", "other"]),
+  message: z.string().min(10),
+});
 
 export default function Contact() {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === "en";
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const subjectLabels = isEn
+    ? {
+        bug: "🐛 Report a bug",
+        question: "❓ General question",
+        billing: "💳 Billing",
+        feature: "💡 Feature request",
+        other: "📝 Other",
+      }
+    : {
+        bug: "🐛 Signaler un bug",
+        question: "❓ Question générale",
+        billing: "💳 Facturation",
+        feature: "💡 Demande de fonctionnalité",
+        other: "📝 Autre",
+      };
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -82,11 +91,11 @@ export default function Contact() {
       if (error) throw error;
 
       setIsSuccess(true);
-      toast.success("Message envoyé avec succès !");
+      toast.success(isEn ? "Message sent successfully!" : "Message envoyé avec succès !");
       form.reset();
     } catch (error) {
       console.error("Contact form error:", error);
-      toast.error("Erreur lors de l'envoi. Veuillez réessayer.");
+      toast.error(isEn ? "Error sending message. Please try again." : "Erreur lors de l'envoi. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +105,7 @@ export default function Contact() {
     {
       icon: Mail,
       title: "Email",
-      description: "Réponse sous 24h ouvrées",
+      description: isEn ? "Response within 24 business hours" : "Réponse sous 24h ouvrées",
       action: "contact@emotionscare.com",
       href: "mailto:contact@emotionscare.com",
       color: "text-blue-500",
@@ -104,11 +113,10 @@ export default function Contact() {
     },
     {
       icon: MessageCircle,
-      title: "Chat en direct",
-      description: "Discutez avec nous en bas à droite",
-      action: "Ouvrir le chat",
+      title: isEn ? "Live chat" : "Chat en direct",
+      description: isEn ? "Chat with us in the bottom right" : "Discutez avec nous en bas à droite",
+      action: isEn ? "Open chat" : "Ouvrir le chat",
       onClick: () => {
-        // Crisp chat trigger
         if (typeof window !== "undefined" && (window as any).$crisp) {
           (window as any).$crisp.push(["do", "chat:open"]);
         }
@@ -119,8 +127,8 @@ export default function Contact() {
     {
       icon: BookOpen,
       title: "Documentation",
-      description: "Guides et tutoriels",
-      action: "Consulter le guide",
+      description: isEn ? "Guides and tutorials" : "Guides et tutoriels",
+      action: isEn ? "View guide" : "Consulter le guide",
       href: "/dashboard/guide",
       isInternal: true,
       color: "text-purple-500",
@@ -132,13 +140,16 @@ export default function Contact() {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Contact"
-        description="Contactez l'équipe Growth OS. Support client réactif, assistance technique et réponses à vos questions sous 24h."
+        description={isEn 
+          ? "Contact the Growth OS team. Responsive customer support, technical assistance and answers within 24h."
+          : "Contactez l'équipe Growth OS. Support client réactif, assistance technique et réponses à vos questions sous 24h."
+        }
         canonical="/contact"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ContactPage",
           "name": "Contact Growth OS",
-          "description": "Formulaire de contact et support"
+          "description": isEn ? "Contact form and support" : "Formulaire de contact et support"
         }}
       />
       <Navbar />
@@ -147,10 +158,10 @@ export default function Contact() {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Besoin d'aide ?
+            {isEn ? "Need help?" : "Besoin d'aide ?"}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Notre équipe vous répond sous 24h
+            {isEn ? "Our team responds within 24 hours" : "Notre équipe vous répond sous 24h"}
           </p>
         </div>
 
@@ -201,9 +212,12 @@ export default function Contact() {
         <div className="max-w-xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Envoyez-nous un message</CardTitle>
+              <CardTitle>{isEn ? "Send us a message" : "Envoyez-nous un message"}</CardTitle>
               <CardDescription>
-                Décrivez votre demande et nous vous répondrons rapidement
+                {isEn 
+                  ? "Describe your request and we'll get back to you quickly"
+                  : "Décrivez votre demande et nous vous répondrons rapidement"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -212,12 +226,17 @@ export default function Contact() {
                   <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Message envoyé !</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {isEn ? "Message sent!" : "Message envoyé !"}
+                  </h3>
                   <p className="text-muted-foreground mb-6">
-                    Nous vous répondrons dans les plus brefs délais.
+                    {isEn 
+                      ? "We'll get back to you as soon as possible."
+                      : "Nous vous répondrons dans les plus brefs délais."
+                    }
                   </p>
                   <Button variant="outline" onClick={() => setIsSuccess(false)}>
-                    Envoyer un autre message
+                    {isEn ? "Send another message" : "Envoyer un autre message"}
                   </Button>
                 </div>
               ) : (
@@ -229,9 +248,9 @@ export default function Contact() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nom</FormLabel>
+                            <FormLabel>{isEn ? "Name" : "Nom"}</FormLabel>
                             <FormControl>
-                              <Input placeholder="Votre nom" {...field} />
+                              <Input placeholder={isEn ? "Your name" : "Votre nom"} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -246,7 +265,7 @@ export default function Contact() {
                             <FormControl>
                               <Input
                                 type="email"
-                                placeholder="votre@email.com"
+                                placeholder={isEn ? "your@email.com" : "votre@email.com"}
                                 {...field}
                               />
                             </FormControl>
@@ -261,14 +280,14 @@ export default function Contact() {
                       name="subject"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sujet</FormLabel>
+                          <FormLabel>{isEn ? "Subject" : "Sujet"}</FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Sélectionnez un sujet" />
+                                <SelectValue placeholder={isEn ? "Select a subject" : "Sélectionnez un sujet"} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -292,7 +311,7 @@ export default function Contact() {
                           <FormLabel>Message</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Décrivez votre demande..."
+                              placeholder={isEn ? "Describe your request..." : "Décrivez votre demande..."}
                               className="min-h-[120px] resize-none"
                               {...field}
                             />
@@ -310,12 +329,12 @@ export default function Contact() {
                       {isSubmitting ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Envoi en cours...
+                          {isEn ? "Sending..." : "Envoi en cours..."}
                         </>
                       ) : (
                         <>
                           <Send className="w-4 h-4 mr-2" />
-                          Envoyer
+                          {isEn ? "Send" : "Envoyer"}
                         </>
                       )}
                     </Button>
