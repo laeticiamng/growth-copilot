@@ -1,42 +1,67 @@
 
-# Audit Final Multi-Roles -- Resultat
+# Audit Beta Testeur -- Bug Critique Identifie
 
-## Bilan par role
+## Constat
 
-### CDO -- Audit Data
-- **Pipeline KPIs** : GA4 et GSC synchronisent vers `kpis_daily` via Edge Functions securisees (OAuth tokens chiffres)
-- **Zero fake data** : politique stricte respectee -- empty states affiches quand aucune donnee
-- **Comparaison M-1** : `DashboardHome.tsx` requete J-30 et J-60 a J-30 pour les variations
-- **Gouvernance** : `kpi-sync`, `sync-ga4`, `sync-gsc` logguent chaque sync dans `action_log` avec sync_id tracable
-- **Statut** : Conforme, aucune correction requise
+En navigant sur la plateforme comme un vrai utilisateur :
 
-### COO -- Audit Organisationnel
-- **Automatisations** : 43 regles metier (`automation_rules`) + 15 taches `pg_cron` actives
-- **Workflows** : `approval_queue` avec niveaux de risque (low/medium/high), approbation/rejet avec motif via Dialog (pas de `window.prompt`)
-- **Historique** : `RunsHistory` affiche les executions recentes, `AuditLog` accessible aux managers
-- **Monitoring** : `ServiceHealthMonitor` + `WorkspaceQuotaWidget` surveillent tokens, crawls, runs
-- **Statut** : Conforme, aucune correction requise
+- **Landing page** : claire, regle des 3 secondes respectee (badge + headline + CTA immediat)
+- **Auth** : fonctionnelle (redirection correcte si non connecte)
+- **Dashboard cockpit** : fonctionnel, affichage coherent (Sophie Marchand, Briefing, Semaphores, Services)
+- **0 erreur console** applicative
 
-### Head of Design -- Audit UX
-- **Landing page** : Hero clair avec badge ("Complete Digital Company"), headline, 3 benefices, CTA immediat, 4 stats (11 depts, 39 agents, 24/7, 100% auditable) -- regle des 3 secondes respectee
-- **Navbar** : responsive avec hamburger mobile (Sheet), smooth scrolling, LanguageToggle accessible desktop et mobile
-- **Auth** : formulaire valide (Zod), social login Google/Apple, indication visuelle erreurs, loading states sur tous les boutons
-- **Cockpit** : WelcomeCard personnalisee (agent CGO, greeting contextuel matin/apres-midi/soir), DailyBriefing avec generation IA
-- **Mobile** : teste a 390x844 -- rendering correct, pas de debordement, grilles adaptatives
-- **Statut** : Conforme, aucune correction requise
+## Bug critique identifie
 
-### Beta Testeur -- Audit UX/Bugs
-- **Comprehension en 3 secondes** : le Hero dit clairement "The Complete Digital Company" + "Run your entire business with 39 AI employees" -- pas d'ambiguite
-- **Premier clic** : le CTA "Get Started" mene directement a l'onboarding, le "See Pricing" scrolle vers la tarification
-- **Navigation** : Login mene au dashboard (avec redirect si non authentifie vers /auth), tous les modules accessibles
-- **Console** : 0 erreur applicative (seuls des warnings infrastructure Lovable Cloud : postMessage/manifest CORS)
-- **i18n** : `common.comingSoon` present dans les 7 langues, plus aucun texte hardcode identifie dans CRO.tsx
-- **Statut** : Conforme, aucune correction requise
+**Voice Assistant : 14 cles i18n manquantes**
 
-## Conclusion
+Le widget "Voice Assistant" affiche les cles de traduction brutes au lieu du texte traduit (ex: `components.voice.disconnected`, `components.voice.talkTo`, `components.voice.helpDisconnected`).
 
-Les corrections identifiees lors du precedent audit (i18n CRO.tsx + Tooltip BusinessHealthScore) ont ete appliquees avec succes. Aucun nouveau probleme bloquant ou correction supplementaire n'a ete identifie.
+**Cause** : Les cles `components.voice.*` n'existent dans aucun des 7 fichiers de traduction.
 
-**La plateforme est production-ready.** Aucune modification de code n'est necessaire.
+**Impact utilisateur** : Le widget affiche du texte technique incomprehensible -- violation directe de la regle des 3 secondes et de la politique zero texte hardcode.
 
-Recommandation : publier l'application.
+## Correction a appliquer
+
+Ajouter le bloc `voice` dans la section `components` des 7 fichiers de traduction.
+
+### Cles a ajouter (14 cles)
+
+| Cle | EN | FR |
+|-----|----|----|
+| `connected` | Connected to assistant | Connecte a l'assistant |
+| `disconnected` | Disconnected | Deconnecte |
+| `listening` | Listening... | Ecoute en cours... |
+| `speakNow` | Speak now | Parlez maintenant |
+| `connecting` | Connecting... | Connexion... |
+| `talkTo` | Talk to Sophie | Parler a Sophie |
+| `end` | End | Terminer |
+| `you` | You: | Vous : |
+| `assistant` | Sophie: | Sophie : |
+| `connectionError` | Connection error | Erreur de connexion |
+| `noWorkspace` | No active workspace | Aucun espace de travail actif |
+| `micDenied` | Microphone access denied | Acces au microphone refuse |
+| `startError` | Failed to start conversation | Impossible de demarrer la conversation |
+| `ended` | Conversation ended | Conversation terminee |
+| `helpConnected` | Sophie is listening. Ask about your business metrics, approvals, or any question. | Sophie vous ecoute. Posez vos questions sur vos KPIs, approbations ou tout autre sujet. |
+| `helpDisconnected` | Click to start a voice conversation with your AI assistant. | Cliquez pour demarrer une conversation vocale avec votre assistante IA. |
+
+### Fichiers a modifier (7)
+
+| Fichier | Action |
+|---------|--------|
+| `src/i18n/locales/en.ts` | Ajouter bloc `voice` dans `components` (anglais) |
+| `src/i18n/locales/fr.ts` | Ajouter bloc `voice` dans `components` (francais) |
+| `src/i18n/locales/es.ts` | Ajouter bloc `voice` dans `components` (espagnol) |
+| `src/i18n/locales/de.ts` | Ajouter bloc `voice` dans `components` (allemand) |
+| `src/i18n/locales/it.ts` | Ajouter bloc `voice` dans `components` (italien) |
+| `src/i18n/locales/pt.ts` | Ajouter bloc `voice` dans `components` (portugais) |
+| `src/i18n/locales/nl.ts` | Ajouter bloc `voice` dans `components` (neerlandais) |
+
+**Total : 7 fichiers, 1 bloc de 16 cles chacun. Aucun changement de logique metier.**
+
+## Aucun autre bug identifie
+
+- Navigation : OK
+- Loading states : OK  
+- Responsive : OK
+- i18n autres composants : OK (CRO.tsx corrige precedemment)
