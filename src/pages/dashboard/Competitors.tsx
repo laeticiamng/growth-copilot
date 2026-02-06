@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +46,8 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Competitors() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { currentSite } = useSites();
   const { competitors, loading, addCompetitor, removeCompetitor, analyzeCompetitor, refetch } = useCompetitors();
   
@@ -67,7 +71,7 @@ export default function Competitors() {
     id: c.id,
     name: c.competitor_name || "Concurrent",
     url: c.competitor_url,
-    lastAnalyzed: c.last_analyzed_at ? new Date(c.last_analyzed_at).toLocaleDateString('fr') : "Jamais",
+    lastAnalyzed: c.last_analyzed_at ? new Date(c.last_analyzed_at).toLocaleDateString(locale) : "—",
     domainAuthority: (c.insights as Record<string, number>)?.domain_authority || 0,
     organicKeywords: (c.keyword_gaps as unknown[])?.length || 0,
     traffic: "—",
@@ -174,7 +178,7 @@ export default function Competitors() {
 
   const handleExportSWOT = () => {
     const content = `# Analyse SWOT Concurrentielle
-Généré le ${new Date().toLocaleDateString('fr-FR')}
+Généré le ${new Date().toLocaleDateString(locale)}
 
 ## Forces
 ${swotData.strengths.map(s => `- ${s}`).join('\n') || '- Aucune identifiée'}

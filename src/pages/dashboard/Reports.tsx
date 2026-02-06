@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +15,8 @@ import { ReportScheduler } from "@/components/reports/ReportScheduler";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Reports() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [generating, setGenerating] = useState(false);
@@ -159,7 +163,7 @@ export default function Reports() {
 
   const formatMonth = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
   };
 
   const formatTimeAgo = (dateStr: string) => {
@@ -309,7 +313,7 @@ export default function Reports() {
                       <div>
                         <span className="font-medium capitalize">{formatMonth(report.month)}</span>
                         <p className="text-xs text-muted-foreground">
-                          Généré le {new Date(report.created_at).toLocaleDateString('fr-FR')}
+                          Généré le {new Date(report.created_at).toLocaleDateString(locale)}
                         </p>
                       </div>
                     </div>

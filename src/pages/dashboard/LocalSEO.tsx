@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +41,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function LocalSEO() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const { 
@@ -74,7 +78,7 @@ export default function LocalSEO() {
   const scheduledPosts = posts.filter(p => p.status === 'scheduled').map(p => ({
     title: p.title || 'Sans titre',
     type: p.post_type || 'Update',
-    scheduledFor: p.scheduled_at ? new Date(p.scheduled_at).toLocaleDateString('fr') : 'Non planifié',
+    scheduledFor: p.scheduled_at ? new Date(p.scheduled_at).toLocaleDateString(locale) : '—',
   }));
 
   // GBP audit tasks - empty by default, would come from database in production

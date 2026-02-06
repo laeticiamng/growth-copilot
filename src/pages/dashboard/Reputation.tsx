@@ -1,5 +1,6 @@
-import { useState } from "react";
- import { useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,8 @@ import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Reputation() {
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const { reviews, stats, loading, sendReviewRequest, respondToReview } = useReputation();
   const { profiles } = useLocalSEO();
   const { currentWorkspace } = useWorkspace();
@@ -347,7 +350,7 @@ export default function Reputation() {
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs text-muted-foreground">
                       {review.review_date 
-                        ? new Date(review.review_date).toLocaleDateString('fr-FR') 
+                        ? new Date(review.review_date).toLocaleDateString(locale) 
                         : "Date inconnue"}
                     </span>
                     <Button 
