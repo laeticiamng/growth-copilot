@@ -4,6 +4,7 @@
  * Generates: AI-powered daily briefing based on workspace metrics
  */
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +35,7 @@ interface DailyBriefingProps {
 }
 
 export function DailyBriefing({ className }: DailyBriefingProps) {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [briefing, setBriefing] = useState<BriefingData | null>(null);
@@ -83,7 +85,7 @@ export function DailyBriefing({ className }: DailyBriefingProps) {
 
   const handleGenerateBriefing = async () => {
     if (!currentWorkspace) {
-      toast.error("Aucun workspace sélectionné");
+      toast.error(t("cockpit.noWorkspace"));
       return;
     }
 
@@ -92,7 +94,7 @@ export function DailyBriefing({ className }: DailyBriefingProps) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Veuillez vous connecter");
+        toast.error(i18n.language === 'fr' ? "Veuillez vous connecter" : "Please log in");
         setGenerating(false);
         return;
       }
@@ -188,13 +190,13 @@ Génère un briefing exécutif adapté à cette situation.`;
           ...(data.artifact.daily_briefing as Omit<BriefingData, 'generated_at'>),
           generated_at: new Date().toISOString(),
         });
-        toast.success("Briefing généré !");
+        toast.success(t("cockpit.briefingGenerated"));
       } else {
-        throw new Error(data?.error || "Erreur lors de la génération");
+        throw new Error(data?.error || "Generation error");
       }
     } catch (err) {
       console.error("Briefing generation error:", err);
-      toast.error("Erreur lors de la génération du briefing");
+      toast.error(t("cockpit.briefingError"));
     } finally {
       setGenerating(false);
     }
@@ -223,9 +225,9 @@ Génère un briefing exécutif adapté à cette situation.`;
               <Calendar className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">Briefing du jour</CardTitle>
+              <CardTitle className="text-lg">{t("cockpit.dailyBriefing")}</CardTitle>
               <CardDescription>
-                Sophie Marchand • Directrice de la Croissance
+                {t("cockpit.dailyBriefingDesc")}
               </CardDescription>
             </div>
           </div>
@@ -250,7 +252,7 @@ Génère un briefing exécutif adapté à cette situation.`;
           <div className="text-center py-6">
             <Sparkles className="w-10 h-10 mx-auto mb-3 text-primary/50" />
             <p className="text-sm text-muted-foreground mb-4">
-              Aucun briefing disponible pour aujourd'hui
+              {t("cockpit.noBriefing")}
             </p>
             <Button 
               variant="hero" 
@@ -260,12 +262,12 @@ Génère un briefing exécutif adapté à cette situation.`;
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Génération...
+                  {t("cockpit.generating")}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Générer le briefing
+                  {t("cockpit.generateBriefing")}
                 </>
               )}
             </Button>
@@ -278,7 +280,7 @@ Génère un briefing exécutif adapté à cette situation.`;
             {/* Priorities */}
             {briefing.priorities?.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase">Priorités du jour</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase">{t("cockpit.todayPriorities")}</p>
                 <ul className="space-y-1">
                   {briefing.priorities.map((p, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
@@ -296,7 +298,7 @@ Génère un briefing exécutif adapté à cette situation.`;
                 <div className="p-3 rounded-lg bg-primary/10">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-medium">Points positifs</span>
+                    <span className="text-xs font-medium">{t("cockpit.positivePoints")}</span>
                   </div>
                   <ul className="space-y-1">
                     {briefing.highlights.map((h, i) => (
@@ -309,7 +311,7 @@ Génère un briefing exécutif adapté à cette situation.`;
                 <div className="p-3 rounded-lg bg-destructive/10">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle className="w-4 h-4 text-destructive" />
-                    <span className="text-xs font-medium">À surveiller</span>
+                    <span className="text-xs font-medium">{t("cockpit.toWatch")}</span>
                   </div>
                   <ul className="space-y-1">
                     {briefing.concerns.map((c, i) => (
@@ -322,7 +324,7 @@ Génère un briefing exécutif adapté à cette situation.`;
 
             {/* Generated time */}
             <p className="text-xs text-muted-foreground text-right">
-              Généré {new Date(briefing.generated_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              {t("cockpit.generated")} {new Date(briefing.generated_at).toLocaleTimeString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </>
         )}

@@ -79,116 +79,116 @@ interface NavDepartment {
   items: NavItem[];
 }
 
-// Main navigation - CEO-level (always visible)
-const mainNavItems: NavItem[] = [
-  { path: "/dashboard", label: "Cockpit", icon: LayoutDashboard },
-  { path: "/dashboard/agents", label: "Mon équipe IA", icon: Bot },
+// Main navigation - CEO-level (always visible) - uses i18n keys
+const getMainNavItems = (t: (key: string) => string): NavItem[] => [
+  { path: "/dashboard", label: t("layout.cockpit"), icon: LayoutDashboard },
+  { path: "/dashboard/agents", label: t("layout.myTeam"), icon: Bot },
 ];
 
-// Advanced items organized by department
-const advancedDepartments: NavDepartment[] = [
+// Advanced items organized by department - uses i18n keys
+const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => [
   {
     id: "operations",
-    label: "Opérations",
+    label: t("layout.operations"),
     icon: Layers,
     color: "text-violet-500",
-    description: "Réunions, approbations, historique",
+    description: t("layout.operationsDesc"),
     items: [
       { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
-      { path: "/dashboard/approvals", label: "Approbations", icon: FileCheck },
-      { path: "/dashboard/reports", label: "Rapports", icon: () => <span className="text-base">📊</span> },
-      { path: "/dashboard/automations", label: "Automations", icon: () => <span className="text-base">⚡</span> },
+      { path: "/dashboard/approvals", label: t("nav.approvals"), icon: FileCheck },
+      { path: "/dashboard/reports", label: t("nav.reports"), icon: () => <span className="text-base">📊</span> },
+      { path: "/dashboard/automations", label: t("nav.automations"), icon: () => <span className="text-base">⚡</span> },
     ],
   },
   {
     id: "marketing",
-    label: "Marketing",
+    label: t("layout.marketing"),
     icon: Target,
     color: "text-emerald-500",
-    description: "SEO, contenu, social, publicité",
+    description: t("layout.marketingDesc"),
     items: [
-      { path: "/dashboard/seo", label: "SEO Tech", icon: () => <span className="text-base">🔍</span> },
-      { path: "/dashboard/content", label: "Contenu", icon: () => <span className="text-base">📝</span> },
-      { path: "/dashboard/local", label: "Local SEO", icon: () => <span className="text-base">📍</span> },
-      { path: "/dashboard/ads", label: "Google Ads", icon: () => <span className="text-base">📣</span> },
-      { path: "/dashboard/social", label: "Social", icon: () => <span className="text-base">📱</span> },
-      { path: "/dashboard/cro", label: "CRO", icon: () => <span className="text-base">🎯</span> },
-      { path: "/dashboard/competitors", label: "Concurrents", icon: () => <span className="text-base">👥</span> },
-      { path: "/dashboard/brand-kit", label: "Brand Kit", icon: () => <span className="text-base">🎨</span> },
+      { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
+      { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
+      { path: "/dashboard/ads", label: t("nav.ads"), icon: () => <span className="text-base">📣</span> },
+      { path: "/dashboard/social", label: t("nav.social"), icon: () => <span className="text-base">📱</span> },
+      { path: "/dashboard/cro", label: t("nav.cro"), icon: () => <span className="text-base">🎯</span> },
+      { path: "/dashboard/competitors", label: t("nav.competitors"), icon: () => <span className="text-base">👥</span> },
+      { path: "/dashboard/brand-kit", label: t("nav.brandKit"), icon: () => <span className="text-base">🎨</span> },
     ],
   },
   {
     id: "sales",
-    label: "Ventes",
+    label: t("layout.sales"),
     icon: Briefcase,
     color: "text-blue-500",
-    description: "Pipeline, offres, lifecycle",
+    description: t("layout.salesDesc"),
     items: [
-      { path: "/dashboard/offers", label: "Offres", icon: () => <span className="text-base">📦</span> },
-      { path: "/dashboard/lifecycle", label: "Lifecycle", icon: () => <span className="text-base">📧</span> },
-      { path: "/dashboard/reputation", label: "Réputation", icon: () => <span className="text-base">⭐</span> },
+      { path: "/dashboard/offers", label: t("nav.offers"), icon: () => <span className="text-base">📦</span> },
+      { path: "/dashboard/lifecycle", label: t("nav.lifecycle"), icon: () => <span className="text-base">📧</span> },
+      { path: "/dashboard/reputation", label: t("nav.reputation"), icon: () => <span className="text-base">⭐</span> },
     ],
   },
   {
     id: "data-analytics",
-    label: "Data & Analytics",
+    label: t("layout.dataAnalytics"),
     icon: Database,
     color: "text-purple-500",
-    description: "CMS, assets, KPIs",
+    description: t("layout.dataAnalyticsDesc"),
     items: [
       { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
-      { path: "/dashboard/media", label: "Media Assets", icon: () => <span className="text-base">🎬</span> },
-      { path: "/dashboard/media-kpis", label: "Media KPIs", icon: BarChart3 },
+      { path: "/dashboard/media", label: t("nav.media"), icon: () => <span className="text-base">🎬</span> },
+      { path: "/dashboard/media-kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
     ],
   },
   {
     id: "resources",
-    label: "Ressources & RH",
+    label: t("layout.resources"),
     icon: UserCog,
     color: "text-amber-500",
-    description: "Équipes, RH, juridique",
+    description: t("layout.resourcesDesc"),
     items: [
       { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
-      { path: "/dashboard/legal", label: "Juridique", icon: () => <span className="text-base">⚖️</span> },
+      { path: "/dashboard/legal", label: "Legal", icon: () => <span className="text-base">⚖️</span> },
       { path: "/dashboard/service-catalog", label: "Catalogue", icon: () => <span className="text-base">📋</span> },
     ],
   },
   {
     id: "governance",
-    label: "Gouvernance",
+    label: t("layout.governance"),
     icon: Shield,
     color: "text-red-500",
-    description: "Audit, conformité, sécurité",
+    description: t("layout.governanceDesc"),
     items: [
       { path: "/dashboard/audit-log", label: "Audit Log", icon: History, requiresRole: "manager" },
-      { path: "/dashboard/access-review", label: "Revue accès", icon: () => <span className="text-base">🔐</span> },
-      { path: "/dashboard/diagnostics", label: "Diagnostics", icon: () => <span className="text-base">🔧</span> },
-      { path: "/dashboard/agency", label: "Mode Agence", icon: Building2, requiresRole: "admin" },
+      { path: "/dashboard/access-review", label: "Access Review", icon: () => <span className="text-base">🔐</span> },
+      { path: "/dashboard/diagnostics", label: t("nav.diagnostics"), icon: () => <span className="text-base">🔧</span> },
+      { path: "/dashboard/agency", label: t("nav.agency"), icon: Building2, requiresRole: "admin" },
     ],
   },
   {
     id: "compliance",
-    label: "Conformité RGPD",
+    label: t("layout.compliance"),
     icon: ShieldCheck,
     color: "text-teal-500",
-    description: "Protection données, export",
+    description: t("layout.complianceDesc"),
     items: [
-      { path: "/dashboard/logs", label: "Logs système", icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
+      { path: "/dashboard/logs", label: t("nav.logs"), icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
       { path: "/dashboard/status", label: "Status Page", icon: () => <span className="text-base">🟢</span> },
     ],
   },
   {
     id: "config",
-    label: "Configuration",
+    label: t("layout.configuration"),
     icon: Cog,
     color: "text-slate-500",
-    description: "Sites, intégrations, facturation",
+    description: t("layout.configurationDesc"),
     items: [
-      { path: "/dashboard/sites", label: "Sites", icon: Building2 },
-      { path: "/dashboard/integrations", label: "Connexions API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
-      { path: "/dashboard/connections", label: "Mes accès", icon: () => <span className="text-base">🔑</span> },
+      { path: "/dashboard/sites", label: t("nav.sites"), icon: Building2 },
+      { path: "/dashboard/integrations", label: "API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
+      { path: "/dashboard/connections", label: "Access", icon: () => <span className="text-base">🔑</span> },
       { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
-      { path: "/dashboard/billing", label: "Facturation", icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
+      { path: "/dashboard/billing", label: t("layout.billing"), icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
       { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
     ],
   },
@@ -205,6 +205,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [openDepartments, setOpenDepartments] = useState<Set<string>>(new Set());
+
+  // Build navigation items with translations
+  const mainNavItems = useMemo(() => getMainNavItems(t), [t]);
+  const advancedDepartments = useMemo(() => getAdvancedDepartments(t), [t]);
 
   // Check if current route is in advanced section and open relevant department
   useEffect(() => {
@@ -304,7 +308,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       return (
         <span
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground/40 cursor-default group"
-          title="Service non activé"
+          title={t("layout.serviceNotActive")}
         >
           <Icon className="w-4 h-4" />
           <span className="flex-1">{item.label}</span>
@@ -371,13 +375,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Button variant="outline" className="w-full justify-between">
                   <span className="flex items-center gap-2 truncate">
                     <Building2 className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{currentWorkspace?.name || "Sélectionner"}</span>
+                    <span className="truncate">{currentWorkspace?.name || t("layout.select")}</span>
                   </span>
                   <ChevronDown className="w-4 h-4 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("layout.workspaces")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {workspaces.map((ws) => (
                   <DropdownMenuItem
@@ -389,11 +393,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   </DropdownMenuItem>
                 ))}
                 {workspaces.length === 0 && (
-                  <DropdownMenuItem disabled>Aucun workspace</DropdownMenuItem>
+                  <DropdownMenuItem disabled>{t("layout.noWorkspace")}</DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate("/onboarding")}>
-                  + Nouveau workspace
+                  {t("layout.newWorkspace")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -455,7 +459,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                   <path d="M12 17h.01" />
                 </svg>
-                Besoin d'aide ?
+                {t("layout.needHelp")}
               </Link>
             </div>
           </nav>
@@ -463,7 +467,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Subscription Status Badge */}
           <div className="px-4 py-2 border-t border-border">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Abonnement</span>
+              <span className="text-xs text-muted-foreground">{t("layout.subscription")}</span>
               <SubscriptionStatusBadge compact />
             </div>
           </div>
@@ -488,7 +492,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/billing")}>
                   <span className="w-4 h-4 mr-2">💳</span>
-                  Facturation
+                  {t("layout.billing")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
