@@ -46,7 +46,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Competitors() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const { currentSite } = useSites();
   const { competitors, loading, addCompetitor, removeCompetitor, analyzeCompetitor, refetch } = useCompetitors();
@@ -69,7 +69,7 @@ export default function Competitors() {
   // Real data only - no demo fallback (Zero Fake Data policy)
   const displayCompetitors = competitors.map(c => ({
     id: c.id,
-    name: c.competitor_name || "Concurrent",
+    name: c.competitor_name || t("modules.competitors.competitor"),
     url: c.competitor_url,
     lastAnalyzed: c.last_analyzed_at ? new Date(c.last_analyzed_at).toLocaleDateString(locale) : "—",
     domainAuthority: (c.insights as Record<string, number>)?.domain_authority || 0,
@@ -90,15 +90,14 @@ export default function Competitors() {
 
   const handleAddCompetitor = async () => {
     if (!competitorForm.url) {
-      toast.error("URL du concurrent requise");
+      toast.error(t("modules.competitors.competitorUrlRequired"));
       return;
     }
     
-    // Validate URL
     try {
       new URL(competitorForm.url.startsWith('http') ? competitorForm.url : `https://${competitorForm.url}`);
     } catch {
-      toast.error("URL invalide");
+      toast.error(t("modules.competitors.invalidUrl"));
       return;
     }
     
@@ -108,9 +107,9 @@ export default function Competitors() {
     setSubmitting(false);
     
     if (error) {
-      toast.error("Erreur lors de l'ajout");
+      toast.error(t("modules.competitors.addError"));
     } else {
-      toast.success("Concurrent ajouté");
+      toast.success(t("modules.competitors.competitorAdded"));
       setShowAddDialog(false);
       setCompetitorForm({ url: "", name: "" });
     }
@@ -122,29 +121,28 @@ export default function Competitors() {
     setAnalyzingId(null);
     
     if (error) {
-      toast.error("Erreur lors de l'analyse");
+      toast.error(t("modules.competitors.analysisError"));
     } else {
-      toast.success("Analyse lancée");
+      toast.success(t("modules.competitors.analysisLaunched"));
     }
   };
 
   const handleRemove = async (competitorId: string) => {
     const { error } = await removeCompetitor(competitorId);
     if (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("modules.competitors.deleteError"));
     } else {
-      toast.success("Concurrent supprimé");
+      toast.success(t("modules.competitors.competitorDeleted"));
     }
   };
 
   const handleGenerateSWOT = async () => {
     if (competitors.length === 0) {
-      toast.error("Ajoutez au moins un concurrent");
+      toast.error(t("modules.competitors.addAtLeastOne"));
       return;
     }
     
     setGeneratingSWOT(true);
-    // Simulate SWOT generation based on competitor data
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const strengths: string[] = [];
@@ -155,20 +153,19 @@ export default function Competitors() {
     competitors.forEach(comp => {
       const insights = comp.insights as Record<string, unknown> | null;
       if (insights?.domain_authority && (insights.domain_authority as number) > 40) {
-        threats.push(`${comp.competitor_name || 'Concurrent'} a un DA élevé (${insights.domain_authority})`);
+        threats.push(t("modules.competitors.highDA", { name: comp.competitor_name || t("modules.competitors.competitor"), da: insights.domain_authority }));
       }
       if (comp.keyword_gaps && (comp.keyword_gaps as unknown[]).length > 0) {
-        opportunities.push(`${(comp.keyword_gaps as unknown[]).length} mots-clés non exploités`);
+        opportunities.push(t("modules.competitors.unusedKeywords", { count: (comp.keyword_gaps as unknown[]).length }));
       }
       if (comp.content_gaps && (comp.content_gaps as unknown[]).length > 0) {
-        opportunities.push(`${(comp.content_gaps as unknown[]).length} thématiques de contenu à créer`);
+        opportunities.push(t("modules.competitors.contentTopicsToCreate", { count: (comp.content_gaps as unknown[]).length }));
       }
     });
     
-    // Add generic insights
     if (currentSite) {
-      strengths.push("Connaissance du marché local");
-      weaknesses.push("Visibilité SEO à améliorer");
+      strengths.push(t("modules.competitors.localMarketKnowledge"));
+      weaknesses.push(t("modules.competitors.seoVisibilityToImprove"));
     }
     
     setSWOTData({ strengths, weaknesses, opportunities, threats });
@@ -177,20 +174,20 @@ export default function Competitors() {
   };
 
   const handleExportSWOT = () => {
-    const content = `# Analyse SWOT Concurrentielle
-Généré le ${new Date().toLocaleDateString(locale)}
+    const content = `# ${t("modules.competitors.swotTitle")}
+${t("modules.competitors.generatedOn", { date: new Date().toLocaleDateString(locale) })}
 
-## Forces
-${swotData.strengths.map(s => `- ${s}`).join('\n') || '- Aucune identifiée'}
+## ${t("modules.competitors.swotStrengths")}
+${swotData.strengths.map(s => `- ${s}`).join('\n') || `- ${t("modules.competitors.noneIdentified")}`}
 
-## Faiblesses
-${swotData.weaknesses.map(w => `- ${w}`).join('\n') || '- Aucune identifiée'}
+## ${t("modules.competitors.swotWeaknesses")}
+${swotData.weaknesses.map(w => `- ${w}`).join('\n') || `- ${t("modules.competitors.noneIdentified")}`}
 
-## Opportunités
-${swotData.opportunities.map(o => `- ${o}`).join('\n') || '- Aucune identifiée'}
+## ${t("modules.competitors.swotOpportunities")}
+${swotData.opportunities.map(o => `- ${o}`).join('\n') || `- ${t("modules.competitors.noneIdentified")}`}
 
-## Menaces
-${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
+## ${t("modules.competitors.swotThreats")}
+${swotData.threats.map(item => `- ${item}`).join('\n') || `- ${t("modules.competitors.noneIdentified")}`}
 `;
 
     const blob = new Blob([content], { type: 'text/markdown' });
@@ -200,7 +197,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
     a.download = `swot-analysis-${new Date().toISOString().split('T')[0]}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Analyse SWOT exportée");
+    toast.success(t("modules.competitors.swotExported"));
   };
 
   const toggleAlert = (competitorId: string) => {
@@ -208,41 +205,39 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
       ...prev,
       [competitorId]: !prev[competitorId],
     }));
-    toast.success(alertSettings[competitorId] ? "Alertes désactivées" : "Alertes activées");
+    toast.success(alertSettings[competitorId] ? t("modules.competitors.alertsDisabled") : t("modules.competitors.alertsEnabled"));
   };
 
   if (loading) {
-    return <LoadingState message="Chargement des concurrents..." />;
+    return <LoadingState message={t("modules.competitors.loadingCompetitors")} />;
   }
 
-  // Empty state - no site selected
   if (!currentSite) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Veille concurrentielle</h1>
-          <p className="text-muted-foreground">Analysez vos concurrents et identifiez les opportunités</p>
+          <h1 className="text-2xl font-bold">{t("modules.competitors.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.competitors.subtitle")}</p>
         </div>
-        <NoSiteEmptyState moduleName="Concurrents" icon={Users} />
+        <NoSiteEmptyState moduleName={t("nav.competitors")} icon={Users} />
       </div>
     );
   }
 
-  // Empty state - no competitors added
   if (competitors.length === 0) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Veille concurrentielle</h1>
-          <p className="text-muted-foreground">Analysez vos concurrents et identifiez les opportunités</p>
+          <h1 className="text-2xl font-bold">{t("modules.competitors.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.competitors.subtitle")}</p>
         </div>
         <ModuleEmptyState
           icon={Users}
-          moduleName="Concurrents"
-          description="Surveillez vos concurrents, identifiez leurs mots-clés gagnants et découvrez des opportunités de contenu. Générez une analyse SWOT automatisée et recevez des alertes de changements."
-          features={["Keyword gaps", "Content gaps", "Analyse backlinks", "SWOT automatisé"]}
+          moduleName={t("nav.competitors")}
+          description={t("modules.competitors.emptyDesc")}
+          features={t("modules.competitors.emptyFeatures").split(",")}
           primaryAction={{
-            label: "Ajouter un concurrent",
+            label: t("modules.competitors.addCompetitor"),
             onClick: () => setShowAddDialog(true),
             icon: Plus,
           }}
@@ -253,14 +248,11 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Veille concurrentielle</h1>
-          <p className="text-muted-foreground">
-            Analysez vos concurrents et identifiez les opportunités
-          </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
+          <h1 className="text-2xl font-bold">{t("modules.competitors.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.competitors.subtitle")}</p>
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.competitors.selectSiteWarning")}</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleGenerateSWOT} disabled={generatingSWOT || competitors.length === 0}>
@@ -269,31 +261,27 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
           </Button>
           <Button variant="outline" onClick={refetch}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Actualiser
+            {t("modules.competitors.refresh")}
           </Button>
           <Button variant="hero" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Ajouter concurrent
+            {t("modules.competitors.addCompetitor")}
           </Button>
         </div>
       </div>
 
-      {/* Compliance notice */}
       <Card className="border-yellow-500/30 bg-yellow-500/5">
         <CardContent className="py-4">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
             <div>
-              <p className="font-medium text-sm">Analyse éthique uniquement</p>
-              <p className="text-xs text-muted-foreground">
-                Crawl public safe • Pas de copie de contenu • Insights pour inspiration uniquement
-              </p>
+              <p className="font-medium text-sm">{t("modules.competitors.ethicalAnalysis")}</p>
+              <p className="text-xs text-muted-foreground">{t("modules.competitors.ethicalAnalysisDesc")}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Competitors grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayCompetitors.map((comp) => (
           <Card key={comp.id} variant="feature">
@@ -324,7 +312,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                   <p className="font-bold text-lg">{comp.organicKeywords?.toLocaleString() || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Trafic</p>
+                  <p className="text-xs text-muted-foreground">{t("modules.competitors.traffic")}</p>
                   <div className="flex items-center gap-1">
                     <p className="font-bold text-lg">{comp.traffic}</p>
                     {comp.trend === "up" ? (
@@ -335,13 +323,13 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Analysé</p>
+                  <p className="text-xs text-muted-foreground">{t("modules.competitors.analyzed")}</p>
                   <p className="text-sm">{comp.lastAnalyzed}</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" className="w-full" onClick={() => handleAnalyze(comp.id)} disabled={analyzingId === comp.id}>
                 {analyzingId === comp.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
-                Analyser
+                {t("modules.competitors.analyze")}
               </Button>
             </CardContent>
           </Card>
@@ -352,15 +340,15 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
         <TabsList>
           <TabsTrigger value="keywords">
             <Target className="w-4 h-4 mr-2" />
-            Keyword gaps
+            {t("modules.competitors.keywordGaps")}
           </TabsTrigger>
           <TabsTrigger value="content">
             <FileText className="w-4 h-4 mr-2" />
-            Content gaps
+            {t("modules.competitors.contentGaps")}
           </TabsTrigger>
           <TabsTrigger value="backlinks">
             <Link className="w-4 h-4 mr-2" />
-            Backlinks
+            {t("modules.competitors.backlinks")}
           </TabsTrigger>
         </TabsList>
 
@@ -369,30 +357,28 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Opportunités mots-clés</CardTitle>
-                  <CardDescription>
-                    Mots-clés sur lesquels vos concurrents se positionnent mais pas vous
-                  </CardDescription>
+                  <CardTitle>{t("modules.competitors.keywordOpportunities")}</CardTitle>
+                  <CardDescription>{t("modules.competitors.keywordOpportunitiesDesc")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Générer briefs
+                  {t("modules.competitors.generateBriefs")}
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {keywordGaps.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Ajoutez des concurrents pour voir les opportunités de mots-clés</p>
+                <p className="text-center text-muted-foreground py-8">{t("modules.competitors.addCompetitorsForKeywords")}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border">
-                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Mot-clé</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">Concurrent</th>
-                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">Vous</th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Volume</th>
-                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Difficulté</th>
+                        <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.ads.keyword")}</th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.competitor")}</th>
+                        <th className="text-center py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.you")}</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.volume")}</th>
+                        <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.difficulty")}</th>
                         <th className="text-center py-3 px-2"></th>
                       </tr>
                     </thead>
@@ -410,9 +396,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                               <Badge variant="secondary">#{kw.your_rank}</Badge>
                             )}
                           </td>
-                          <td className="py-3 px-2 text-right text-muted-foreground">
-                            {kw.volume?.toLocaleString()}
-                          </td>
+                          <td className="py-3 px-2 text-right text-muted-foreground">{kw.volume?.toLocaleString()}</td>
                           <td className="py-3 px-2 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Progress value={kw.difficulty} className="w-12 h-1.5" />
@@ -420,9 +404,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                             </div>
                           </td>
                           <td className="py-3 px-2 text-center">
-                            <Button variant="ghost" size="sm">
-                              <Plus className="w-4 h-4" />
-                            </Button>
+                            <Button variant="ghost" size="sm"><Plus className="w-4 h-4" /></Button>
                           </td>
                         </tr>
                       ))}
@@ -437,14 +419,12 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
         <TabsContent value="content" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Opportunités contenu</CardTitle>
-              <CardDescription>
-                Contenus que vos concurrents ont et que vous n'avez pas
-              </CardDescription>
+              <CardTitle>{t("modules.competitors.contentOpportunities")}</CardTitle>
+              <CardDescription>{t("modules.competitors.contentOpportunitiesDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {contentGaps.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Ajoutez des concurrents pour voir les opportunités de contenu</p>
+                <p className="text-center text-muted-foreground py-8">{t("modules.competitors.addCompetitorsForContent")}</p>
               ) : (
                 contentGaps.map((gap, i) => (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
@@ -452,21 +432,21 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{gap.topic}</p>
                         {gap.you_have ? (
-                          <Badge variant="secondary">Vous l'avez</Badge>
+                          <Badge variant="secondary">{t("modules.competitors.youHaveIt")}</Badge>
                         ) : (
                           <Badge variant={gap.priority === "high" ? "destructive" : "outline"}>
-                            {gap.priority === "high" ? "Prioritaire" : "Moyen"}
+                            {gap.priority === "high" ? t("modules.competitors.priority") : t("modules.competitors.medium")}
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {gap.competitors} concurrent(s) ont ce contenu
+                        {t("modules.competitors.competitorsHaveContent", { count: gap.competitors })}
                       </p>
                     </div>
                     {!gap.you_have && (
                       <Button variant="outline" size="sm">
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Créer brief
+                        {t("modules.competitors.createBrief")}
                       </Button>
                     )}
                   </div>
@@ -479,31 +459,26 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
         <TabsContent value="backlinks" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Analyse de backlinks</CardTitle>
-              <CardDescription>
-                Comparez les profils de liens entrants pour identifier des opportunités de link building
-              </CardDescription>
+              <CardTitle>{t("modules.competitors.backlinkAnalysis")}</CardTitle>
+              <CardDescription>{t("modules.competitors.backlinkAnalysisDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {competitors.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium mb-2">Ajoutez des concurrents</p>
-                  <p className="text-sm">
-                    Comparez les profils de backlinks une fois vos concurrents configurés
-                  </p>
+                  <p className="font-medium mb-2">{t("modules.competitors.addCompetitorsForBacklinks")}</p>
+                  <p className="text-sm">{t("modules.competitors.compareBacklinks")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Backlink comparison table */}
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-border">
-                          <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Concurrent</th>
-                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Domaines référents</th>
-                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Backlinks</th>
-                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">DA moyen</th>
+                          <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.competitor")}</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.referringDomains")}</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.totalBacklinks")}</th>
+                          <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.competitors.avgDA")}</th>
                           <th className="text-center py-3 px-2"></th>
                         </tr>
                       </thead>
@@ -514,16 +489,12 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                             <tr key={comp.id} className="border-b border-border/50 hover:bg-secondary/50">
                               <td className="py-3 px-2">
                                 <div>
-                                  <p className="font-medium">{comp.competitor_name || 'Sans nom'}</p>
+                                  <p className="font-medium">{comp.competitor_name || t("modules.competitors.noName")}</p>
                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">{comp.competitor_url}</p>
                                 </div>
                               </td>
-                              <td className="py-3 px-2 text-right font-medium">
-                                {backlinkData?.referring_domains?.toLocaleString() || '—'}
-                              </td>
-                              <td className="py-3 px-2 text-right">
-                                {backlinkData?.total_backlinks?.toLocaleString() || '—'}
-                              </td>
+                              <td className="py-3 px-2 text-right font-medium">{backlinkData?.referring_domains?.toLocaleString() || '—'}</td>
+                              <td className="py-3 px-2 text-right">{backlinkData?.total_backlinks?.toLocaleString() || '—'}</td>
                               <td className="py-3 px-2 text-right">
                                 <Badge variant={backlinkData?.avg_da && backlinkData.avg_da >= 40 ? "success" : "secondary"}>
                                   {backlinkData?.avg_da || '—'}
@@ -541,19 +512,16 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
                     </table>
                   </div>
                   
-                  {/* Opportunities section */}
                   <Card className="bg-primary/5 border-primary/20">
                     <CardContent className="pt-4">
                       <h4 className="font-medium mb-2 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-primary" />
-                        Opportunités de link building
+                        {t("modules.competitors.linkBuildingOpps")}
                       </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Analysez vos concurrents pour découvrir des sites qui pointent vers eux mais pas vers vous.
-                      </p>
+                      <p className="text-sm text-muted-foreground">{t("modules.competitors.linkBuildingDesc")}</p>
                       <Button variant="outline" size="sm" className="mt-3">
                         <Search className="w-4 h-4 mr-2" />
-                        Trouver des opportunités
+                        {t("modules.competitors.findOpportunities")}
                       </Button>
                     </CardContent>
                   </Card>
@@ -564,15 +532,14 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
         </TabsContent>
       </Tabs>
 
-      {/* Add Competitor Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ajouter un concurrent</DialogTitle>
+            <DialogTitle>{t("modules.competitors.addCompetitor")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">URL du site</label>
+              <label className="text-sm font-medium">{t("modules.competitors.siteUrl")}</label>
               <Input 
                 placeholder="https://concurrent.com"
                 value={competitorForm.url}
@@ -580,7 +547,7 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Nom (optionnel)</label>
+              <label className="text-sm font-medium">{t("modules.competitors.nameOptional")}</label>
               <Input 
                 placeholder="Ex: Concurrent A"
                 value={competitorForm.name}
@@ -589,68 +556,67 @@ ${swotData.threats.map(t => `- ${t}`).join('\n') || '- Aucune identifiée'}
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowAddDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleAddCompetitor} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-              Ajouter
+              {t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* SWOT Analysis Dialog */}
       <Dialog open={showSWOTDialog} onOpenChange={setShowSWOTDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Analyse SWOT Concurrentielle</DialogTitle>
+            <DialogTitle>{t("modules.competitors.swotTitle")}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
               <h4 className="font-medium text-green-600 mb-2 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4" /> Forces
+                <ArrowUpRight className="w-4 h-4" /> {t("modules.competitors.strengths")}
               </h4>
               <ul className="text-sm space-y-1">
                 {swotData.strengths.length > 0 ? swotData.strengths.map((s, i) => (
                   <li key={i}>• {s}</li>
-                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+                )) : <li className="text-muted-foreground">{t("modules.competitors.noneIdentified")}</li>}
               </ul>
             </div>
             <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
               <h4 className="font-medium text-red-600 mb-2 flex items-center gap-2">
-                <ArrowDownRight className="w-4 h-4" /> Faiblesses
+                <ArrowDownRight className="w-4 h-4" /> {t("modules.competitors.weaknesses")}
               </h4>
               <ul className="text-sm space-y-1">
                 {swotData.weaknesses.length > 0 ? swotData.weaknesses.map((w, i) => (
                   <li key={i}>• {w}</li>
-                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+                )) : <li className="text-muted-foreground">{t("modules.competitors.noneIdentified")}</li>}
               </ul>
             </div>
             <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <h4 className="font-medium text-blue-600 mb-2 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> Opportunités
+                <CheckCircle2 className="w-4 h-4" /> {t("modules.competitors.opportunities")}
               </h4>
               <ul className="text-sm space-y-1">
                 {swotData.opportunities.length > 0 ? swotData.opportunities.map((o, i) => (
                   <li key={i}>• {o}</li>
-                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+                )) : <li className="text-muted-foreground">{t("modules.competitors.noneIdentified")}</li>}
               </ul>
             </div>
             <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
               <h4 className="font-medium text-yellow-600 mb-2 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" /> Menaces
+                <AlertTriangle className="w-4 h-4" /> {t("modules.competitors.threats")}
               </h4>
               <ul className="text-sm space-y-1">
-                {swotData.threats.length > 0 ? swotData.threats.map((t, i) => (
-                  <li key={i}>• {t}</li>
-                )) : <li className="text-muted-foreground">Aucune identifiée</li>}
+                {swotData.threats.length > 0 ? swotData.threats.map((item, i) => (
+                  <li key={i}>• {item}</li>
+                )) : <li className="text-muted-foreground">{t("modules.competitors.noneIdentified")}</li>}
               </ul>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSWOTDialog(false)}>Fermer</Button>
+            <Button variant="outline" onClick={() => setShowSWOTDialog(false)}>{t("common.close")}</Button>
             <Button onClick={handleExportSWOT}>
               <Download className="w-4 h-4 mr-2" />
-              Exporter
+              {t("common.export")}
             </Button>
           </DialogFooter>
         </DialogContent>

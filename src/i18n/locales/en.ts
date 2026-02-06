@@ -2512,7 +2512,7 @@ export const en = {
       periodComparisonDesc: "Analyze your KPI evolution over time",
       thisMonth: "This month",
       prevMonth: "Previous month",
-      prevPeriod: "vs {{count}} previous period",
+      prevPeriod: "vs {{val}} previous period",
       insufficientData: "Insufficient data",
       connectDataSources: "Connect your data sources to see comparisons",
       selectSite: "Please select a site",
