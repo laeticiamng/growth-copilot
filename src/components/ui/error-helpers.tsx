@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, WifiOff, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isOnline } from '@/lib/api-utils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Hook to monitor online/offline status
@@ -26,36 +27,6 @@ export function useOnlineStatus(): boolean {
 }
 
 /**
- * Offline banner component
- */
-export function OfflineBanner() {
-  const online = useOnlineStatus();
-
-  if (online) return null;
-
-  return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
-      <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/30 rounded-lg shadow-lg">
-        <WifiOff className="w-5 h-5 text-destructive flex-shrink-0" />
-        <div className="flex-1">
-          <p className="font-medium text-destructive">Hors ligne</p>
-          <p className="text-sm text-muted-foreground">
-            Certaines fonctionnalités sont indisponibles.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.location.reload()}
-        >
-          <RefreshCw className="w-4 h-4" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-/**
  * Generic error display component
  */
 interface ErrorDisplayProps {
@@ -66,22 +37,26 @@ interface ErrorDisplayProps {
 }
 
 export function ErrorDisplay({
-  title = "Une erreur est survenue",
-  message = "Veuillez réessayer plus tard.",
+  title,
+  message,
   onRetry,
   className = "",
 }: ErrorDisplayProps) {
+  const { t } = useTranslation();
+  const displayTitle = title || t('errors.generic', 'An error occurred');
+  const displayMessage = message || t('errors.tryAgainLater', 'Please try again later.');
+
   return (
     <div className={`flex flex-col items-center justify-center p-8 text-center ${className}`}>
       <div className="p-3 rounded-full bg-destructive/10 mb-4">
         <AlertCircle className="w-8 h-8 text-destructive" />
       </div>
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground mb-4 max-w-md">{message}</p>
+      <h3 className="font-semibold mb-2">{displayTitle}</h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-md">{displayMessage}</p>
       {onRetry && (
         <Button variant="outline" onClick={onRetry}>
           <RefreshCw className="w-4 h-4 mr-2" />
-          Réessayer
+          {t('errors.tryAgain', 'Try again')}
         </Button>
       )}
     </div>

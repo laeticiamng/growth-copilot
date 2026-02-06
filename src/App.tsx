@@ -1,7 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { OfflineBanner } from "@/components/ui/error-helpers";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -121,7 +120,22 @@ import ServiceCatalog from "./pages/dashboard/ServiceCatalog";
 import AICostDashboard from "./pages/dashboard/AICostDashboard";
 import Settings from "./pages/dashboard/Settings";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: (failureCount, error) => {
+        // Don't retry on auth errors
+        const message = (error as Error)?.message || '';
+        if (message.includes('401') || message.includes('403') || message.includes('JWT')) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 /**
  * Provider Groups - Organized by dependency and purpose
@@ -215,7 +229,6 @@ function App() {
         <InnerProviders>
           <Toaster />
           <Sonner />
-          <OfflineBanner />
           <CrispChat />
           <BrowserRouter>
             <SentryRouteTracker />
