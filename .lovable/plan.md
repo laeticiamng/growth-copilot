@@ -1,126 +1,130 @@
 
-# Audit Multi-Roles et Plan de Corrections
+# Audit Multi-Roles Round 12 - Corrections P4 + Dates Localisees
 
 ## Constats par role
 
 ### CEO - Audit Strategique
-- **Coherence decisionnelle** : Le cockpit (DashboardHome) est bien structure avec briefing, semaphores, approbations et health score. L'architecture "Portable Company" avec 11 departements et 39 agents IA est coherente.
-- **Probleme** : Les semaphores ne couvrent que 5 departements (SEO, Content, Ads, Commercial, Finance) sur les 11 disponibles. Manquent : Support, Security, Governance, HR, Legal, Product.
-- **Probleme** : 2 liens morts dans la navigation sidebar (`/dashboard/media-kpis` et `/dashboard/service-catalog` ne correspondent a aucune route dans App.tsx).
+- **Liens sidebar** : Corriges dans le round precedent (P0 valide).
+- **Cockpit** : DashboardHome utilise `useTranslation()` correctement. Architecture solide.
+- **Onboarding** : Toujours 238 occurrences `isEn ?` dans `Onboarding.tsx` malgre les cles i18n `onboarding.*` ajoutees en round precedent. Le fichier n'a pas ete migre.
 
 ### CTO - Audit Technique
-- **Fiabilite** : Architecture React + Supabase solide, 24 providers correctement composes, RLS appliquee sur 131 tables, 325+ politiques.
-- **Probleme critique** : Onboarding.tsx contient encore ~120 occurrences `isEn ?` (dernier fichier majeur non migre vers `t()`).
-- **Probleme** : ROIDashboard.tsx et AICostDashboard.tsx ont des textes entierement hardcodes en francais (~80 textes chacun, aucun `t()`).
-- **Probleme** : ~290 textes francais hardcodes restants dans 20 fichiers dashboard (Offers, Ads, Social, Reputation, Competitors, LocalSEO, Reports, TemplateAdsFactory, BrandKit, ApprovalsV2, Approvals, Diagnostics, etc.).
-- **Probleme** : AICostDashboard affiche des donnees factices ("hardcoded agent costs" lignes 175-181) comme si elles etaient reelles.
-- **Probleme** : `Billing.tsx` ligne 152 : toast hardcode en francais "Aucun workspace selectionne".
+1. **`isEn` anti-pattern persistant** : `Onboarding.tsx` contient encore `const isEn = i18n.language === "en"` avec ~120 ternaires (lignes 62-140+). Les cles `onboarding.*` existent dans en.ts/fr.ts mais ne sont pas utilisees dans le fichier.
+2. **`toLocaleDateString('fr')` / `('fr-FR')` hardcodes** : 125 occurrences dans 17 fichiers. Le helper `getIntlLocale()` existe dans `src/lib/date-locale.ts` mais n'est pas utilise dans ces fichiers.
+3. **`window.prompt` non localise** : `Approvals.tsx` ligne 42 utilise `window.prompt("Raison du refus :")` en francais hardcode. `PriorityActionsEnhanced.tsx` l'a correctement migre vers `t("cockpit.rejectionPrompt")`.
+4. **Doubles imports** : `Ads.tsx` ligne 2, `Social.tsx` ligne 2, `Reputation.tsx` ligne 2, `Competitors.tsx` (pas de doublon mais `useCallback` importe sans etre utilise dans certains cas).
+5. **Textes francais hardcodes restants** : ~290 textes dans 16 fichiers dashboard (Offers, Ads, Social, Reputation, Competitors, LocalSEO, Reports, TemplateAdsFactory, BrandKit, ApprovalsV2, Approvals, CMS, Legal, Diagnostics).
 
 ### CPO - Audit Produit
-- **KPIs clairs** : BusinessHealthScore avec 5 metriques ponderees, DepartmentSemaphores avec code couleur. Bon.
-- **Probleme UX** : Les liens sidebar morts (`media-kpis`, `service-catalog`) causent des 404 silencieux. Impact utilisateur direct.
-- **Probleme** : La page Agents (647 lignes) avec 39 personas a des specialites et greetings hardcodes en francais. Un utilisateur EN voit du francais.
+- **Incoherence linguistique** : Un utilisateur EN verra "Chargement des offres...", "Campagne creee", "Erreur lors de la creation" etc. dans les toasts et labels de 16 pages dashboard.
+- **Dates hardcodees** : Toutes les dates sont formatees en francais meme si l'utilisateur est en allemand, espagnol, etc.
 
 ### CISO - Audit Securite
-- **RLS** : 325+ politiques, fonctions SECURITY DEFINER pour les helpers d'acces. Architecture multi-tenant solide.
-- **Audit log immuable** : Trigger `prevent_audit_modification` en place. Bien.
-- **Pas de vulnerabilite critique identifiee** dans ce round. Les corrections portent sur l'UX et l'i18n.
+- **`window.prompt`** : Utilise pour saisir la raison de refus dans Approvals.tsx. Pas un risque de securite direct mais ne devrait pas contenir du texte hardcode.
+- Pas de nouvelle vulnerabilite identifiee. RLS et RBAC restent solides.
 
 ### DPO - Audit RGPD
-- **GDPR export** : Edge function `gdpr-export` couvrant 21 tables. Conforme.
-- **Conservation** : `anonymize_old_click_data` apres 30 jours. Bon.
-- **Pas de probleme bloquant identifie.**
+- Pas de nouveau probleme identifie. Export GDPR et anonymisation fonctionnels.
 
 ### CDO - Audit Data
-- **Probleme** : AICostDashboard utilise des donnees estimees (today × 5, today × 22, today × 30) au lieu de requeter les periodes reelles. Donnees trompeuses.
-- **Probleme** : L'onglet "Par agent" de AICostDashboard affiche des donnees fictives hardcodees (SEO Auditor: 23.45€, etc.).
+- **Dates non localisees** : `formatMonth()` dans Reports.tsx utilise `'fr-FR'` hardcode. Les donnees temporelles sont toujours formatees en francais.
+- `AICostDashboard.tsx` utilise `Intl.NumberFormat('fr-FR')` hardcode pour le formatage des couts.
 
 ### COO - Audit Organisationnel
-- **Probleme** : 2 liens de navigation morts dans le sidebar cassent le workflow utilisateur.
-- **Probleme** : Onboarding.tsx non localise = experience d'inscription degradee pour 5 langues.
+- **Onboarding non migre** : Premier contact utilisateur toujours en `isEn ?` ternaire, degradant l'experience pour 5 langues.
 
 ### CFO - Audit Financier
-- **ROIDashboard** : Calculateur de ROI fonctionnel mais entierement en francais hardcode. Inaccessible pour les utilisateurs non francophones.
-- **Billing** : Integration Stripe fonctionnelle avec 3 plans (Starter/Full/A la carte). Bien structure.
-
-### CMO/Growth - Audit Marketing
-- **Landing page** : Migration i18n completee dans Round 10. Couverture 7 langues. Bon.
-- **Pas de probleme bloquant additionnel.**
+- ROIDashboard et AICostDashboard migres vers `t()` dans le round precedent. OK.
 
 ### Head of Design - Audit UX
-- **Liens morts** : `media-kpis` et `service-catalog` dans le sidebar ne menent nulle part.
-- **Semaphores incomplets** : Seulement 5/11 departements visibles.
+- Coherence linguistique incomplete : les labels et toasts des modules metier restent en francais.
 
 ### Beta Testeur
-- **Bug** : Clic sur "Media KPIs" dans le sidebar = page 404.
-- **Bug** : Clic sur "Catalogue" dans le sidebar = page 404.
-- **Incoherence** : Pages ROI et AI Costs affichent du francais meme en mode anglais.
-- **Fake data** : Page AI Costs affiche des couts par agent qui sont des donnees inventees.
+- Je choisis l'allemand, je vais dans Offers : tout est en francais.
+- Je vais dans Ads : "Chargement des campagnes..." en francais.
+- Les dates sont toutes en format francais.
 
 ---
 
-## Plan de Corrections (par priorite)
+## Plan de Corrections
 
-### P0 - Bugs critiques (liens morts)
+### Batch 1 : Migrer Onboarding.tsx vers t() (P0)
 
-**Fichier : `src/components/layout/DashboardLayout.tsx`**
-- Corriger `/dashboard/media-kpis` vers `/dashboard/media/kpis` (ligne 141)
-- Corriger `/dashboard/service-catalog` vers `/dashboard/services` (ligne 153)
+Le fichier utilise encore `isEn ?` alors que les cles `onboarding.*` existent deja. Action :
+- Supprimer `const isEn = i18n.language === "en"` et le bloc `const txt = {...}`
+- Remplacer toutes les references `txt.xxx` par `t("onboarding.xxx")`
+- Verifier que toutes les cles existent dans en.ts/fr.ts
 
-### P1 - i18n ROIDashboard.tsx (~40 textes)
+**Fichier** : `src/pages/Onboarding.tsx`
 
-Migrer tous les textes francais hardcodes vers `t()`. Ajouter les cles dans en.ts et fr.ts.
+### Batch 2 : Localiser les dates (P1)
 
-### P2 - i18n AICostDashboard.tsx (~30 textes) + supprimer fake data
+Remplacer toutes les occurrences de `toLocaleDateString('fr')`, `toLocaleDateString('fr-FR')`, `toLocaleString('fr-FR')`, `toLocaleTimeString('fr-FR')`, et `Intl.NumberFormat('fr-FR')` par des versions utilisant `getIntlLocale(i18n.language)` du helper centralise.
 
-- Migrer tous les textes vers `t()`
-- Supprimer les donnees fictives hardcodees de l'onglet "Par agent" et afficher un etat vide quand il n'y a pas de donnees reelles
-- Corriger les estimations (semaine/mois) pour utiliser des requetes reelles ou afficher clairement que ce sont des projections
+**Fichiers concernes (17 fichiers)** :
+| Fichier | Occurrences |
+|---------|-------------|
+| `src/pages/dashboard/Approvals.tsx` | 2 dates + 1 window.prompt |
+| `src/pages/dashboard/ApprovalsV2.tsx` | 2 dates |
+| `src/pages/dashboard/Ads.tsx` | 1 date + 1 import doublon |
+| `src/pages/dashboard/Social.tsx` | 1 date + 1 import doublon |
+| `src/pages/dashboard/Reputation.tsx` | 1 date + 1 import doublon |
+| `src/pages/dashboard/Competitors.tsx` | 2 dates |
+| `src/pages/dashboard/LocalSEO.tsx` | 1 date |
+| `src/pages/dashboard/Reports.tsx` | 3 dates |
+| `src/pages/dashboard/Legal.tsx` | 2 dates |
+| `src/pages/dashboard/CMS.tsx` | 2 dates |
+| `src/pages/dashboard/TemplateAdsFactory.tsx` | 1 date |
+| `src/pages/dashboard/AICostDashboard.tsx` | 1 Intl.NumberFormat |
+| `src/components/diagnostics/LatencyHistoryChart.tsx` | 2 dates |
+| `src/components/diagnostics/DiagnosticsPanel.tsx` | 1 date |
+| `src/components/evidence/EvidenceBundleCard.tsx` | 2 dates |
+| `src/components/cockpit/DailyBriefing.tsx` | 1 date |
+| `src/components/reports/ReportScheduler.tsx` | 1 date |
+| `src/components/sales/SalesScriptGenerator.tsx` | 3 dates |
+| `src/components/webhooks/AdvancedWebhooks.tsx` | 1 date |
+| `src/components/competitors/CompetitorAlerts.tsx` | dates |
 
-### P3 - i18n Onboarding.tsx (~120 occurrences `isEn ?`)
+Pour chaque fichier :
+1. Ajouter `import { useTranslation } from "react-i18next"` (si absent)
+2. Ajouter `import { getIntlLocale } from "@/lib/date-locale"` 
+3. Remplacer `'fr'` / `'fr-FR'` par `getIntlLocale(i18n.language)`
 
-Migrer le dernier fichier majeur avec l'anti-pattern `isEn ?` vers `t()`. Ajouter ~60 cles dans en.ts et fr.ts.
+### Batch 3 : Migrer les toasts et labels hardcodes (P2)
 
-### P4 - Textes hardcodes restants dans les pages dashboard (batch de nettoyage)
+Ajouter ~150 cles i18n pour les textes francais restants dans les 16 fichiers dashboard. Organiser par module :
 
-Migrer les toasts et labels francais dans les 20 fichiers restants :
-- Offers.tsx (~8 textes)
-- Ads.tsx (~6 textes)
-- Social.tsx (~8 textes)
-- Reputation.tsx (~6 textes)
-- Competitors.tsx (~6 textes)
-- LocalSEO.tsx (~8 textes)
-- Reports.tsx (~6 textes)
-- TemplateAdsFactory.tsx (~8 textes)
-- BrandKit.tsx (~4 textes)
-- ApprovalsV2.tsx (~6 textes)
-- Approvals.tsx (~8 textes)
-- Billing.tsx (1 toast ligne 152)
+| Module | Fichier | Textes a migrer |
+|--------|---------|-----------------|
+| Offers | `Offers.tsx` | ~25 (labels, toasts, dialogs) |
+| Ads | `Ads.tsx` | ~20 (metrics, toasts, table headers) |
+| Social | `Social.tsx` | ~20 (labels, toasts, exports) |
+| Reputation | `Reputation.tsx` | ~15 (labels, dialogs) |
+| Competitors | `Competitors.tsx` | ~15 (labels, SWOT) |
+| LocalSEO | `LocalSEO.tsx` | ~15 (labels, metrics) |
+| Reports | `Reports.tsx` | ~15 (tabs, labels, toasts) |
+| Approvals | `Approvals.tsx` | ~10 (tabs, labels, window.prompt) |
+| ApprovalsV2 | `ApprovalsV2.tsx` | ~10 (tabs, labels) |
+| BrandKit | `BrandKit.tsx` | ~10 (labels, save) |
+| TemplateAdsFactory | `TemplateAdsFactory.tsx` | ~10 (labels, statuses) |
+| Diagnostics | `Diagnostics.tsx` | ~5 (labels) |
 
-### P5 - Nettoyage mineur
+### Batch 4 : Nettoyage imports doublons (P3)
 
-- `Agents.tsx` ligne 3 : double import `import { useCallback } from 'react'` deja dans ligne 1
+| Fichier | Action |
+|---------|--------|
+| `src/pages/dashboard/Ads.tsx` | Fusionner `import { useState } from "react"` et `import { useCallback } from "react"` |
+| `src/pages/dashboard/Social.tsx` | Idem |
+| `src/pages/dashboard/Reputation.tsx` | Idem |
 
 ---
 
-## Details techniques
+## Resume
 
-### Fichiers a modifier : ~25 fichiers
+- **1 fichier majeur** avec anti-pattern `isEn ?` restant : `Onboarding.tsx` (238 occurrences)
+- **~125 dates hardcodees** en `'fr'`/`'fr-FR'` dans 20 fichiers
+- **~150 textes francais hardcodes** dans 16 fichiers dashboard
+- **3 imports doublons** a fusionner
+- **1 `window.prompt`** non localise
 
-| Batch | Fichiers | Cles i18n |
-|-------|----------|-----------|
-| P0 | DashboardLayout.tsx | 0 |
-| P1 | ROIDashboard.tsx, en.ts, fr.ts | ~40 |
-| P2 | AICostDashboard.tsx, en.ts, fr.ts | ~30 |
-| P3 | Onboarding.tsx, en.ts, fr.ts | ~60 |
-| P4 | 12 fichiers dashboard, en.ts, fr.ts | ~80 |
-| P5 | Agents.tsx | 0 |
-
-**Total : ~210 nouvelles cles i18n, 25 fichiers modifies.**
-
-### Approche
-1. Corriger les 2 liens morts immediatement (DashboardLayout)
-2. Migrer ROIDashboard et AICostDashboard (pages financieres visibles)
-3. Migrer Onboarding (dernier `isEn ?` majeur)
-4. Nettoyer les toasts et labels des 12 pages restantes
-5. Fix import doublon Agents.tsx
+**Total : ~25 fichiers a modifier, ~150 nouvelles cles i18n.**
