@@ -61,6 +61,30 @@ serve(async (req) => {
           });
         }
 
+        // Input validation: type, length, sanitization
+        if (typeof message !== "string") {
+          return new Response(JSON.stringify({ error: "Message must be a string" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const MAX_MESSAGE_LENGTH = 4000;
+        if (message.length > MAX_MESSAGE_LENGTH) {
+          return new Response(JSON.stringify({ error: `Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters.` }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const sanitizedMessage = message.replace(/\0/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim();
+        if (sanitizedMessage.length === 0) {
+          return new Response(JSON.stringify({ error: "Message cannot be empty" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         // Get or create conversation
         let convId = conversation_id;
         if (!convId) {
@@ -69,7 +93,7 @@ serve(async (req) => {
             .insert({
               workspace_id,
               user_id: user.id,
-              title: message.substring(0, 50) + (message.length > 50 ? "..." : ""),
+              title: sanitizedMessage.substring(0, 50) + (sanitizedMessage.length > 50 ? "..." : ""),
             })
             .select()
             .single();
@@ -83,7 +107,7 @@ serve(async (req) => {
           conversation_id: convId,
           workspace_id,
           role: "user",
-          content: message,
+          content: sanitizedMessage,
         });
 
         // Get conversation history
