@@ -84,13 +84,13 @@ export default function Ops() {
   return (
     <PermissionGuard permission="manage_team" fallback={
       <div className="p-8 text-center text-muted-foreground">
-        Accès réservé aux administrateurs
+        {t("opsPage.adminOnly")}
       </div>
     }>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Ops Dashboard</h1>
-          <p className="text-muted-foreground">Supervision opérationnelle et observabilité</p>
+          <h1 className="text-3xl font-bold">{t("opsPage.title")}</h1>
+          <p className="text-muted-foreground">{t("opsPage.subtitle")}</p>
         </div>
 
         {/* Alert Banner */}
@@ -101,17 +101,17 @@ export default function Ops() {
                 <AlertTriangle className="h-6 w-6 text-destructive" />
                 <div className="flex-1">
                   {criticalIncidents.length > 0 && (
-                    <p className="font-medium">{criticalIncidents.length} incident(s) critique(s) non résolu(s)</p>
+                    <p className="font-medium">{t("opsPage.criticalIncidents", { count: criticalIncidents.length })}</p>
                   )}
                   {failedTokens.length > 0 && (
-                    <p className="text-sm text-muted-foreground">{failedTokens.length} token(s) en échec de refresh</p>
+                    <p className="text-sm text-muted-foreground">{t("opsPage.failedTokens", { count: failedTokens.length })}</p>
                   )}
                   {expiringTokens.length > 0 && (
-                    <p className="text-sm text-muted-foreground">{expiringTokens.length} token(s) expirant dans 24h</p>
+                    <p className="text-sm text-muted-foreground">{t("opsPage.expiringTokens", { count: expiringTokens.length })}</p>
                   )}
                 </div>
                 <Button variant="destructive" size="sm" onClick={() => setActiveTab('incidents')}>
-                  Voir les incidents
+                  {t("opsPage.viewIncidents")}
                 </Button>
               </div>
             </CardContent>
@@ -122,7 +122,7 @@ export default function Ops() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Taux de succès</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("opsPage.successRate")}</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -135,35 +135,35 @@ export default function Ops() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Échecs</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("opsPage.failures")}</CardTitle>
               <XCircle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-destructive">{totalFailed}</div>
-              <p className="text-xs text-muted-foreground">30 derniers jours</p>
+              <p className="text-xs text-muted-foreground">{t("opsPage.last30Days")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Coût total</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("opsPage.totalCost")}</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">${totalCost.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">Render + AI (30j)</p>
+              <p className="text-xs text-muted-foreground">{t("opsPage.renderAi30d")}</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Incidents ouverts</CardTitle>
+              <CardTitle className="text-sm font-medium">{t("opsPage.openIncidents")}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{unresolvedIncidents.length}</div>
               <p className="text-xs text-muted-foreground">
-                {criticalIncidents.length} critique(s)
+                {t("opsPage.criticalCount", { count: criticalIncidents.length })}
               </p>
             </CardContent>
           </Card>
@@ -171,17 +171,17 @@ export default function Ops() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="incidents">Incidents</TabsTrigger>
-            <TabsTrigger value="tokens">Tokens & Auth</TabsTrigger>
-            <TabsTrigger value="costs">Coûts</TabsTrigger>
+            <TabsTrigger value="overview">{t("opsPage.overview")}</TabsTrigger>
+            <TabsTrigger value="incidents">{t("opsPage.incidents")}</TabsTrigger>
+            <TabsTrigger value="tokens">{t("opsPage.tokensAuth")}</TabsTrigger>
+            <TabsTrigger value="costs">{t("opsPage.costs")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Agents runs (14j)</CardTitle>
+                  <CardTitle>{t("opsPage.agentRuns14d")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
@@ -190,8 +190,8 @@ export default function Ops() {
                       <XAxis dataKey="date" className="text-xs" />
                       <YAxis className="text-xs" />
                       <Tooltip />
-                      <Bar dataKey="success" fill="hsl(var(--primary))" name="Succès" />
-                      <Bar dataKey="failed" fill="hsl(var(--destructive))" name="Échecs" />
+                      <Bar dataKey="success" fill="hsl(var(--primary))" name={t("opsPage.chartSuccess")} />
+                      <Bar dataKey="failed" fill="hsl(var(--destructive))" name={t("opsPage.chartFailures")} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -199,7 +199,7 @@ export default function Ops() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Coûts journaliers (14j)</CardTitle>
+                  <CardTitle>{t("opsPage.dailyCosts14d")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
@@ -219,14 +219,14 @@ export default function Ops() {
           <TabsContent value="incidents">
             <Card>
               <CardHeader>
-                <CardTitle>Incidents récents</CardTitle>
-                <CardDescription>Post-mortems et suivi des problèmes</CardDescription>
+                <CardTitle>{t("opsPage.recentIncidents")}</CardTitle>
+                <CardDescription>{t("opsPage.postMortems")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
                     {incidents.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">Aucun incident</p>
+                      <p className="text-center text-muted-foreground py-8">{t("opsPage.noIncident")}</p>
                     ) : (
                       incidents.map(incident => (
                         <div key={incident.id} className="flex items-start gap-3 p-3 border rounded-lg">
@@ -267,7 +267,7 @@ export default function Ops() {
                               size="sm"
                               onClick={() => handleResolveIncident(incident.id)}
                             >
-                              Résoudre
+                              {t("opsPage.resolve")}
                             </Button>
                           )}
                         </div>
@@ -285,13 +285,13 @@ export default function Ops() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Key className="h-5 w-5" />
-                    État des tokens
+                    {t("opsPage.tokenStatus")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {tokenStatuses.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-4">Aucune intégration active</p>
+                      <p className="text-center text-muted-foreground py-4">{t("opsPage.noActiveIntegration")}</p>
                     ) : (
                       tokenStatuses.map(token => (
                         <div key={token.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -306,15 +306,15 @@ export default function Ops() {
                               <p className="text-xs text-muted-foreground">
                                 {token.scopes_granted.length} scopes • 
                                 {token.token_expires_at 
-                                  ? ` Expire ${format(new Date(token.token_expires_at), 'dd/MM HH:mm')}`
-                                  : ' Pas d\'expiration'
+                                  ? ` ${t("opsPage.expiresAt")} ${format(new Date(token.token_expires_at), 'dd/MM HH:mm')}`
+                                  : ` ${t("opsPage.noExpiry")}`
                                 }
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             {token.refresh_failure_count > 0 && (
-                              <Badge variant="destructive">{token.refresh_failure_count} échecs</Badge>
+                              <Badge variant="destructive">{token.refresh_failure_count} {t("opsPage.failuresLabel")}</Badge>
                             )}
                             <Button variant="ghost" size="icon">
                               <RefreshCw className="h-4 w-4" />
@@ -331,14 +331,14 @@ export default function Ops() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    Audit des tokens
+                    {t("opsPage.tokenAudit")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-2">
                       {auditLog.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4">Aucun événement</p>
+                        <p className="text-center text-muted-foreground py-4">{t("opsPage.noEvent")}</p>
                       ) : (
                         auditLog.map(entry => (
                           <div key={entry.id} className="flex items-center gap-3 py-2 border-b last:border-0">
@@ -366,21 +366,21 @@ export default function Ops() {
           <TabsContent value="costs">
             <Card>
               <CardHeader>
-                <CardTitle>Répartition des coûts</CardTitle>
+                <CardTitle>{t("opsPage.costBreakdown")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3 mb-6">
                   <div className="p-4 border rounded-lg text-center">
                     <p className="text-2xl font-bold">${metrics.reduce((s, m) => s + m.render_cost_usd, 0).toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">Coûts Render</p>
+                    <p className="text-sm text-muted-foreground">{t("opsPage.renderCosts")}</p>
                   </div>
                   <div className="p-4 border rounded-lg text-center">
                     <p className="text-2xl font-bold">${metrics.reduce((s, m) => s + m.ai_cost_usd, 0).toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">Coûts AI</p>
+                    <p className="text-sm text-muted-foreground">{t("opsPage.aiCosts")}</p>
                   </div>
                   <div className="p-4 border rounded-lg text-center">
                     <p className="text-2xl font-bold">${totalCost.toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground">Total 30j</p>
+                    <p className="text-sm text-muted-foreground">{t("opsPage.total30d")}</p>
                   </div>
                 </div>
               </CardContent>

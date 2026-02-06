@@ -47,13 +47,20 @@ import { toast } from "sonner";
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 
-const sectors = [
-  "E-commerce", "SaaS / Tech", "Agence / Services", "Restaurant / Local",
-  "Immobilier", "Santé", "Formation", "Autre"
+const getSectors = (t: (key: string) => string) => [
+  { value: "E-commerce", label: t("sitesPage.sectorEcommerce") },
+  { value: "SaaS / Tech", label: t("sitesPage.sectorSaaS") },
+  { value: "Agence / Services", label: t("sitesPage.sectorAgency") },
+  { value: "Restaurant / Local", label: t("sitesPage.sectorRestaurant") },
+  { value: "Immobilier", label: t("sitesPage.sectorRealEstate") },
+  { value: "Santé", label: t("sitesPage.sectorHealth") },
+  { value: "Formation", label: t("sitesPage.sectorTraining") },
+  { value: "Autre", label: t("sitesPage.sectorOther") },
 ];
 
 const Sites = () => {
   const { t } = useTranslation();
+  const sectors = getSectors(t);
    const { sites, currentSite, setCurrentSite, createSite, updateSite, deleteSite, loading, refetch } = useSites();
    const { currentWorkspace } = useWorkspace();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -108,7 +115,7 @@ const Sites = () => {
 
   const handleCreate = async () => {
     if (!formData.url) {
-      toast.error(t("common.error"), { description: "URL requise" });
+      toast.error(t("common.error"), { description: t("sitesPage.urlRequired") });
       return;
     }
 
@@ -118,7 +125,7 @@ const Sites = () => {
     try {
       new URL(normalizedUrl);
     } catch {
-      toast.error(t("common.error"), { description: "URL invalide" });
+      toast.error(t("common.error"), { description: t("sitesPage.invalidUrl") });
       return;
     }
 
@@ -129,7 +136,7 @@ const Sites = () => {
     if (error) {
       toast.error(t("common.error"), { description: error.message });
     } else {
-      toast.success(t("dashboard.sites.title"), { description: `${site?.name || site?.url} ajouté avec succès.` });
+      toast.success(t("dashboard.sites.title"), { description: t("sitesPage.addedSuccess", { name: site?.name || site?.url }) });
       setIsCreateOpen(false);
       resetForm();
     }
@@ -182,6 +189,83 @@ const Sites = () => {
     );
   }
 
+  const SiteFormFields = () => (
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
+        <Label htmlFor="url">{t("sitesPage.siteUrl")}</Label>
+        <Input
+          id="url"
+          placeholder="https://example.com"
+          value={formData.url}
+          onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="name">{t("sitesPage.siteName")}</Label>
+        <Input
+          id="name"
+          placeholder="Mon Site"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="sector">{t("sitesPage.sector")}</Label>
+          <Select value={formData.sector} onValueChange={(v) => setFormData({ ...formData, sector: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("sitesPage.choose")} />
+            </SelectTrigger>
+            <SelectContent>
+              {sectors.map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="business_type">{t("sitesPage.businessType")}</Label>
+          <Select value={formData.business_type} onValueChange={(v) => setFormData({ ...formData, business_type: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("sitesPage.choose")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="local">{t("sitesPage.local")}</SelectItem>
+              <SelectItem value="ecommerce">{t("sitesPage.ecommerce")}</SelectItem>
+              <SelectItem value="service">{t("sitesPage.service")}</SelectItem>
+              <SelectItem value="saas">{t("sitesPage.saas")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="geographic_zone">{t("sitesPage.geoZone")}</Label>
+          <Input
+            id="geographic_zone"
+            placeholder={t("sitesPage.geoPlaceholder")}
+            value={formData.geographic_zone}
+            onChange={(e) => setFormData({ ...formData, geographic_zone: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="language">{t("sitesPage.language")}</Label>
+          <Select value={formData.language} onValueChange={(v) => setFormData({ ...formData, language: v })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">{t("sitesPage.french")}</SelectItem>
+              <SelectItem value="en">{t("sitesPage.english")}</SelectItem>
+              <SelectItem value="es">{t("sitesPage.spanish")}</SelectItem>
+              <SelectItem value="de">{t("sitesPage.german")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -195,95 +279,22 @@ const Sites = () => {
           <DialogTrigger asChild>
             <Button variant="gradient">
               <Plus className="w-4 h-4 mr-2" />
-              Ajouter un site
+              {t("sitesPage.addSite")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Ajouter un site</DialogTitle>
+              <DialogTitle>{t("sitesPage.addSite")}</DialogTitle>
               <DialogDescription>
-                Entrez les informations de votre site pour commencer l'optimisation.
+                {t("sitesPage.addSiteDesc")}
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="url">URL du site *</Label>
-                <Input
-                  id="url"
-                  placeholder="https://example.com"
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nom du site</Label>
-                <Input
-                  id="name"
-                  placeholder="Mon Site"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="sector">Secteur</Label>
-                  <Select value={formData.sector} onValueChange={(v) => setFormData({ ...formData, sector: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sectors.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="business_type">Type</Label>
-                  <Select value={formData.business_type} onValueChange={(v) => setFormData({ ...formData, business_type: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="local">Local</SelectItem>
-                      <SelectItem value="ecommerce">E-commerce</SelectItem>
-                      <SelectItem value="service">Service</SelectItem>
-                      <SelectItem value="saas">SaaS</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="geographic_zone">Zone géographique</Label>
-                  <Input
-                    id="geographic_zone"
-                    placeholder="France, Paris..."
-                    value={formData.geographic_zone}
-                    onChange={(e) => setFormData({ ...formData, geographic_zone: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="language">Langue</Label>
-                  <Select value={formData.language} onValueChange={(v) => setFormData({ ...formData, language: v })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="en">Anglais</SelectItem>
-                      <SelectItem value="es">Espagnol</SelectItem>
-                      <SelectItem value="de">Allemand</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+            <SiteFormFields />
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Annuler</Button>
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>{t("common.cancel")}</Button>
               <Button type="button" onClick={handleCreate} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Créer
+                {t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -295,13 +306,13 @@ const Sites = () => {
         <Card variant="elevated" className="text-center py-12">
           <CardContent>
             <Globe className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Aucun site</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("sitesPage.noSites")}</h3>
             <p className="text-muted-foreground mb-4">
-              Ajoutez votre premier site pour commencer l'optimisation.
+              {t("sitesPage.noSitesDesc")}
             </p>
             <Button variant="gradient" onClick={() => setIsCreateOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Ajouter un site
+              {t("sitesPage.addSite")}
             </Button>
           </CardContent>
         </Card>
@@ -333,7 +344,7 @@ const Sites = () => {
                   {currentSite?.id === site.id && (
                     <Badge variant="success" className="text-xs">
                       <Check className="w-3 h-3 mr-1" />
-                      Actif
+                      {t("sitesPage.activeLabel")}
                     </Badge>
                   )}
                 </div>
@@ -366,15 +377,15 @@ const Sites = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Supprimer ce site ?</AlertDialogTitle>
+                        <AlertDialogTitle>{t("sitesPage.deleteSite")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Cette action est irréversible. Toutes les données associées seront supprimées.
+                          {t("sitesPage.deleteIrreversible")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => handleDelete(site.id)} className="bg-destructive text-destructive-foreground">
-                          Supprimer
+                          {t("common.delete")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -390,83 +401,14 @@ const Sites = () => {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Modifier le site</DialogTitle>
+            <DialogTitle>{t("sitesPage.editSite")}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-url">URL du site</Label>
-              <Input
-                id="edit-url"
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nom du site</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>Secteur</Label>
-                <Select value={formData.sector} onValueChange={(v) => setFormData({ ...formData, sector: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choisir..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sectors.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>Type</Label>
-                <Select value={formData.business_type} onValueChange={(v) => setFormData({ ...formData, business_type: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choisir..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="local">Local</SelectItem>
-                    <SelectItem value="ecommerce">E-commerce</SelectItem>
-                    <SelectItem value="service">Service</SelectItem>
-                    <SelectItem value="saas">SaaS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>Zone géographique</Label>
-                <Input
-                  value={formData.geographic_zone}
-                  onChange={(e) => setFormData({ ...formData, geographic_zone: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Langue</Label>
-                <Select value={formData.language} onValueChange={(v) => setFormData({ ...formData, language: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="en">Anglais</SelectItem>
-                    <SelectItem value="es">Espagnol</SelectItem>
-                    <SelectItem value="de">Allemand</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          <SiteFormFields />
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Annuler</Button>
+            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>{t("common.cancel")}</Button>
             <Button type="button" onClick={handleEdit} disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Enregistrer
+              {t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -34,19 +34,19 @@ import {
 
 const getContractStatusLabels = (t: any): Record<ContractStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> => ({
   draft: { label: t("legalPage.statusDraft"), variant: "secondary" },
-  pending_signature: { label: t("legalPage.statusPending"), variant: "outline" },
+  pending_signature: { label: t("legalPage.statusPendingSig"), variant: "outline" },
   active: { label: t("legalPage.statusActive"), variant: "default" },
   expired: { label: t("legalPage.statusExpired"), variant: "destructive" },
   terminated: { label: t("legalPage.statusTerminated"), variant: "destructive" },
 });
 
 const getContractTypes = (t: any) => [
-  { value: "employment", label: t("legalPage.typeEmployment") },
+  { value: "employment", label: t("legalPage.contractEmployment") },
   { value: "nda", label: "NDA" },
-  { value: "service", label: t("legalPage.typeService") },
-  { value: "license", label: t("legalPage.typeLicense") },
-  { value: "partnership", label: t("legalPage.typePartnership") },
-  { value: "other", label: t("legalPage.typeOther") },
+  { value: "service", label: t("legalPage.contractService") },
+  { value: "license", label: t("legalPage.contractLicense") },
+  { value: "partnership", label: t("legalPage.contractPartnership") },
+  { value: "other", label: t("legalPage.contractOther") },
 ];
 
 export default function Legal() {
@@ -135,19 +135,19 @@ export default function Legal() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Nouveau contrat
+              {t("legalPage.newContract")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Créer un contrat</DialogTitle>
+              <DialogTitle>{t("legalPage.createContract")}</DialogTitle>
               <DialogDescription>
-                Ajoutez un nouveau contrat à suivre
+                {t("legalPage.createContractDesc")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Titre du contrat</Label>
+                <Label htmlFor="title">{t("legalPage.contractTitle")}</Label>
                 <Input
                   id="title"
                   value={newContract.title}
@@ -155,7 +155,7 @@ export default function Legal() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contract_type">Type</Label>
+                <Label htmlFor="contract_type">{t("legalPage.type")}</Label>
                 <Select
                   value={newContract.contract_type}
                   onValueChange={(value) => setNewContract({ ...newContract, contract_type: value })}
@@ -173,16 +173,16 @@ export default function Legal() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="counterparty">Contrepartie</Label>
+                <Label htmlFor="counterparty">{t("legalPage.counterparty")}</Label>
                 <Input
                   id="counterparty"
-                  placeholder="Nom de l'entreprise ou personne"
+                  placeholder={t("legalPage.counterpartyPlaceholder")}
                   value={newContract.counterparty_name}
                   onChange={(e) => setNewContract({ ...newContract, counterparty_name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("legalPage.description")}</Label>
                 <Textarea
                   id="description"
                   value={newContract.description}
@@ -192,10 +192,10 @@ export default function Legal() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Annuler
+                {t("common.cancel")}
               </Button>
               <Button onClick={handleCreate} disabled={isCreating}>
-                {isCreating ? "Création..." : "Créer"}
+                {isCreating ? t("legalPage.creating") : t("common.create")}
               </Button>
             </div>
           </DialogContent>
@@ -208,7 +208,7 @@ export default function Legal() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Contrats actifs</p>
+                <p className="text-sm text-muted-foreground">{t("legalPage.activeContracts")}</p>
                 <p className="text-2xl font-bold">{contractStats.active}</p>
               </div>
               <FileText className="w-8 h-8 text-primary opacity-80" />
@@ -219,7 +219,7 @@ export default function Legal() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Expirent bientôt</p>
+                <p className="text-sm text-muted-foreground">{t("legalPage.expiringSoon")}</p>
                 <p className="text-2xl font-bold text-orange-600">{contractStats.expiringSoon}</p>
               </div>
               <AlertTriangle className="w-8 h-8 text-orange-500 opacity-80" />
@@ -230,7 +230,7 @@ export default function Legal() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Taux de conformité</p>
+                <p className="text-sm text-muted-foreground">{t("legalPage.complianceRate")}</p>
                 <p className="text-2xl font-bold text-green-600">{complianceStats.complianceRate}%</p>
               </div>
               <Shield className="w-8 h-8 text-green-500 opacity-80" />
@@ -241,9 +241,9 @@ export default function Legal() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Requêtes RGPD</p>
+                <p className="text-sm text-muted-foreground">{t("legalPage.gdprRequestsLabel")}</p>
                 <p className="text-2xl font-bold">{gdprStats.pending}</p>
-                <p className="text-xs text-muted-foreground">en attente</p>
+                <p className="text-xs text-muted-foreground">{t("legalPage.pending")}</p>
               </div>
               <Scale className="w-8 h-8 text-blue-500 opacity-80" />
             </div>
@@ -258,13 +258,13 @@ export default function Legal() {
             <div className="flex items-start gap-4">
               <AlertTriangle className="w-6 h-6 text-orange-500 mt-0.5" />
               <div className="space-y-2">
-                <h3 className="font-semibold text-orange-800 dark:text-orange-200">Alertes juridiques</h3>
+                <h3 className="font-semibold text-orange-800 dark:text-orange-200">{t("legalPage.legalAlerts")}</h3>
                 <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
                   {contractStats.expiringSoon > 0 && (
-                    <li>• {contractStats.expiringSoon} contrat(s) expire(nt) dans les 30 prochains jours</li>
+                    <li>• {t("legalPage.contractsExpiring", { count: contractStats.expiringSoon })}</li>
                   )}
                   {gdprStats.overdue > 0 && (
-                    <li>• {gdprStats.overdue} requête(s) RGPD en retard de traitement</li>
+                    <li>• {t("legalPage.gdprOverdue", { count: gdprStats.overdue })}</li>
                   )}
                 </ul>
               </div>
@@ -276,10 +276,10 @@ export default function Legal() {
       {/* Tabs */}
       <Tabs defaultValue="contracts" className="space-y-4">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="contracts">Contrats</TabsTrigger>
-          <TabsTrigger value="compliance">Conformité</TabsTrigger>
-          <TabsTrigger value="gdpr">RGPD</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="contracts">{t("legalPage.contracts")}</TabsTrigger>
+          <TabsTrigger value="compliance">{t("legalPage.compliance")}</TabsTrigger>
+          <TabsTrigger value="gdpr">{t("legalPage.gdpr")}</TabsTrigger>
+          <TabsTrigger value="templates">{t("legalPage.templatesTab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="contracts" className="space-y-4">
@@ -287,7 +287,7 @@ export default function Legal() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un contrat..."
+              placeholder={t("legalPage.searchContract")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -296,16 +296,16 @@ export default function Legal() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Gestion des contrats</CardTitle>
+              <CardTitle>{t("legalPage.contractManagement")}</CardTitle>
               <CardDescription>
-                {filteredContracts.length} contrat{filteredContracts.length !== 1 ? "s" : ""}
+                {t("legalPage.contractCount", { count: filteredContracts.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {filteredContracts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun contrat trouvé</p>
+                  <p>{t("legalPage.noContract")}</p>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -321,8 +321,8 @@ export default function Legal() {
                         <div>
                           <p className="font-medium">{contract.title}</p>
                           <p className="text-sm text-muted-foreground">
-                            {contract.counterparty_name || "Non spécifié"}
-                            {contract.expiry_date && ` • Expire le ${new Date(contract.expiry_date).toLocaleDateString(locale)}`}
+                            {contract.counterparty_name || t("legalPage.notSpecified")}
+                            {contract.expiry_date && ` • ${t("legalPage.expiresOn", { date: new Date(contract.expiry_date).toLocaleDateString(locale) })}`}
                           </p>
                         </div>
                       </div>
@@ -347,9 +347,9 @@ export default function Legal() {
         <TabsContent value="compliance" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Tableau de conformité</CardTitle>
+              <CardTitle>{t("legalPage.complianceBoard")}</CardTitle>
               <CardDescription>
-                Suivez vos obligations réglementaires
+                {t("legalPage.trackObligations")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -360,8 +360,8 @@ export default function Legal() {
                       <CheckCircle2 className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <p className="font-medium">Conformes</p>
-                      <p className="text-sm text-muted-foreground">{complianceStats.compliant} éléments</p>
+                      <p className="font-medium">{t("legalPage.compliant")}</p>
+                      <p className="text-sm text-muted-foreground">{complianceStats.compliant} {t("legalPage.items")}</p>
                     </div>
                   </div>
                   <Progress value={(complianceStats.compliant / Math.max(complianceStats.total, 1)) * 100} className="w-32" />
@@ -372,8 +372,8 @@ export default function Legal() {
                       <Clock className="w-6 h-6 text-yellow-600" />
                     </div>
                     <div>
-                      <p className="font-medium">À revoir</p>
-                      <p className="text-sm text-muted-foreground">{complianceStats.reviewNeeded} éléments</p>
+                      <p className="font-medium">{t("legalPage.toReview")}</p>
+                      <p className="text-sm text-muted-foreground">{complianceStats.reviewNeeded} {t("legalPage.items")}</p>
                     </div>
                   </div>
                 </div>
@@ -383,8 +383,8 @@ export default function Legal() {
                       <XCircle className="w-6 h-6 text-red-600" />
                     </div>
                     <div>
-                      <p className="font-medium">Non conformes</p>
-                      <p className="text-sm text-muted-foreground">{complianceStats.nonCompliant} éléments</p>
+                      <p className="font-medium">{t("legalPage.nonCompliant")}</p>
+                      <p className="text-sm text-muted-foreground">{complianceStats.nonCompliant} {t("legalPage.items")}</p>
                     </div>
                   </div>
                 </div>
@@ -396,16 +396,16 @@ export default function Legal() {
         <TabsContent value="gdpr">
           <Card>
             <CardHeader>
-              <CardTitle>Requêtes RGPD</CardTitle>
+              <CardTitle>{t("legalPage.gdprTitle")}</CardTitle>
               <CardDescription>
-                Droits d'accès, rectification, suppression, portabilité
+                {t("legalPage.gdprDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {gdprRequests.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Shield className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune requête RGPD</p>
+                  <p>{t("legalPage.noGdprRequests")}</p>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -423,7 +423,7 @@ export default function Legal() {
                             {request.status}
                           </Badge>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Échéance: {new Date(request.response_deadline).toLocaleDateString(locale)}
+                            {t("legalPage.deadline")}: {new Date(request.response_deadline).toLocaleDateString(locale)}
                           </p>
                         </div>
                       </div>
@@ -445,6 +445,7 @@ export default function Legal() {
 
 // ===== Legal Templates Tab Component =====
 function LegalTemplatesTab() {
+  const { t } = useTranslation();
   const { 
     templates, 
     loading, 
@@ -468,10 +469,10 @@ function LegalTemplatesTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const filteredTemplates = templates.filter(t => {
-    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (t.description?.toLowerCase() || "").includes(searchQuery.toLowerCase());
-    const matchesType = typeFilter === "all" || t.template_type === typeFilter;
+  const filteredTemplates = templates.filter(tmpl => {
+    const matchesSearch = tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (tmpl.description?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === "all" || tmpl.template_type === typeFilter;
     return matchesSearch && matchesType;
   });
 
@@ -517,7 +518,7 @@ function LegalTemplatesTab() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher un template..."
+            placeholder={t("legalPage.searchTemplate")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -525,10 +526,10 @@ function LegalTemplatesTab() {
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Tous les types" />
+            <SelectValue placeholder={t("legalPage.allTypes")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous les types</SelectItem>
+            <SelectItem value="all">{t("legalPage.allTypes")}</SelectItem>
             {Object.entries(TEMPLATE_TYPE_LABELS).map(([key, label]) => (
               <SelectItem key={key} value={key}>{label}</SelectItem>
             ))}
@@ -538,20 +539,20 @@ function LegalTemplatesTab() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Nouveau template
+              {t("legalPage.newTemplate")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Créer un template juridique</DialogTitle>
+              <DialogTitle>{t("legalPage.createLegalTemplate")}</DialogTitle>
               <DialogDescription>
-                Créez un modèle de document réutilisable
+                {t("legalPage.createReusableDoc")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="template-name">Nom du template</Label>
+                  <Label htmlFor="template-name">{t("legalPage.templateName")}</Label>
                   <Input
                     id="template-name"
                     value={newTemplate.name}
@@ -560,7 +561,7 @@ function LegalTemplatesTab() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="template-type">Type</Label>
+                  <Label htmlFor="template-type">{t("legalPage.type")}</Label>
                   <Select
                     value={newTemplate.template_type}
                     onValueChange={(value) => setNewTemplate({ ...newTemplate, template_type: value as TemplateType })}
@@ -577,33 +578,32 @@ function LegalTemplatesTab() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="template-desc">Description</Label>
+                <Label htmlFor="template-desc">{t("legalPage.templateDesc")}</Label>
                 <Input
                   id="template-desc"
                   value={newTemplate.description || ""}
                   onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
-                  placeholder="Accord de confidentialité standard..."
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="template-content">Contenu</Label>
+                <Label htmlFor="template-content">{t("legalPage.content")}</Label>
                 <Textarea
                   id="template-content"
                   value={newTemplate.content}
                   onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
-                  placeholder="Entre les soussignés : {{PARTY_A}}..."
+                  placeholder={t("legalPage.contentPlaceholder")}
                   rows={10}
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Utilisez {"{{VARIABLE}}"} pour les champs dynamiques
+                  {t("legalPage.dynamicFields")}
                 </p>
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Annuler</Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button onClick={handleCreate} disabled={isCreating || !newTemplate.name || !newTemplate.content}>
-                {isCreating ? "Création..." : "Créer"}
+                {isCreating ? t("legalPage.creating") : t("common.create")}
               </Button>
             </div>
           </DialogContent>
@@ -615,19 +615,19 @@ function LegalTemplatesTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileCheck className="w-5 h-5" />
-            Templates juridiques
+            {t("legalPage.legalTemplates")}
           </CardTitle>
-          <CardDescription>{filteredTemplates.length} template(s)</CardDescription>
+          <CardDescription>{t("legalPage.templateCount", { count: filteredTemplates.length })}</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">Aucun template</p>
-              <p className="text-sm mt-1">Créez votre premier modèle de document</p>
+              <p className="font-medium">{t("legalPage.noTemplate")}</p>
+              <p className="text-sm mt-1">{t("legalPage.createFirstDoc")}</p>
               <Button variant="outline" className="mt-4" onClick={() => setIsDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
-                Créer un template
+                {t("legalPage.newTemplate")}
               </Button>
             </div>
           ) : (
@@ -645,7 +645,7 @@ function LegalTemplatesTab() {
                       <p className="font-medium flex items-center gap-2">
                         {template.name}
                         {template.is_default && (
-                          <Badge variant="secondary" className="text-xs">Par défaut</Badge>
+                          <Badge variant="secondary" className="text-xs">{t("legalPage.defaultLabel")}</Badge>
                         )}
                       </p>
                       <p className="text-sm text-muted-foreground">
@@ -656,10 +656,10 @@ function LegalTemplatesTab() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" onClick={() => duplicateTemplate(template.id)}>
-                      Dupliquer
+                      {t("legalPage.duplicate")}
                     </Button>
                     <Button variant="ghost" size="sm" className="text-destructive" onClick={() => deleteTemplate(template.id)}>
-                      Supprimer
+                      {t("legalPage.deleteBtn")}
                     </Button>
                   </div>
                 </div>
