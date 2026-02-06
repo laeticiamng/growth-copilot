@@ -88,7 +88,7 @@ export function Pricing() {
           </Card>
 
           {/* Full Company */}
-          <Card variant="gradient" className="relative overflow-hidden border-2 border-primary/30 mt-4 lg:mt-0">
+          <Card variant="gradient" className="relative border-2 border-primary/30 mt-4 lg:mt-0">
             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
               <Badge variant="gradient" className="px-3 py-1 whitespace-nowrap text-xs">
