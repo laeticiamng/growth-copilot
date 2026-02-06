@@ -6,7 +6,6 @@ export { Services } from './Services';
 export { TeamOrgChart } from './TeamOrgChart';
 export { Tools } from './Tools';
 export { HowItWorks } from './HowItWorks';
-export { Testimonials } from './Testimonials';
 export { Pricing } from './Pricing';
 export { FAQ } from './FAQ';
 export { CTA } from './CTA';
