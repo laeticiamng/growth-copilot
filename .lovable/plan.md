@@ -1,75 +1,127 @@
 
 
-# Sub-batch B - Component i18n Migration (~20 files)
+# Audit Multi-Roles et Corrections Restantes - Round 15
 
-## Overview
+## Synthese de l'Audit
 
-Migrate all remaining hardcoded French strings in 20 component files, plus TeamManagement.tsx. Each file needs `useTranslation` added (or `t` destructured from existing hook), French strings replaced with `t()` calls, and corresponding keys added to `en.ts` and `fr.ts`.
+Apres exploration approfondie du codebase, voici les constats par role et les corrections a implementer.
 
-## Files to Modify
+---
 
-### Connectors (2 files, ~20 strings)
-1. **GoogleSuperConnector.tsx** - Add `t` destructuring. Migrate: toasts (lines 62-91), module descriptions (lines 113-144), badges ("Connecte"/"Non connecte"), info box text (lines 210-216), button labels ("Autoriser l'acces").
-2. **MetaSuperConnector.tsx** - Add `useTranslation`. Migrate: toasts (lines 39-68), badges, button labels, info box text (lines 166-172), module descriptions (lines 180-238).
+## Constats par Role
 
-### Metrics Widgets (2 files, ~12 strings)
-3. **GA4MetricsWidget.tsx** - Add `useTranslation`. Migrate: toasts (lines 118-142, 169), empty state texts (lines 215-226, 335-336), "Derniere sync" label (line 242), metric label "Revenu" (line 284).
-4. **MetaMetricsWidget.tsx** - Add `useTranslation`. Migrate: toasts (lines 138-163, 189), empty state texts (lines 232-243, 344-347), "Derniere sync" label (line 261), "Top posts" label (line 353).
+### CEO - Audit Strategique
+- **Positif** : Architecture solide avec 39 agents IA, 11 departements, modele multi-tenant. Cockpit executif avec briefing quotidien, score de sante, semaphores par departement.
+- **A corriger** : Aucun probleme structurel majeur. Les KPIs hardcodes ("39 agents", "11 departements") dans `WelcomeCard.tsx` et `DashboardHome.tsx` devraient etre dynamiques a terme.
 
-### AI Generators (5 files, ~40 strings)
-5. **SalesScriptGenerator.tsx** - Add `t` to existing hook. Migrate: SCRIPT_TYPES labels (lines 32-36), COMMON_OBJECTIONS (lines 38-47, keep as FR since they're business content), toasts (lines 62, 118, 143, 150, 180), form labels (lines 222-246), button labels (lines 253-260, 279-288), tab labels (lines 296-299), "Scripts sauvegardes" (line 335).
-6. **LeadQualifier.tsx** - Add `useTranslation`. Migrate: sources labels (lines 63-69), pipelineStages labels (lines 72-78), toasts (lines 98-227), form labels (lines 280-341), badge labels (lines 249-251), "Prochaine etape" (line 398), tab labels (lines 272-273).
-7. **ContentStrategyGenerator.tsx** - Add `useTranslation`. Migrate: toasts (lines 73-202), form placeholders (lines 282-287), button labels (lines 294-304), tab labels (lines 329-340), section labels (lines 381-429), empty state (lines 478-485).
-8. **SocialPostGenerator.tsx** - Add `useTranslation`. Migrate: toasts (lines 66-161), button labels (lines 240-250), form placeholder (line 224), "Variante" badge (line 283), "Publier" button (line 303), "CTA recommande" (line 331), "caracteres" labels.
-9. **AdsOptimizer.tsx** - Add `useTranslation`. Migrate: toasts (lines 62-159), form labels (lines 191-231), select options (lines 229-231), section headers (lines 266-348), budget labels (lines 352-358).
+### CTO - Audit Technique
+- **Bug console** : Warning React `forwardRef` dans `BusinessHealthScore.tsx` - un `<button>` est passe a `TooltipTrigger` sans `asChild` ou `forwardRef`. Deja corrige avec `<button type="button">` wrapping.
+- **Locale inline** : `MoMComparison.tsx` et `CockpitPDFExport.tsx` utilisent des ternaires manuels pour construire les locales au lieu de `getIntlLocale()`.
+- **Performance** : Le `DashboardHome` lance 5+ queries en parallele au montage - acceptable mais a surveiller.
 
-### CRO & Social (2 files, ~15 strings)
-10. **CROSuggestionsAI.tsx** - Add `useTranslation`. Migrate: toasts (lines 59, 122-128, 139), button/label text (lines 159-162, 174-185), empty state (lines 289-293), impact/effort labels (lines 244-251).
-11. **RepurposeEngine.tsx** - Add `useTranslation`. Migrate: toasts (lines 90-183), card titles/descriptions (lines 202-208), dialog labels (lines 334-376, 387-438), button labels, status badges (lines 296-300), empty state (lines 219-225).
+### CPO - Audit Produit
+- **Coherent** : Les sections du cockpit suivent une hierarchie logique (Welcome > Briefing > Semaphores > Actions > Health Score).
+- **Manque** : Le `PriorityActionsEnhanced` utilise `window.prompt()` pour la raison de rejet - UX pauvre, devrait etre un Dialog.
 
-### Research (1 file, ~8 strings)
-12. **SmartResearchHub.tsx** - Add `useTranslation`. Migrate: modeConfig labels/descriptions (lines 43-66), button labels (lines 162-184), "Resultats de recherche" (line 193), "sources" badge (line 211), "Sources :" label (line 228).
+### CISO - Audit Securite
+- **Positif** : RLS sur 131 tables, JWT valide sur edge functions, audit log immutable, SSRF protection.
+- **Aucun probleme critique** identifie dans ce tour d'audit.
 
-### Notifications (2 files, ~20 strings)
-13. **AlertRulesConfig.tsx** - Add `useTranslation`. Migrate: METRIC_OPTIONS labels (lines 58-66), DEFAULT_RULES names/descriptions (lines 70-93), condition labels (lines 122-133), dialog labels (lines 215-306), toasts (lines 144-188), empty state (lines 362-364).
-14. **NotificationPreferences.tsx** - Add `useTranslation`. Migrate: channel names/descriptions (lines 46-49), notification type labels/descriptions (lines 52-88), section titles (lines 128-131, 158-161, 194-197), digest frequency labels (lines 207-210), toast (line 110), button label (line 220).
+### DPO - Audit RGPD
+- **Positif** : GDPR export en place, anonymisation des clicks apres 30 jours, rate limiting.
+- **OK** pour ce round.
 
-### Data Export (1 file, ~6 strings)
-15. **DataExportButton.tsx** - Add `useTranslation`. Migrate: toasts (lines 84, 97-98, 103, 110), "Exporter" button labels (lines 156, 174), "Format d'export" label (line 177).
+### CDO - Audit Data
+- **Positif** : Pipeline KPI avec kpis_daily, data quality alerts, evidence bundles.
+- **A verifier** : Les sources de verite semaphores utilisent des requetes directes plutot qu'un cache/materialise.
 
-### Team Management (1 file, ~30 strings)
-16. **TeamManagement.tsx** - Add `t` to existing `useTranslation`. Migrate: roleLabels (lines 56-62), all toasts (lines 90-143), header text (lines 154-156), loading message (line 166), card titles (lines 175, 229, 232), member labels (lines 239, 256-258), dropdown items (lines 275-289), dialog text (lines 307-348).
+### COO - Audit Operationnel
+- **Positif** : Automations, scheduled runs, approval workflow.
+- **OK** pour ce round.
 
-## New i18n Keys
+### Head of Design - Audit UX
+- **Bug UX** : `window.prompt()` pour les rejets d'approbation (primitif).
+- **Responsive** : Grille semaphores `grid-cols-5` potentiellement serree sur mobile, deja fixee avec `grid-cols-2 sm:grid-cols-3 md:grid-cols-5`.
 
-All keys will be added under new namespaces in `en.ts` and `fr.ts`:
+### Beta Testeur - Audit Utilisabilite
+- **Loading screens** : Messages hardcodes en francais ("Verification de l'authentification...", "Chargement...").
+- **Composants non localises** restants identifies ci-dessous.
 
-- `components.connectors.*` (~20 keys)
-- `components.ga4Widget.*` (~12 keys)
-- `components.metaWidget.*` (~12 keys)
-- `components.salesScript.*` (~20 keys)
-- `components.leadQualifier.*` (~25 keys)
-- `components.contentStrategy.*` (~20 keys)
-- `components.socialPost.*` (~15 keys)
-- `components.adsOptimizer.*` (~20 keys)
-- `components.croSuggestions.*` (~15 keys)
-- `components.repurpose.*` (~20 keys)
-- `components.research.*` (~10 keys)
-- `components.alertRules.*` (~25 keys)
-- `components.notifications.*` (~25 keys)
-- `components.dataExport.*` (~6 keys)
-- `components.team.*` (~30 keys)
+---
 
-## Technical Notes
+## Corrections a Implementer
 
-- For const objects defined outside components (like `SCRIPT_TYPES`, `METRIC_OPTIONS`, `sources`, `pipelineStages`, `categoryLabels`, `roleLabels`), these will be converted to functions that accept `t` or the labels will be resolved inline where they are rendered.
-- `COMMON_OBJECTIONS` in SalesScriptGenerator.tsx are business/sales training content used as AI prompt context -- these will remain in French as they are domain-specific training data, not UI strings.
-- The fallback script templates in `generateFallbackScript()` and `generateFallbackObjections()` are also business content (sales scripts) and will remain in French.
-- Total: ~275 new i18n keys across 16 component files + en.ts + fr.ts = 18 files modified.
+### 1. Fix React Warning `forwardRef` dans BusinessHealthScore (CTO)
 
-## Execution
+Le `TooltipTrigger` dans `BusinessHealthScore.tsx` passe un `<button>` sans `asChild` qui cause un warning. La correction est deja partiellement en place (ligne 208-211 utilise `asChild` + `<button>`). Le warning persiste car le composant precedemment renderait un composant fonctionnel sans ref. Il faut confirmer que le `asChild` est bien present et que le `<button>` est natif.
 
-Due to the volume, this will be implemented in 2 parallel batches:
-- **Batch B1**: Files 1-8 (connectors, widgets, generators) + en.ts/fr.ts keys
-- **Batch B2**: Files 9-16 (CRO, social, notifications, team) + remaining en.ts/fr.ts keys
+**Action** : Verifier et confirmer que la structure actuelle est correcte (elle l'est - le warning peut venir d'un cache hot reload).
+
+### 2. Remplacer les ternaires locale dans MoMComparison et CockpitPDFExport (CTO)
+
+2 fichiers utilisent encore `i18n.language === 'fr' ? 'fr-FR' : ...` au lieu de `getIntlLocale()`.
+
+**Fichiers** :
+- `src/components/dashboard/MoMComparison.tsx` (ligne 50)
+- `src/components/dashboard/CockpitPDFExport.tsx` (ligne 63)
+
+### 3. Localiser les derniers composants avec strings hardcodes FR (Beta Testeur)
+
+~60 strings restantes dans 8 fichiers :
+
+| Fichier | Strings FR |
+|---------|-----------|
+| `ProtectedRoute.tsx` | 2 ("Verification...", "Chargement...") |
+| `ServiceGuard.tsx` | 1 ("Verification de vos acces...") |
+| `PermissionGuard.tsx` | 1 ("Verification des permissions...") |
+| `loading-state.tsx` | 1 (default "Chargement...") |
+| `SubscriptionStatusBadge.tsx` | 5 ("Chargement...", "Actif", "Essai", "Paiement en retard", "Annule") |
+| `ExportButton.tsx` | 7 ("Exporter", "Aucune donnee...", "Export CSV reussi", "Erreur d'export", "Export JSON reussi") |
+| `VoiceAssistant.tsx` | 6 ("Assistant vocal connecte", "Erreur de connexion vocale", "Aucun workspace", "Connexion...", "Parler a Growth OS", "Vous:", "Assistant:") |
+| `GSCMetricsWidget.tsx` | 4 ("jours de donnees synchronises", "Erreur lors de la synchronisation", "Erreur OAuth") |
+| `data-table-pagination.tsx` | 1 ("Aucun resultat") |
+| `paginated-list.tsx` | 2 ("Aucun element", "Commencez par ajouter...") |
+| `empty-state.tsx` | 1 ("Erreur lors du chargement...") |
+| `DiagnosticsPanel.tsx` | 5 ("Echec verification auth", "Connexion OK/echouee", "Erreurs recentes", "Verifications de sante") |
+
+### 4. Remplacer `window.prompt()` par un Dialog dans PriorityActionsEnhanced (CPO/UX)
+
+Ligne 174 : `const reason = window.prompt(t("cockpit.rejectionPrompt"))` - remplacer par un Dialog Radix avec un textarea pour la raison de rejet.
+
+---
+
+## Plan Technique
+
+### Groupe A - Quick fixes locales (2 fichiers)
+
+1. **MoMComparison.tsx** : Remplacer le ternaire ligne 50 par `getIntlLocale(i18n.language)`, ajouter import
+2. **CockpitPDFExport.tsx** : Meme correction ligne 63
+
+### Groupe B - i18n des composants restants (12 fichiers)
+
+Pour chaque fichier :
+- Ajouter `useTranslation` si absent (ou `i18next.t()` pour les fichiers non-composant)
+- Remplacer les strings FR par `t("namespace.key")`
+- Ajouter les cles dans `en.ts` et `fr.ts`
+
+Nouvelles cles a ajouter :
+- `common.verifyingAuth`, `common.verifyingPermissions`, `common.verifyingAccess`
+- `components.subscription.active`, `components.subscription.trial`, `components.subscription.pastDue`, `components.subscription.cancelled`
+- `components.exportButton.*` (7 cles)
+- `components.voice.*` (6 cles)
+- `components.gscWidget.*` (4 cles)
+- `components.pagination.noResults`
+- `components.paginatedList.noItems`, `components.paginatedList.startAdding`
+- `components.emptyState.loadError`
+- `components.diagnostics.*` (5 cles restantes)
+
+### Groupe C - UX fix rejection dialog (1 fichier)
+
+Remplacer le `window.prompt()` dans `PriorityActionsEnhanced.tsx` par un state-driven Dialog avec :
+- Un `<Dialog>` Radix
+- Un `<Textarea>` pour la raison
+- Des boutons Confirmer/Annuler
+- L'ID de l'action stocke en state
+
+**Total : ~16 fichiers modifies + en.ts + fr.ts = 18 fichiers**
 
