@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import { toast } from "sonner";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Offers() {
+  const { t } = useTranslation();
   const { currentSite } = useSites();
   const { offers, loading, createOffer, updateOffer, deleteOffer, toggleActive } = useOffers();
   
@@ -68,9 +70,9 @@ export default function Offers() {
   const guarantees = offers.length > 0 && offers[0].guarantees.length > 0
     ? offers[0].guarantees.map(g => ({ title: g, description: "" }))
     : [
-        { title: "Satisfait ou remboursé", description: "30 jours pour tester sans risque" },
-        { title: "Sans engagement", description: "Résiliable à tout moment" },
-        { title: "Transparence totale", description: "Accès complet aux données et actions" },
+        { title: t("modules.offers.satisfiedOrRefunded"), description: t("modules.offers.satisfiedOrRefundedDesc") },
+        { title: t("modules.offers.noCommitment"), description: t("modules.offers.noCommitmentDesc") },
+        { title: t("modules.offers.totalTransparency"), description: t("modules.offers.totalTransparencyDesc") },
       ];
 
   const handleAddFeature = () => {
@@ -89,7 +91,7 @@ export default function Offers() {
 
   const handleGenerateObjections = async () => {
     if (!objectionInput.trim()) {
-      toast.error("Décrivez votre offre ou service pour générer les objections");
+      toast.error(t("modules.offers.describeOffer"));
       return;
     }
     setGeneratingObjections(true);
@@ -100,7 +102,7 @@ export default function Offers() {
       // Get current session token for authentication
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Veuillez vous connecter pour continuer");
+        toast.error(t("modules.offers.loginRequired"));
         setGeneratingObjections(false);
         return;
       }
@@ -120,17 +122,17 @@ export default function Offers() {
       if (!error && data) {
         const generated = data.output?.objections || [];
         if (generated.length > 0) {
-          toast.success(`${generated.length} objections générées`);
+          toast.success(t("modules.offers.objectionsGenerated", { count: generated.length }));
           // Would update in DB via updateOffer if we had a selected offer
         } else {
-          toast.info("Aucune nouvelle objection générée");
+          toast.info(t("modules.offers.noObjectionsGenerated"));
         }
       } else {
-        toast.error("Erreur lors de la génération");
+        toast.error(t("modules.offers.generationError"));
       }
     } catch (err) {
       console.error("AI generation error:", err);
-      toast.error("Erreur de connexion");
+      toast.error(t("modules.offers.connectionError"));
     } finally {
       setGeneratingObjections(false);
     }
@@ -138,7 +140,7 @@ export default function Offers() {
 
   const handleCreateOffer = async () => {
     if (!offerForm.name || offerForm.price <= 0) {
-      toast.error("Nom et prix requis");
+      toast.error(t("modules.offers.nameAndPriceRequired"));
       return;
     }
     setSubmitting(true);
@@ -161,7 +163,7 @@ export default function Offers() {
 
   const handleDeleteOffer = async (offerId: string) => {
     if (offerId.startsWith("demo-")) {
-      toast.info("Les offres de démo ne peuvent pas être supprimées");
+      toast.info(t("modules.offers.demoCannotDelete"));
       return;
     }
     await deleteOffer(offerId);
@@ -169,7 +171,7 @@ export default function Offers() {
 
   const handleToggleActive = async (offerId: string) => {
     if (offerId.startsWith("demo-")) {
-      toast.info("Les offres de démo ne peuvent pas être modifiées");
+      toast.info(t("modules.offers.demoCannotModify"));
       return;
     }
     await toggleActive(offerId);
@@ -177,7 +179,7 @@ export default function Offers() {
 
   const openEditDialog = (offer: typeof displayOffers[0]) => {
     if (offer.id.startsWith("demo-")) {
-      toast.info("Créez une vraie offre pour la modifier");
+      toast.info(t("modules.offers.createRealOffer"));
       return;
     }
     setEditingOffer(offer.id);
@@ -195,7 +197,7 @@ export default function Offers() {
   };
 
   if (loading) {
-    return <LoadingState message="Chargement des offres..." />;
+    return <LoadingState message={t("modules.offers.loadingOffers")} />;
   }
 
   // Empty state - no site selected
@@ -203,8 +205,8 @@ export default function Offers() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Offer Lab</h1>
-          <p className="text-muted-foreground">Packaging, pricing et pages de vente</p>
+          <h1 className="text-2xl font-bold">{t("modules.offers.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.offers.subtitle")}</p>
         </div>
         <NoSiteEmptyState moduleName="Offers" icon={Package} />
       </div>
@@ -216,16 +218,16 @@ export default function Offers() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Offer Lab</h1>
-          <p className="text-muted-foreground">Packaging, pricing et pages de vente</p>
+          <h1 className="text-2xl font-bold">{t("modules.offers.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.offers.subtitle")}</p>
         </div>
         <ModuleEmptyState
           icon={Package}
           moduleName="Offers"
-          description="Créez et gérez vos offres commerciales. Définissez vos propositions de valeur, anticipez les objections clients et configurez vos garanties pour maximiser les conversions."
-          features={["Packaging pricing", "Objections IA", "Garanties", "Proposition de valeur"]}
+          description={t("modules.offers.emptyDesc")}
+          features={t("modules.offers.emptyFeatures").split(",")}
           primaryAction={{
-            label: "Créer une offre",
+            label: t("modules.offers.createAnOffer"),
             onClick: () => {
               setEditingOffer(null);
               setOfferForm({
@@ -252,16 +254,16 @@ export default function Offers() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Offer Lab</h1>
+          <h1 className="text-2xl font-bold">{t("modules.offers.title")}</h1>
           <p className="text-muted-foreground">
-            Packaging, pricing et pages de vente
+            {t("modules.offers.subtitle")}
           </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.offers.selectSiteWarning")}</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">
             <Eye className="w-4 h-4 mr-2" />
-            Prévisualiser
+            {t("modules.offers.preview")}
           </Button>
           <Button variant="hero" onClick={() => {
             setEditingOffer(null);
@@ -278,17 +280,17 @@ export default function Offers() {
             setShowOfferDialog(true);
           }}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouvelle offre
+            {t("modules.offers.newOffer")}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="offers" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="offers">Offres</TabsTrigger>
-          <TabsTrigger value="usp">Proposition valeur</TabsTrigger>
-          <TabsTrigger value="objections">Objections</TabsTrigger>
-          <TabsTrigger value="guarantees">Garanties</TabsTrigger>
+          <TabsTrigger value="offers">{t("modules.offers.offers")}</TabsTrigger>
+          <TabsTrigger value="usp">{t("modules.offers.valueProposition")}</TabsTrigger>
+          <TabsTrigger value="objections">{t("modules.offers.objections")}</TabsTrigger>
+          <TabsTrigger value="guarantees">{t("modules.offers.guarantees")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="offers" className="space-y-6">
@@ -305,12 +307,12 @@ export default function Offers() {
                 >
                   {isPopular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge variant="gradient">Le plus populaire</Badge>
+                      <Badge variant="gradient">{t("modules.offers.mostPopular")}</Badge>
                     </div>
                   )}
                   {isDemo && (
                     <div className="absolute top-2 right-2">
-                      <Badge variant="outline" className="text-xs">Démo</Badge>
+                      <Badge variant="outline" className="text-xs">{t("modules.offers.demo")}</Badge>
                     </div>
                   )}
                   <CardHeader className="text-center">
@@ -330,9 +332,9 @@ export default function Offers() {
                       ))}
                     </ul>
                     <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <span>Statut</span>
+                      <span>{t("modules.offers.status")}</span>
                       <Badge variant={offer.is_active ? "success" : "secondary"}>
-                        {offer.is_active ? "Active" : "Inactive"}
+                        {offer.is_active ? t("modules.offers.active") : t("modules.offers.inactive")}
                       </Badge>
                     </div>
                     <div className="flex gap-2">
@@ -342,7 +344,7 @@ export default function Offers() {
                         onClick={() => openEditDialog(offer)}
                       >
                         <Edit className="w-4 h-4 mr-2" />
-                        Modifier
+                        {t("modules.offers.modify")}
                       </Button>
                       {!isDemo && (
                         <Button 
@@ -364,9 +366,9 @@ export default function Offers() {
         <TabsContent value="usp" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Proposition de valeur unique</CardTitle>
+              <CardTitle>{t("modules.offers.uniqueValueProp")}</CardTitle>
               <CardDescription>
-                Ce qui vous différencie de la concurrence
+                {t("modules.offers.whatDifferentiates")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -381,7 +383,7 @@ export default function Offers() {
               ))}
               <Button variant="outline" className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
-                Ajouter un point
+                {t("modules.offers.addPoint")}
               </Button>
             </CardContent>
           </Card>
@@ -390,9 +392,9 @@ export default function Offers() {
         <TabsContent value="objections" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Objections & Réponses</CardTitle>
+              <CardTitle>{t("modules.offers.objectionsResponses")}</CardTitle>
               <CardDescription>
-                Préparez les réponses aux freins clients
+                {t("modules.offers.prepareResponses")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -406,7 +408,7 @@ export default function Offers() {
               ))}
               <div className="pt-4 border-t border-border space-y-3">
                 <Input
-                  placeholder="Décrivez votre service (ex: agence SEO premium...)"
+                  placeholder={t("modules.offers.describeService")}
                   value={objectionInput}
                   onChange={(e) => setObjectionInput(e.target.value)}
                 />
@@ -421,7 +423,7 @@ export default function Offers() {
                   ) : (
                     <Sparkles className="w-4 h-4 mr-2" />
                   )}
-                  Générer des réponses IA
+                  {t("modules.offers.generateAIResponses")}
                 </Button>
               </div>
             </CardContent>
@@ -431,9 +433,9 @@ export default function Offers() {
         <TabsContent value="guarantees" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Garanties</CardTitle>
+              <CardTitle>{t("modules.offers.guarantees")}</CardTitle>
               <CardDescription>
-                Réduisez le risque perçu par vos prospects
+                {t("modules.offers.reducePerceivedRisk")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -460,20 +462,20 @@ export default function Offers() {
       <Dialog open={showOfferDialog} onOpenChange={setShowOfferDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{editingOffer ? "Modifier l'offre" : "Nouvelle offre"}</DialogTitle>
+            <DialogTitle>{editingOffer ? t("modules.offers.editOffer") : t("modules.offers.createOffer")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div>
-              <label className="text-sm font-medium">Nom de l'offre *</label>
+              <label className="text-sm font-medium">{t("modules.offers.offerName")}</label>
               <Input 
-                placeholder="Ex: Starter, Growth, Enterprise..."
+                placeholder={t("modules.offers.offerNamePlaceholder")}
                 value={offerForm.name}
                 onChange={(e) => setOfferForm({ ...offerForm, name: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Prix *</label>
+                <label className="text-sm font-medium">{t("modules.offers.price")}</label>
                 <Input 
                   type="number"
                   placeholder="490"
@@ -482,7 +484,7 @@ export default function Offers() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Période</label>
+                <label className="text-sm font-medium">{t("modules.offers.period")}</label>
                 <Input 
                   placeholder="/mois"
                   value={offerForm.price_period}
@@ -507,10 +509,10 @@ export default function Offers() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium">Fonctionnalités</label>
+              <label className="text-sm font-medium">{t("modules.offers.features")}</label>
               <div className="flex gap-2 mt-1">
                 <Input 
-                  placeholder="Ajouter une fonctionnalité..."
+                  placeholder={t("modules.offers.addFeature")}
                   value={featureInput}
                   onChange={(e) => setFeatureInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
@@ -529,10 +531,10 @@ export default function Offers() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowOfferDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowOfferDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreateOffer} disabled={submitting}>
               {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {editingOffer ? "Mettre à jour" : "Créer"}
+              {editingOffer ? t("modules.offers.update") : t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

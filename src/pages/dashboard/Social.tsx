@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,6 @@ import {
   MessageCircle,
   Share2,
   Eye,
-  RefreshCw,
   Download,
   Sparkles,
   Loader2,
@@ -38,7 +37,7 @@ import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { RepurposeEngine } from "@/components/social/RepurposeEngine";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
-import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { MetaMetricsWidget } from "@/components/integrations";
 
 const platformIcons: Record<string, React.ElementType> = {
@@ -48,13 +47,8 @@ const platformIcons: Record<string, React.ElementType> = {
   twitter: Twitter,
 };
 
-const repurposeIdeas = [
-  { source: "Guide SEO 2026 (blog)", outputs: ["5 carrousels IG", "3 reels", "10 tweets", "1 LinkedIn long"] },
-  { source: "Webinar CRO (vidéo)", outputs: ["8 shorts", "2 carrousels", "15 citations"] },
-];
-
 export default function Social() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const { currentSite } = useSites();
   const { currentWorkspace } = useWorkspace();
@@ -80,20 +74,20 @@ export default function Social() {
 
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
-      toast.error("Décrivez le type de contenu souhaité");
+      toast.error(t("modules.social.describeContentType"));
       return;
     }
     
     // Get current workspace from site
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast.error("Veuillez vous connecter");
+      toast.error(t("modules.social.pleaseLogin"));
       return;
     }
 
      // Use currentWorkspace directly
      if (!currentWorkspace?.id) {
-      toast.error("Workspace non trouvé");
+      toast.error(t("modules.social.workspaceNotFound"));
       return;
     }
 
@@ -121,13 +115,13 @@ export default function Social() {
         setPostForm(prev => ({ ...prev, content: generatedContent }));
         setShowAIDialog(false);
         setShowPostDialog(true);
-        toast.success("Contenu généré avec succès");
+        toast.success(t("modules.social.contentGenerated"));
       } else {
-        toast.error(data?.error || "Erreur lors de la génération");
+        toast.error(data?.error || t("modules.social.generationError"));
       }
     } catch (err) {
       console.error("AI generation error:", err);
-      toast.error("Erreur de connexion");
+      toast.error(t("modules.social.connectionError"));
     } finally {
       setGeneratingAI(false);
     }
@@ -135,7 +129,7 @@ export default function Social() {
 
   const handleCreatePost = async () => {
     if (!postForm.content) {
-      toast.error("Contenu requis");
+      toast.error(t("modules.social.contentRequired"));
       return;
     }
     setSubmitting(true);
@@ -147,9 +141,9 @@ export default function Social() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de la création");
+      toast.error(t("modules.social.creationError"));
     } else {
-      toast.success("Post créé");
+      toast.success(t("modules.social.postCreated"));
       setShowPostDialog(false);
       setPostForm({ content: "", platforms: [], type: "Post", scheduled_for: "" });
     }
@@ -158,9 +152,9 @@ export default function Social() {
   const handlePublish = async (postId: string) => {
     const { error } = await publishPost(postId);
     if (error) {
-      toast.error("Erreur lors de la publication");
+      toast.error(t("modules.social.publishError"));
     } else {
-      toast.success("Post publié");
+      toast.success(t("modules.social.postPublished"));
     }
   };
 
@@ -192,7 +186,7 @@ export default function Social() {
     a.download = "social-calendar.ics";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Calendrier exporté");
+    toast.success(t("modules.social.calendarExported"));
   };
 
   const handleExportCSV = () => {
@@ -213,7 +207,7 @@ export default function Social() {
     a.download = "social-posts.csv";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("CSV exporté");
+    toast.success(t("modules.social.csvExported"));
   };
 
   const togglePlatform = (platform: string) => {
@@ -230,16 +224,16 @@ export default function Social() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Social Distribution</h1>
-          <p className="text-muted-foreground">Calendrier social et distribution de contenu</p>
+          <h1 className="text-2xl font-bold">{t("modules.social.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.social.subtitle")}</p>
         </div>
         <ModuleEmptyState
           icon={Instagram}
           moduleName="Social"
-          description="Planifiez vos publications, générez du contenu IA et distribuez automatiquement sur toutes vos plateformes sociales. Repurposez votre contenu blog en posts optimisés."
-          features={["Multi-plateforme", "Génération IA", "Repurpose Engine", "Calendrier iCal"]}
+          description={t("modules.social.emptyDesc")}
+          features={t("modules.social.emptyFeatures").split(",")}
           primaryAction={{
-            label: "Gérer mes sites",
+            label: t("modules.social.manageSites"),
             href: "/dashboard/sites",
           }}
         />
@@ -253,20 +247,20 @@ export default function Social() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Social Distribution</h1>
-          <p className="text-muted-foreground">Calendrier social et distribution de contenu</p>
+          <h1 className="text-2xl font-bold">{t("modules.social.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.social.subtitle")}</p>
         </div>
         <ModuleEmptyState
           icon={Instagram}
           moduleName="Social"
-          description="Connectez vos réseaux sociaux pour planifier et distribuer automatiquement votre contenu. Générez des posts optimisés pour chaque plateforme avec l'IA."
+          description={t("modules.social.emptyConnectDesc")}
           features={["Instagram", "LinkedIn", "Facebook", "Twitter"]}
           primaryAction={{
-            label: "Connecter mes réseaux",
+            label: t("modules.social.connectNetworks"),
             href: "/dashboard/integrations",
           }}
           secondaryAction={{
-            label: "Créer un post manuellement",
+            label: t("modules.social.createManualPost"),
             onClick: () => setShowPostDialog(true),
           }}
         />
@@ -279,20 +273,20 @@ export default function Social() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Social Distribution</h1>
+          <h1 className="text-2xl font-bold">{t("modules.social.title")}</h1>
           <p className="text-muted-foreground">
-            Calendrier social et distribution de contenu
+            {t("modules.social.subtitle")}
           </p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.social.selectSiteWarning")}</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleExportCalendar}>
             <Download className="w-4 h-4 mr-2" />
-            Exporter iCal
+            {t("modules.social.exportICal")}
           </Button>
           <Button variant="hero" onClick={() => setShowPostDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau post
+            {t("modules.social.newPost")}
           </Button>
         </div>
       </div>
@@ -315,7 +309,7 @@ export default function Social() {
                         {account.handle || account.followers?.toLocaleString() + " followers"}
                       </p>
                     ) : (
-                      <Button variant="link" className="p-0 h-auto text-sm">Autoriser l'accès</Button>
+                      <Button variant="link" className="p-0 h-auto text-sm">{t("modules.social.authorizeAccess")}</Button>
                     )}
                   </div>
                 </div>
@@ -327,10 +321,10 @@ export default function Social() {
 
       <Tabs defaultValue="calendar" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="calendar">Calendrier</TabsTrigger>
-          <TabsTrigger value="repurpose">Repurpose</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="export">Export</TabsTrigger>
+          <TabsTrigger value="calendar">{t("modules.social.calendar")}</TabsTrigger>
+          <TabsTrigger value="repurpose">{t("modules.social.repurpose")}</TabsTrigger>
+          <TabsTrigger value="performance">{t("modules.social.performance")}</TabsTrigger>
+          <TabsTrigger value="export">{t("modules.social.exportTab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar" className="space-y-6">
@@ -340,15 +334,15 @@ export default function Social() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
-                    Posts planifiés
+                    {t("modules.social.plannedPosts")}
                   </CardTitle>
                   <CardDescription>
-                    {posts.filter(p => p.status === 'scheduled').length} posts planifiés
+                    {t("modules.social.postsPlanned", { count: posts.filter(p => p.status === 'scheduled').length })}
                   </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setShowAIDialog(true)}>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Générer avec IA
+                  {t("modules.social.generateWithAI")}
                 </Button>
               </div>
             </CardHeader>
@@ -356,8 +350,8 @@ export default function Social() {
               {posts.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Aucun post planifié</p>
-                  <p className="text-sm mt-1">Créez votre premier post</p>
+                  <p className="font-medium">{t("modules.social.noPlannedPosts")}</p>
+                  <p className="text-sm mt-1">{t("modules.social.createFirstPost")}</p>
                 </div>
               ) : (
                 posts.map((post) => (
@@ -387,11 +381,11 @@ export default function Social() {
                         </p>
                       )}
                       <Badge variant={post.status === "scheduled" ? "gradient" : post.status === "published" ? "success" : "outline"} className="mt-1">
-                        {post.status === "scheduled" ? "Planifié" : post.status === "published" ? "Publié" : "Brouillon"}
+                        {post.status === "scheduled" ? t("modules.social.scheduled") : post.status === "published" ? t("modules.social.published") : t("modules.social.draft")}
                       </Badge>
                       {post.status === "draft" && (
                         <Button variant="ghost" size="sm" className="mt-2" onClick={() => handlePublish(post.id)}>
-                          Publier
+                          {t("modules.social.publish")}
                         </Button>
                       )}
                     </div>
@@ -409,7 +403,7 @@ export default function Social() {
             <Card variant="feature">
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground py-8">
-                  Sélectionnez un workspace pour utiliser le Repurpose Engine
+                  {t("modules.social.selectWorkspace")}
                 </p>
               </CardContent>
             </Card>
@@ -422,16 +416,16 @@ export default function Social() {
           
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Performance récente</CardTitle>
-              <CardDescription>Engagement sur vos derniers posts</CardDescription>
+              <CardTitle>{t("modules.social.recentPerformance")}</CardTitle>
+              <CardDescription>{t("modules.social.engagementOnPosts")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {posts.filter(p => p.status === 'published').length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">Aucun post publié</p>
-                    <p className="text-sm mt-1">Les statistiques apparaîtront après publication</p>
+                    <p className="font-medium">{t("modules.social.noPublishedPosts")}</p>
+                    <p className="text-sm mt-1">{t("modules.social.statsAfterPublish")}</p>
                   </div>
                 ) : (
                   posts.filter(p => p.status === 'published').map((post) => (
@@ -468,23 +462,23 @@ export default function Social() {
         <TabsContent value="export" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Export & Checklists</CardTitle>
+              <CardTitle>{t("modules.social.exportChecklists")}</CardTitle>
               <CardDescription>
-                Si les permissions API ne sont pas disponibles, exportez votre calendrier
+                {t("modules.social.exportChecklistsDesc")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button variant="outline" className="w-full justify-start" onClick={handleExportCSV}>
                 <Download className="w-4 h-4 mr-2" />
-                Exporter en CSV
+                {t("modules.social.exportCSV")}
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={handleExportCalendar}>
                 <Calendar className="w-4 h-4 mr-2" />
-                Exporter en iCal
+                {t("modules.social.exportICalBtn")}
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Download className="w-4 h-4 mr-2" />
-                Télécharger les assets
+                {t("modules.social.downloadAssets")}
               </Button>
             </CardContent>
           </Card>
@@ -495,13 +489,13 @@ export default function Social() {
       <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Nouveau post</DialogTitle>
+            <DialogTitle>{t("modules.social.newPost")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Contenu</label>
+              <label className="text-sm font-medium">{t("modules.social.content")}</label>
               <Textarea
-                placeholder="Votre contenu..."
+                placeholder={t("modules.social.yourContent")}
                 value={postForm.content}
                 onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
                 className="mt-1"
@@ -509,7 +503,7 @@ export default function Social() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Plateformes</label>
+              <label className="text-sm font-medium">{t("modules.social.platforms")}</label>
               <div className="flex gap-2 mt-2">
                 {["Instagram", "Facebook", "LinkedIn", "Twitter"].map((platform) => (
                   <Button
@@ -526,7 +520,7 @@ export default function Social() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Type</label>
+                <label className="text-sm font-medium">{t("modules.social.postType")}</label>
                 <Input
                   placeholder="Post, Carrousel, Reel..."
                   value={postForm.type}
@@ -535,7 +529,7 @@ export default function Social() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Date planifiée</label>
+                <label className="text-sm font-medium">{t("modules.social.scheduledDate")}</label>
                 <Input
                   type="datetime-local"
                   value={postForm.scheduled_for}
@@ -547,11 +541,11 @@ export default function Social() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => setShowPostDialog(false)}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button type="button" onClick={handleCreatePost} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Créer
+              {t("common.create")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -563,14 +557,14 @@ export default function Social() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              Générer avec IA
+              {t("modules.social.generateWithAI")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Décrivez votre post</label>
+              <label className="text-sm font-medium">{t("modules.social.describeYourPost")}</label>
               <Textarea
-                placeholder="Ex: Un post inspirant sur les tendances SEO 2026, ton professionnel mais accessible..."
+                placeholder={t("modules.social.describeYourPostPlaceholder")}
                 value={aiPrompt}
                 onChange={(e) => setAIPrompt(e.target.value)}
                 className="mt-1"
@@ -578,7 +572,7 @@ export default function Social() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Plateformes cibles</label>
+              <label className="text-sm font-medium">{t("modules.social.targetPlatforms")}</label>
               <div className="flex gap-2 mt-2">
                 {["Instagram", "Facebook", "LinkedIn", "Twitter"].map((platform) => (
                   <Button
@@ -595,10 +589,10 @@ export default function Social() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setShowAIDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowAIDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleGenerateAI} disabled={generatingAI}>
               {generatingAI && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Générer
+              {t("modules.social.generate")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { DiagnosticsPanel, LatencyHistoryChart, ConsoleLogsViewer } from "@/components/diagnostics";
 import { GA4MetricsWidget } from "@/components/integrations";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -39,6 +40,7 @@ interface LatencyMetric {
 }
 
 export default function Diagnostics() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const { isOnline } = useNetworkStatus();
@@ -165,7 +167,7 @@ export default function Diagnostics() {
 
     setLatencyMetrics(metrics);
     setIsRunningHealthCheck(false);
-    toast.success("Health check terminé");
+    toast.success(t("modules.diagnostics.healthCheckDone"));
   };
 
   // Auto-run health check on mount
@@ -196,7 +198,7 @@ export default function Diagnostics() {
     a.click();
     URL.revokeObjectURL(url);
     
-    toast.success("Rapport de diagnostics exporté");
+    toast.success(t("modules.diagnostics.diagnosticsExported"));
   };
 
   const formatTimeAgo = (dateStr: string) => {
@@ -205,11 +207,11 @@ export default function Diagnostics() {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     
-    if (diffMins < 1) return "À l'instant";
-    if (diffMins < 60) return `Il y a ${diffMins}min`;
+    if (diffMins < 1) return t("modules.diagnostics.justNow");
+    if (diffMins < 60) return t("modules.diagnostics.minutesAgo", { n: diffMins });
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    return `Il y a ${Math.floor(diffHours / 24)}j`;
+    if (diffHours < 24) return t("modules.diagnostics.hoursAgo", { n: diffHours });
+    return t("modules.diagnostics.daysAgo", { n: Math.floor(diffHours / 24) });
   };
 
   const getStatusIcon = (status: 'healthy' | 'degraded' | 'down') => {
@@ -245,20 +247,20 @@ export default function Diagnostics() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bug className="w-6 h-6 text-primary" />
-            Diagnostics
+            {t("modules.diagnostics.title")}
           </h1>
           <p className="text-muted-foreground">
-            Outils de debug et monitoring système
+            {t("modules.diagnostics.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={runHealthCheck} disabled={isRunningHealthCheck}>
             <RefreshCw className={`w-4 h-4 mr-2 ${isRunningHealthCheck ? 'animate-spin' : ''}`} />
-            Health Check
+            {t("modules.diagnostics.healthCheck")}
           </Button>
           <Button variant="outline" onClick={exportDiagnostics}>
             <Download className="w-4 h-4 mr-2" />
-            Exporter rapport
+            {t("modules.diagnostics.exportReport")}
           </Button>
         </div>
       </div>
@@ -269,8 +271,8 @@ export default function Diagnostics() {
           <CardContent className="flex items-center gap-3 py-4">
             <WifiOff className="w-5 h-5 text-destructive" />
             <div>
-              <p className="font-medium text-destructive">Connexion réseau perdue</p>
-              <p className="text-sm text-muted-foreground">Certaines fonctionnalités peuvent être indisponibles</p>
+              <p className="font-medium text-destructive">{t("modules.diagnostics.networkLost")}</p>
+              <p className="text-sm text-muted-foreground">{t("modules.diagnostics.networkLostDesc")}</p>
             </div>
           </CardContent>
         </Card>
@@ -283,17 +285,17 @@ export default function Diagnostics() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
-                Santé système
+                {t("modules.diagnostics.systemHealth")}
               </CardTitle>
-              <CardDescription>Latence et disponibilité des services</CardDescription>
+              <CardDescription>{t("modules.diagnostics.systemHealthDesc")}</CardDescription>
             </div>
             <Badge 
               variant={overallHealth === 'healthy' ? 'success' : overallHealth === 'degraded' ? 'secondary' : 'destructive'}
               className="text-xs"
             >
-              {overallHealth === 'healthy' ? 'Tous les systèmes opérationnels' : 
-               overallHealth === 'degraded' ? 'Performances dégradées' : 
-               overallHealth === 'down' ? 'Services indisponibles' : 'Vérification en cours...'}
+              {overallHealth === 'healthy' ? t("modules.diagnostics.allOperational") : 
+               overallHealth === 'degraded' ? t("modules.diagnostics.degraded") : 
+               overallHealth === 'down' ? t("modules.diagnostics.servicesDown") : t("modules.diagnostics.checking")}
             </Badge>
           </div>
         </CardHeader>
@@ -326,7 +328,7 @@ export default function Diagnostics() {
             {latencyMetrics.length === 0 && (
               <div className="col-span-full text-center py-8 text-muted-foreground">
                 <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Cliquez sur "Health Check" pour tester les services</p>
+                <p className="text-sm">{t("modules.diagnostics.clickHealthCheck")}</p>
               </div>
             )}
           </div>
@@ -345,9 +347,9 @@ export default function Diagnostics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-destructive" />
-              Erreurs récentes
+              {t("modules.diagnostics.recentErrors")}
             </CardTitle>
-            <CardDescription>Dernières erreurs enregistrées</CardDescription>
+            <CardDescription>{t("modules.diagnostics.recentErrorsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentErrors && recentErrors.length > 0 ? (
@@ -367,7 +369,7 @@ export default function Diagnostics() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <CheckCircle2 className="w-10 h-10 mx-auto mb-3 status-success opacity-50" />
-                <p className="text-sm">Aucune erreur récente</p>
+                <p className="text-sm">{t("modules.diagnostics.noRecentErrors")}</p>
               </div>
             )}
           </CardContent>
@@ -378,9 +380,9 @@ export default function Diagnostics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Terminal className="w-5 h-5 text-primary" />
-              Agents en échec
+              {t("modules.diagnostics.failedAgents")}
             </CardTitle>
-            <CardDescription>Exécutions d'agents ayant échoué</CardDescription>
+            <CardDescription>{t("modules.diagnostics.failedAgentsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {failedRuns && failedRuns.length > 0 ? (
@@ -392,12 +394,12 @@ export default function Diagnostics() {
                         {run.agent_type.replace(/_/g, ' ')}
                       </p>
                       <p className="text-xs text-destructive mt-1">
-                        {run.error_message || "Erreur inconnue"}
+                        {run.error_message || t("modules.diagnostics.unknownError")}
                       </p>
                     </div>
                     <div className="text-right">
                       <Badge variant="destructive" className="text-xs">
-                        Échec
+                        {t("modules.diagnostics.failure")}
                       </Badge>
                       <p className="text-xs text-muted-foreground mt-1">
                         {run.duration_ms ? `${run.duration_ms}ms` : "—"}
@@ -412,7 +414,7 @@ export default function Diagnostics() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <CheckCircle2 className="w-10 h-10 mx-auto mb-3 status-success opacity-50" />
-                <p className="text-sm">Aucun agent en échec récemment</p>
+                <p className="text-sm">{t("modules.diagnostics.noFailedAgents")}</p>
               </div>
             )}
           </CardContent>
@@ -430,17 +432,17 @@ export default function Diagnostics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
-            Informations système
+            {t("modules.diagnostics.systemInfo")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="p-3 rounded-lg bg-secondary/30">
-              <p className="text-xs text-muted-foreground mb-1">Version App</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("modules.diagnostics.appVersion")}</p>
               <p className="text-sm font-medium">1.0.0</p>
             </div>
             <div className="p-3 rounded-lg bg-secondary/30">
-              <p className="text-xs text-muted-foreground mb-1">Build</p>
+              <p className="text-xs text-muted-foreground mb-1">{t("modules.diagnostics.build")}</p>
               <p className="text-sm font-medium">{import.meta.env.DEV ? "Development" : "Production"}</p>
             </div>
             <div className="p-3 rounded-lg bg-secondary/30">
@@ -455,8 +457,8 @@ export default function Diagnostics() {
               <div className="flex items-center gap-2">
                 {isOnline ? <Wifi className="w-4 h-4 status-success" /> : <WifiOff className="w-4 h-4 text-destructive" />}
                 <div>
-                  <p className="text-xs text-muted-foreground">Réseau</p>
-                  <p className="text-sm font-medium">{isOnline ? 'En ligne' : 'Hors ligne'}</p>
+                  <p className="text-xs text-muted-foreground">{t("modules.diagnostics.network")}</p>
+                  <p className="text-sm font-medium">{isOnline ? t("modules.diagnostics.online") : t("modules.diagnostics.offline")}</p>
                 </div>
               </div>
             </div>
