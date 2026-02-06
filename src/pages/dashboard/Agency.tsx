@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { getIntlLocale } from "@/lib/date-locale";
 
 export default function Agency() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { clients, metrics, tasks, team, loading, isAgency, addClient, removeClient, inviteTeamMember } = useAgency();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -44,70 +44,69 @@ export default function Agency() {
 
   const handleAddClient = async () => {
     if (!clientForm.name || !clientForm.slug) {
-      toast.error("Nom et slug requis");
+      toast.error(t("modules.agency.nameSlugRequired"));
       return;
     }
     setSubmitting(true);
     const { error } = await addClient(clientForm.name, clientForm.slug);
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de l'ajout du client");
+      toast.error(t("modules.agency.addClientError"));
     } else {
-      toast.success("Client ajouté");
+      toast.success(t("modules.agency.clientAdded"));
       setShowAddDialog(false);
       setClientForm({ name: "", slug: "" });
     }
   };
 
   const handleRemoveClient = async (clientId: string, clientName: string) => {
-    if (!confirm(`Supprimer le client "${clientName}" ?`)) return;
+    if (!confirm(t("modules.agency.confirmDelete", { name: clientName }))) return;
     const { error } = await removeClient(clientId);
     if (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("modules.agency.deleteError"));
     } else {
-      toast.success("Client supprimé");
+      toast.success(t("modules.agency.clientDeleted"));
     }
   };
 
   const handleInvite = async () => {
     if (!inviteForm.email) {
-      toast.error("Email requis");
+      toast.error(t("modules.agency.emailRequired"));
       return;
     }
     setSubmitting(true);
     const { error } = await inviteTeamMember(inviteForm.email, inviteForm.role);
     setSubmitting(false);
     if (error) {
-      toast.error("Erreur lors de l'invitation");
+      toast.error(t("modules.agency.inviteError"));
     } else {
-      toast.success("Invitation envoyée");
+      toast.success(t("modules.agency.inviteSent"));
       setShowInviteDialog(false);
       setInviteForm({ email: "", role: "consultant" });
     }
   };
 
   if (loading) {
-    return <LoadingState message="Chargement du mode agence..." />;
+    return <LoadingState message={t("modules.agency.loading")} />;
   }
 
   if (!isAgency) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Mode Agence</h1>
-          <p className="text-muted-foreground">Gérez plusieurs clients et workspaces</p>
+          <h1 className="text-2xl font-bold">{t("modules.agency.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.agency.subtitle")}</p>
         </div>
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Building2 className="w-12 h-12 text-primary mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Mode Agence non activé</h3>
+            <h3 className="font-semibold text-lg mb-2">{t("modules.agency.notActivated")}</h3>
             <p className="text-muted-foreground text-center max-w-md mb-4">
-              Votre workspace actuel n'est pas configuré en mode agence. 
-              Passez au plan Agency pour gérer plusieurs clients.
+              {t("modules.agency.notActivatedDesc")}
             </p>
             <Button variant="gradient">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Passer au plan Agency
+              {t("modules.agency.upgradePlan")}
             </Button>
           </CardContent>
         </Card>
@@ -116,10 +115,10 @@ export default function Agency() {
   }
 
   const agencyMetrics = [
-    { label: "Clients actifs", value: metrics.total_clients.toString(), change: `+${metrics.change_clients} ce mois` },
-    { label: "Sites gérés", value: metrics.total_sites.toString(), change: `+${metrics.change_sites} ce mois` },
-    { label: "Score santé moyen", value: `${metrics.avg_health_score}%`, change: `+${metrics.change_health}%` },
-    { label: "MRR total", value: `€${metrics.total_mrr.toLocaleString()}`, change: `+${metrics.change_mrr}%` },
+    { label: t("modules.agency.activeClients"), value: metrics.total_clients.toString(), change: t("modules.agency.changeThisMonth", { count: metrics.change_clients }) },
+    { label: t("modules.agency.managedSites"), value: metrics.total_sites.toString(), change: t("modules.agency.changeThisMonth", { count: metrics.change_sites }) },
+    { label: t("modules.agency.avgHealthScore"), value: `${metrics.avg_health_score}%`, change: `+${metrics.change_health}%` },
+    { label: t("modules.agency.totalMRR"), value: `€${metrics.total_mrr.toLocaleString()}`, change: `+${metrics.change_mrr}%` },
   ];
 
   return (
@@ -127,19 +126,19 @@ export default function Agency() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Mode Agence</h1>
+          <h1 className="text-2xl font-bold">{t("modules.agency.title")}</h1>
           <p className="text-muted-foreground">
-            Gérez plusieurs clients et workspaces
+            {t("modules.agency.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">
             <BarChart3 className="w-4 h-4 mr-2" />
-            Rapport global
+            {t("modules.agency.globalReport")}
           </Button>
           <Button variant="hero" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau client
+            {t("modules.agency.newClient")}
           </Button>
         </div>
       </div>
@@ -163,7 +162,7 @@ export default function Agency() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-chart-4" />
-              Actions en attente
+              {t("modules.agency.pendingActions")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -188,15 +187,15 @@ export default function Agency() {
         <TabsList>
           <TabsTrigger value="clients">
             <Building2 className="w-4 h-4 mr-2" />
-            Clients
+            {t("modules.agency.clients")}
           </TabsTrigger>
           <TabsTrigger value="quotas">
             <BarChart3 className="w-4 h-4 mr-2" />
-            Quotas
+            {t("modules.agency.quotas")}
           </TabsTrigger>
           <TabsTrigger value="team">
             <Users className="w-4 h-4 mr-2" />
-            Équipe
+            {t("modules.agency.team")}
           </TabsTrigger>
         </TabsList>
 
@@ -205,13 +204,13 @@ export default function Agency() {
             <Card variant="feature">
               <CardContent className="py-12 text-center">
                 <Building2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="font-medium mb-2">Aucun client</h3>
+                <h3 className="font-medium mb-2">{t("modules.agency.noClient")}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ajoutez votre premier client pour commencer à gérer plusieurs workspaces.
+                  {t("modules.agency.noClientDesc")}
                 </p>
                 <Button variant="outline" onClick={() => setShowAddDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Ajouter un client
+                  {t("modules.agency.addClient")}
                 </Button>
               </CardContent>
             </Card>
@@ -235,7 +234,7 @@ export default function Agency() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {client.sites_count} site(s) • Dernière activité: {client.last_activity ? new Date(client.last_activity).toLocaleDateString(getIntlLocale(i18n.language)) : "Récent"}
+                        {client.sites_count} site(s) • {t("modules.agency.lastActivity")}: {client.last_activity ? new Date(client.last_activity).toLocaleDateString(getIntlLocale(i18n.language)) : t("modules.agency.recent")}
                       </p>
                     </div>
                     <div className="text-center px-4">
@@ -249,7 +248,7 @@ export default function Agency() {
                           <AlertTriangle className="w-4 h-4 text-chart-4" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">Score santé</p>
+                      <p className="text-xs text-muted-foreground">{t("modules.agency.healthScore")}</p>
                     </div>
                     <div className="w-32">
                       <div className="flex items-center justify-between text-xs mb-1">
@@ -267,7 +266,7 @@ export default function Agency() {
                       </Button>
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4 mr-1" />
-                        Voir
+                        {t("common.view")}
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -288,13 +287,13 @@ export default function Agency() {
         <TabsContent value="quotas" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Consommation globale</CardTitle>
-              <CardDescription>Usage des ressources par tous les clients</CardDescription>
+              <CardTitle>{t("modules.agency.globalConsumption")}</CardTitle>
+              <CardDescription>{t("modules.agency.resourceUsage")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground">Tokens IA ce mois</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.agency.aiTokensMonth")}</p>
                   <p className="text-2xl font-bold">
                     {(clients.reduce((sum, c) => sum + c.tokens_used, 0) / 1000000).toFixed(2)}M
                   </p>
@@ -304,15 +303,15 @@ export default function Agency() {
                   />
                 </div>
                 <div className="p-4 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground">Sites actifs</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.agency.activeSites")}</p>
                   <p className="text-2xl font-bold">{metrics.total_sites}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground">Issues en attente</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.agency.pendingIssues")}</p>
                   <p className="text-2xl font-bold">{clients.reduce((sum, c) => sum + c.issues_count, 0)}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-secondary/50">
-                  <p className="text-sm text-muted-foreground">Clients</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.agency.clients")}</p>
                   <p className="text-2xl font-bold">{metrics.total_clients}</p>
                 </div>
               </div>
@@ -325,12 +324,12 @@ export default function Agency() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Équipe agence</CardTitle>
-                  <CardDescription>Gérez les accès de votre équipe</CardDescription>
+                  <CardTitle>{t("modules.agency.agencyTeam")}</CardTitle>
+                  <CardDescription>{t("modules.agency.manageAccess")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setShowInviteDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Inviter
+                  {t("modules.agency.invite")}
                 </Button>
               </div>
             </CardHeader>
@@ -346,7 +345,7 @@ export default function Agency() {
                       <p className="text-sm text-muted-foreground">{member.email}</p>
                     </div>
                     <Badge variant="secondary">{member.role}</Badge>
-                    <span className="text-sm text-muted-foreground">{member.clients_count} clients</span>
+                    <span className="text-sm text-muted-foreground">{member.clients_count} {t("modules.agency.clients").toLowerCase()}</span>
                     <Button variant="ghost" size="sm">
                       <Settings className="w-4 h-4" />
                     </Button>
@@ -362,11 +361,11 @@ export default function Agency() {
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ajouter un client</DialogTitle>
+            <DialogTitle>{t("modules.agency.addClient")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium">Nom du client</label>
+              <label className="text-sm font-medium">{t("modules.agency.clientName")}</label>
               <Input 
                 placeholder="Ex: Tech Solutions"
                 value={clientForm.name}
@@ -374,7 +373,7 @@ export default function Agency() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Slug (identifiant unique)</label>
+              <label className="text-sm font-medium">{t("modules.agency.slugLabel")}</label>
               <Input 
                 placeholder="Ex: tech-solutions"
                 value={clientForm.slug}
@@ -383,10 +382,10 @@ export default function Agency() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowAddDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleAddClient} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-              Ajouter
+              {t("modules.agency.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -396,7 +395,7 @@ export default function Agency() {
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Inviter un membre</DialogTitle>
+            <DialogTitle>{t("modules.agency.inviteMember")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
@@ -409,7 +408,7 @@ export default function Agency() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Rôle</label>
+              <label className="text-sm font-medium">{t("modules.agency.role")}</label>
               <select 
                 className="w-full mt-1 p-2 rounded-md border border-input bg-background"
                 value={inviteForm.role}
@@ -422,10 +421,10 @@ export default function Agency() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleInvite} disabled={submitting}>
               {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
-              Envoyer l'invitation
+              {t("modules.agency.sendInvitation")}
             </Button>
           </DialogFooter>
         </DialogContent>

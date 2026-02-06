@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +34,7 @@ interface BulkSiteImportProps {
 }
 
 export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
+  const { t } = useTranslation();
   const [showDialog, setShowDialog] = useState(false);
   const [input, setInput] = useState("");
   const [parsedSites, setParsedSites] = useState<ParsedSite[]>([]);
@@ -47,7 +49,6 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
       const trimmed = line.trim();
       if (!trimmed) continue;
 
-      // Try to extract URL and optional name (comma or tab separated)
       let url = trimmed;
       let name = "";
 
@@ -61,16 +62,13 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
         name = parts[1]?.trim() || "";
       }
 
-      // Validate URL
       try {
-        // Add protocol if missing
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
           url = 'https://' + url;
         }
 
         const urlObj = new URL(url);
         
-        // Generate name from domain if not provided
         if (!name) {
           name = urlObj.hostname.replace('www.', '').split('.')[0];
           name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -78,7 +76,7 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
 
         sites.push({ url, name, valid: true });
       } catch {
-        sites.push({ url: trimmed, name: "", valid: false, error: "URL invalide" });
+        sites.push({ url: trimmed, name: "", valid: false, error: t("components.bulkImport.invalidUrl") });
       }
     }
 
@@ -88,7 +86,7 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
   const handleImport = async () => {
     const validSites = parsedSites.filter(s => s.valid);
     if (validSites.length === 0) {
-      toast.error("Aucun site valide à importer");
+      toast.error(t("components.bulkImport.noValidSites"));
       return;
     }
 
@@ -99,18 +97,18 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
       const totalSites = validSites.length;
       for (let i = 0; i < totalSites; i++) {
         setProgress(((i + 1) / totalSites) * 100);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for UX
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       await onImport(validSites.map(s => ({ url: s.url, name: s.name })));
       
-      toast.success(`${validSites.length} sites importés`);
+      toast.success(t("components.bulkImport.sitesImported", { count: validSites.length }));
       setShowDialog(false);
       setInput("");
       setParsedSites([]);
     } catch (err) {
       console.error("Import error:", err);
-      toast.error("Erreur lors de l'import");
+      toast.error(t("components.bulkImport.importError"));
     } finally {
       setImporting(false);
       setProgress(0);
@@ -124,7 +122,7 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
     <>
       <Button variant="outline" onClick={() => setShowDialog(true)}>
         <Upload className="w-4 h-4 mr-2" />
-        Import en masse
+        {t("components.bulkImport.bulkImport")}
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -132,14 +130,14 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5" />
-              Import de sites en masse
+              {t("components.bulkImport.title")}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground mb-2">
-                Collez une liste d'URLs (une par ligne). Format optionnel : URL, Nom du site
+                {t("components.bulkImport.instructions")}
               </p>
               <Textarea
                 placeholder="https://example.com, Mon Site&#10;https://autre-site.com&#10;www.troisiemesite.fr"
@@ -158,12 +156,12 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
                 <div className="flex items-center gap-4">
                   <Badge variant="success" className="flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
-                    {validCount} valides
+                    {validCount} {t("components.bulkImport.valid")}
                   </Badge>
                   {invalidCount > 0 && (
                     <Badge variant="destructive" className="flex items-center gap-1">
                       <XCircle className="w-3 h-3" />
-                      {invalidCount} invalides
+                      {invalidCount} {t("components.bulkImport.invalid")}
                     </Badge>
                   )}
                 </div>
@@ -201,7 +199,7 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
               <div className="space-y-2">
                 <Progress value={progress} className="w-full" />
                 <p className="text-sm text-center text-muted-foreground">
-                  Import en cours...
+                  {t("components.bulkImport.importing")}
                 </p>
               </div>
             )}
@@ -209,7 +207,7 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)} disabled={importing}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button
               variant="hero"
@@ -219,12 +217,12 @@ export function BulkSiteImport({ onImport }: BulkSiteImportProps) {
               {importing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Import...
+                  {t("common.import")}...
                 </>
               ) : (
                 <>
                   <Upload className="w-4 h-4 mr-2" />
-                  Importer {validCount} sites
+                  {t("components.bulkImport.importCount", { count: validCount })}
                 </>
               )}
             </Button>
