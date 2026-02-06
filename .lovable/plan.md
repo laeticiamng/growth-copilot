@@ -1,77 +1,129 @@
 
-# Batch 3 Suite - i18n Migration for 8 Remaining Dashboard Files
 
-## Audit Summary (Round 13)
+# Audit Multi-Roles Round 14 - Corrections Restantes
 
-All 8 files already have `useTranslation` and `getIntlLocale` imported (except BrandKit.tsx which has neither, and TemplateAdsFactory.tsx which has neither). The i18n keys were already added to `en.ts` and `fr.ts` under the `modules.*` namespace in the previous round. Now the actual string replacements need to happen.
+## Constats
 
-### Files and Hardcoded French Strings Count
+Apres les rounds 12 et 13 (Batches 1-4), il reste encore des dettes techniques significatives dans 3 categories :
 
-| File | Hardcoded FR Strings | Date Locale Issues | Notes |
-|------|---------------------|-------------------|-------|
-| **Competitors.tsx** | ~45 strings | 0 (already fixed) | Has `useTranslation` but only uses `i18n` for locale, not `t()` for strings |
-| **LocalSEO.tsx** | ~50 strings | 0 (already fixed) | Same pattern - has `useTranslation` but never calls `t()` |
-| **Reports.tsx** | ~35 strings | 0 (already fixed) | `formatTimeAgo()` still uses hardcoded FR strings |
-| **Reputation.tsx** | ~40 strings | 0 (already fixed) | Has `useTranslation` but never calls `t()` |
-| **BrandKit.tsx** | ~30 strings | N/A | Missing `useTranslation` entirely |
-| **CMS.tsx** | ~35 strings | 1 (`'fr-FR'` line 343) | `STATUS_CONFIG` and `PAGE_TYPES` are hardcoded FR outside component |
-| **TemplateAdsFactory.tsx** | ~25 strings | 1 (`'fr-FR'` line 285) | Missing `useTranslation` entirely |
-| **Approvals.tsx** | Already done | Already done | Verified - no remaining FR strings |
+### 1. Dates/nombres hardcodes `'fr'`/`'fr-FR'` (55 occurrences dans 7 fichiers)
 
-**Total: ~260 hardcoded French strings across 7 files (Approvals already complete)**
+Les fichiers suivants n'ont pas ete migres vers `getIntlLocale(i18n.language)` :
 
-## Technical Approach
+| Fichier | Occurrences | Type |
+|---------|------------|------|
+| `src/components/cockpit/DailyBriefing.tsx` | 1 | `toLocaleDateString('fr-FR')` |
+| `src/pages/dashboard/Agency.tsx` | 1 | `toLocaleDateString('fr')` |
+| `src/components/team/TeamManagement.tsx` | 2 | `toLocaleDateString('fr')` |
+| `src/components/reports/ReportScheduler.tsx` | 1 | `toLocaleDateString('fr-FR')` |
+| `src/components/sales/SalesScriptGenerator.tsx` | 3 | `toLocaleDateString('fr-FR')` + `toLocaleString('fr-FR')` |
+| `src/components/competitors/CompetitorAlerts.tsx` | 1 | `toLocaleDateString('fr')` |
+| `src/components/webhooks/AdvancedWebhooks.tsx` | 1 | `toLocaleString('fr-FR')` |
+| `src/components/evidence/EvidenceBundleCard.tsx` | 2 | `toLocaleString('fr-FR')` |
+| `src/components/diagnostics/ConsoleLogsViewer.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
+| `src/components/diagnostics/SystemHealthDashboard.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
+| `src/components/diagnostics/DiagnosticsPanel.tsx` | 1 | `toLocaleTimeString('fr-FR')` |
+| `src/components/kpi/KPITrendCard.tsx` | 2 | `Intl.NumberFormat('fr-FR')` + `toLocaleString('fr-FR')` |
+| `src/components/dashboard/KPISparkline.tsx` | 1 | `toLocaleString('fr-FR')` |
+| `src/components/dashboard/GoalsProgress.tsx` | 2 | `toLocaleString('fr-FR')` |
+| `src/lib/agents/report-generator.ts` | 3 | `toLocaleDateString('fr-FR')` (backend PDF - on conserve FR) |
 
-### For each file:
-1. Add `const { t } = useTranslation()` or destructure `t` from existing `useTranslation()` call
-2. Replace every hardcoded French string with `t("modules.<module>.<key>")`
-3. For files with `STATUS_CONFIG` / `PAGE_TYPES` defined outside the component (CMS.tsx), move them inside or use a function pattern
-4. Fix remaining `'fr-FR'` date locales in CMS.tsx and TemplateAdsFactory.tsx
-5. Localize `formatTimeAgo()` in Reports.tsx using `t("modules.reports.timeAgo.*")`
+### 2. Textes francais hardcodes (~270 dans 29 fichiers components + 10 fichiers pages)
 
-### Special Handling:
-- **CMS.tsx**: `STATUS_CONFIG` and `PAGE_TYPES` are const objects outside the component, so they can't use `t()`. Solution: convert to functions that accept `t` or move labels inline.
-- **BrandKit.tsx**: Needs `import { useTranslation } from "react-i18next"` added.
-- **TemplateAdsFactory.tsx**: Needs both `useTranslation` and `getIntlLocale` imports added.
-- **Competitors.tsx SWOT export**: The markdown export content uses French headers -- these should use `t()` too.
+Les pages dashboard non migrees :
+- `Agency.tsx` (~25 strings)
+- `Lifecycle.tsx` (~30 strings)
+- `CRO.tsx` (~20 strings)
+- `Integrations.tsx` (~20 strings)
+- `ApprovalsV2.tsx` (~15 strings restantes)
+- `Approvals.tsx` (~10 strings restantes)
+- `AccessReview.tsx` (~10 strings)
+- `MediaAssets.tsx` (~5 strings)
+- `Sites.tsx` (verifier)
+- `ConnectionStatus.tsx` (verifier)
 
-## File-by-File Changes
+Les composants non migres :
+- `TeamManagement.tsx` (~15 strings)
+- `ContentStrategyGenerator.tsx` (~8 strings)
+- `SocialPostGenerator.tsx` (~8 strings)
+- `AdsOptimizer.tsx` (~8 strings)
+- `LeadQualifier.tsx` (~10 strings)
+- `VoiceAssistant.tsx` (~4 strings)
+- `SmartResearchHub.tsx` (~4 strings)
+- `RepurposeEngine.tsx` (~4 strings)
+- `AlertRulesConfig.tsx` (~4 strings)
+- `AdvancedWebhooks.tsx` (~5 strings)
+- `EvidenceBundleCard.tsx` / `EvidenceBundleViewer.tsx` (~8 strings)
+- `GoogleSuperConnector.tsx` / `MetaSuperConnector.tsx` (~6 strings)
+- `BulkSiteImport.tsx` (~5 strings)
+- `DataExportButton.tsx` (~4 strings)
+- `NotificationPreferences.tsx` (~10 strings)
+- `ProtectedRoute.tsx` (1 string)
+- `PaginatedList.tsx` (2 strings)
+- `data-table-pagination.tsx` (1 string)
 
-### 1. Competitors.tsx (660 lines)
-- Add `t` to existing `useTranslation()` destructuring (line 49)
-- Replace ~45 strings: titles, subtitles, button labels, toast messages, table headers, empty states, SWOT dialog labels, compliance notice, dialog labels
+### 3. Imports doublons (4 fichiers)
 
-### 2. LocalSEO.tsx (558 lines)
-- Add `t` to existing `useTranslation()` destructuring (line 44)
-- Replace ~50 strings: metric labels, tab labels, button labels, toast messages, empty state descriptions, review dialog labels, GBP post dialog labels, FAQ section
+| Fichier | Probleme |
+|---------|----------|
+| `Lifecycle.tsx` | `useState` et `useCallback` sur 2 lignes separees |
+| `Sites.tsx` | `useState` et `useCallback` sur 2 lignes separees |
+| `CRO.tsx` | `useState` et `useCallback` sur 2 lignes separees |
+| `Diagnostics.tsx` | `useState, useEffect` et `useCallback` sur 2 lignes separees |
 
-### 3. Reports.tsx (474 lines)
-- Add `t` to existing `useTranslation()` destructuring (line 18)
-- Replace ~35 strings: page title/subtitle, tab labels, KPI labels, toast messages, empty states, `formatTimeAgo()` strings
-- Localize `formatTimeAgo()` using `t("modules.reports.timeAgo.*")`
+### 4. Roadmap.tsx - anti-pattern `isEn ?`
 
-### 4. Reputation.tsx (437 lines)
-- Add `t` to existing `useTranslation()` destructuring (line 21)
-- Replace ~40 strings: KPI labels, button labels, dialog labels, toast messages, badge labels, alert messages, empty state text
+`Roadmap.tsx` utilise encore `isEn ?` pour les tags (36 occurrences). Doit etre migre vers `t()`.
 
-### 5. BrandKit.tsx (412 lines)
-- Add `import { useTranslation } from "react-i18next"`
-- Add `const { t } = useTranslation()` in component
-- Replace ~30 strings: section titles, descriptions, labels, placeholders, toast messages, empty state text
+## Plan de Corrections
 
-### 6. CMS.tsx (628 lines)
-- Move `STATUS_CONFIG` labels and `PAGE_TYPES` labels to use `t()` inline (convert const to a function or use `t()` directly where labels are rendered)
-- Fix `toLocaleDateString('fr-FR')` on line 343 to use `getIntlLocale(i18n.language)`
-- Replace ~35 strings: tab labels, dialog labels, button labels, empty state texts, status labels
+Le volume est trop important pour un seul message (~40 fichiers). Je propose de traiter en 2 groupes prioritaires :
 
-### 7. TemplateAdsFactory.tsx (640 lines)
-- Add `import { useTranslation } from "react-i18next"` and `import { getIntlLocale } from "@/lib/date-locale"`
-- Fix `toLocaleDateString('fr-FR')` on line 285
-- Replace ~25 strings: form labels, select options, tab labels, empty state, button labels
+### Groupe 1 (ce message) - Dates + imports + Roadmap (~18 fichiers)
 
-## Estimated Impact
-- **7 files modified** (Approvals already complete)
-- **~260 strings migrated** to `t()` calls
-- **2 date locale fixes** (CMS, TemplateAdsFactory)
-- **1 `formatTimeAgo()` localization** (Reports)
-- All keys already exist in `en.ts` and `fr.ts` from the previous round
+1. **Corriger toutes les dates/nombres hardcodes** dans les 14 fichiers frontend (exclure `report-generator.ts` qui genere du PDF serveur)
+2. **Fusionner les imports doublons** dans 4 fichiers
+3. **Migrer Roadmap.tsx** vers `t()` pour les tags
+
+Pour chaque fichier date :
+- Ajouter `import { getIntlLocale } from "@/lib/date-locale"` si absent
+- Ajouter `useTranslation` si absent
+- Remplacer `'fr'` / `'fr-FR'` par `getIntlLocale(i18n.language)`
+
+### Groupe 2 (message suivant) - Textes hardcodes (~25 fichiers)
+
+Migrer les ~270 strings francaises restantes dans les pages et composants listes ci-dessus.
+
+## Details Techniques - Groupe 1
+
+### Fichiers a modifier :
+
+1. `src/components/cockpit/DailyBriefing.tsx` - ajouter `getIntlLocale`, remplacer ligne 128
+2. `src/pages/dashboard/Agency.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 235
+3. `src/components/team/TeamManagement.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer lignes 188, 255
+4. `src/components/reports/ReportScheduler.tsx` - ajouter `getIntlLocale`, remplacer ligne 91
+5. `src/components/sales/SalesScriptGenerator.tsx` - ajouter `getIntlLocale`, remplacer lignes 156, 271, 341
+6. `src/components/competitors/CompetitorAlerts.tsx` - ajouter `getIntlLocale`, remplacer ligne 186
+7. `src/components/webhooks/AdvancedWebhooks.tsx` - ajouter `getIntlLocale`, remplacer ligne 527
+8. `src/components/evidence/EvidenceBundleCard.tsx` - ajouter `getIntlLocale`, remplacer lignes 102, 295
+9. `src/components/diagnostics/ConsoleLogsViewer.tsx` - ajouter `getIntlLocale`, remplacer ligne 154
+10. `src/components/diagnostics/SystemHealthDashboard.tsx` - ajouter `getIntlLocale`, remplacer ligne 244
+11. `src/components/diagnostics/DiagnosticsPanel.tsx` - ajouter `getIntlLocale`, remplacer ligne 385
+12. `src/components/kpi/KPITrendCard.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer lignes 55, 59
+13. `src/components/dashboard/KPISparkline.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 56
+14. `src/components/dashboard/GoalsProgress.tsx` - ajouter `useTranslation` + `getIntlLocale`, remplacer ligne 143
+
+### Imports doublons :
+15. `src/pages/dashboard/Lifecycle.tsx` - fusionner lignes 1-2
+16. `src/pages/dashboard/Sites.tsx` - fusionner lignes 1-2
+17. `src/pages/dashboard/CRO.tsx` - fusionner lignes 1-2
+18. `src/pages/dashboard/Diagnostics.tsx` - fusionner lignes 1-2
+
+### Roadmap :
+19. `src/pages/Roadmap.tsx` - migrer tags `isEn ?` vers des cles i18n `pages.roadmap.tags.*`
+
+### Nouvelles cles i18n a ajouter :
+- `pages.roadmap.tags.product` / `pages.roadmap.tags.integration` / `pages.roadmap.tags.security` / `pages.roadmap.tags.ai` dans `en.ts` et `fr.ts`
+
+**Total Groupe 1 : 19 fichiers + en.ts + fr.ts = 21 fichiers**
+
