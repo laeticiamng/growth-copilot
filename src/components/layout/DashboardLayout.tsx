@@ -138,7 +138,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
       { path: "/dashboard/media", label: t("nav.media"), icon: () => <span className="text-base">🎬</span> },
-      { path: "/dashboard/media-kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
+      { path: "/dashboard/media/kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
     ],
   },
   {
@@ -150,7 +150,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
       { path: "/dashboard/legal", label: "Legal", icon: () => <span className="text-base">⚖️</span> },
-      { path: "/dashboard/service-catalog", label: "Catalogue", icon: () => <span className="text-base">📋</span> },
+      { path: "/dashboard/services", label: t("nav.serviceCatalog"), icon: () => <span className="text-base">📋</span> },
     ],
   },
   {
