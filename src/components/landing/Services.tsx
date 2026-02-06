@@ -11,17 +11,17 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const DEPARTMENTS = [
-  { id: "marketing", icon: TrendingUp, color: "text-blue-500", bgColor: "bg-blue-500/10", employees: 5, features: ["SEO Audit", "Content Calendar", "Ad Optimization", "Social Distribution"] },
-  { id: "sales", icon: Briefcase, color: "text-green-500", bgColor: "bg-green-500/10", employees: 4, features: ["Pipeline Review", "Outreach Sequences", "Lead Qualification"] },
-  { id: "finance", icon: BarChart3, color: "text-yellow-500", bgColor: "bg-yellow-500/10", employees: 3, features: ["ROI Summaries", "Budget Alerts", "Monthly Reports"] },
-  { id: "security", icon: Shield, color: "text-red-500", bgColor: "bg-red-500/10", employees: 3, features: ["Access Review", "Secrets Hygiene", "Compliance Checks"] },
-  { id: "product", icon: Puzzle, color: "text-purple-500", bgColor: "bg-purple-500/10", employees: 4, features: ["Roadmap Planning", "OKR Drafts", "Priority Scoring"] },
-  { id: "engineering", icon: Code, color: "text-orange-500", bgColor: "bg-orange-500/10", employees: 5, features: ["Release Gates", "QA Summaries", "Delivery Reports"] },
-  { id: "data", icon: BarChart3, color: "text-cyan-500", bgColor: "bg-cyan-500/10", employees: 4, features: ["Funnel Diagnostics", "Cohort Analysis", "Tracking Setup"] },
-  { id: "support", icon: HeadphonesIcon, color: "text-pink-500", bgColor: "bg-pink-500/10", employees: 3, features: ["Ticket Triage", "KB Updates", "Review Management"] },
-  { id: "governance", icon: Settings, color: "text-gray-500", bgColor: "bg-gray-500/10", employees: 3, features: ["Policy Management", "IT Hygiene", "Access Governance"] },
-  { id: "hr", icon: Users, color: "text-indigo-500", bgColor: "bg-indigo-500/10", employees: 2, features: ["Team Onboarding", "Role Management", "Talent Tracking"] },
-  { id: "legal", icon: Scale, color: "text-slate-500", bgColor: "bg-slate-500/10", employees: 1, features: ["Contract Tracking", "GDPR Requests", "Legal Alerts"] },
+  { id: "marketing", icon: TrendingUp, color: "text-blue-500", bgColor: "bg-blue-500/10", employees: 5 },
+  { id: "sales", icon: Briefcase, color: "text-green-500", bgColor: "bg-green-500/10", employees: 4 },
+  { id: "finance", icon: BarChart3, color: "text-yellow-500", bgColor: "bg-yellow-500/10", employees: 3 },
+  { id: "security", icon: Shield, color: "text-red-500", bgColor: "bg-red-500/10", employees: 3 },
+  { id: "product", icon: Puzzle, color: "text-purple-500", bgColor: "bg-purple-500/10", employees: 4 },
+  { id: "engineering", icon: Code, color: "text-orange-500", bgColor: "bg-orange-500/10", employees: 5 },
+  { id: "data", icon: BarChart3, color: "text-cyan-500", bgColor: "bg-cyan-500/10", employees: 4 },
+  { id: "support", icon: HeadphonesIcon, color: "text-pink-500", bgColor: "bg-pink-500/10", employees: 3 },
+  { id: "governance", icon: Settings, color: "text-gray-500", bgColor: "bg-gray-500/10", employees: 3 },
+  { id: "hr", icon: Users, color: "text-indigo-500", bgColor: "bg-indigo-500/10", employees: 2 },
+  { id: "legal", icon: Scale, color: "text-slate-500", bgColor: "bg-slate-500/10", employees: 1 },
 ];
 
 const PRICE_PER_DEPT = 1900;
@@ -70,14 +70,6 @@ export function Services() {
                   <p className="text-sm text-muted-foreground mb-4">
                     {t(`landing.services.depts.${dept.id}.desc`)}
                   </p>
-                  <div className="space-y-1">
-                    {dept.features.slice(0, 3).map((feature) => (
-                      <div key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="w-3 h-3 text-primary flex-shrink-0" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
                 </CardContent>
               </Card>
             );
@@ -90,9 +82,9 @@ export function Services() {
             <h3 className="text-xl font-bold mb-2">Core OS</h3>
             <p className="text-sm text-muted-foreground mb-4">{t("landing.services.coreOSDesc")}</p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
-              {["Workspace", "RBAC", "Approvals", "Audit Log", "Scheduler", "Integrations"].map((item) => (
-                <span key={item} className="flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-primary" />{item}
+              {["workspace", "rbac", "approvals", "auditLog", "scheduler", "integrations"].map((key) => (
+                <span key={key} className="flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-primary" />{t(`landing.services.coreFeatures.${key}`)}
                 </span>
               ))}
             </div>
