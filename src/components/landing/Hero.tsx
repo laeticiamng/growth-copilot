@@ -2,8 +2,8 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle, Building2, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle, Building2, Zap, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { urlSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,8 @@ export function Hero() {
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [urlValid, setUrlValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Real-time URL validation
   const validateUrl = useCallback((value: string) => {
@@ -44,6 +46,13 @@ export function Hero() {
     const value = e.target.value;
     setUrl(value);
     validateUrl(value);
+  };
+
+  const handleGetStarted = async () => {
+    setIsLoading(true);
+    // Simulate a brief loading state for better UX feedback
+    await new Promise(resolve => setTimeout(resolve, 300));
+    navigate('/onboarding');
   };
 
   return (
@@ -127,12 +136,24 @@ export function Hero() {
                   </div>
                 )}
               </div>
-              <Link to="/onboarding">
-                <Button variant="hero" className="w-full sm:w-auto whitespace-nowrap h-14 px-8">
-                  {isEn ? "Get Started" : "Commencer"}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+              <Button 
+                variant="hero" 
+                className="w-full sm:w-auto whitespace-nowrap h-14 px-8"
+                onClick={handleGetStarted}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    {isEn ? "Loading..." : "Chargement..."}
+                  </>
+                ) : (
+                  <>
+                    {isEn ? "Get Started" : "Commencer"}
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
             </div>
             {/* Validation feedback */}
             <div className="h-5 mt-2">

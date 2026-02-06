@@ -86,9 +86,9 @@ export function Navbar() {
               <SheetTrigger asChild>
                 <button
                   className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                  aria-label="Toggle menu"
+                  aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
                 >
-                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  <Menu className="w-6 h-6" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[350px]">

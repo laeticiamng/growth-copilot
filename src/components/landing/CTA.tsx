@@ -1,12 +1,21 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Rocket, Shield, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Rocket, Shield, Sparkles, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function CTA() {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === "en";
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleStartFree = async () => {
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 300));
+    navigate('/onboarding');
+  };
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -49,12 +58,24 @@ export function CTA() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/onboarding">
-              <Button variant="hero" size="xl">
-                {isEn ? "Start Free" : "Commencer gratuitement"}
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
+            <Button 
+              variant="hero" 
+              size="xl"
+              onClick={handleStartFree}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  {isEn ? "Loading..." : "Chargement..."}
+                </>
+              ) : (
+                <>
+                  {isEn ? "Start Free" : "Commencer gratuitement"}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </Button>
             <a 
               href="#pricing"
               onClick={(e) => {
