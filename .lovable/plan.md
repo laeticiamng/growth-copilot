@@ -1,135 +1,147 @@
 
 
-# Audit UX Complet - Round 7 (Composants secondaires & DashboardHome)
+# Audit UX Complet - Round 8 (Pages Dashboard & Composants restants)
 
 ## Resume
 
-Apres les rounds 5 et 6 (cockpit principal localise), il reste **8 composants secondaires** et le fichier **DashboardHome.tsx** lui-meme avec des textes hardcodes en francais ou des patterns `i18n.language === 'fr' ? "..." : "..."` au lieu d'utiliser les cles i18n. Ces composants sont visibles dans le cockpit et affectent l'experience utilisateur dans toutes les langues autres que FR/EN.
+Apres les rounds 5-7 (cockpit localise), il reste **~20 fichiers** avec des textes hardcodes en francais et des `locale: fr` / `"fr-FR"` statiques. Ces fichiers couvrent les pages dashboard principales et les composants d'integration, impactant l'experience utilisateur dans toutes les langues sauf le francais.
 
 ---
 
 ## Problemes Identifies
 
-### 1. WelcomeCard.tsx - Pattern ternaire au lieu de i18n (P0)
-- Lignes 62-96: Tout le bloc de texte utilise `i18n.language === 'fr'` au lieu de `t()`
-- Lignes 125-137: "Agents actifs", "Departements", "Disponibilite" en ternaire
-- Lignes 103-106: Format de date en ternaire
-- **Impact**: Ne fonctionne pas pour ES, DE, IT, PT, NL (7 langues supportees)
+### Categorie A : Composants avec `locale: fr` statique (pas de dateLocaleMap)
 
-### 2. DashboardHome.tsx - Textes hardcodes restants (P0)
-- Ligne 59: `getCGORole()` en ternaire FR/EN
-- Ligne 213: `Par ${a.agent_type}` - francais hardcode
-- Lignes 341-343: "Votre equipe d'agents specialises..." en ternaire
-- Lignes 349-354: "Departements", "Direction Marketing", "Prets a executer" via `t()` mais pas verifie
-- Lignes 370-389: Labels KPI "Clics organiques", "Conversions", "Position moyenne" hardcodes en francais
+| # | Fichier | Occurrences | Textes FR hardcodes |
+|---|---------|-------------|---------------------|
+| 1 | `src/components/team/TeamActivityFeed.tsx` | 1x `locale: fr` | "Agent IA", "Systeme" |
+| 2 | `src/components/activity/ActivityFeed.tsx` | 1x `locale: fr` | - |
+| 3 | `src/components/kpi/KPIDashboard.tsx` | 2x `locale: fr` | "Derniere sync:", "Jamais", "Jamais synchronise" |
+| 4 | `src/components/agents/DepartmentHeadDashboard.tsx` | 1x `locale: fr` | Textes divers |
+| 5 | `src/components/agents/AgentDetail.tsx` | 1x `locale: fr` | "Jamais" |
+| 6 | `src/components/ads/CampaignBudgetTracker.tsx` | 1x `locale: fr` | "Jour X/Y" |
+| 7 | `src/components/content/ContentCalendar.tsx` | 2x `locale: fr` | - |
 
-### 3. MoMComparison.tsx - 100% francais (P0)
-- Lignes 38-43: periodLabels hardcodes ("Mois precedent", "Annee precedente", etc.)
-- Ligne 58-67: `Intl.NumberFormat('fr-FR')` hardcode
-- Lignes 114-127: Empty state "Aucune donnee KPI disponible", "Connecter Google Search Console"
-- Lignes 136-139: "Comparaison de Periodes", "Evolution de vos KPIs cles"
-- Lignes 166-181: "en hausse", "en baisse", "stables", "Moyenne"
-- Ligne 219: "Pas de comparaison"
-- Ligne 192: "Pas de donnees anterieures disponibles"
+### Categorie B : Composants avec `"fr-FR"` hardcode
 
-### 4. CockpitPDFExport.tsx - 100% francais (P1)
-- Lignes 30-37: Section labels ("Resume executif", "Score de sante business", etc.)
-- Lignes 48-65: Toast et dialog texts
-- Ligne 72-76: Date en `fr-FR` hardcode
-- Lignes 243-285: Dialog "Exporter le Cockpit en PDF", "Annuler", "Exporter"
+| # | Fichier | Occurrences |
+|---|---------|-------------|
+| 8 | `src/components/integrations/MetaMetricsWidget.tsx` | 2x `"fr-FR"` | "Derniere sync:", "Jamais", "Connecter Instagram" |
+| 9 | `src/components/integrations/GA4MetricsWidget.tsx` | 2x `"fr-FR"` | "Derniere sync:", "Jamais", "Connecter Google Analytics" |
+| 10 | `src/components/integrations/GSCMetricsWidget.tsx` | 2x `"fr-FR"` | "Derniere sync:", "Jamais", "Connecter Search Console" |
+| 11 | `src/components/integrations/MetaModuleCard.tsx` | 1x `"fr-FR"` | "il y a Xh" |
 
-### 5. RealtimeStatus.tsx - 100% francais (P1)
-- Lignes 47-99: Channel names "Approbations", "Executions agents"
-- Ligne 148: "Connexions temps reel"
-- Ligne 169: "Aucune connexion active"
+### Categorie C : Composants partiellement i18n (ternaire FR/EN seulement pour 2 langues)
 
-### 6. SmartAlertsPanel.tsx - 90% francais (P0)
-- Ligne 70: "L'agent ${a.agent_type} propose une action."
-- Lignes 115-143: Predictive alerts en francais
-- Ligne 214: "Alertes"
-- Ligne 227: "Aucune alerte"
-- Ligne 263: `formatDistanceToNow` avec `locale: fr` hardcode
+| # | Fichier | Probleme |
+|---|---------|----------|
+| 12 | `src/components/billing/BillingOverview.tsx` | `i18n.language === "fr" ? fr : enUS` (manque ES/DE/IT/PT/NL) |
+| 13 | `src/components/notifications/NotificationCenter.tsx` | idem |
+| 14 | `src/components/cockpit/DailyBriefing.tsx` | ternaire FR/EN pour toast + `toLocaleTimeString` |
 
-### 7. SessionStatus.tsx - 100% francais (P1)
-- Ligne 53: "Non connecte"
-- Lignes 78-79: "Expiration proche", "Session active"
-- Ligne 85: "Expire dans..."
-- Ligne 112-115: Meme textes en version non-compact
-- Ligne 135: "Renouveler la session"
-- Ligne 152: "Deconnexion"
-- Ligne 59: `locale: fr` hardcode pour date-fns
+### Categorie D : Pages dashboard 100% francais
 
-### 8. NavigationHelper.tsx - 100% francais (P2)
-- Lignes 29-85: Tous les titres, descriptions et features des sections de navigation
-- Ligne 92: "Navigation rapide"
-- Ligne 119: "Nouveau"
-
-### 9. WorkspaceQuotaWidget.tsx - 100% francais (P1)
-- Lignes 100-125: "Tokens IA", "Crawls (aujourd'hui)", "Executions concurrentes"
-- Lignes 143-149: "Limite proche", "Attention"
-- Ligne 194: "utilise" dans tooltip
-- Ligne 204: "Gerer les quotas"
-
-### 10. EmptyStateGuide.tsx - Texte "Progression" hardcode (P2)
-- Ligne 37: "Progression"
-
-### 11. AgentPerformanceChart.tsx - `locale: fr` hardcode (P1)
-- Ligne 13: Import `fr` de date-fns, utilise sans dynamisme
+| # | Fichier | Nb textes FR |
+|---|---------|-------------|
+| 15 | `src/pages/dashboard/Agents.tsx` | ~20 | "Activite recente des agents", "Aucune execution recente", etc. |
+| 16 | `src/pages/dashboard/Automations.tsx` | ~15 | "Aucune automation", "Derniere:", etc. |
+| 17 | `src/pages/dashboard/SEOTech.tsx` | ~12 | "Derniere analyse:", "Aucun probleme", "Aucun audit" |
+| 18 | `src/pages/dashboard/AuditLog.tsx` | ~8 | Dates avec `locale: fr` |
+| 19 | `src/pages/dashboard/AccessReview.tsx` | ~10 | "Aucune revue", "Jamais", dates |
+| 20 | `src/pages/dashboard/ConnectionStatus.tsx` | ~5 | "Derniere sync:" |
+| 21 | `src/pages/dashboard/HR.tsx` | ~8 | Dates, "Employe", "Periode:" |
+| 22 | `src/pages/dashboard/Logs.tsx` | dates FR |
+| 23 | `src/components/integrations/IntegrationConnector.tsx` | "Connecter", "Deconnecter" |
+| 24 | `src/components/integrations/SyncLogsViewer.tsx` | "Aucun evenement" |
+| 25 | `src/components/integrations/GoogleSuperConnector.tsx` | "Aucun workspace actif" |
+| 26 | `src/components/integrations/MetaSuperConnector.tsx` | "Aucun workspace actif" |
 
 ---
 
 ## Plan d'Implementation
 
-### Phase 1: Ajouter ~100 nouvelles cles i18n (en.ts et fr.ts)
-Namespaces a ajouter/enrichir: `cockpit`, `dashboard`, `common`
+### Phase 1 : Creer un helper dateLocaleMap partage
 
-### Phase 2: Corriger les 11 composants
-Pour chaque composant:
-1. Remplacer les ternaires `i18n.language === 'fr'` par `t("key")`
-2. Dynamiser les locales `date-fns` et `Intl.NumberFormat` selon `i18n.language`
-3. Ajouter `useTranslation` la ou manquant
+Creer `src/lib/date-locale.ts` avec un helper reutilisable pour le mapping des locales date-fns, evitant la duplication dans chaque composant.
 
-### Fichiers a modifier
+```text
+// src/lib/date-locale.ts
+import { fr, enUS, es, de, it, pt, nl } from "date-fns/locale";
+export const dateLocaleMap = { fr, en: enUS, es, de, it, pt, nl };
+export const getDateLocale = (lang: string) => dateLocaleMap[lang] || enUS;
+export const getIntlLocale = (lang: string) => { fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', it: 'it-IT', pt: 'pt-PT', nl: 'nl-NL' }[lang] || 'en-US';
+```
 
-| Fichier | Nb textes | Priorite |
-|---------|-----------|----------|
-| `src/i18n/locales/en.ts` | ~100 cles | P0 |
-| `src/i18n/locales/fr.ts` | ~100 cles | P0 |
-| `src/components/cockpit/WelcomeCard.tsx` | 12 textes | P0 |
-| `src/pages/dashboard/DashboardHome.tsx` | 8 textes | P0 |
-| `src/components/dashboard/MoMComparison.tsx` | 18 textes | P0 |
-| `src/components/notifications/SmartAlertsPanel.tsx` | 10 textes | P0 |
-| `src/components/cockpit/SessionStatus.tsx` | 8 textes | P1 |
-| `src/components/cockpit/RealtimeStatus.tsx` | 4 textes | P1 |
-| `src/components/cockpit/WorkspaceQuotaWidget.tsx` | 8 textes | P1 |
-| `src/components/dashboard/CockpitPDFExport.tsx` | 12 textes | P1 |
-| `src/components/agents/AgentPerformanceChart.tsx` | 2 textes | P1 |
-| `src/components/cockpit/NavigationHelper.tsx` | 20 textes | P2 |
-| `src/components/cockpit/EmptyStateGuide.tsx` | 1 texte | P2 |
+### Phase 2 : Ajouter ~60 nouvelles cles i18n (en.ts et fr.ts)
+
+Namespace `integrations`, `agents`, `automations`, `seo`, `audit`, `hr`, `team`.
+
+### Phase 3 : Corriger les composants (Categories A-D)
+
+Pour chaque fichier :
+1. Importer `getDateLocale` / `getIntlLocale` depuis le helper
+2. Remplacer `locale: fr` par `locale: getDateLocale(i18n.language)`
+3. Remplacer `"fr-FR"` par `getIntlLocale(i18n.language)`
+4. Remplacer les textes FR hardcodes par `t("key")`
+
+### Fichiers a modifier (26 fichiers)
+
+| Fichier | Action principale | Priorite |
+|---------|-------------------|----------|
+| `src/lib/date-locale.ts` | NOUVEAU - Helper partage | P0 |
+| `src/i18n/locales/en.ts` | ~60 cles | P0 |
+| `src/i18n/locales/fr.ts` | ~60 cles | P0 |
+| `src/components/team/TeamActivityFeed.tsx` | locale + textes | P0 |
+| `src/components/activity/ActivityFeed.tsx` | locale | P0 |
+| `src/components/kpi/KPIDashboard.tsx` | locale + textes | P0 |
+| `src/components/agents/DepartmentHeadDashboard.tsx` | locale | P1 |
+| `src/components/agents/AgentDetail.tsx` | locale + "Jamais" | P1 |
+| `src/components/ads/CampaignBudgetTracker.tsx` | locale | P1 |
+| `src/components/content/ContentCalendar.tsx` | locale | P1 |
+| `src/components/integrations/MetaMetricsWidget.tsx` | fr-FR + textes | P0 |
+| `src/components/integrations/GA4MetricsWidget.tsx` | fr-FR + textes | P0 |
+| `src/components/integrations/GSCMetricsWidget.tsx` | fr-FR + textes | P0 |
+| `src/components/integrations/MetaModuleCard.tsx` | fr-FR + textes | P1 |
+| `src/components/integrations/IntegrationConnector.tsx` | textes | P1 |
+| `src/components/integrations/SyncLogsViewer.tsx` | textes | P1 |
+| `src/components/integrations/GoogleSuperConnector.tsx` | textes | P1 |
+| `src/components/integrations/MetaSuperConnector.tsx` | textes | P1 |
+| `src/components/billing/BillingOverview.tsx` | dateLocaleMap 7 langues | P1 |
+| `src/components/notifications/NotificationCenter.tsx` | dateLocaleMap 7 langues | P1 |
+| `src/components/cockpit/DailyBriefing.tsx` | ternaire -> t() | P1 |
+| `src/pages/dashboard/Agents.tsx` | locale + textes | P0 |
+| `src/pages/dashboard/Automations.tsx` | locale + textes | P1 |
+| `src/pages/dashboard/SEOTech.tsx` | locale + textes | P1 |
+| `src/pages/dashboard/AuditLog.tsx` | locale | P1 |
+| `src/pages/dashboard/AccessReview.tsx` | locale + textes | P1 |
+| `src/pages/dashboard/ConnectionStatus.tsx` | locale + textes | P1 |
+| `src/pages/dashboard/HR.tsx` | locale + textes | P1 |
 
 ---
 
-## Details techniques cles
+## Details techniques
 
-### Pattern a eliminer
-Le pattern `i18n.language === 'fr' ? "texte FR" : "texte EN"` est un anti-pattern car il ne supporte que 2 langues sur les 7 configurees (FR, EN, ES, DE, IT, PT, NL). Toutes ces occurrences doivent etre remplacees par `t("cle")`.
+### Helper partage `getDateLocale`
+Cela elimine la duplication de `dateLocaleMap` dans chaque composant (actuellement copie dans ~8 fichiers) et centralise la logique.
 
-### Intl.NumberFormat dynamique
+### Pattern de correction uniforme
 ```text
 // Avant
-new Intl.NumberFormat('fr-FR').format(value)
+import { fr } from "date-fns/locale";
+formatDistanceToNow(date, { locale: fr, addSuffix: true })
 
 // Apres
-new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-FR' : 'en-US').format(value)
+import { getDateLocale } from "@/lib/date-locale";
+formatDistanceToNow(date, { locale: getDateLocale(i18n.language), addSuffix: true })
 ```
 
-### date-fns locale map reutilisable
-Un helper partage pour la map de locales date-fns sera utilise, similaire a celui deja en place dans RunsHistory et ServiceHealthMonitor.
+### Ternaire dateLocale existant a etendre
+Les fichiers qui utilisent `i18n.language === "fr" ? fr : enUS` seront migres vers `getDateLocale(i18n.language)` pour supporter les 7 langues.
 
 ## Resume
-- 11 composants avec textes hardcodes en francais
-- ~100 nouvelles cles de traduction
-- 13 fichiers a modifier
-- Elimination de l'anti-pattern ternaire FR/EN
-- Support complet des 7 langues
+- 26 fichiers a modifier + 1 nouveau helper
+- ~60 nouvelles cles de traduction
+- Centralisation du dateLocaleMap
+- Elimination de tous les `locale: fr` et `"fr-FR"` hardcodes restants
+- Support complet des 7 langues dans toutes les pages dashboard
 
