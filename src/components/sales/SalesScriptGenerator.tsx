@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Copy, Download, RefreshCw, CheckCircle2, Loader2, Phone, Mail, MessageSquare, Target, Shield, Zap } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -28,13 +27,7 @@ interface ObjectionHandler {
   technique: string;
 }
 
-const SCRIPT_TYPES = [
-  { value: "discovery", label: "Découverte", icon: Target, description: "Questions de qualification" },
-  { value: "closing", label: "Closing", icon: Zap, description: "Finaliser la vente" },
-  { value: "objection", label: "Objections", icon: Shield, description: "Réponses aux freins" },
-  { value: "followup", label: "Relance", icon: Mail, description: "Suivi prospects" },
-] as const;
-
+// Business content – kept in French as domain-specific training data
 const COMMON_OBJECTIONS = [
   "C'est trop cher",
   "Je dois réfléchir",
@@ -47,8 +40,16 @@ const COMMON_OBJECTIONS = [
 ];
 
 export function SalesScriptGenerator() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
+
+  const SCRIPT_TYPES = [
+    { value: "discovery", label: t("components.salesScript.typeDiscovery"), icon: Target, description: t("components.salesScript.typeDiscoveryDesc") },
+    { value: "closing", label: t("components.salesScript.typeClosing"), icon: Zap, description: t("components.salesScript.typeClosingDesc") },
+    { value: "objection", label: t("components.salesScript.typeObjection"), icon: Shield, description: t("components.salesScript.typeObjectionDesc") },
+    { value: "followup", label: t("components.salesScript.typeFollowup"), icon: Mail, description: t("components.salesScript.typeFollowupDesc") },
+  ] as const;
+
   const [selectedType, setSelectedType] = useState<string>("discovery");
   const [context, setContext] = useState("");
   const [product, setProduct] = useState("");
@@ -59,7 +60,7 @@ export function SalesScriptGenerator() {
 
   const handleGenerate = async () => {
     if (!product) {
-      toast.error("Précisez le produit/service");
+      toast.error(t("components.salesScript.specifyProduct"));
       return;
     }
 
@@ -100,7 +101,6 @@ Retourne un JSON avec:
 
       if (error) throw error;
 
-      // Parse the AI response
       const artifact = data?.artifact;
       if (artifact) {
         const scriptData = typeof artifact === 'string' ? JSON.parse(artifact) : artifact;
@@ -115,13 +115,12 @@ Retourne un JSON avec:
         };
         
         setGeneratedScript(newScript);
-        toast.success("Script généré !");
+        toast.success(t("components.salesScript.generated"));
       }
     } catch (error) {
       console.error("[SalesScript] Generation error:", error);
-      toast.error("Erreur lors de la génération");
+      toast.error(t("components.salesScript.generationError"));
       
-      // Fallback with template
       const fallbackScript: SalesScript = {
         id: crypto.randomUUID(),
         type: selectedType as SalesScript["type"],
@@ -140,14 +139,14 @@ Retourne un JSON avec:
     if (generatedScript) {
       const fullText = `${generatedScript.title}\n\n${generatedScript.content}\n\n--- OBJECTIONS ---\n${generatedScript.objections.map(o => `Q: ${o.objection}\nR: ${o.response}\nTechnique: ${o.technique}`).join('\n\n')}`;
       navigator.clipboard.writeText(fullText);
-      toast.success("Script copié !");
+      toast.success(t("components.salesScript.copied"));
     }
   };
 
   const handleSave = () => {
     if (generatedScript) {
       setSavedScripts(prev => [generatedScript, ...prev]);
-      toast.success("Script sauvegardé !");
+      toast.success(t("components.salesScript.saved"));
     }
   };
 
@@ -177,24 +176,22 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
     a.download = `script-${generatedScript.type}-${new Date().toISOString().split('T')[0]}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Script exporté !");
+    toast.success(t("components.salesScript.exported"));
   };
 
   return (
     <div className="space-y-6">
-      {/* Configuration */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            Générateur de Scripts IA
+            {t("components.salesScript.title")}
           </CardTitle>
           <CardDescription>
-            Créez des scripts de vente personnalisés avec l'IA
+            {t("components.salesScript.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Script Type Selection */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {SCRIPT_TYPES.map((type) => {
               const Icon = type.icon;
@@ -216,20 +213,19 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
             })}
           </div>
 
-          {/* Input Fields */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Produit/Service *</label>
+              <label className="text-sm font-medium">{t("components.salesScript.product")} *</label>
               <Input
-                placeholder="Ex: CRM SaaS pour PME"
+                placeholder={t("components.salesScript.productPlaceholder")}
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Cible</label>
+              <label className="text-sm font-medium">{t("components.salesScript.target")}</label>
               <Input
-                placeholder="Ex: Directeurs commerciaux PME"
+                placeholder={t("components.salesScript.targetPlaceholder")}
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value)}
               />
@@ -237,9 +233,9 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
           </div>
 
           <div>
-            <label className="text-sm font-medium">Contexte (optionnel)</label>
+            <label className="text-sm font-medium">{t("components.salesScript.context")}</label>
             <Textarea
-              placeholder="Décrivez le contexte de l'appel, les points de douleur client, la proposition de valeur..."
+              placeholder={t("components.salesScript.contextPlaceholder")}
               value={context}
               onChange={(e) => setContext(e.target.value)}
               rows={3}
@@ -250,19 +246,18 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Génération en cours...
+                {t("components.salesScript.generating")}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Générer le script
+                {t("components.salesScript.generate")}
               </>
             )}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Generated Script */}
       {generatedScript && (
         <Card>
           <CardHeader>
@@ -270,22 +265,21 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
               <div>
                 <CardTitle>{generatedScript.title}</CardTitle>
                 <CardDescription>
-                  Script {SCRIPT_TYPES.find(t => t.value === generatedScript.type)?.label} généré le{" "}
-                  {new Date(generatedScript.createdAt).toLocaleString(getIntlLocale(i18n.language))}
+                  Script {SCRIPT_TYPES.find(t => t.value === generatedScript.type)?.label} — {new Date(generatedScript.createdAt).toLocaleString(getIntlLocale(i18n.language))}
                 </CardDescription>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleCopy}>
                   <Copy className="w-4 h-4 mr-2" />
-                  Copier
+                  {t("components.salesScript.copy")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleExport}>
                   <Download className="w-4 h-4 mr-2" />
-                  Exporter
+                  {t("common.export")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSave}>
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Sauvegarder
+                  {t("common.save")}
                 </Button>
               </div>
             </div>
@@ -295,7 +289,7 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
               <TabsList>
                 <TabsTrigger value="script">Script</TabsTrigger>
                 <TabsTrigger value="objections">
-                  Objections ({generatedScript.objections.length})
+                  {t("components.salesScript.typeObjection")} ({generatedScript.objections.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -328,11 +322,10 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
         </Card>
       )}
 
-      {/* Saved Scripts */}
       {savedScripts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Scripts sauvegardés</CardTitle>
+            <CardTitle>{t("components.salesScript.savedScripts")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {savedScripts.map((script) => (
@@ -345,7 +338,7 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setGeneratedScript(script)}>
-                  Voir
+                  {t("common.view")}
                 </Button>
               </div>
             ))}
@@ -356,7 +349,7 @@ ${generatedScript.objections.map(o => `### "${o.objection}"
   );
 }
 
-// Fallback script templates
+// Fallback script templates – business content, kept in French
 function generateFallbackScript(type: string, product: string, target: string): string {
   const templates: Record<string, string> = {
     discovery: `## Introduction

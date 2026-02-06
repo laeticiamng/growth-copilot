@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface CROSuggestion {
   id: string;
@@ -39,24 +40,37 @@ const categoryIcons = {
   speed: Clock,
 };
 
-const categoryLabels = {
-  cta: "Call-to-Action",
-  form: "Formulaire",
-  layout: "Layout",
-  copy: "Copywriting",
-  trust: "Confiance",
-  speed: "Performance",
-};
-
 export function CROSuggestionsAI({ workspaceId, pageUrl }: { workspaceId: string; pageUrl?: string }) {
+  const { t } = useTranslation();
   const [url, setUrl] = useState(pageUrl || "");
   const [analyzing, setAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<CROSuggestion[]>([]);
   const [progress, setProgress] = useState(0);
 
+  const getCategoryLabels = () => ({
+    cta: "Call-to-Action",
+    form: t("components.croSuggestions.catForm"),
+    layout: "Layout",
+    copy: "Copywriting",
+    trust: t("components.croSuggestions.catTrust"),
+    speed: t("components.croSuggestions.catSpeed"),
+  });
+
+  const getImpactLabel = (impact: string) => {
+    if (impact === "high") return t("components.croSuggestions.impactHigh");
+    if (impact === "medium") return t("components.croSuggestions.impactMedium");
+    return t("components.croSuggestions.impactLow");
+  };
+
+  const getEffortLabel = (effort: string) => {
+    if (effort === "low") return t("components.croSuggestions.impactLow");
+    if (effort === "medium") return t("components.croSuggestions.impactMedium");
+    return t("components.croSuggestions.impactHigh");
+  };
+
   const analyzeUrl = async () => {
     if (!url) {
-      toast.error("Entrez une URL à analyser");
+      toast.error(t("components.croSuggestions.enterUrl"));
       return;
     }
 
@@ -65,7 +79,6 @@ export function CROSuggestionsAI({ workspaceId, pageUrl }: { workspaceId: string
     setSuggestions([]);
 
     try {
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 500);
@@ -116,16 +129,15 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
           };
         });
 
-        // Sort by ICE score
         formattedSuggestions.sort((a, b) => b.iceScore - a.iceScore);
         setSuggestions(formattedSuggestions);
-        toast.success(`${formattedSuggestions.length} suggestions générées`);
+        toast.success(t("components.croSuggestions.suggestionsGenerated", { count: formattedSuggestions.length }));
       } else {
-        toast.error("Erreur lors de l'analyse");
+        toast.error(t("components.croSuggestions.analysisError"));
       }
     } catch (err) {
       console.error("Analysis error:", err);
-      toast.error("Erreur de connexion");
+      toast.error(t("components.croSuggestions.connectionError"));
     } finally {
       setAnalyzing(false);
       setProgress(0);
@@ -136,7 +148,7 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
     setSuggestions(prev =>
       prev.map(s => s.id === id ? { ...s, status } : s)
     );
-    toast.success(status === "implemented" ? "Marqué comme implémenté" : "Suggestion ignorée");
+    toast.success(status === "implemented" ? t("components.croSuggestions.markedDone") : t("components.croSuggestions.dismissed"));
   };
 
   const impactColors = {
@@ -151,19 +163,20 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
     high: "text-red-500",
   };
 
+  const categoryLabels = getCategoryLabels();
+
   return (
     <Card variant="feature">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="w-5 h-5" />
-          Suggestions IA d'optimisation
+          {t("components.croSuggestions.title")}
         </CardTitle>
         <CardDescription>
-          Analyse automatique des opportunités CRO
+          {t("components.croSuggestions.subtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* URL Input */}
         <div className="flex gap-2">
           <Input
             placeholder="https://votre-site.com/page"
@@ -175,36 +188,34 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
             {analyzing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Analyse...
+                {t("components.croSuggestions.analyzing")}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Analyser
+                {t("components.croSuggestions.analyze")}
               </>
             )}
           </Button>
         </div>
 
-        {/* Progress */}
         {analyzing && (
           <div className="space-y-2">
             <Progress value={progress} className="w-full" />
             <p className="text-sm text-center text-muted-foreground">
-              Analyse en cours...
+              {t("components.croSuggestions.analyzingProgress")}
             </p>
           </div>
         )}
 
-        {/* Suggestions */}
         {suggestions.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">
-                {suggestions.filter(s => s.status === "pending").length} suggestions à traiter
+                {t("components.croSuggestions.suggestionsToProcess", { count: suggestions.filter(s => s.status === "pending").length })}
               </p>
               <Badge variant="gradient">
-                Triées par score ICE
+                {t("components.croSuggestions.sortedByICE")}
               </Badge>
             </div>
 
@@ -230,7 +241,7 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
                         {suggestion.status === "implemented" && (
                           <Badge variant="success" className="text-xs">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Fait
+                            {t("components.croSuggestions.done")}
                           </Badge>
                         )}
                       </div>
@@ -239,19 +250,19 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
                       </p>
                       <div className="flex items-center gap-4 mt-3">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Impact:</span>
+                          <span className="text-xs text-muted-foreground">{t("components.croSuggestions.impact")}:</span>
                           <span className={`text-xs font-medium ${impactColors[suggestion.impact]}`}>
-                            {suggestion.impact === "high" ? "Élevé" : suggestion.impact === "medium" ? "Moyen" : "Faible"}
+                            {getImpactLabel(suggestion.impact)}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Effort:</span>
+                          <span className="text-xs text-muted-foreground">{t("components.croSuggestions.effort")}:</span>
                           <span className={`text-xs font-medium ${effortColors[suggestion.effort]}`}>
-                            {suggestion.effort === "low" ? "Faible" : suggestion.effort === "medium" ? "Moyen" : "Élevé"}
+                            {getEffortLabel(suggestion.effort)}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Score ICE:</span>
+                          <span className="text-xs text-muted-foreground">{t("components.croSuggestions.iceScore")}:</span>
                           <span className="text-xs font-medium text-primary">
                             {suggestion.iceScore}
                           </span>
@@ -265,7 +276,7 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
                           size="sm"
                           onClick={() => updateStatus(suggestion.id, "dismissed")}
                         >
-                          Ignorer
+                          {t("components.croSuggestions.ignore")}
                         </Button>
                         <Button
                           variant="outline"
@@ -273,7 +284,7 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
                           onClick={() => updateStatus(suggestion.id, "implemented")}
                         >
                           <CheckCircle2 className="w-4 h-4 mr-2" />
-                          Fait
+                          {t("components.croSuggestions.done")}
                         </Button>
                       </div>
                     )}
@@ -284,12 +295,11 @@ Réponds en JSON avec un array "suggestions" contenant des objets {category, tit
           </div>
         )}
 
-        {/* Empty state */}
         {!analyzing && suggestions.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="font-medium">Aucune analyse</p>
-            <p className="text-sm mt-1">Entrez une URL pour obtenir des suggestions d'optimisation</p>
+            <p className="font-medium">{t("components.croSuggestions.noAnalysis")}</p>
+            <p className="text-sm mt-1">{t("components.croSuggestions.noAnalysisDesc")}</p>
           </div>
         )}
       </CardContent>

@@ -5,35 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  RefreshCw,
-  Plus,
-  Sparkles,
-  FileText,
-  Video,
-  Mic,
-  Image,
-  Loader2,
-  CheckCircle2,
-  Copy,
-  Download,
-} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RefreshCw, Plus, Sparkles, FileText, Video, Mic, Image, Loader2, CheckCircle2, Copy, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface RepurposeSource {
   id: string;
@@ -66,6 +43,7 @@ const platformOutputs = {
 };
 
 export function RepurposeEngine({ workspaceId }: { workspaceId: string }) {
+  const { t } = useTranslation();
   const [sources, setSources] = useState<RepurposeSource[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
@@ -87,7 +65,7 @@ export function RepurposeEngine({ workspaceId }: { workspaceId: string }) {
 
   const handleAddSource = () => {
     if (!newSource.title || !newSource.content) {
-      toast.error("Titre et contenu requis");
+      toast.error(t("components.repurpose.titleContentRequired"));
       return;
     }
 
@@ -102,13 +80,13 @@ export function RepurposeEngine({ workspaceId }: { workspaceId: string }) {
     setSources(prev => [...prev, source]);
     setNewSource({ title: "", type: "blog", content: "" });
     setShowAddDialog(false);
-    toast.success("Source ajoutée");
+    toast.success(t("components.repurpose.sourceAdded"));
   };
 
   const handleGenerate = async () => {
     if (!selectedSource) return;
     if (generateOptions.platforms.length === 0) {
-      toast.error("Sélectionnez au moins une plateforme");
+      toast.error(t("components.repurpose.selectPlatform"));
       return;
     }
 
@@ -161,10 +139,10 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
 
       setGeneratedContents(results);
       setShowGenerateDialog(false);
-      toast.success(`${results.length} contenus générés`);
+      toast.success(t("components.repurpose.contentsGenerated", { count: results.length }));
     } catch (err) {
       console.error("Generation error:", err);
-      toast.error("Erreur lors de la génération");
+      toast.error(t("components.repurpose.generationError"));
     } finally {
       setGenerating(false);
       setProgress(0);
@@ -175,12 +153,12 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
     setGeneratedContents(prev =>
       prev.map(c => c.id === id ? { ...c, status: "approved" as const } : c)
     );
-    toast.success("Contenu approuvé");
+    toast.success(t("components.repurpose.approved"));
   };
 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
-    toast.success("Copié dans le presse-papiers");
+    toast.success(t("components.repurpose.copied"));
   };
 
   const togglePlatform = (platform: string) => {
@@ -203,13 +181,11 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                 <RefreshCw className="w-5 h-5" />
                 Repurpose Engine
               </CardTitle>
-              <CardDescription>
-                Transformez 1 contenu long en 10+ micro-contenus
-              </CardDescription>
+              <CardDescription>{t("components.repurpose.subtitle")}</CardDescription>
             </div>
             <Button variant="hero" size="sm" onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Ajouter une source
+              {t("components.repurpose.addSource")}
             </Button>
           </div>
         </CardHeader>
@@ -217,11 +193,11 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
           {sources.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">Aucune source</p>
-              <p className="text-sm mt-1">Ajoutez un article, vidéo ou podcast à transformer</p>
+              <p className="font-medium">{t("components.repurpose.noSource")}</p>
+              <p className="text-sm mt-1">{t("components.repurpose.noSourceDesc")}</p>
               <Button variant="outline" className="mt-4" onClick={() => setShowAddDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
-                Ajouter une source
+                {t("components.repurpose.addSource")}
               </Button>
             </div>
           ) : (
@@ -253,7 +229,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                       }}
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Générer
+                      {t("components.repurpose.generate")}
                     </Button>
                   </div>
                 </div>
@@ -269,12 +245,10 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
-              Contenus générés
+              {t("components.repurpose.generatedContents")}
               <Badge variant="gradient" className="ml-2">{generatedContents.length}</Badge>
             </CardTitle>
-            <CardDescription>
-              Approuvez et planifiez vos micro-contenus
-            </CardDescription>
+            <CardDescription>{t("components.repurpose.approveAndSchedule")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {generatedContents.map((content) => (
@@ -294,10 +268,10 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                     }
                   >
                     {content.status === "approved"
-                      ? "Approuvé"
+                      ? t("components.repurpose.statusApproved")
                       : content.status === "scheduled"
-                      ? "Planifié"
-                      : "En attente"}
+                      ? t("components.repurpose.statusScheduled")
+                      : t("components.repurpose.statusPending")}
                   </Badge>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{content.content}</p>
@@ -308,7 +282,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                     onClick={() => handleCopy(content.content)}
                   >
                     <Copy className="w-4 h-4 mr-2" />
-                    Copier
+                    {t("components.repurpose.copy")}
                   </Button>
                   {content.status === "pending" && (
                     <Button
@@ -317,7 +291,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                       onClick={() => handleApprove(content.id)}
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Approuver
+                      {t("components.repurpose.approve")}
                     </Button>
                   )}
                 </div>
@@ -331,15 +305,15 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ajouter une source</DialogTitle>
+            <DialogTitle>{t("components.repurpose.addSourceTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Titre</label>
+              <label className="text-sm font-medium">{t("components.repurpose.sourceTitle")}</label>
               <Input
                 value={newSource.title}
                 onChange={(e) => setNewSource(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Ex: Guide SEO 2026"
+                placeholder={t("components.repurpose.sourceTitlePlaceholder")}
               />
             </div>
             <div>
@@ -352,29 +326,29 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="blog">Article de blog</SelectItem>
-                  <SelectItem value="video">Vidéo</SelectItem>
+                  <SelectItem value="blog">{t("components.repurpose.typeBlog")}</SelectItem>
+                  <SelectItem value="video">{t("components.repurpose.typeVideo")}</SelectItem>
                   <SelectItem value="podcast">Podcast</SelectItem>
-                  <SelectItem value="whitepaper">Livre blanc</SelectItem>
+                  <SelectItem value="whitepaper">{t("components.repurpose.typeWhitepaper")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">Contenu (texte ou transcription)</label>
+              <label className="text-sm font-medium">{t("components.repurpose.contentLabel")}</label>
               <Textarea
                 value={newSource.content}
                 onChange={(e) => setNewSource(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="Collez le contenu complet ici..."
+                placeholder={t("components.repurpose.contentPlaceholder")}
                 rows={8}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button variant="hero" onClick={handleAddSource}>
-              Ajouter
+              {t("components.repurpose.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -384,7 +358,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
       <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Générer des micro-contenus</DialogTitle>
+            <DialogTitle>{t("components.repurpose.generateMicroContents")}</DialogTitle>
           </DialogHeader>
           {generating ? (
             <div className="py-8 space-y-4">
@@ -392,7 +366,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
               <p className="text-center text-muted-foreground">
-                Génération en cours...
+                {t("components.repurpose.generatingProgress")}
               </p>
               <Progress value={progress} className="w-full" />
             </div>
@@ -403,7 +377,7 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
                 <p className="text-muted-foreground">{selectedSource?.title}</p>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Plateformes cibles</label>
+                <label className="text-sm font-medium mb-2 block">{t("components.repurpose.targetPlatforms")}</label>
                 <div className="flex flex-wrap gap-2">
                   {Object.keys(platformOutputs).map((platform) => (
                     <Badge
@@ -421,18 +395,18 @@ Réponds en JSON avec un array "contents" contenant des objets {type, content}.`
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGenerateDialog(false)} disabled={generating}>
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button variant="hero" onClick={handleGenerate} disabled={generating}>
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Génération...
+                  {t("components.repurpose.generatingProgress")}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Générer
+                  {t("components.repurpose.generate")}
                 </>
               )}
             </Button>
