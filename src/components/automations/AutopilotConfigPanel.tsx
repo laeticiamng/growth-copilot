@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -10,15 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAutopilotSettings } from "@/hooks/useAutopilotSettings";
-import { 
-  Zap, 
-  Shield, 
-  AlertTriangle, 
-  Bot, 
-  Settings,
-  Loader2,
-  Info
-} from "lucide-react";
+import { Zap, Shield, AlertTriangle, Bot, Settings, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AutopilotConfigPanelProps {
@@ -26,15 +19,10 @@ interface AutopilotConfigPanelProps {
 }
 
 export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
+  const { t } = useTranslation();
   const {
-    settings,
-    loading,
-    isUpdating,
-    toggleEnabled,
-    updateAllowedActions,
-    updateRiskThreshold,
-    updateLimits,
-    availableActions,
+    settings, loading, isUpdating, toggleEnabled,
+    updateAllowedActions, updateRiskThreshold, updateLimits, availableActions,
   } = useAutopilotSettings(siteId);
 
   const [localMaxActions, setLocalMaxActions] = useState(settings.max_actions_per_week);
@@ -48,10 +36,7 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
   };
 
   const handleSaveLimits = () => {
-    updateLimits({
-      max_actions_per_week: localMaxActions,
-      max_daily_budget: localBudget,
-    });
+    updateLimits({ max_actions_per_week: localMaxActions, max_daily_budget: localBudget });
   };
 
   const actionsByCategory = availableActions.reduce((acc, action) => {
@@ -60,12 +45,15 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
     return acc;
   }, {} as Record<string, typeof availableActions>);
 
-  const categoryLabels: Record<string, string> = {
-    seo: 'SEO',
-    content: 'Contenu',
-    ads: 'Publicité',
-    social: 'Social',
-    lifecycle: 'Automation',
+  const getCategoryLabel = (category: string): string => {
+    const map: Record<string, string> = {
+      seo: 'SEO',
+      content: t("autopilotComponent.catContent"),
+      ads: t("autopilotComponent.catAds"),
+      social: t("autopilotComponent.catSocial"),
+      lifecycle: t("autopilotComponent.catLifecycle"),
+    };
+    return map[category] || category;
   };
 
   if (loading) {
@@ -81,86 +69,60 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
   return (
     <div className="space-y-6">
       {/* Master Switch */}
-      <Card className={cn(
-        "border-2 transition-colors",
-        settings.enabled ? "border-primary/50 bg-primary/5" : "border-border"
-      )}>
+      <Card className={cn("border-2 transition-colors", settings.enabled ? "border-primary/50 bg-primary/5" : "border-border")}>
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={cn(
-                "p-3 rounded-full",
-                settings.enabled ? "bg-primary/20" : "bg-muted"
-              )}>
-                <Zap className={cn(
-                  "w-6 h-6",
-                  settings.enabled ? "text-primary" : "text-muted-foreground"
-                )} />
+              <div className={cn("p-3 rounded-full", settings.enabled ? "bg-primary/20" : "bg-muted")}>
+                <Zap className={cn("w-6 h-6", settings.enabled ? "text-primary" : "text-muted-foreground")} />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">Mode Autopilot</h3>
+                <h3 className="font-semibold text-lg">{t("autopilotComponent.autopilotMode")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {settings.enabled 
-                    ? "Les agents peuvent exécuter des actions automatiquement"
-                    : "Toutes les actions nécessitent une approbation manuelle"
-                  }
+                  {settings.enabled ? t("autopilotComponent.enabledDesc") : t("autopilotComponent.disabledDesc")}
                 </p>
               </div>
             </div>
-            <Switch
-              checked={settings.enabled}
-              onCheckedChange={toggleEnabled}
-              disabled={isUpdating}
-            />
+            <Switch checked={settings.enabled} onCheckedChange={toggleEnabled} disabled={isUpdating} />
           </div>
         </CardContent>
       </Card>
 
       {settings.enabled && (
         <>
-          {/* Warning Alert */}
           <Alert variant="default" className="border-amber-500/30 bg-amber-500/10">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800 dark:text-amber-200">Mode automatique activé</AlertTitle>
-            <AlertDescription className="text-amber-700 dark:text-amber-300">
-              Les agents peuvent effectuer des modifications sans approbation préalable selon les paramètres ci-dessous.
-            </AlertDescription>
+            <AlertTitle className="text-amber-800 dark:text-amber-200">{t("autopilotComponent.autoModeActive")}</AlertTitle>
+            <AlertDescription className="text-amber-700 dark:text-amber-300">{t("autopilotComponent.autoModeWarning")}</AlertDescription>
           </Alert>
 
-          {/* Risk Threshold */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                Seuil d'approbation
+                {t("autopilotComponent.approvalThreshold")}
               </CardTitle>
-              <CardDescription>
-                Définissez à partir de quel niveau de risque une approbation est requise
-              </CardDescription>
+              <CardDescription>{t("autopilotComponent.approvalThresholdDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <RadioGroup
-                value={settings.require_approval_above_risk}
-                onValueChange={(value) => updateRiskThreshold(value as 'low' | 'medium' | 'high')}
-                className="space-y-3"
-              >
+              <RadioGroup value={settings.require_approval_above_risk} onValueChange={(value) => updateRiskThreshold(value as 'low' | 'medium' | 'high')} className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-secondary/30 transition-colors">
                   <RadioGroupItem value="low" id="risk-low" />
                   <Label htmlFor="risk-low" className="flex-1 cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Conservateur</p>
-                        <p className="text-sm text-muted-foreground">Approbation requise pour tout risque moyen ou élevé</p>
+                        <p className="font-medium">{t("autopilotComponent.conservative")}</p>
+                        <p className="text-sm text-muted-foreground">{t("autopilotComponent.conservativeDesc")}</p>
                       </div>
-                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700">Recommandé</Badge>
+                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700">{t("autopilotComponent.recommended")}</Badge>
                     </div>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-secondary/30 transition-colors">
                   <RadioGroupItem value="medium" id="risk-medium" />
                   <Label htmlFor="risk-medium" className="flex-1 cursor-pointer">
-                    <p className="font-medium">Équilibré</p>
-                    <p className="text-sm text-muted-foreground">Approbation requise uniquement pour les risques élevés</p>
+                    <p className="font-medium">{t("autopilotComponent.balanced")}</p>
+                    <p className="text-sm text-muted-foreground">{t("autopilotComponent.balancedDesc")}</p>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-secondary/30 transition-colors">
@@ -168,10 +130,10 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
                   <Label htmlFor="risk-high" className="flex-1 cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Agressif</p>
-                        <p className="text-sm text-muted-foreground">Toutes les actions sont exécutées automatiquement</p>
+                        <p className="font-medium">{t("autopilotComponent.aggressive")}</p>
+                        <p className="text-sm text-muted-foreground">{t("autopilotComponent.aggressiveDesc")}</p>
                       </div>
-                      <Badge variant="destructive" className="text-xs">Risqué</Badge>
+                      <Badge variant="destructive" className="text-xs">{t("autopilotComponent.risky")}</Badge>
                     </div>
                   </Label>
                 </div>
@@ -179,34 +141,23 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
             </CardContent>
           </Card>
 
-          {/* Allowed Actions */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Bot className="w-5 h-5 text-primary" />
-                Actions autorisées
+                {t("autopilotComponent.allowedActions")}
               </CardTitle>
-              <CardDescription>
-                Sélectionnez les types d'actions que les agents peuvent exécuter automatiquement
-              </CardDescription>
+              <CardDescription>{t("autopilotComponent.allowedActionsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {Object.entries(actionsByCategory).map(([category, actions]) => (
                 <div key={category}>
-                  <p className="text-sm font-medium text-muted-foreground mb-3">
-                    {categoryLabels[category] || category}
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">{getCategoryLabel(category)}</p>
                   <div className="grid gap-2">
                     {actions.map(action => (
                       <div key={action.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-secondary/30 transition-colors">
-                        <Checkbox
-                          id={action.id}
-                          checked={settings.allowed_actions.includes(action.id)}
-                          onCheckedChange={(checked) => handleActionToggle(action.id, !!checked)}
-                        />
-                        <Label htmlFor={action.id} className="cursor-pointer flex-1">
-                          {action.label}
-                        </Label>
+                        <Checkbox id={action.id} checked={settings.allowed_actions.includes(action.id)} onCheckedChange={(checked) => handleActionToggle(action.id, !!checked)} />
+                        <Label htmlFor={action.id} className="cursor-pointer flex-1">{action.label}</Label>
                       </div>
                     ))}
                   </div>
@@ -215,55 +166,33 @@ export function AutopilotConfigPanel({ siteId }: AutopilotConfigPanelProps) {
             </CardContent>
           </Card>
 
-          {/* Limits */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Settings className="w-5 h-5 text-primary" />
-                Limites de sécurité
+                {t("autopilotComponent.securityLimits")}
               </CardTitle>
-              <CardDescription>
-                Définissez des garde-fous pour limiter les actions automatiques
-              </CardDescription>
+              <CardDescription>{t("autopilotComponent.securityLimitsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label>Actions max par semaine</Label>
+                  <Label>{t("autopilotComponent.maxActionsPerWeek")}</Label>
                   <Badge variant="outline">{localMaxActions}</Badge>
                 </div>
-                <Slider
-                  value={[localMaxActions]}
-                  onValueChange={([v]) => setLocalMaxActions(v)}
-                  min={5}
-                  max={100}
-                  step={5}
-                />
+                <Slider value={[localMaxActions]} onValueChange={([v]) => setLocalMaxActions(v)} min={5} max={100} step={5} />
               </div>
-
               <Separator />
-
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label>Budget journalier max (€)</Label>
+                  <Label>{t("autopilotComponent.maxDailyBudget")}</Label>
                   <Badge variant="outline">{localBudget}€</Badge>
                 </div>
-                <Slider
-                  value={[localBudget]}
-                  onValueChange={([v]) => setLocalBudget(v)}
-                  min={10}
-                  max={500}
-                  step={10}
-                />
+                <Slider value={[localBudget]} onValueChange={([v]) => setLocalBudget(v)} min={10} max={500} step={10} />
               </div>
-
-              <Button 
-                onClick={handleSaveLimits} 
-                disabled={isUpdating}
-                className="w-full"
-              >
+              <Button onClick={handleSaveLimits} disabled={isUpdating} className="w-full">
                 {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Sauvegarder les limites
+                {t("autopilotComponent.saveLimits")}
               </Button>
             </CardContent>
           </Card>
