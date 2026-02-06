@@ -3,6 +3,7 @@
  * Manage company info, team, integrations, billing, and danger zone
  */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,30 +60,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-const INDUSTRIES = [
-  { value: "ecommerce", label: "E-commerce" },
-  { value: "saas", label: "SaaS / Logiciel" },
-  { value: "agency", label: "Agence" },
-  { value: "consulting", label: "Conseil" },
-  { value: "healthcare", label: "Santé" },
-  { value: "finance", label: "Finance" },
-  { value: "education", label: "Éducation" },
-  { value: "real_estate", label: "Immobilier" },
-  { value: "other", label: "Autre" },
-];
-
-const ROLES = [
-  { value: "owner", label: "Propriétaire", description: "Accès complet, facturation" },
-  { value: "admin", label: "Admin", description: "Gestion équipe, intégrations" },
-  { value: "manager", label: "Manager", description: "Gestion opérationnelle" },
-  { value: "analyst", label: "Analyste", description: "Visualisation des données" },
-  { value: "viewer", label: "Lecteur", description: "Lecture seule" },
-];
-
 export default function Settings() {
+  const { t } = useTranslation();
   const { currentWorkspace, refetch: refetchWorkspaces } = useWorkspace();
   const { isAtLeastRole } = usePermissions();
   const { invitations, sendInvitation, cancelInvitation } = useTeamInvitations();
+  
+  // Dynamic industries based on translation
+  const industries = [
+    { value: "ecommerce", label: t("settings.industries.ecommerce") },
+    { value: "saas", label: t("settings.industries.saas") },
+    { value: "agency", label: t("settings.industries.agency") },
+    { value: "consulting", label: t("settings.industries.consulting") },
+    { value: "healthcare", label: t("settings.industries.healthcare") },
+    { value: "finance", label: t("settings.industries.finance") },
+    { value: "education", label: t("settings.industries.education") },
+    { value: "real_estate", label: t("settings.industries.realEstate") },
+    { value: "other", label: t("settings.industries.other") },
+  ];
+  
+  // Dynamic roles based on translation
+  const roles = [
+    { value: "owner", label: t("settings.roles.owner"), description: t("settings.roles.ownerDesc") },
+    { value: "admin", label: t("settings.roles.admin"), description: t("settings.roles.adminDesc") },
+    { value: "manager", label: t("settings.roles.manager"), description: t("settings.roles.managerDesc") },
+    { value: "analyst", label: t("settings.roles.analyst"), description: t("settings.roles.analystDesc") },
+    { value: "viewer", label: t("settings.roles.viewer"), description: t("settings.roles.viewerDesc") },
+  ];
   
   const [saving, setSaving] = useState(false);
   const [companyName, setCompanyName] = useState(currentWorkspace?.name || "");
@@ -145,11 +149,11 @@ export default function Settings() {
       
       if (error) throw error;
       
-      toast.success("Informations mises à jour");
+      toast.success(t("settings.toast.infoUpdated"));
       refetchWorkspaces();
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("settings.toast.saveError"));
     } finally {
       setSaving(false);
     }
@@ -163,10 +167,10 @@ export default function Settings() {
       await sendInvitation(inviteEmail, inviteRole as "admin" | "manager" | "analyst" | "viewer");
       setInviteEmail("");
       setInviteOpen(false);
-      toast.success(`Invitation envoyée à ${inviteEmail}`);
+      toast.success(t("settings.toast.inviteSent", { email: inviteEmail }));
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de l'envoi de l'invitation");
+      toast.error(t("settings.toast.inviteError"));
     } finally {
       setInviting(false);
     }
@@ -181,11 +185,11 @@ export default function Settings() {
       
       if (error) throw error;
       
-      toast.success("Intégration déconnectée");
+      toast.success(t("settings.toast.integrationDisconnected"));
       refetchIntegrations();
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la déconnexion");
+      toast.error(t("settings.toast.disconnectError"));
     }
   };
 
@@ -201,11 +205,11 @@ export default function Settings() {
       
       if (error) throw error;
       
-      toast.success("Workspace supprimé");
+      toast.success(t("settings.toast.workspaceDeleted"));
       window.location.href = "/dashboard";
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la suppression");
+      toast.error(t("settings.toast.deleteError"));
     } finally {
       setDeleting(false);
     }
@@ -224,14 +228,14 @@ export default function Settings() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de l'ouverture du portail");
+      toast.error(t("settings.toast.portalError"));
     }
   };
 
   if (!currentWorkspace) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Sélectionnez un workspace</p>
+        <p className="text-muted-foreground">{t("settings.selectWorkspace")}</p>
       </div>
     );
   }
@@ -239,9 +243,9 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Paramètres</h1>
+        <h1 className="text-3xl font-bold">{t("settings.title")}</h1>
         <p className="text-muted-foreground">
-          Gérez les paramètres de votre workspace
+          {t("settings.subtitle")}
         </p>
       </div>
 
@@ -249,23 +253,23 @@ export default function Settings() {
         <TabsList className="grid w-full grid-cols-5 max-w-2xl">
           <TabsTrigger value="company" className="gap-2">
             <Building2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Entreprise</span>
+            <span className="hidden sm:inline">{t("settings.tabs.company")}</span>
           </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
             <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Équipe</span>
+            <span className="hidden sm:inline">{t("settings.tabs.team")}</span>
           </TabsTrigger>
           <TabsTrigger value="integrations" className="gap-2">
             <Plug className="w-4 h-4" />
-            <span className="hidden sm:inline">Intégrations</span>
+            <span className="hidden sm:inline">{t("settings.tabs.integrations")}</span>
           </TabsTrigger>
           <TabsTrigger value="billing" className="gap-2">
             <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">Facturation</span>
+            <span className="hidden sm:inline">{t("settings.tabs.billing")}</span>
           </TabsTrigger>
           <TabsTrigger value="danger" className="gap-2 text-destructive">
             <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Danger</span>
+            <span className="hidden sm:inline">{t("settings.tabs.danger")}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -273,23 +277,23 @@ export default function Settings() {
         <TabsContent value="company" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Informations de l'entreprise</CardTitle>
+              <CardTitle>{t("settings.company.title")}</CardTitle>
               <CardDescription>
-                Modifiez les informations de base de votre workspace
+                {t("settings.company.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="companyName">Nom de l'entreprise</Label>
+                <Label htmlFor="companyName">{t("settings.company.nameLabel")}</Label>
                 <Input
                   id="companyName"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Ma Société SAS"
+                  placeholder={t("settings.company.namePlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="companyUrl">URL du site principal</Label>
+                <Label htmlFor="companyUrl">{t("settings.company.urlLabel")}</Label>
                 <Input
                   id="companyUrl"
                   value={companyUrl}
@@ -298,13 +302,13 @@ export default function Settings() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="industry">Secteur d'activité</Label>
+                <Label htmlFor="industry">{t("settings.company.industryLabel")}</Label>
                 <Select value={industry} onValueChange={setIndustry}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un secteur" />
+                    <SelectValue placeholder={t("settings.company.selectIndustry")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {INDUSTRIES.map((ind) => (
+                    {industries.map((ind) => (
                       <SelectItem key={ind.value} value={ind.value}>
                         {ind.label}
                       </SelectItem>
@@ -314,7 +318,7 @@ export default function Settings() {
               </div>
               <Button onClick={handleSaveCompany} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Enregistrer
+                {t("settings.save")}
               </Button>
             </CardContent>
           </Card>
@@ -325,9 +329,9 @@ export default function Settings() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Membres de l'équipe</CardTitle>
+                <CardTitle>{t("settings.team.title")}</CardTitle>
                 <CardDescription>
-                  Gérez les accès à votre workspace
+                  {t("settings.team.description")}
                 </CardDescription>
               </div>
               {isAtLeastRole("admin") && (
@@ -335,19 +339,19 @@ export default function Settings() {
                   <DialogTrigger asChild>
                     <Button>
                       <UserPlus className="w-4 h-4 mr-2" />
-                      Inviter
+                      {t("settings.team.invite")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Inviter un membre</DialogTitle>
+                      <DialogTitle>{t("settings.team.inviteTitle")}</DialogTitle>
                       <DialogDescription>
-                        Envoyez une invitation par email
+                        {t("settings.team.inviteDescription")}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
-                        <Label htmlFor="inviteEmail">Email</Label>
+                        <Label htmlFor="inviteEmail">{t("settings.team.emailLabel")}</Label>
                         <Input
                           id="inviteEmail"
                           type="email"
@@ -357,13 +361,13 @@ export default function Settings() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="inviteRole">Rôle</Label>
+                        <Label htmlFor="inviteRole">{t("settings.team.roleLabel")}</Label>
                         <Select value={inviteRole} onValueChange={setInviteRole}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {ROLES.filter(r => r.value !== "owner").map((role) => (
+                            {roles.filter(r => r.value !== "owner").map((role) => (
                               <SelectItem key={role.value} value={role.value}>
                                 <div>
                                   <p className="font-medium">{role.label}</p>
@@ -377,11 +381,11 @@ export default function Settings() {
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setInviteOpen(false)}>
-                        Annuler
+                        {t("common.cancel")}
                       </Button>
                       <Button onClick={handleInvite} disabled={inviting || !inviteEmail}>
                         {inviting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
-                        Envoyer
+                        {t("settings.team.send")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -399,7 +403,7 @@ export default function Settings() {
                   </div>
                 ))}
                 {teamMembers.length === 0 && (
-                  <p className="text-sm text-muted-foreground py-4">Aucun membre</p>
+                  <p className="text-sm text-muted-foreground py-4">{t("settings.team.noMembers")}</p>
                 )}
               </div>
               
@@ -407,7 +411,7 @@ export default function Settings() {
                 <>
                   <Separator className="my-4" />
                   <div>
-                    <p className="text-sm font-medium mb-3">Invitations en attente</p>
+                    <p className="text-sm font-medium mb-3">{t("settings.team.pendingInvitations")}</p>
                     <div className="space-y-2">
                       {invitations.filter(i => i.status === "pending").map((inv) => (
                         <div key={inv.id} className="flex items-center justify-between p-2 rounded bg-secondary/50">
@@ -436,9 +440,9 @@ export default function Settings() {
         <TabsContent value="integrations" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Intégrations connectées</CardTitle>
+              <CardTitle>{t("settings.integrations.title")}</CardTitle>
               <CardDescription>
-                Gérez vos connexions aux services externes
+                {t("settings.integrations.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -453,11 +457,11 @@ export default function Settings() {
                         <p className="font-medium capitalize">{integration.provider.replace("_", " ")}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant={integration.status === "active" ? "default" : "secondary"}>
-                            {integration.status === "active" ? "Connecté" : "Déconnecté"}
+                            {integration.status === "active" ? t("settings.integrations.connected") : t("settings.integrations.disconnected")}
                           </Badge>
                           {integration.last_sync_at && (
                             <span className="text-xs text-muted-foreground">
-                              Dernière sync: {new Date(integration.last_sync_at).toLocaleDateString()}
+                              {t("settings.integrations.lastSync")}: {new Date(integration.last_sync_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
@@ -470,13 +474,13 @@ export default function Settings() {
                         onClick={() => handleDisconnectIntegration(integration.id)}
                       >
                         <Unplug className="w-4 h-4 mr-2" />
-                        Déconnecter
+                        {t("settings.integrations.disconnect")}
                       </Button>
                     )}
                   </div>
                 ))}
                 {integrations.length === 0 && (
-                  <p className="text-sm text-muted-foreground py-4">Aucune intégration</p>
+                  <p className="text-sm text-muted-foreground py-4">{t("settings.integrations.noIntegrations")}</p>
                 )}
               </div>
             </CardContent>
@@ -487,29 +491,29 @@ export default function Settings() {
         <TabsContent value="billing" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Facturation</CardTitle>
+              <CardTitle>{t("settings.billing.title")}</CardTitle>
               <CardDescription>
-                Gérez votre abonnement et vos paiements
+                {t("settings.billing.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 rounded-lg border bg-secondary/30">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">Plan actuel</p>
+                    <p className="font-medium">{t("settings.billing.currentPlan")}</p>
                     <p className="text-2xl font-bold mt-1 capitalize">{currentWorkspace.plan || "Trial"}</p>
                   </div>
-                  <Badge variant="default">Actif</Badge>
+                  <Badge variant="default">{t("settings.billing.active")}</Badge>
                 </div>
               </div>
               
               <Button onClick={openStripePortal} className="w-full">
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Ouvrir le portail de facturation
+                {t("settings.billing.openPortal")}
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
-                Gérez vos moyens de paiement, téléchargez vos factures et modifiez votre abonnement
+                {t("settings.billing.portalDescription")}
               </p>
             </CardContent>
           </Card>
@@ -521,33 +525,33 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="text-destructive flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5" />
-                Zone de danger
+                {t("settings.danger.title")}
               </CardTitle>
               <CardDescription>
-                Actions irréversibles sur votre workspace
+                {t("settings.danger.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5">
-                <h4 className="font-medium text-destructive mb-2">Supprimer le workspace</h4>
+                <h4 className="font-medium text-destructive mb-2">{t("settings.danger.deleteWorkspace")}</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Cette action supprimera définitivement toutes les données, les sites, les rapports, et les intégrations. Cette action est irréversible.
+                  {t("settings.danger.deleteWarning")}
                 </p>
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" disabled={!isAtLeastRole("owner")}>
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Supprimer le workspace
+                      {t("settings.danger.deleteButton")}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                      <AlertDialogTitle>{t("settings.danger.confirmTitle")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Cette action est irréversible. Toutes les données seront supprimées.
+                        {t("settings.danger.confirmDescription")}
                         <br /><br />
-                        Pour confirmer, tapez <strong>{currentWorkspace.name}</strong> ci-dessous :
+                        {t("settings.danger.typeToConfirm", { name: currentWorkspace.name })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <Input
@@ -557,14 +561,14 @@ export default function Settings() {
                       className="my-4"
                     />
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteWorkspace}
                         disabled={deleteConfirmation !== currentWorkspace.name || deleting}
                         className="bg-destructive hover:bg-destructive/90"
                       >
                         {deleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                        Supprimer définitivement
+                        {t("settings.danger.confirmDelete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -572,7 +576,7 @@ export default function Settings() {
                 
                 {!isAtLeastRole("owner") && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Seul le propriétaire peut supprimer le workspace
+                    {t("settings.danger.ownerOnly")}
                   </p>
                 )}
               </div>
