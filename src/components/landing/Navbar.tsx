@@ -51,7 +51,7 @@ export function Navbar() {
 
           <div className="hidden md:flex items-center gap-2">
             <LanguageToggle />
-            <Link to="/dashboard">
+            <Link to="/auth">
               <Button variant="ghost" size="sm">{t("landing.navbar.login")}</Button>
             </Link>
             <Link to="/auth">
@@ -85,7 +85,7 @@ export function Navbar() {
                     </a>
                   ))}
                   <div className="flex flex-col gap-3 pt-4">
-                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">{t("landing.navbar.login")}</Button>
                     </Link>
                     <Link to="/auth" onClick={() => setIsOpen(false)}>

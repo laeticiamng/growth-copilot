@@ -12,7 +12,7 @@ export function TrustBar() {
     { icon: Shield, labelKey: "landing.trustBar.gdpr" },
     { icon: Flag, labelKey: "landing.trustBar.euHosted" },
     { icon: Lock, labelKey: "landing.trustBar.encryption" },
-    { icon: Award, labelKey: "landing.trustBar.soc2" },
+    { icon: Award, labelKey: "landing.trustBar.auditTrail" },
   ];
 
   return (

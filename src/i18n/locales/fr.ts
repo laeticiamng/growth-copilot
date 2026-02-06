@@ -131,6 +131,7 @@ export const fr = {
       euHosted: "Données hébergées en Europe",
       encryption: "Chiffrement AES-256",
       soc2: "SOC 2 en cours",
+      auditTrail: "Audit trail complet",
     },
     services: {
       badge: "Départements modulaires",
@@ -1834,6 +1835,10 @@ export const fr = {
       description: "Plateforme SaaS d'automatisation marketing pilotée par l'IA. SEO, Ads, Content, Social, Analytics - 39 agents travaillent 24/7 pour votre croissance.",
       schemaDescription: "Plateforme SaaS d'automatisation marketing pilotée par 39 agents IA. SEO, Ads, Content, Social, Analytics - tout en autopilot.",
       trialOffer: "Essai gratuit 14 jours",
+    },
+    notFound: {
+      description: "La page que vous recherchez n'existe pas ou a été déplacée.",
+      backHome: "Retour à l'accueil",
     },
     about: {
       seoTitle: "À propos",

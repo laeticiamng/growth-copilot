@@ -131,6 +131,7 @@ export const en = {
       euHosted: "EU-hosted data",
       encryption: "AES-256 encryption",
       soc2: "SOC 2 in progress",
+      auditTrail: "Complete audit trail",
     },
     services: {
       badge: "Modular Departments",
@@ -1834,6 +1835,10 @@ export const en = {
       description: "AI-powered SaaS marketing automation platform. SEO, Ads, Content, Social, Analytics - 39 agents working 24/7 for your growth.",
       schemaDescription: "AI-powered SaaS marketing automation platform with 39 AI agents. SEO, Ads, Content, Social, Analytics - all on autopilot.",
       trialOffer: "14-day free trial",
+    },
+    notFound: {
+      description: "The page you're looking for doesn't exist or has been moved.",
+      backHome: "Back to Home",
     },
     about: {
       seoTitle: "About",
