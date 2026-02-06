@@ -7,9 +7,7 @@ import { User, Clock, RefreshCw, LogOut, Shield, Wifi, WifiOff } from "lucide-re
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionExpiry } from "@/hooks/useSessionExpiry";
 import { formatDistanceToNow } from "date-fns";
-import { fr, enUS, es, de, it, pt, nl } from "date-fns/locale";
-
-const dateLocaleMap: Record<string, typeof enUS> = { fr, en: enUS, es, de, it, pt, nl };
+import { getDateLocale } from "@/lib/date-locale";
 
 interface SessionStatusProps {
   compact?: boolean;
@@ -22,7 +20,7 @@ export function SessionStatus({ compact = false, showActions = true }: SessionSt
   const { expiresAt, refreshSession } = useSessionExpiry();
   const isExpiringSoon = expiresAt ? (expiresAt.getTime() - Date.now()) < 5 * 60 * 1000 : false;
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const locale = dateLocaleMap[i18n.language] || enUS;
+  const locale = getDateLocale(i18n.language);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

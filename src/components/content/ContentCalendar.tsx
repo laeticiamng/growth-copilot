@@ -28,7 +28,8 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 
 interface ContentItem {
   id: string;
@@ -85,6 +86,7 @@ export function ContentCalendar({
   onAddContent, 
   onEditContent 
 }: ContentCalendarProps) {
+  const { i18n } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -241,7 +243,7 @@ export function ContentCalendar({
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <h3 className="font-semibold capitalize">
-            {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+            {format(currentMonth, 'MMMM yyyy', { locale: getDateLocale(i18n.language) })}
           </h3>
           <Button 
             variant="ghost" 
@@ -272,7 +274,7 @@ export function ContentCalendar({
           <div className="mt-4 p-4 rounded-lg bg-secondary/50">
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-medium">
-                {format(selectedDate, 'EEEE d MMMM', { locale: fr })}
+                {format(selectedDate, 'EEEE d MMMM', { locale: getDateLocale(i18n.language) })}
               </h4>
               {onAddContent && (
                 <Button 

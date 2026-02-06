@@ -94,7 +94,7 @@ export function DailyBriefing({ className }: DailyBriefingProps) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error(i18n.language === 'fr' ? "Veuillez vous connecter" : "Please log in");
+        toast.error(t("cockpitExtra.pleaseLogin"));
         setGenerating(false);
         return;
       }
@@ -324,7 +324,7 @@ Génère un briefing exécutif adapté à cette situation.`;
 
             {/* Generated time */}
             <p className="text-xs text-muted-foreground text-right">
-              {t("cockpit.generated")} {new Date(briefing.generated_at).toLocaleTimeString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+              {t("cockpit.generated")} {new Date(briefing.generated_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
             </p>
           </>
         )}

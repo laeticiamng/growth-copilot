@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 import { 
   Activity,
   Bot,
@@ -9,14 +10,12 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  FileText,
   Settings,
-  Users,
   Zap,
   AlertTriangle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
 
 interface ActivityItem {
   id: string;
@@ -94,6 +93,7 @@ export function TeamActivityFeed({
   showHeader = true,
   compact = false,
 }: TeamActivityFeedProps) {
+  const { t, i18n } = useTranslation();
   const displayActivities = activities.slice(0, maxItems);
 
   const getActorIcon = (actorType: ActivityItem['actorType']) => {
@@ -128,14 +128,14 @@ export function TeamActivityFeed({
         return (
           <Badge variant="secondary" className="text-xs gap-1">
             <Bot className="w-3 h-3" />
-            Agent IA
+            {t("team.agentIA")}
           </Badge>
         );
       case 'system':
         return (
           <Badge variant="outline" className="text-xs gap-1">
             <Zap className="w-3 h-3" />
-            Système
+            {t("team.system")}
           </Badge>
         );
       default:
@@ -144,7 +144,7 @@ export function TeamActivityFeed({
   };
 
   const formatTime = (date: Date) => {
-    return formatDistanceToNow(date, { locale: fr, addSuffix: true });
+    return formatDistanceToNow(date, { locale: getDateLocale(i18n.language), addSuffix: true });
   };
 
   if (compact) {
@@ -170,10 +170,10 @@ export function TeamActivityFeed({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Activité de l'équipe
+            {t("team.teamActivity")}
           </CardTitle>
           <CardDescription>
-            Actions récentes des utilisateurs et agents IA
+            {t("team.recentActions")}
           </CardDescription>
         </CardHeader>
       )}
@@ -182,7 +182,6 @@ export function TeamActivityFeed({
           <div className="space-y-4">
             {displayActivities.map((activity, index) => (
               <div key={activity.id} className="flex gap-4">
-                {/* Timeline connector */}
                 <div className="flex flex-col items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     activity.actorType === 'agent' ? 'bg-primary/10 text-primary' :
@@ -203,7 +202,6 @@ export function TeamActivityFeed({
                   )}
                 </div>
                 
-                {/* Content */}
                 <div className="flex-1 pb-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -241,7 +239,7 @@ export function TeamActivityFeed({
             {displayActivities.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Aucune activité récente</p>
+                <p>{t("team.noRecentActivity")}</p>
               </div>
             )}
           </div>

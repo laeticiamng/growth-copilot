@@ -3,6 +3,7 @@
  * Displays a chronological feed of all workspace actions with avatars and relative time
  */
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
 
 interface ActivityItem {
   id: string;
@@ -95,6 +96,7 @@ export function ActivityFeed({
   showLoadMore = true,
   className,
 }: ActivityFeedProps) {
+  const { t, i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +104,6 @@ export function ActivityFeed({
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   
-  // Filters
   const [agentFilter, setAgentFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("all");
@@ -125,7 +126,6 @@ export function ActivityFeed({
         .order("created_at", { ascending: false })
         .range(currentOffset, currentOffset + limit - 1);
 
-      // Apply filters
       if (agentFilter !== "all") {
         query = query.eq("actor_id", agentFilter);
       }
@@ -174,7 +174,6 @@ export function ActivityFeed({
     }
   }, [currentWorkspace?.id, limit, offset, agentFilter, categoryFilter, dateFilter]);
 
-  // Initial fetch and filter changes
   useEffect(() => {
     fetchActivities(true);
   }, [currentWorkspace?.id, agentFilter, categoryFilter, dateFilter]);
@@ -189,7 +188,7 @@ export function ActivityFeed({
       };
     }
     return {
-      name: "Vous",
+      name: t("activity.you"),
       initials: "U",
       isAgent: false,
     };
@@ -204,7 +203,7 @@ export function ActivityFeed({
   };
 
   const formatTime = (date: string) => {
-    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr });
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: getDateLocale(i18n.language) });
   };
 
   if (loading) {
@@ -233,7 +232,7 @@ export function ActivityFeed({
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Activity className="w-5 h-5" />
-          Activité récente
+          {t("activity.recentActivity")}
         </CardTitle>
         <Button variant="ghost" size="sm" onClick={() => fetchActivities(true)}>
           <RefreshCw className="w-4 h-4" />
@@ -248,7 +247,7 @@ export function ActivityFeed({
               <SelectValue placeholder="Agent" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous les agents</SelectItem>
+              <SelectItem value="all">{t("activity.allAgents")}</SelectItem>
               <SelectItem value="seo_auditor">Sophie (SEO)</SelectItem>
               <SelectItem value="content_strategist">Marie (Contenu)</SelectItem>
               <SelectItem value="analytics_agent">Pierre (Analytics)</SelectItem>
@@ -258,27 +257,27 @@ export function ActivityFeed({
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-[140px]">
               <Filter className="w-3 h-3 mr-2" />
-              <SelectValue placeholder="Catégorie" />
+              <SelectValue placeholder={t("common.filter")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem value="all">{t("activity.allCategories")}</SelectItem>
               <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="operations">Opérations</SelectItem>
-              <SelectItem value="sales">Ventes</SelectItem>
-              <SelectItem value="governance">Gouvernance</SelectItem>
+              <SelectItem value="operations">Operations</SelectItem>
+              <SelectItem value="sales">Sales</SelectItem>
+              <SelectItem value="governance">Governance</SelectItem>
             </SelectContent>
           </Select>
           
           <Select value={dateFilter} onValueChange={setDateFilter}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="w-3 h-3 mr-2" />
-              <SelectValue placeholder="Période" />
+              <SelectValue placeholder={t("common.filter")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tout</SelectItem>
-              <SelectItem value="today">Aujourd'hui</SelectItem>
-              <SelectItem value="week">7 derniers jours</SelectItem>
-              <SelectItem value="month">30 derniers jours</SelectItem>
+              <SelectItem value="all">{t("activity.all")}</SelectItem>
+              <SelectItem value="today">{t("activity.today")}</SelectItem>
+              <SelectItem value="week">{t("activity.last7Days")}</SelectItem>
+              <SelectItem value="month">{t("activity.last30Days")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -288,7 +287,7 @@ export function ActivityFeed({
         {activities.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p>Aucune activité récente</p>
+            <p>{t("activity.noActivity")}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -328,7 +327,7 @@ export function ActivityFeed({
                           variant={activity.result === "success" ? "default" : "destructive"}
                           className="text-[10px] px-1.5 py-0"
                         >
-                          {activity.result === "success" ? "Succès" : "Échec"}
+                          {activity.result === "success" ? t("activity.success") : t("activity.failure")}
                         </Badge>
                       )}
                     </div>
@@ -351,7 +350,7 @@ export function ActivityFeed({
               {loadingMore ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : null}
-              Charger plus
+              {t("activity.loadMore")}
             </Button>
           </div>
         )}

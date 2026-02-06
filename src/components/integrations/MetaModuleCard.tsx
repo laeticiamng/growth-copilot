@@ -1,7 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Check, Clock, RefreshCw, AlertTriangle } from "lucide-react";
+import { getDateLocale } from "@/lib/date-locale";
+import { formatDistanceToNow } from "date-fns";
 
 interface MetaModuleCardProps {
   title: string;
@@ -26,21 +29,13 @@ export function MetaModuleCard({
   syncing,
   note,
 }: MetaModuleCardProps) {
+  const { t, i18n } = useTranslation();
   const isActive = status === "connected" || status === "configured";
   const isComingSoon = status === "coming_soon";
 
   const formatLastSync = (date: string | null | undefined) => {
     if (!date) return null;
-    const d = new Date(date);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 1) return "à l'instant";
-    if (diffMins < 60) return `il y a ${diffMins}min`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `il y a ${diffHours}h`;
-    return d.toLocaleDateString("fr-FR");
+    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: getDateLocale(i18n.language) });
   };
 
   return (
@@ -60,10 +55,10 @@ export function MetaModuleCard({
                 variant={isActive ? "success" : isComingSoon ? "outline" : "secondary"}
                 className="text-xs"
               >
-                {status === "connected" && <><Check className="w-3 h-3 mr-1" />Connecté</>}
-                {status === "configured" && <><Check className="w-3 h-3 mr-1" />Configuré</>}
-                {status === "disconnected" && <><Clock className="w-3 h-3 mr-1" />Non connecté</>}
-                {status === "coming_soon" && <><Clock className="w-3 h-3 mr-1" />Bientôt</>}
+                {status === "connected" && <><Check className="w-3 h-3 mr-1" />{t("metaModule.connected")}</>}
+                {status === "configured" && <><Check className="w-3 h-3 mr-1" />{t("metaModule.configured")}</>}
+                {status === "disconnected" && <><Clock className="w-3 h-3 mr-1" />{t("metaModule.disconnected")}</>}
+                {status === "coming_soon" && <><Clock className="w-3 h-3 mr-1" />{t("metaModule.comingSoon")}</>}
               </Badge>
             </div>
             

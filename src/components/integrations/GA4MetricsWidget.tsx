@@ -184,7 +184,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
 
   // Chart data
   const chartData = kpiData.map(d => ({
-    date: new Date(d.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
+    date: new Date(d.date).toLocaleDateString(undefined, { day: "2-digit", month: "short" }),
     sessions: d.organic_sessions || 0,
     conversions: d.total_conversions || 0,
   }));
@@ -239,7 +239,7 @@ export function GA4MetricsWidget({ className }: GA4MetricsWidgetProps) {
               Google Analytics 4
             </CardTitle>
             <CardDescription>
-              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString("fr-FR") : "Jamais"}
+              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>

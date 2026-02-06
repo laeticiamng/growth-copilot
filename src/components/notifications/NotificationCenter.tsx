@@ -22,7 +22,8 @@ import {
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { fr, enUS, type Locale } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { type Locale } from "date-fns/locale";
 
 const typeIcons = {
   info: Info,
@@ -52,7 +53,7 @@ export function NotificationCenter() {
   } = useNotifications();
   const [open, setOpen] = useState(false);
 
-  const dateLocale = i18n.language === "fr" ? fr : enUS;
+  const dateLocale = getDateLocale(i18n.language);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
