@@ -1,57 +1,77 @@
 
+# Batch 3 Suite - i18n Migration for 8 Remaining Dashboard Files
 
-# Batch 3 - i18n Migration for 12 Dashboard Files
+## Audit Summary (Round 13)
 
-## Overview
+All 8 files already have `useTranslation` and `getIntlLocale` imported (except BrandKit.tsx which has neither, and TemplateAdsFactory.tsx which has neither). The i18n keys were already added to `en.ts` and `fr.ts` under the `modules.*` namespace in the previous round. Now the actual string replacements need to happen.
 
-Migrate all hardcoded French strings (labels, toasts, placeholders, descriptions, status texts) to `t()` across 12 dashboard files. Add corresponding keys to `en.ts` and `fr.ts`.
+### Files and Hardcoded French Strings Count
 
-## Scope
+| File | Hardcoded FR Strings | Date Locale Issues | Notes |
+|------|---------------------|-------------------|-------|
+| **Competitors.tsx** | ~45 strings | 0 (already fixed) | Has `useTranslation` but only uses `i18n` for locale, not `t()` for strings |
+| **LocalSEO.tsx** | ~50 strings | 0 (already fixed) | Same pattern - has `useTranslation` but never calls `t()` |
+| **Reports.tsx** | ~35 strings | 0 (already fixed) | `formatTimeAgo()` still uses hardcoded FR strings |
+| **Reputation.tsx** | ~40 strings | 0 (already fixed) | Has `useTranslation` but never calls `t()` |
+| **BrandKit.tsx** | ~30 strings | N/A | Missing `useTranslation` entirely |
+| **CMS.tsx** | ~35 strings | 1 (`'fr-FR'` line 343) | `STATUS_CONFIG` and `PAGE_TYPES` are hardcoded FR outside component |
+| **TemplateAdsFactory.tsx** | ~25 strings | 1 (`'fr-FR'` line 285) | Missing `useTranslation` entirely |
+| **Approvals.tsx** | Already done | Already done | Verified - no remaining FR strings |
 
-The following files have hardcoded French strings that need migration:
-
-### Group A - High volume (20+ strings each)
-
-1. **Offers.tsx** (~30 strings): Page title, subtitle, tab labels, dialog titles, form labels, toasts, guarantees defaults, badge labels, button labels, empty state descriptions, placeholders
-2. **Ads.tsx** (~25 strings): Metric labels, tab labels, table headers, toasts, status badges, empty state descriptions, button labels, form labels, dialog title
-3. **Social.tsx** (~25 strings): Tab labels, toasts, button labels, status badges, empty state descriptions, system prompts (kept in FR for AI context), dialog titles, export labels
-4. **Competitors.tsx** (~25 strings): Tab labels, toasts, button labels, table headers, SWOT export labels, compliance notice, empty state descriptions, dialog titles
-5. **LocalSEO.tsx** (~25 strings): Metric labels, tab labels, toasts, button labels, audit task labels, priority badges, empty state descriptions, dialog titles
-6. **Reports.tsx** (~20 strings): Tab labels, toasts, formatTimeAgo strings, empty state descriptions, KPI labels, button labels
-
-### Group B - Medium volume (10-20 strings each)
-
-7. **Reputation.tsx** (~18 strings): KPI labels, badge labels, toasts, dialog labels, form labels, alert messages, empty state descriptions
-8. **BrandKit.tsx** (~15 strings): Section titles, descriptions, labels, placeholders, toast messages, empty state text
-9. **CMS.tsx** (~18 strings): STATUS_CONFIG labels, PAGE_TYPES labels, dialog labels, button labels, empty state texts, tab labels
-10. **TemplateAdsFactory.tsx** (~15 strings): Form labels, select options, tab labels, empty state, button labels, date formatting fix
-
-### Group C - Low volume (< 10 strings each)
-
-11. **Diagnostics.tsx** (~12 strings): Health status labels, formatTimeAgo strings, section titles, button labels, system info labels
-12. **Approvals.tsx** (already partially done, 1 `window.prompt` was localized) - verify no remaining strings
+**Total: ~260 hardcoded French strings across 7 files (Approvals already complete)**
 
 ## Technical Approach
 
 ### For each file:
-1. Add `import { useTranslation } from "react-i18next"` if not already present
-2. Add `const { t } = useTranslation()` or `const { t, i18n } = useTranslation()` at component start
-3. Replace every hardcoded French string with `t("module.key")`
-4. Add all new keys to `en.ts` and `fr.ts` under the existing module namespaces (e.g., `offers`, `ads`, `social`)
+1. Add `const { t } = useTranslation()` or destructure `t` from existing `useTranslation()` call
+2. Replace every hardcoded French string with `t("modules.<module>.<key>")`
+3. For files with `STATUS_CONFIG` / `PAGE_TYPES` defined outside the component (CMS.tsx), move them inside or use a function pattern
+4. Fix remaining `'fr-FR'` date locales in CMS.tsx and TemplateAdsFactory.tsx
+5. Localize `formatTimeAgo()` in Reports.tsx using `t("modules.reports.timeAgo.*")`
 
-### i18n key organization:
-- Use existing namespace structure in en.ts/fr.ts (e.g., `dashboard.offers.*`, `dashboard.ads.*`)
-- Group keys by function: labels, toasts, empty states, form fields, statuses
-- Reuse existing keys where available (e.g., `common.cancel`, `common.save`)
+### Special Handling:
+- **CMS.tsx**: `STATUS_CONFIG` and `PAGE_TYPES` are const objects outside the component, so they can't use `t()`. Solution: convert to functions that accept `t` or move labels inline.
+- **BrandKit.tsx**: Needs `import { useTranslation } from "react-i18next"` added.
+- **TemplateAdsFactory.tsx**: Needs both `useTranslation` and `getIntlLocale` imports added.
+- **Competitors.tsx SWOT export**: The markdown export content uses French headers -- these should use `t()` too.
 
-### Special cases:
-- `TemplateAdsFactory.tsx` line 285: Fix `toLocaleDateString('fr-FR')` to use `getIntlLocale(i18n.language)`
-- `CMS.tsx` line 343: Fix `toLocaleDateString('fr-FR')` to use locale
-- `Diagnostics.tsx` `formatTimeAgo()`: Localize time-relative strings
-- `Reports.tsx` `formatTimeAgo()`: Same localization
-- AI system prompts (Social, LocalSEO, Reputation): Keep in target language or make dynamic - these are prompt instructions, not UI strings. Will keep as-is since they define AI behavior.
+## File-by-File Changes
 
-## Estimated new keys: ~200 across en.ts and fr.ts
+### 1. Competitors.tsx (660 lines)
+- Add `t` to existing `useTranslation()` destructuring (line 49)
+- Replace ~45 strings: titles, subtitles, button labels, toast messages, table headers, empty states, SWOT dialog labels, compliance notice, dialog labels
 
-## Files modified: 12 dashboard files + en.ts + fr.ts = 14 files total
+### 2. LocalSEO.tsx (558 lines)
+- Add `t` to existing `useTranslation()` destructuring (line 44)
+- Replace ~50 strings: metric labels, tab labels, button labels, toast messages, empty state descriptions, review dialog labels, GBP post dialog labels, FAQ section
 
+### 3. Reports.tsx (474 lines)
+- Add `t` to existing `useTranslation()` destructuring (line 18)
+- Replace ~35 strings: page title/subtitle, tab labels, KPI labels, toast messages, empty states, `formatTimeAgo()` strings
+- Localize `formatTimeAgo()` using `t("modules.reports.timeAgo.*")`
+
+### 4. Reputation.tsx (437 lines)
+- Add `t` to existing `useTranslation()` destructuring (line 21)
+- Replace ~40 strings: KPI labels, button labels, dialog labels, toast messages, badge labels, alert messages, empty state text
+
+### 5. BrandKit.tsx (412 lines)
+- Add `import { useTranslation } from "react-i18next"`
+- Add `const { t } = useTranslation()` in component
+- Replace ~30 strings: section titles, descriptions, labels, placeholders, toast messages, empty state text
+
+### 6. CMS.tsx (628 lines)
+- Move `STATUS_CONFIG` labels and `PAGE_TYPES` labels to use `t()` inline (convert const to a function or use `t()` directly where labels are rendered)
+- Fix `toLocaleDateString('fr-FR')` on line 343 to use `getIntlLocale(i18n.language)`
+- Replace ~35 strings: tab labels, dialog labels, button labels, empty state texts, status labels
+
+### 7. TemplateAdsFactory.tsx (640 lines)
+- Add `import { useTranslation } from "react-i18next"` and `import { getIntlLocale } from "@/lib/date-locale"`
+- Fix `toLocaleDateString('fr-FR')` on line 285
+- Replace ~25 strings: form labels, select options, tab labels, empty state, button labels
+
+## Estimated Impact
+- **7 files modified** (Approvals already complete)
+- **~260 strings migrated** to `t()` calls
+- **2 date locale fixes** (CMS, TemplateAdsFactory)
+- **1 `formatTimeAgo()` localization** (Reports)
+- All keys already exist in `en.ts` and `fr.ts` from the previous round
