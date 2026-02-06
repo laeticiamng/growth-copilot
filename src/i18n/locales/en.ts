@@ -32,6 +32,7 @@ export const en = {
     accessDeniedDesc: "You don't have the required permissions to access this section.",
     contactAdmin: "Contact an administrator to get access",
     days: "days",
+    frenchOnly: "This document is available in French only",
   },
 
   // Navigation

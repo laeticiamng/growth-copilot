@@ -67,8 +67,8 @@ export function Pricing() {
                 <span className="text-muted-foreground">/{t("landing.pricing.month")}</span>
               </div>
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Badge variant="secondary" className="text-sm"><Bot className="w-3 h-3 mr-1" />11 {t("landing.pricing.aiEmployees")}</Badge>
-                <Badge variant="outline" className="text-sm">11 {t("landing.pricing.departments")}</Badge>
+                <Badge variant="secondary" className="text-sm"><Bot className="w-3 h-3 mr-1" />{TOTAL_EMPLOYEES} {t("landing.pricing.aiEmployees")} (lite)</Badge>
+                <Badge variant="outline" className="text-sm">{TOTAL_DEPARTMENTS} {t("landing.pricing.departments")} (lite)</Badge>
               </div>
               <p className="text-sm text-muted-foreground mb-6">{t("landing.pricing.starterNote")}</p>
               <ul className="space-y-2 mb-8 text-left">
@@ -83,7 +83,7 @@ export function Pricing() {
                   <li key={f} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-green-500 flex-shrink-0" /><span>{f}</span></li>
                 ))}
               </ul>
-              <Link to="/onboarding"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.starterCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.starterCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
 
@@ -138,7 +138,7 @@ export function Pricing() {
                   <li key={f} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-primary flex-shrink-0" /><span>{f}</span></li>
                 ))}
               </ul>
-              <Link to="/onboarding"><Button variant="hero" className="w-full" size="lg">{t("landing.pricing.fullCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="hero" className="w-full" size="lg">{t("landing.pricing.fullCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
 
@@ -181,7 +181,7 @@ export function Pricing() {
                   );
                 })}
               </div>
-              <Link to="/onboarding"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.buildTeam")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.buildTeam")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
         </div>

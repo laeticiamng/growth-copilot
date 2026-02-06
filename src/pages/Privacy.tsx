@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SEOHead } from "@/components/SEOHead";
@@ -7,6 +9,8 @@ import { SEOHead } from "@/components/SEOHead";
 const LAST_UPDATED = "5 février 2026";
 
 export default function Privacy() {
+  const { t, i18n } = useTranslation();
+  const isFr = i18n.language === "fr";
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
@@ -35,6 +39,11 @@ export default function Privacy() {
       {/* Hero */}
       <div className="bg-gradient-to-b from-primary/5 to-background py-16">
         <div className="container max-w-4xl px-4">
+          {!isFr && (
+            <Badge variant="outline" className="mb-4">
+              {t("common.frenchOnly")}
+            </Badge>
+          )}
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Politique de Confidentialité
           </h1>
