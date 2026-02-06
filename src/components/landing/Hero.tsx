@@ -103,7 +103,7 @@ export function Hero() {
               <div className="flex-1 relative">
                 <input
                   type="url"
-                  placeholder={isEn ? "yourcompany.com" : "votreentreprise.com"}
+                  placeholder={isEn ? "https://yourcompany.com" : "https://votreentreprise.com"}
                   value={url}
                   onChange={handleUrlChange}
                   className={cn(
@@ -153,7 +153,13 @@ export function Hero() {
 
           {/* Secondary CTA */}
           <div className="fade-in-up flex flex-wrap items-center justify-center gap-4" style={{ animationDelay: "0.4s" }}>
-            <a href="#pricing">
+            <a 
+              href="#pricing"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               <Button variant="hero-outline">
                 <Play className="w-4 h-4 mr-2" />
                 {isEn ? "See Pricing" : "Voir les tarifs"}

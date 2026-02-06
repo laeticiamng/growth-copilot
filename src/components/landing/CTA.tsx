@@ -55,7 +55,13 @@ export function CTA() {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <a href="#pricing">
+            <a 
+              href="#pricing"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               <Button variant="hero-outline" size="xl">
                 {isEn ? "See Pricing" : "Voir les tarifs"}
               </Button>
