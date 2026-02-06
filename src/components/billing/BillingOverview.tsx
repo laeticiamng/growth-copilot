@@ -22,7 +22,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
 import { Link } from "react-router-dom";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
 
@@ -45,7 +45,7 @@ export function BillingOverview() {
   } = useSubscriptionStatus();
 
   const [portalLoading, setPortalLoading] = useState(false);
-  const dateLocale = i18n.language === "fr" ? fr : enUS;
+  const dateLocale = getDateLocale(i18n.language);
 
   const openCustomerPortal = async () => {
     setPortalLoading(true);

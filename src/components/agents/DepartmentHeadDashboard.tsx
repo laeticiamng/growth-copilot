@@ -1,7 +1,7 @@
  import { useState, useCallback, useMemo } from "react";
+ import { useTranslation } from "react-i18next";
  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
- import { Button } from "@/components/ui/button";
  import { Avatar, AvatarFallback } from "@/components/ui/avatar";
  import { Progress } from "@/components/ui/progress";
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,7 +41,7 @@
  import { useDepartmentAccess } from "@/hooks/useDepartmentAccess";
  import { cn } from "@/lib/utils";
  import { formatDistanceToNow } from "date-fns";
- import { fr } from "date-fns/locale";
+ import { getDateLocale } from "@/lib/date-locale";
  
  // Department heads configuration
  const DEPARTMENT_HEADS: Record<string, {
@@ -165,15 +165,16 @@
    }>;
  }
  
- function DepartmentHeadCard({ 
-   deptKey,
-   stats,
-   isActive = true 
- }: { 
-   deptKey: string; 
-   stats: DepartmentStats;
-   isActive?: boolean;
- }) {
+function DepartmentHeadCard({ 
+  deptKey,
+  stats,
+  isActive = true 
+}: { 
+  deptKey: string; 
+  stats: DepartmentStats;
+  isActive?: boolean;
+}) {
+  const { t, i18n } = useTranslation();
    const head = DEPARTMENT_HEADS[deptKey];
    if (!head) return null;
    
@@ -219,22 +220,22 @@
          <div className="grid grid-cols-3 gap-2">
            <div className="p-2 rounded-lg bg-muted/50 text-center">
              <p className="text-lg font-bold text-primary">{stats.totalRuns}</p>
-             <p className="text-xs text-muted-foreground">Exécutions</p>
+             <p className="text-xs text-muted-foreground">{t("deptHeads.executions")}</p>
            </div>
            <div className="p-2 rounded-lg bg-muted/50 text-center">
              <p className="text-lg font-bold text-chart-3">{successRate}%</p>
-             <p className="text-xs text-muted-foreground">Succès</p>
+             <p className="text-xs text-muted-foreground">{t("deptHeads.success")}</p>
            </div>
            <div className="p-2 rounded-lg bg-muted/50 text-center">
              <p className="text-lg font-bold text-amber-500">{stats.pendingApprovals}</p>
-             <p className="text-xs text-muted-foreground">En attente</p>
+             <p className="text-xs text-muted-foreground">{t("deptHeads.waiting")}</p>
            </div>
          </div>
          
          {/* Progress bar */}
          <div className="space-y-1">
            <div className="flex justify-between text-xs">
-             <span className="text-muted-foreground">Performance équipe</span>
+              <span className="text-muted-foreground">{t("deptHeads.teamPerformance")}</span>
              <span className="font-medium">{successRate}%</span>
            </div>
            <Progress value={successRate} className="h-2" />
@@ -243,7 +244,7 @@
          {/* Recent activity */}
          {stats.recentRuns.length > 0 && (
            <div className="space-y-2">
-             <p className="text-xs font-medium text-muted-foreground">Activité récente</p>
+             <p className="text-xs font-medium text-muted-foreground">{t("deptHeads.recentActivity")}</p>
              <ScrollArea className="h-24">
                <div className="space-y-1.5">
                  {stats.recentRuns.slice(0, 5).map((run) => (
@@ -263,12 +264,12 @@
                          {run.agent_type.replace(/_/g, ' ')}
                        </span>
                      </div>
-                     <span className="text-muted-foreground">
-                       {formatDistanceToNow(new Date(run.created_at), { 
-                         addSuffix: true, 
-                         locale: fr 
-                       })}
-                     </span>
+                      <span className="text-muted-foreground">
+                        {formatDistanceToNow(new Date(run.created_at), { 
+                          addSuffix: true, 
+                          locale: getDateLocale(i18n.language)
+                        })}
+                      </span>
                    </div>
                  ))}
                </div>
@@ -385,7 +386,7 @@
          <CardContent className="py-12">
            <div className="flex items-center justify-center gap-3">
              <Activity className="w-5 h-5 animate-spin" />
-             <span>Chargement des données des chefs de département...</span>
+              <span>Chargement des données des chefs de département...</span>
            </div>
          </CardContent>
        </Card>

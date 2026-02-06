@@ -199,7 +199,7 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
 
   // Chart data
   const chartData = metaData.slice(-14).map(d => ({
-    date: new Date(d.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
+    date: new Date(d.date).toLocaleDateString(undefined, { day: "2-digit", month: "short" }),
     reach: d.reach || 0,
     engagement: (d.engagement_rate || 0) * 100,
   }));
@@ -258,7 +258,7 @@ export function MetaMetricsWidget({ className }: MetaMetricsWidgetProps) {
               Instagram
             </CardTitle>
             <CardDescription>
-              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString("fr-FR") : "Jamais"}
+              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>

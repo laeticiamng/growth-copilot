@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
  import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,10 @@ import { useSites } from "@/hooks/useSites";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
 
  export function GoogleSuperConnector() {
+  const { i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [connecting, setConnecting] = useState(false);
@@ -254,7 +256,7 @@ import { fr } from "date-fns/locale";
                   <p className="text-xs text-muted-foreground mt-2">
                      Sync : {formatDistanceToNow(new Date(module.status.lastSync as string), { 
                       addSuffix: true, 
-                      locale: fr 
+                      locale: getDateLocale(i18n.language)
                     })}
                   </p>
                 )}

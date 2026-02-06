@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
 
 function TrendBadge({ value }: { value: number | null }) {
   if (value === null) return null;
@@ -39,6 +40,7 @@ function TrendBadge({ value }: { value: number | null }) {
 }
 
 export function KPIDashboard() {
+  const { t, i18n } = useTranslation();
   const { 
     aggregates, 
     syncJobs, 
@@ -64,28 +66,26 @@ export function KPIDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with sync controls */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold">Tableau de bord ROI</h2>
+          <h2 className="text-xl font-bold">{t("kpiDashboard.roiDashboard")}</h2>
           <p className="text-sm text-muted-foreground">
-            Dernière sync: {summary.lastSync 
-              ? format(new Date(summary.lastSync), "dd MMM HH:mm", { locale: fr })
-              : "Jamais"}
+            {t("kpiDashboard.lastSync")} {summary.lastSync 
+              ? format(new Date(summary.lastSync), "dd MMM HH:mm", { locale: getDateLocale(i18n.language) })
+              : t("kpiDashboard.never")}
           </p>
         </div>
         <Button onClick={() => triggerSync("all")} disabled={isSyncing} size="sm">
           <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
-          Synchroniser
+          {t("kpiDashboard.sync")}
         </Button>
       </div>
 
-      {/* Health Score */}
       <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Score de Santé Global</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("kpiDashboard.healthScore")}</p>
               <p className="text-4xl font-bold">{summary.health}%</p>
             </div>
             <div className="w-24">
@@ -95,9 +95,7 @@ export function KPIDashboard() {
         </CardContent>
       </Card>
 
-      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        {/* SEO */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -112,13 +110,12 @@ export function KPIDashboard() {
                 <TrendBadge value={summary.seo.change} />
               </div>
               <p className="text-xs text-muted-foreground">
-                {summary.seo.clicks.toLocaleString()} clics
+                {summary.seo.clicks.toLocaleString()} {t("kpiDashboard.clicks")}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Ads */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -133,18 +130,17 @@ export function KPIDashboard() {
                 <TrendBadge value={summary.ads.change} />
               </div>
               <p className="text-xs text-muted-foreground">
-                {summary.ads.spend.toFixed(0)}€ dépensés • ROAS {summary.ads.roas.toFixed(1)}x
+                {summary.ads.spend.toFixed(0)}€ {t("kpiDashboard.spent")} • ROAS {summary.ads.roas.toFixed(1)}x
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Sales */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <ShoppingCart className="w-4 h-4 text-purple-500" />
-              Ventes
+              {t("kpiDashboard.sales")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -154,18 +150,17 @@ export function KPIDashboard() {
                 <TrendBadge value={summary.sales.change} />
               </div>
               <p className="text-xs text-muted-foreground">
-                {summary.sales.orders} commandes • AOV {summary.sales.aov.toFixed(0)}€
+                {summary.sales.orders} {t("kpiDashboard.orders")} • AOV {summary.sales.aov.toFixed(0)}€
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* ROI */}
         <Card className="border-green-200 dark:border-green-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Activity className="w-4 h-4 text-green-500" />
-              ROI Global
+              {t("kpiDashboard.globalROI")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -178,18 +173,17 @@ export function KPIDashboard() {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Profit: {(summary.sales.revenue - summary.ads.spend).toFixed(0)}€
+                {t("kpiDashboard.profit")}: {(summary.sales.revenue - summary.ads.spend).toFixed(0)}€
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Sync Jobs Status */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Synchronisation automatique</CardTitle>
-          <CardDescription>Configurez la collecte automatique des données</CardDescription>
+          <CardTitle className="text-sm">{t("kpiDashboard.autoSync")}</CardTitle>
+          <CardDescription>{t("kpiDashboard.autoSyncDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -207,8 +201,8 @@ export function KPIDashboard() {
                       <p className="font-medium text-sm capitalize">{jobType}</p>
                       <p className="text-xs text-muted-foreground">
                         {job?.last_run_at 
-                          ? `Dernière sync: ${format(new Date(job.last_run_at), "dd/MM HH:mm", { locale: fr })}`
-                          : "Jamais synchronisé"}
+                          ? `${t("kpiDashboard.lastSync")} ${format(new Date(job.last_run_at), "dd/MM HH:mm", { locale: getDateLocale(i18n.language) })}`
+                          : t("kpiDashboard.neverSynced")}
                       </p>
                     </div>
                   </div>

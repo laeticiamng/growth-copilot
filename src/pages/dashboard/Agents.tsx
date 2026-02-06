@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
  import { useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +32,7 @@ import {
   Users
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { getDateLocale } from '@/lib/date-locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { AGENT_DEFINITIONS, type AgentDefinition } from '@/lib/agents/agent-registry';
@@ -353,6 +354,7 @@ interface AgentStats {
 }
 
 export default function Agents() {
+  const { i18n } = useTranslation();
   const { currentWorkspace } = useWorkspace();
    const [activeTab, setActiveTab] = useState('heads');
   const [recentRuns, setRecentRuns] = useState<AgentRun[]>([]);
@@ -618,8 +620,8 @@ export default function Agents() {
                             </div>
                             <p className="text-xs text-muted-foreground">
                               {run.started_at 
-                                ? format(new Date(run.started_at), 'dd/MM/yyyy HH:mm', { locale: fr })
-                                : format(new Date(run.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+                                ? format(new Date(run.started_at), 'dd/MM/yyyy HH:mm', { locale: getDateLocale(i18n.language) })
+                                : format(new Date(run.created_at), 'dd/MM/yyyy HH:mm', { locale: getDateLocale(i18n.language) })
                               }
                               {run.duration_ms && ` • ${(run.duration_ms / 1000).toFixed(1)}s`}
                             </p>

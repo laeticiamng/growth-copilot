@@ -13,7 +13,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { differenceInDays, format, startOfMonth, endOfMonth } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 
 interface Campaign {
   id: string;
@@ -73,6 +74,7 @@ export function CampaignBudgetTracker({
   currency = "€",
   onViewDetails,
 }: CampaignBudgetTrackerProps) {
+  const { i18n } = useTranslation();
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
@@ -140,7 +142,7 @@ export function CampaignBudgetTracker({
               Suivi des budgets publicitaires
             </CardTitle>
             <CardDescription>
-              {format(now, 'MMMM yyyy', { locale: fr })} • Jour {daysPassed}/{daysInMonth}
+              {format(now, 'MMMM yyyy', { locale: getDateLocale(i18n.language) })} • Jour {daysPassed}/{daysInMonth}
             </CardDescription>
           </div>
           <Badge variant="outline">

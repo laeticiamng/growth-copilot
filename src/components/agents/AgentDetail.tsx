@@ -16,7 +16,8 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getDateLocale } from "@/lib/date-locale";
+import { useTranslation } from "react-i18next";
 
 interface AgentRun {
   id: string;
@@ -62,6 +63,7 @@ export function AgentDetail({
   onLaunch,
   loading = false,
 }: AgentDetailProps) {
+  const { t, i18n } = useTranslation();
   const successRate = agent.stats.total_runs > 0
     ? ((agent.stats.success_runs / agent.stats.total_runs) * 100).toFixed(1)
     : '100';
@@ -161,8 +163,8 @@ export function AgentDetail({
           <CardContent>
             <div className="text-lg font-medium">
               {agent.stats.last_run_at
-                ? format(new Date(agent.stats.last_run_at), 'dd/MM HH:mm', { locale: fr })
-                : 'Jamais'
+                ? format(new Date(agent.stats.last_run_at), 'dd/MM HH:mm', { locale: getDateLocale(i18n.language) })
+                : t("kpiDashboard.never")
               }
             </div>
           </CardContent>
@@ -206,7 +208,7 @@ export function AgentDetail({
                                run.status === 'running' ? 'En cours' : run.status}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {format(new Date(run.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: fr })}
+                              {format(new Date(run.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: getDateLocale(i18n.language) })}
                             </p>
                           </div>
                         </div>
