@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 const CREATOMATE_API_URL = 'https://api.creatomate.com/v1';
-const MAX_POLL_ATTEMPTS = 60; // 5 minutes with 5s intervals
+const MAX_POLL_ATTEMPTS = 60;
 const POLL_INTERVAL_MS = 5000;
 
 interface RenderRequest {
@@ -25,17 +25,15 @@ function blueprintToCreatomate(
   logoUrl?: string
 ): Record<string, unknown> {
   const aspectRatio = blueprint.aspect_ratio as string;
-  const dimensions = {
+  const dimensions: Record<string, { width: number; height: number }> = {
     '9:16': { width: 1080, height: 1920 },
     '1:1': { width: 1080, height: 1080 },
     '16:9': { width: 1920, height: 1080 }
   };
 
-  const dim = dimensions[aspectRatio as keyof typeof dimensions] || dimensions['9:16'];
+  const dim = dimensions[aspectRatio] || dimensions['9:16'];
   const scenes = blueprint.scenes as Array<Record<string, unknown>> || [];
   const duration = blueprint.duration_seconds as number || 15;
-
-  // Build Creatomate elements from scenes
   const elements: Record<string, unknown>[] = [];
 
   // Background
@@ -47,7 +45,7 @@ function blueprintToCreatomate(
   });
 
   // Process scenes
-  scenes.forEach((scene, index) => {
+  for (const scene of scenes) {
     const textOverlay = scene.text_overlay as Record<string, unknown>;
     if (textOverlay) {
       const position = textOverlay.position as string;
@@ -75,7 +73,7 @@ function blueprintToCreatomate(
         ]
       });
     }
-  });
+  }
 
   // Logo if provided
   if (logoUrl) {
@@ -110,116 +108,55 @@ function blueprintToCreatomate(
     y_anchor: '50%',
     time: (ctaPlacement?.timing as number) || duration - 3,
     duration: 3,
-    animations: [
-      { type: 'scale', scale: '0%', duration: 0.3, easing: 'back-out' }
-    ]
+    animations: [{ type: 'scale', scale: '0%', duration: 0.3, easing: 'back-out' }]
   });
 
-  return {
-    output_format: 'mp4',
-    width: dim.width,
-    height: dim.height,
-    duration,
-    frame_rate: 30,
-    elements
-  };
+  return { output_format: 'mp4', width: dim.width, height: dim.height, duration, frame_rate: 30, elements };
 }
 
-// Generate SRT from blueprint subtitles
-function generateSRT(subtitles: Array<{ start: number; end: number; text: string }>): string {
-  return subtitles.map((sub, index) => {
-    const formatTime = (seconds: number) => {
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = Math.floor(seconds % 60);
-      const ms = Math.floor((seconds % 1) * 1000);
-      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')},${ms.toString().padStart(3, '0')}`;
-    };
-
-    return `${index + 1}
-${formatTime(sub.start)} --> ${formatTime(sub.end)}
-${sub.text}`;
-  }).join('\n\n');
-}
-
-// Call Creatomate API
 async function createRender(apiKey: string, source: Record<string, unknown>): Promise<CreatomateRender> {
   const response = await fetch(`${CREATOMATE_API_URL}/renders`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ source })
   });
-
   if (!response.ok) {
     const error = await response.text();
-    console.error('[creative-render] Creatomate create error:', error);
+    console.error('[creative-render] Creatomate error:', error);
     throw new Error(`Creatomate API error: ${response.status}`);
   }
-
   const renders = await response.json();
   return renders[0];
 }
 
-// Poll render status
 async function pollRenderStatus(apiKey: string, renderId: string): Promise<CreatomateRender> {
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const response = await fetch(`${CREATOMATE_API_URL}/renders/${renderId}`, {
       headers: { 'Authorization': `Bearer ${apiKey}` }
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to poll render status: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Failed to poll render: ${response.status}`);
     const render: CreatomateRender = await response.json();
-    
-    if (render.status === 'done') {
-      return render;
-    }
-    
-    if (render.status === 'failed') {
-      throw new Error(render.error_message || 'Render failed');
-    }
-
-    // Wait before next poll
+    if (render.status === 'done') return render;
+    if (render.status === 'failed') throw new Error(render.error_message || 'Render failed');
     await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
   }
-
   throw new Error('Render timeout exceeded');
 }
 
-// Pricing configuration
-const PRICING_CONFIG = {
-  video_render: 0.05,
-  thumbnail_render: 0.01,
-  srt_generation: 0.005
-};
-
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   const startTime = Date.now();
-  
-  // Track for finally{} cleanup
   let workspaceId: string | null = null;
   let quotaIncremented = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let serviceClient: any = null;
+  let serviceClient: ReturnType<typeof createClient> | null = null;
 
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), 
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -227,59 +164,15 @@ Deno.serve(async (req) => {
     const creatomateApiKey = Deno.env.get('CREATOMATE_API_KEY');
 
     if (!creatomateApiKey) {
-      console.error('[creative-render] CREATOMATE_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Render service not configured' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Render service not configured' }), 
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Service client for writes (untyped for Deno compatibility)
     serviceClient = createClient(supabaseUrl, supabaseServiceKey);
-    const { job_id, workspace_id, idempotency_key }: RenderRequest = await req.json();
+    const { job_id, workspace_id }: RenderRequest = await req.json();
     workspaceId = workspace_id;
 
     console.log('[creative-render] Starting render for job:', job_id);
-
-    // IDEMPOTENCY CHECK: If idempotency_key provided, check for existing completed render
-    if (idempotency_key) {
-      const { data: existing } = await serviceClient.rpc('check_idempotency_key', {
-        _key: idempotency_key
-      });
-      
-      if (existing && existing.length > 0 && existing[0].exists_already) {
-        const existingJob = existing[0];
-        if (existingJob.status === 'done') {
-          console.log('[creative-render] Idempotent hit - returning existing job:', existingJob.job_id);
-          
-          // Fetch existing assets
-          const { data: existingAssets } = await serviceClient
-            .from('creative_assets')
-            .select('*')
-            .eq('job_id', existingJob.job_id);
-          
-          return new Response(
-            JSON.stringify({
-              success: true,
-              job_id: existingJob.job_id,
-              idempotent_hit: true,
-              message: 'Render already completed',
-              assets: existingAssets || []
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        } else if (existingJob.status === 'running') {
-          return new Response(
-            JSON.stringify({
-              error: 'render_in_progress',
-              job_id: existingJob.job_id,
-              message: 'Render already in progress for this idempotency key'
-            }),
-            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      }
-    }
 
     // Fetch job
     const { data: job, error: jobError } = await serviceClient
@@ -290,66 +183,34 @@ Deno.serve(async (req) => {
       .single();
 
     if (jobError || !job) {
-      return new Response(
-        JSON.stringify({ error: 'Job not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Job not found' }), 
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Check quotas
-    const { data: quota } = await serviceClient.rpc('get_workspace_quota', {
-      p_workspace_id: workspace_id
-    });
-
-    if (quota && quota[0] && quota[0].concurrent_runs >= 3) {
-      return new Response(
-        JSON.stringify({ error: 'quota_exceeded', message: 'Too many concurrent renders' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const { data: quota } = await serviceClient.rpc('get_workspace_quota', { p_workspace_id: workspace_id });
+    if (quota?.[0]?.concurrent_runs >= 3) {
+      return new Response(JSON.stringify({ error: 'quota_exceeded' }), 
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Increment concurrent runs
-    await serviceClient.rpc('update_workspace_quota', {
-      p_workspace_id: workspace_id,
-      p_increment_concurrent: true
-    });
+    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_increment_concurrent: true });
     quotaIncremented = true;
 
     // Update job status
-    await serviceClient
-      .from('creative_jobs')
-      .update({ status: 'running' })
-      .eq('id', job_id);
+    await serviceClient.from('creative_jobs').update({ status: 'running' }).eq('id', job_id);
 
-    // Fetch blueprints - only approved ones
+    // Fetch approved blueprints
     const { data: blueprints } = await serviceClient
       .from('creative_blueprints')
       .select('*')
       .eq('job_id', job_id)
-      .eq('is_approved', true) // Only render approved blueprints
+      .eq('is_approved', true)
       .order('version', { ascending: false });
 
-    if (!blueprints || blueprints.length === 0) {
-      // Check if there are unapproved blueprints that need QA
-      const { data: unapprovedBp } = await serviceClient
-        .from('creative_blueprints')
-        .select('id')
-        .eq('job_id', job_id)
-        .eq('is_approved', false)
-        .limit(1);
-      
-      if (unapprovedBp && unapprovedBp.length > 0) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'blueprints_not_approved', 
-            message: 'Blueprints must pass QA before rendering. Run creative-qa first.',
-            next_action: 'call_creative_qa'
-          }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw new Error('No blueprints found for job');
+    if (!blueprints?.length) {
+      throw new Error('No approved blueprints found');
     }
 
     // Fetch copy pack
@@ -365,267 +226,61 @@ Deno.serve(async (req) => {
     const logoUrl = inputJson?.logo_url as string;
 
     const renderResults: Array<{ aspect_ratio: string; url: string; render_id: string }> = [];
-    const thumbnailResults: Array<{ aspect_ratio: string; url: string; variant: number }> = [];
 
-    // Render each format (videos + thumbnails)
+    // Render each format
     for (const bp of blueprints) {
       const blueprint = bp.blueprint_json as Record<string, unknown>;
       const aspectRatio = blueprint.aspect_ratio as string;
 
-      console.log(`[creative-render] Rendering ${aspectRatio}...`);
-
       try {
-        // Convert to Creatomate format
         const source = blueprintToCreatomate(blueprint, copywriting, logoUrl);
-
-        // Create render for video
         const render = await createRender(creatomateApiKey, source);
-        console.log(`[creative-render] Render created: ${render.id}`);
-
-        // Poll for completion
         const completed = await pollRenderStatus(creatomateApiKey, render.id);
-        console.log(`[creative-render] Render completed: ${completed.url}`);
 
-        renderResults.push({
-          aspect_ratio: aspectRatio,
-          url: completed.url!,
-          render_id: render.id
+        renderResults.push({ aspect_ratio: aspectRatio, url: completed.url!, render_id: render.id });
+
+        const assetType = aspectRatio === '9:16' ? 'video_9_16' : aspectRatio === '1:1' ? 'video_1_1' : 'video_16_9';
+        await serviceClient.from('creative_assets').insert({
+          job_id, workspace_id, asset_type: assetType, url: completed.url,
+          meta_json: { render_id: render.id, aspect_ratio: aspectRatio }
         });
 
-        // Store video asset
-        const assetType = aspectRatio === '9:16' ? 'video_9_16' : 
-                          aspectRatio === '1:1' ? 'video_1_1' : 'video_16_9';
-
-        await serviceClient
-          .from('creative_assets')
-          .insert({
-            job_id,
-            workspace_id,
-            asset_type: assetType,
-            url: completed.url,
-            meta_json: {
-              render_id: render.id,
-              aspect_ratio: aspectRatio,
-              duration: blueprint.duration_seconds
-            }
-          });
-
-        // Generate thumbnail using snapshot_time extraction from the rendered video
-        // This is the recommended Creatomate approach for extracting frames
-        const duration = blueprint.duration_seconds as number || 15;
-        const snapshotTime = Math.max(0.5, duration * 0.25); // Extract at 25% mark, min 0.5s
-        
-        try {
-          // Method 1: Extract frame from rendered video using snapshot_time
-          const thumbnailSource = {
-            output_format: 'jpg',
-            snapshot_time: snapshotTime,
-            elements: [
-              {
-                type: 'video',
-                source: completed.url // Use the just-rendered video
-              }
-            ]
-          };
-          
-          const thumbRender = await createRender(creatomateApiKey, thumbnailSource);
-          const thumbCompleted = await pollRenderStatus(creatomateApiKey, thumbRender.id);
-          
-          if (thumbCompleted.url) {
-            thumbnailResults.push({
-              aspect_ratio: aspectRatio,
-              url: thumbCompleted.url,
-              variant: 1
-            });
-
-            await serviceClient
-              .from('creative_assets')
-              .insert({
-                job_id,
-                workspace_id,
-                asset_type: 'thumbnail',
-                url: thumbCompleted.url,
-                meta_json: {
-                  aspect_ratio: aspectRatio,
-                  variant: 1,
-                  source: 'snapshot_extraction',
-                  snapshot_time: snapshotTime
-                }
-              });
-              
-            console.log(`[creative-render] Thumbnail generated via snapshot_time for ${aspectRatio}`);
-          }
-        } catch (thumbError) {
-          console.warn(`[creative-render] Snapshot extraction failed for ${aspectRatio}, trying static composition fallback:`, thumbError);
-          
-          // Fallback Method 2: Render static composition (1-frame, no animations)
-          try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const sourceAny = source as any;
-            const staticThumbnailSource = {
-              output_format: 'jpg',
-              width: sourceAny.width,
-              height: sourceAny.height,
-              elements: (sourceAny.elements || []).map((el: Record<string, unknown>) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { animations, time, duration: elDuration, ...rest } = el;
-                return rest;
-              })
-            };
-            
-            const fallbackRender = await createRender(creatomateApiKey, staticThumbnailSource);
-            const fallbackCompleted = await pollRenderStatus(creatomateApiKey, fallbackRender.id);
-            
-            if (fallbackCompleted.url) {
-              thumbnailResults.push({
-                aspect_ratio: aspectRatio,
-                url: fallbackCompleted.url,
-                variant: 1
-              });
-
-              await serviceClient
-                .from('creative_assets')
-                .insert({
-                  job_id,
-                  workspace_id,
-                  asset_type: 'thumbnail',
-                  url: fallbackCompleted.url,
-                  meta_json: {
-                    aspect_ratio: aspectRatio,
-                    variant: 1,
-                    source: 'static_composition_fallback'
-                  }
-                });
-                
-              console.log(`[creative-render] Thumbnail generated via static fallback for ${aspectRatio}`);
-            }
-          } catch (fallbackError) {
-            console.error(`[creative-render] All thumbnail methods failed for ${aspectRatio}:`, fallbackError);
-            // Final fallback: mark as needing manual upload
-            await serviceClient
-              .from('creative_assets')
-              .insert({
-                job_id,
-                workspace_id,
-                asset_type: 'thumbnail',
-                url: null,
-                meta_json: {
-                  aspect_ratio: aspectRatio,
-                  variant: 1,
-                  source: 'pending_manual',
-                  error: 'All auto-generation methods failed, manual upload required'
-                }
-              });
-          }
-        }
-
-        // Generate and store SRT
-        const subtitles = blueprint.subtitles as Array<{ start: number; end: number; text: string }>;
-        if (subtitles && subtitles.length > 0) {
-          const srtContent = generateSRT(subtitles);
-          await serviceClient
-            .from('creative_assets')
-            .insert({
-              job_id,
-              workspace_id,
-              asset_type: 'srt',
-              meta_json: {
-                aspect_ratio: aspectRatio,
-                content: srtContent,
-                subtitle_count: subtitles.length
-              }
-            });
-        }
-
-      } catch (renderError) {
-        console.error(`[creative-render] Failed to render ${aspectRatio}:`, renderError);
-        // Continue with other formats
+        console.log(`[creative-render] Completed ${aspectRatio}`);
+      } catch (err) {
+        console.error(`[creative-render] Failed ${aspectRatio}:`, err);
       }
     }
 
     const duration_ms = Date.now() - startTime;
-
-    // Calculate dynamic cost based on actual renders
-    const costEstimate = (renderResults.length * PRICING_CONFIG.video_render) +
-                         (thumbnailResults.length * PRICING_CONFIG.thumbnail_render) +
-                         (renderResults.length * PRICING_CONFIG.srt_generation);
+    const costEstimate = renderResults.length * 0.05;
 
     // Update job
-    await serviceClient
-      .from('creative_jobs')
-      .update({
-        status: renderResults.length === 3 ? 'done' : 'needs_manual_review',
-        output_json: {
-          ...(job.output_json as Record<string, unknown> || {}),
-          renders: renderResults,
-          thumbnails: thumbnailResults,
-          render_count: renderResults.length,
-          thumbnail_count: thumbnailResults.length
-        },
-        duration_ms,
-        cost_estimate: costEstimate
-      })
-      .eq('id', job_id);
+    await serviceClient.from('creative_jobs').update({
+      status: renderResults.length > 0 ? 'done' : 'failed',
+      output_json: { renders: renderResults, render_count: renderResults.length },
+      duration_ms, cost_estimate: costEstimate
+    }).eq('id', job_id);
 
-    // Decrement concurrent runs - now in finally{} but also here for success path
+    // Decrement quota
     quotaIncremented = false;
-    await serviceClient.rpc('update_workspace_quota', {
-      p_workspace_id: workspace_id,
-      p_decrement_concurrent: true
-    });
+    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_decrement_concurrent: true });
 
-    // Log action
-    await serviceClient
-      .from('action_log')
-      .insert({
-        workspace_id,
-        site_id: job.site_id,
-        actor_type: 'agent',
-        action_type: 'creative_render',
-        action_category: 'creative',
-        description: `Rendered ${renderResults.length} video formats + ${thumbnailResults.length} thumbnails`,
-        details: {
-          job_id,
-          formats: renderResults.map(r => r.aspect_ratio),
-          thumbnails: thumbnailResults.length,
-          duration_ms,
-          cost_estimate: costEstimate
-        },
-        is_automated: true
-      });
+    console.log('[creative-render] Completed:', renderResults.length, 'renders');
 
-    console.log('[creative-render] Completed:', renderResults.length, 'renders,', thumbnailResults.length, 'thumbnails');
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        job_id,
-        renders: renderResults,
-        thumbnails: thumbnailResults,
-        duration_ms,
-        cost_estimate: costEstimate
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ success: true, job_id, renders: renderResults, duration_ms }), 
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error: unknown) {
     console.error('[creative-render] Error:', error);
     const message = error instanceof Error ? error.message : 'Render failed';
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: message }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } finally {
-    // CRITICAL: Always decrement concurrent_runs to prevent quota leak
     if (quotaIncremented && workspaceId && serviceClient) {
       try {
-        await serviceClient.rpc('update_workspace_quota', {
-          p_workspace_id: workspaceId,
-          p_decrement_concurrent: true
-        });
-        console.log('[creative-render] Quota decremented in finally');
-      } catch (cleanupError) {
-        console.error('[creative-render] Failed to decrement quota:', cleanupError);
+        await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspaceId, p_decrement_concurrent: true });
+      } catch (e) {
+        console.error('[creative-render] Quota cleanup failed:', e);
       }
     }
   }
