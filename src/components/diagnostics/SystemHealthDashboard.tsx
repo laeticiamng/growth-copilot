@@ -19,6 +19,8 @@ import {
   Globe,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface ServiceHealth {
   name: string;
@@ -36,6 +38,7 @@ interface SystemMetrics {
 }
 
 export function SystemHealthDashboard() {
+  const { i18n } = useTranslation();
   const [services, setServices] = useState<ServiceHealth[]>([]);
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -241,7 +244,7 @@ export function SystemHealthDashboard() {
                'Problèmes détectés'}
             </p>
             <p className="text-sm text-muted-foreground">
-              Dernière vérification : {lastUpdate.toLocaleTimeString('fr-FR')}
+              Dernière vérification : {lastUpdate.toLocaleTimeString(getIntlLocale(i18n.language))}
             </p>
           </div>
         </div>

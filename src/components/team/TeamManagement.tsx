@@ -50,6 +50,8 @@ import { usePermissions, AppRole } from '@/hooks/usePermissions';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { LoadingState } from '@/components/ui/loading-state';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { getIntlLocale } from '@/lib/date-locale';
 
 const roleLabels: Record<AppRole, { label: string; icon: React.ElementType; color: string }> = {
   owner: { label: 'Propriétaire', icon: Crown, color: 'text-yellow-500' },
@@ -60,6 +62,7 @@ const roleLabels: Record<AppRole, { label: string; icon: React.ElementType; colo
 };
 
 export function TeamManagement() {
+  const { i18n } = useTranslation();
   const { 
     invitations, 
     members, 
@@ -185,7 +188,7 @@ export function TeamManagement() {
                         <div>
                           <p className="font-medium text-sm">{inv.email}</p>
                           <p className="text-xs text-muted-foreground">
-                            Expire le {new Date(inv.expires_at).toLocaleDateString('fr')}
+                            Expire le {new Date(inv.expires_at).toLocaleDateString(getIntlLocale(i18n.language))}
                           </p>
                         </div>
                       </div>
@@ -252,7 +255,7 @@ export function TeamManagement() {
                           <div>
                             <p className="font-medium">{member.email || 'Utilisateur'}</p>
                             <p className="text-xs text-muted-foreground">
-                              Membre depuis {new Date(member.joined_at).toLocaleDateString('fr')}
+                              Membre depuis {new Date(member.joined_at).toLocaleDateString(getIntlLocale(i18n.language))}
                             </p>
                           </div>
                         </div>

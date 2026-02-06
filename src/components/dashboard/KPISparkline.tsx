@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface KPISparklineProps {
   title: string;
@@ -24,6 +26,7 @@ export function KPISparkline({
   icon,
   trendLabel,
 }: KPISparklineProps) {
+  const { i18n } = useTranslation();
   // Calculate trend
   const trend = previousValue && currentValue
     ? ((currentValue - previousValue) / previousValue) * 100
@@ -53,7 +56,7 @@ export function KPISparkline({
       <CardContent>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold">
-            {typeof value === 'number' ? value.toLocaleString('fr-FR') : value}
+            {typeof value === 'number' ? value.toLocaleString(getIntlLocale(i18n.language)) : value}
           </span>
           {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
         </div>

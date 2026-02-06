@@ -4,6 +4,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface KPITrendCardProps {
   title: string;
@@ -30,6 +32,7 @@ export function KPITrendCard({
   format = "number",
   variant = "default",
 }: KPITrendCardProps) {
+  const { i18n } = useTranslation();
   const isPositive = change !== undefined && change > 0;
   const isNegative = change !== undefined && change < 0;
   const isNeutral = change === undefined || change === 0;
@@ -52,11 +55,11 @@ export function KPITrendCard({
     
     switch (format) {
       case "currency":
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(val);
+        return new Intl.NumberFormat(getIntlLocale(i18n.language), { style: 'currency', currency: 'EUR' }).format(val);
       case "percent":
         return `${val.toFixed(1)}%`;
       default:
-        return val.toLocaleString('fr-FR');
+        return val.toLocaleString(getIntlLocale(i18n.language));
     }
   };
 

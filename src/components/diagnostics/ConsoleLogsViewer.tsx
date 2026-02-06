@@ -5,6 +5,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Terminal, X, Copy, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface LogEntry {
   id: string;
@@ -19,6 +21,7 @@ interface ConsoleLogsViewerProps {
 }
 
 export function ConsoleLogsViewer({ maxLogs = 100 }: ConsoleLogsViewerProps) {
+  const { i18n } = useTranslation();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filter, setFilter] = useState<string | null>(null);
 
@@ -151,7 +154,7 @@ export function ConsoleLogsViewer({ maxLogs = 100 }: ConsoleLogsViewerProps) {
               {filteredLogs.map((log) => (
                 <div key={log.id} className={`flex items-start gap-2 ${getLevelColor(log.level)}`}>
                   <span className="text-muted-foreground shrink-0">
-                    {log.timestamp.toLocaleTimeString('fr-FR')}
+                    {log.timestamp.toLocaleTimeString(getIntlLocale(i18n.language))}
                   </span>
                   <Badge 
                     variant={getLevelBadge(log.level) as any} 

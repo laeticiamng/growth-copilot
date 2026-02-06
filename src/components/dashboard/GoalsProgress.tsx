@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Target, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface Goal {
   id: string;
@@ -19,6 +21,7 @@ interface GoalsProgressProps {
 }
 
 export function GoalsProgress({ goals = [], loading = false }: GoalsProgressProps) {
+  const { i18n } = useTranslation();
   const defaultGoals: Goal[] = [
     {
       id: '1',
@@ -140,7 +143,7 @@ export function GoalsProgress({ goals = [], loading = false }: GoalsProgressProp
                   className={`h-2 flex-1 ${getProgressColor(progress)}`}
                 />
                 <span className="text-sm font-medium min-w-[80px] text-right">
-                  {goal.current.toLocaleString('fr-FR')} / {goal.target.toLocaleString('fr-FR')} {goal.unit}
+                  {goal.current.toLocaleString(getIntlLocale(i18n.language))} / {goal.target.toLocaleString(getIntlLocale(i18n.language))} {goal.unit}
                 </span>
               </div>
 

@@ -36,6 +36,8 @@ import {
 } from "lucide-react";
 import { useWebhooks, WEBHOOK_EVENTS, type WebhookLog } from "@/hooks/useWebhooks";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface WebhookCondition {
   field: string;
@@ -76,6 +78,7 @@ const SAMPLE_FIELDS = [
 ];
 
 export function AdvancedWebhooks() {
+  const { i18n } = useTranslation();
   const { webhooks, loading, createWebhook, updateWebhook, deleteWebhook, testWebhook, getWebhookLogs } = useWebhooks();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showLogsDialog, setShowLogsDialog] = useState(false);
@@ -524,7 +527,7 @@ export function AdvancedWebhooks() {
                       <Clock className="w-3 h-3" />
                       {log.duration_ms}ms
                       <span>•</span>
-                      {new Date(log.created_at).toLocaleString('fr-FR')}
+                      {new Date(log.created_at).toLocaleString(getIntlLocale(i18n.language))}
                     </div>
                   </div>
                   {log.error_message && (
