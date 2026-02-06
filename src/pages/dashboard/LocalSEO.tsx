@@ -16,22 +16,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  MapPin,
-  Star,
-  Phone,
-  Navigation,
-  Eye,
-  MessageSquare,
-  Calendar,
-  Send,
-  ThumbsUp,
-  ThumbsDown,
-  AlertTriangle,
-  CheckCircle2,
-  Plus,
-  RefreshCw,
-  Loader2,
-  Bot,
+  MapPin, Star, Phone, Navigation, Eye, MessageSquare, Calendar, Send,
+  ThumbsUp, ThumbsDown, AlertTriangle, CheckCircle2, Plus, RefreshCw, Loader2, Bot,
 } from "lucide-react";
 import { useLocalSEO } from "@/hooks/useLocalSEO";
 import { useSites } from "@/hooks/useSites";
@@ -41,19 +27,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function LocalSEO() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
-  const { 
-    profiles, 
-    posts, 
-    loading, 
-    syncing, 
-    syncGBP, 
-    createPost, 
-    refetch 
-  } = useLocalSEO();
+  const { profiles, posts, loading, syncing, syncGBP, createPost, refetch } = useLocalSEO();
   
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [showReplyDialog, setShowReplyDialog] = useState(false);
@@ -63,48 +41,46 @@ export default function LocalSEO() {
   const [generatingReply, setGeneratingReply] = useState(false);
   const [submittingPost, setSubmittingPost] = useState(false);
 
-  const currentProfile = profiles[0]; // First profile for current site
+  const currentProfile = profiles[0];
   const gbpScore = currentProfile?.audit_score || 0;
   const hasProfile = !!currentProfile;
 
   const gbpMetrics = [
-    { label: "Note moyenne", value: currentProfile?.rating_avg?.toFixed(1) || "-", icon: Star },
-    { label: "Avis", value: currentProfile?.reviews_count?.toString() || "0", icon: MessageSquare },
-    { label: "Photos", value: currentProfile?.photos_count?.toString() || "0", icon: Eye },
-    { label: "Catégories", value: (currentProfile?.categories as string[])?.length?.toString() || "0", icon: MapPin },
+    { label: t("modules.localSeo.avgRating"), value: currentProfile?.rating_avg?.toFixed(1) || "-", icon: Star },
+    { label: t("modules.localSeo.reviews"), value: currentProfile?.reviews_count?.toString() || "0", icon: MessageSquare },
+    { label: t("modules.localSeo.photos"), value: currentProfile?.photos_count?.toString() || "0", icon: Eye },
+    { label: t("modules.localSeo.categories"), value: (currentProfile?.categories as string[])?.length?.toString() || "0", icon: MapPin },
   ];
 
-  // Real scheduled posts from database only
   const scheduledPosts = posts.filter(p => p.status === 'scheduled').map(p => ({
-    title: p.title || 'Sans titre',
+    title: p.title || t("modules.localSeo.noTitle"),
     type: p.post_type || 'Update',
     scheduledFor: p.scheduled_at ? new Date(p.scheduled_at).toLocaleDateString(locale) : '—',
   }));
 
-  // GBP audit tasks - empty by default, would come from database in production
   const gbpTasks: Array<{ task: string; status: string; priority: string }> = [];
 
   const handleSyncGBP = async () => {
     const { error } = await syncGBP();
     if (error) {
-      toast.error("Erreur de synchronisation GBP");
+      toast.error(t("modules.localSeo.syncError"));
     } else {
-      toast.success("Données GBP synchronisées");
+      toast.success(t("modules.localSeo.syncSuccess"));
     }
   };
 
   const handleCreatePost = async () => {
     if (!postForm.title || !postForm.content) {
-      toast.error("Titre et contenu requis");
+      toast.error(t("modules.localSeo.titleAndContentRequired"));
       return;
     }
     setSubmittingPost(true);
     const { error } = await createPost(postForm);
     setSubmittingPost(false);
     if (error) {
-      toast.error("Erreur lors de la création du post");
+      toast.error(t("modules.localSeo.postCreationError"));
     } else {
-      toast.success("Post créé avec succès");
+      toast.success(t("modules.localSeo.postCreated"));
       setShowPostDialog(false);
       setPostForm({ title: "", content: "", post_type: "update" });
     }
@@ -112,10 +88,8 @@ export default function LocalSEO() {
 
   const handleGenerateAIReply = async () => {
     if (!selectedReview) return;
-    
-    // Use workspace from context
     if (!currentWorkspace) {
-      toast.error("Workspace non trouvé");
+      toast.error(t("modules.localSeo.workspaceNotFound"));
       return;
     }
     
@@ -129,28 +103,21 @@ export default function LocalSEO() {
           input: {
             system_prompt: "Tu es un assistant qui génère des réponses professionnelles et empathiques aux avis clients. Réponds en français, de manière concise (max 3 phrases).",
             user_prompt: `Génère une réponse à cet avis client:\n\nAuteur: ${selectedReview.author}\nAvis: "${selectedReview.comment}"`,
-            context: {
-              author: selectedReview.author,
-              review: selectedReview.comment,
-            }
+            context: { author: selectedReview.author, review: selectedReview.comment }
           }
         }
       });
-
       if (error) throw error;
-      
       if (data?.success && data?.artifact?.summary) {
         setReplyText(data.artifact.summary);
-        toast.success("Réponse générée par l'IA");
+        toast.success(t("modules.localSeo.aiReplyGenerated"));
       } else {
-        // Fallback if no structured response
         setReplyText(`Merci ${selectedReview.author} pour votre retour. Nous prenons note de vos commentaires et restons à votre disposition.`);
-        toast.info("Réponse par défaut générée");
+        toast.info(t("modules.localSeo.defaultReplyGenerated"));
       }
     } catch (error) {
       console.error("AI reply error:", error);
-      toast.error("Erreur lors de la génération");
-      // Fallback response
+      toast.error(t("modules.localSeo.aiReplyError"));
       setReplyText(`Merci ${selectedReview.author} pour votre retour. Nous prenons note de vos commentaires et restons à votre disposition.`);
     } finally {
       setGeneratingReply(false);
@@ -163,40 +130,32 @@ export default function LocalSEO() {
     setShowReplyDialog(true);
   };
 
-  // Empty state - no site selected
   if (!currentSite) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Local SEO</h1>
-          <p className="text-muted-foreground">Google Business Profile & présence locale</p>
+          <h1 className="text-2xl font-bold">{t("modules.localSeo.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.localSeo.subtitle")}</p>
         </div>
-        <NoSiteEmptyState moduleName="Local SEO" icon={MapPin} />
+        <NoSiteEmptyState moduleName={t("nav.localSeo")} icon={MapPin} />
       </div>
     );
   }
 
-  // Empty state - no GBP profile
   if (!hasProfile && profiles.length === 0) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Local SEO</h1>
-          <p className="text-muted-foreground">Google Business Profile & présence locale</p>
+          <h1 className="text-2xl font-bold">{t("modules.localSeo.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.localSeo.subtitle")}</p>
         </div>
         <ModuleEmptyState
           icon={MapPin}
-          moduleName="Local SEO"
-          description="Connectez votre fiche Google Business Profile pour gérer vos avis, poster des actualités et optimiser votre présence locale. L'IA génère des réponses aux avis et des posts optimisés."
-          features={["Gestion des avis", "Posts GBP automatisés", "FAQ Engine", "Audit de fiche"]}
-          primaryAction={{
-            label: "Connecter Google Business",
-            href: "/dashboard/integrations",
-          }}
-          secondaryAction={{
-            label: "Synchroniser GBP",
-            onClick: handleSyncGBP,
-          }}
+          moduleName={t("nav.localSeo")}
+          description={t("modules.localSeo.emptyDesc")}
+          features={t("modules.localSeo.emptyFeatures").split(",")}
+          primaryAction={{ label: t("modules.localSeo.connectGBP"), href: "/dashboard/integrations" }}
+          secondaryAction={{ label: t("modules.localSeo.syncGBP"), onClick: handleSyncGBP }}
         />
       </div>
     );
@@ -204,60 +163,40 @@ export default function LocalSEO() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Local SEO</h1>
-          <p className="text-muted-foreground">
-            Google Business Profile & présence locale
-          </p>
+          <h1 className="text-2xl font-bold">{t("modules.localSeo.title")}</h1>
+          <p className="text-muted-foreground">{t("modules.localSeo.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleSyncGBP} disabled={syncing}>
             <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Sync...' : 'Sync GBP'}
+            {syncing ? 'Sync...' : t("modules.localSeo.syncGBP")}
           </Button>
           <Button variant="hero" onClick={() => setShowPostDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau post
+            {t("modules.localSeo.newPost")}
           </Button>
         </div>
       </div>
 
-      {/* Score + Metrics */}
       <div className="grid lg:grid-cols-5 gap-6">
         <Card variant="gradient" className="lg:col-span-1">
           <CardContent className="pt-6 text-center">
             <div className="relative w-24 h-24 mx-auto mb-4">
               <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  strokeWidth="8"
-                  fill="none"
-                  className="stroke-background/30"
-                />
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${gbpScore * 2.51} 251`}
-                  className="stroke-primary-foreground"
-                  strokeLinecap="round"
-                />
+                <circle cx="48" cy="48" r="40" strokeWidth="8" fill="none" className="stroke-background/30" />
+                <circle cx="48" cy="48" r="40" strokeWidth="8" fill="none" strokeDasharray={`${gbpScore * 2.51} 251`} className="stroke-primary-foreground" strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-3xl font-bold">{gbpScore}</span>
               </div>
             </div>
-            <p className="font-medium">Score GBP</p>
+            <p className="font-medium">{t("modules.localSeo.gbpScore")}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <Star className="w-4 h-4 fill-primary text-primary" />
               <span className="text-sm">
-                {currentProfile?.rating_avg?.toFixed(1) || "-"} ({currentProfile?.reviews_count || 0} avis)
+                {currentProfile?.rating_avg?.toFixed(1) || "-"} ({currentProfile?.reviews_count || 0} {t("modules.localSeo.reviews").toLowerCase()})
               </span>
             </div>
           </CardContent>
@@ -283,10 +222,10 @@ export default function LocalSEO() {
 
       <Tabs defaultValue="reviews" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="reviews">Avis</TabsTrigger>
-          <TabsTrigger value="posts">Posts GBP</TabsTrigger>
-          <TabsTrigger value="audit">Audit fiche</TabsTrigger>
-          <TabsTrigger value="faq">FAQ Engine</TabsTrigger>
+          <TabsTrigger value="reviews">{t("modules.localSeo.reviewsTabs")}</TabsTrigger>
+          <TabsTrigger value="posts">{t("modules.localSeo.postsTabs")}</TabsTrigger>
+          <TabsTrigger value="audit">{t("modules.localSeo.auditTab")}</TabsTrigger>
+          <TabsTrigger value="faq">{t("modules.localSeo.faqTab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-6">
@@ -296,8 +235,8 @@ export default function LocalSEO() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Avis récents</CardTitle>
-                      <CardDescription>Gérer et répondre aux avis clients</CardDescription>
+                      <CardTitle>{t("modules.localSeo.recentReviews")}</CardTitle>
+                      <CardDescription>{t("modules.localSeo.manageReviews")}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -305,18 +244,18 @@ export default function LocalSEO() {
                   {!hasProfile ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <Star className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p className="font-medium">Aucun profil GBP configuré</p>
-                      <p className="text-sm mt-1">Autorisez l'accès à Google Business Profile pour voir vos avis.</p>
+                      <p className="font-medium">{t("modules.localSeo.noGBPProfile")}</p>
+                      <p className="text-sm mt-1">{t("modules.localSeo.authorizeGBP")}</p>
                       <Button variant="outline" className="mt-4" onClick={handleSyncGBP}>
                         <RefreshCw className="w-4 h-4 mr-2" />
-                        Synchroniser GBP
+                        {t("modules.localSeo.syncGBP")}
                       </Button>
                     </div>
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
                       <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p className="font-medium">Aucun avis synchronisé</p>
-                      <p className="text-sm mt-1">Les avis de votre fiche GBP apparaîtront ici après synchronisation.</p>
+                      <p className="font-medium">{t("modules.localSeo.noSyncedReviews")}</p>
+                      <p className="text-sm mt-1">{t("modules.localSeo.reviewsAfterSync")}</p>
                     </div>
                   )}
                 </CardContent>
@@ -326,46 +265,46 @@ export default function LocalSEO() {
             <div className="space-y-6">
               <Card variant="feature">
                 <CardHeader>
-                  <CardTitle className="text-base">Demander un avis</CardTitle>
+                  <CardTitle className="text-base">{t("modules.localSeo.requestReview")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button variant="outline" className="w-full justify-start">
                     <Send className="w-4 h-4 mr-2" />
-                    Envoyer par email
+                    {t("modules.localSeo.sendByEmail")}
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <Phone className="w-4 h-4 mr-2" />
-                    Envoyer par SMS
+                    {t("modules.localSeo.sendBySMS")}
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
-                    QR Code avis
+                    {t("modules.localSeo.qrCodeReview")}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card variant="feature">
                 <CardHeader>
-                  <CardTitle className="text-base">Stats avis</CardTitle>
+                  <CardTitle className="text-base">{t("modules.localSeo.reviewStats")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {hasProfile && currentProfile?.reviews_count ? (
                     <>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">Total avis</span>
+                        <span className="text-sm">{t("modules.localSeo.totalReviews")}</span>
                         <span className="font-medium">{currentProfile.reviews_count}</span>
                       </div>
                       <Progress value={currentProfile.rating_avg ? (currentProfile.rating_avg / 5) * 100 : 0} className="h-2" />
                       <div className="flex items-center justify-between text-sm mt-4">
                         <span className="flex items-center gap-1">
                           <ThumbsUp className="w-4 h-4 text-chart-3" />
-                          Note moyenne
+                          {t("modules.localSeo.avgScore")}
                         </span>
                         <span>{currentProfile.rating_avg?.toFixed(1) || "-"}/5</span>
                       </div>
                     </>
                   ) : (
                     <div className="text-center py-4 text-muted-foreground">
-                      <p className="text-sm">Aucune statistique disponible</p>
+                      <p className="text-sm">{t("modules.localSeo.noStatsAvailable")}</p>
                     </div>
                   )}
                 </CardContent>
@@ -379,12 +318,12 @@ export default function LocalSEO() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Posts planifiés</CardTitle>
-                  <CardDescription>Publications Google Business Profile</CardDescription>
+                  <CardTitle>{t("modules.localSeo.plannedPosts")}</CardTitle>
+                  <CardDescription>{t("modules.localSeo.gbpPublications")}</CardDescription>
                 </div>
                 <Button variant="outline" size="sm">
                   <Plus className="w-4 h-4 mr-2" />
-                  Nouveau
+                  {t("modules.localSeo.newPostBtn")}
                 </Button>
               </div>
             </CardHeader>
@@ -394,11 +333,9 @@ export default function LocalSEO() {
                   <Calendar className="w-5 h-5 text-primary" />
                   <div className="flex-1">
                     <p className="font-medium">{post.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {post.type} • {post.scheduledFor}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{post.type} • {post.scheduledFor}</p>
                   </div>
-                  <Button variant="ghost" size="sm">Modifier</Button>
+                  <Button variant="ghost" size="sm">{t("modules.localSeo.modifyPost")}</Button>
                 </div>
               ))}
             </CardContent>
@@ -408,44 +345,31 @@ export default function LocalSEO() {
         <TabsContent value="audit" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>Audit de la fiche</CardTitle>
-              <CardDescription>Optimisations recommandées pour votre fiche GBP</CardDescription>
+              <CardTitle>{t("modules.localSeo.profileAudit")}</CardTitle>
+              <CardDescription>{t("modules.localSeo.profileAuditDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {gbpTasks.length > 0 ? (
                 gbpTasks.map((task, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                  >
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-3">
                       {task.status === "done" ? (
                         <CheckCircle2 className="w-5 h-5 text-chart-3" />
                       ) : (
                         <div className="w-5 h-5 rounded-full border-2 border-muted-foreground" />
                       )}
-                      <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>
-                        {task.task}
-                      </span>
+                      <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>{task.task}</span>
                     </div>
-                    <Badge
-                      variant={
-                        task.priority === "high"
-                          ? "destructive"
-                          : task.priority === "medium"
-                          ? "secondary"
-                          : "outline"
-                      }
-                    >
-                      {task.priority === "high" ? "Prioritaire" : task.priority === "medium" ? "Moyen" : "Faible"}
+                    <Badge variant={task.priority === "high" ? "destructive" : task.priority === "medium" ? "secondary" : "outline"}>
+                      {task.priority === "high" ? t("modules.localSeo.priorityHigh") : task.priority === "medium" ? t("modules.localSeo.priorityMedium") : t("modules.localSeo.priorityLow")}
                     </Badge>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <CheckCircle2 className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">Aucune tâche d'optimisation</p>
-                  <p className="text-xs mt-1">Synchronisez votre fiche GBP pour obtenir des recommandations.</p>
+                  <p className="text-sm">{t("modules.localSeo.noOptimizationTasks")}</p>
+                  <p className="text-xs mt-1">{t("modules.localSeo.syncForRecommendations")}</p>
                 </div>
               )}
             </CardContent>
@@ -455,70 +379,56 @@ export default function LocalSEO() {
         <TabsContent value="faq" className="space-y-6">
           <Card variant="feature">
             <CardHeader>
-              <CardTitle>FAQ Engine</CardTitle>
+              <CardTitle>{t("modules.localSeo.faqTab")}</CardTitle>
               <CardDescription>
-                Gérez vos FAQ site + suggestions de posts GBP pour répondre aux questions fréquentes
+                {t("modules.localSeo.faqEngineDesc")}
                 <br />
-                <span className="text-xs text-muted-foreground mt-1 block">
-                  Note : L'API Q&A Google Business Profile est discontinuée depuis Nov 2025
-                </span>
+                <span className="text-xs text-muted-foreground mt-1 block">{t("modules.localSeo.faqApiNote")}</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
                 <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Ajoutez vos FAQ pour générer du contenu optimisé</p>
+                <p>{t("modules.localSeo.addFAQContent")}</p>
                 <Button variant="outline" className="mt-4">
                   <Plus className="w-4 h-4 mr-2" />
-                  Ajouter une FAQ
+                  {t("modules.localSeo.addFAQ")}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-      {/* Post Creation Dialog */}
+
       <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouveau post GBP</DialogTitle>
+            <DialogTitle>{t("modules.localSeo.newGBPPost")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Titre</label>
-              <Input
-                value={postForm.title}
-                onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
-                placeholder="Titre du post"
-              />
+              <label className="text-sm font-medium">{t("modules.localSeo.postTitle")}</label>
+              <Input value={postForm.title} onChange={(e) => setPostForm({ ...postForm, title: e.target.value })} placeholder={t("modules.localSeo.postTitlePlaceholder")} />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Contenu</label>
-              <Textarea
-                value={postForm.content}
-                onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
-                placeholder="Contenu du post..."
-                rows={4}
-              />
+              <label className="text-sm font-medium">{t("modules.localSeo.postContent")}</label>
+              <Textarea value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} placeholder={t("modules.localSeo.postContentPlaceholder")} rows={4} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPostDialog(false)}>
-              Annuler
-            </Button>
+            <Button variant="outline" onClick={() => setShowPostDialog(false)}>{t("common.cancel")}</Button>
             <Button onClick={handleCreatePost} disabled={submittingPost}>
               {submittingPost ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Publier
+              {t("modules.localSeo.publishPost")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Reply Dialog */}
       <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Répondre à l'avis</DialogTitle>
+            <DialogTitle>{t("modules.localSeo.replyToReview")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {selectedReview && (
@@ -529,26 +439,19 @@ export default function LocalSEO() {
             )}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Votre réponse</label>
+                <label className="text-sm font-medium">{t("modules.localSeo.yourResponse")}</label>
                 <Button variant="ghost" size="sm" onClick={handleGenerateAIReply} disabled={generatingReply}>
                   {generatingReply ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Bot className="w-4 h-4 mr-1" />}
                   IA
                 </Button>
               </div>
-              <Textarea
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                placeholder="Rédigez votre réponse..."
-                rows={4}
-              />
+              <Textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder={t("modules.localSeo.writeResponse")} rows={4} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowReplyDialog(false)}>
-              Annuler
-            </Button>
-            <Button onClick={() => { toast.success("Réponse envoyée (simulation)"); setShowReplyDialog(false); }}>
-              Envoyer
+            <Button variant="outline" onClick={() => setShowReplyDialog(false)}>{t("common.cancel")}</Button>
+            <Button onClick={() => { toast.success(t("modules.localSeo.replySent")); setShowReplyDialog(false); }}>
+              {t("modules.localSeo.send")}
             </Button>
           </DialogFooter>
         </DialogContent>

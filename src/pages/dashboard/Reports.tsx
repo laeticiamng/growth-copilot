@@ -15,19 +15,17 @@ import { ReportScheduler } from "@/components/reports/ReportScheduler";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 
 export default function Reports() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("reports");
 
-  // Fetch monthly reports from database
   const { data: reports, isLoading: reportsLoading, refetch } = useQuery({
     queryKey: ['monthly-reports', currentWorkspace?.id, currentSite?.id],
     queryFn: async () => {
       if (!currentWorkspace?.id || !currentSite?.id) return [];
-      
       const { data, error } = await supabase
         .from('monthly_reports')
         .select('*')
@@ -35,19 +33,16 @@ export default function Reports() {
         .eq('site_id', currentSite.id)
         .order('month', { ascending: false })
         .limit(12);
-      
       if (error) throw error;
       return data || [];
     },
     enabled: !!currentWorkspace?.id && !!currentSite?.id,
   });
 
-  // Fetch recent audit trail actions
   const { data: auditTrail, isLoading: auditLoading } = useQuery({
     queryKey: ['audit-trail', currentWorkspace?.id],
     queryFn: async () => {
       if (!currentWorkspace?.id) return [];
-      
       const { data, error } = await supabase
         .from('action_log')
         .select('*')
@@ -55,22 +50,18 @@ export default function Reports() {
         .eq('actor_type', 'agent')
         .order('created_at', { ascending: false })
         .limit(10);
-      
       if (error) throw error;
       return data || [];
     },
     enabled: !!currentWorkspace?.id,
   });
 
-  // Fetch KPI trends for comparison
   const { data: kpiTrend } = useQuery({
     queryKey: ['kpi-trend', currentWorkspace?.id, currentSite?.id],
     queryFn: async () => {
       if (!currentWorkspace?.id || !currentSite?.id) return null;
-      
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
       const sixtyDaysAgo = new Date();
       sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
       
@@ -117,49 +108,37 @@ export default function Reports() {
 
   const handleGenerateReport = async (retryCount = 0) => {
     if (!currentWorkspace?.id || !currentSite?.id) {
-      toast.error("Veuillez sélectionner un site");
+      toast.error(t("modules.reports.selectSite"));
       return;
     }
-
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-report', {
-        body: {
-          workspace_id: currentWorkspace.id,
-          site_id: currentSite.id,
-        },
+        body: { workspace_id: currentWorkspace.id, site_id: currentSite.id },
       });
-
       if (error) throw error;
-
       if (data?.success) {
-        toast.success("Rapport généré avec succès", {
-          action: data.url ? {
-            label: "Télécharger",
-            onClick: () => window.open(data.url, '_blank'),
-          } : undefined,
+        toast.success(t("modules.reports.reportGenerated"), {
+          action: data.url ? { label: t("modules.reports.download"), onClick: () => window.open(data.url, '_blank') } : undefined,
         });
         refetch();
       } else {
-        throw new Error(data?.error || "Erreur inconnue");
+        throw new Error(data?.error || t("modules.reports.unknownError"));
       }
     } catch (err) {
       console.error('Report generation error:', err);
-      
       if (retryCount < 2) {
-        toast.info(`Nouvelle tentative... (${retryCount + 1}/2)`);
+        toast.info(t("modules.reports.retrying", { count: retryCount + 1 }));
         setTimeout(() => handleGenerateReport(retryCount + 1), 2000);
         return;
       }
-      
-      toast.error("Échec de la génération après plusieurs tentatives");
+      toast.error(t("modules.reports.generationFailed"));
     } finally {
       if (retryCount >= 2 || retryCount === 0) {
         setGenerating(false);
       }
     }
   };
-
 
   const formatMonth = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -172,11 +151,11 @@ export default function Reports() {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     
-    if (diffHours < 1) return "Il y a moins d'une heure";
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
+    if (diffHours < 1) return t("modules.reports.timeAgo.lessThanHour");
+    if (diffHours < 24) return t("modules.reports.timeAgo.hoursAgo", { n: diffHours });
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays === 1) return "Hier";
-    return `Il y a ${diffDays} jours`;
+    if (diffDays === 1) return t("modules.reports.timeAgo.yesterday");
+    return t("modules.reports.timeAgo.daysAgo", { n: diffDays });
   };
 
   const TrendIndicator = ({ change }: { change: string }) => {
@@ -190,63 +169,50 @@ export default function Reports() {
     );
   };
 
-  // Empty state - no site selected
   if (!currentSite) {
     return (
       <div className="space-y-8">
         <div className="flex items-center gap-3">
           <span className="text-3xl">📊</span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Rapports</h1>
-            <p className="text-muted-foreground">Suivez vos performances et exportez des rapports professionnels</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("modules.reports.title")}</h1>
+            <p className="text-muted-foreground">{t("modules.reports.subtitle")}</p>
           </div>
         </div>
-        <NoSiteEmptyState moduleName="Rapports" icon={FileText} />
+        <NoSiteEmptyState moduleName={t("nav.reports")} icon={FileText} />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header - Apple-like */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-3xl">📊</span>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Rapports</h1>
-            <p className="text-muted-foreground">
-              Suivez vos performances et exportez des rapports professionnels
-            </p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("modules.reports.title")}</h1>
+            <p className="text-muted-foreground">{t("modules.reports.subtitle")}</p>
           </div>
         </div>
-        <Button 
-          variant="hero" 
-          onClick={() => handleGenerateReport()}
-          disabled={generating || !currentSite}
-        >
-          {generating ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Download className="w-4 h-4 mr-2" />
-          )}
-          Générer rapport PDF
+        <Button variant="hero" onClick={() => handleGenerateReport()} disabled={generating || !currentSite}>
+          {generating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+          {t("modules.reports.generatePDFReport")}
         </Button>
       </div>
 
-      {/* Period Comparison Cards */}
       {kpiTrend && (
         <div className="grid sm:grid-cols-3 gap-4">
           <Card variant="kpi">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Conversions</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.reports.kpi.conversions")}</p>
                   <p className="text-2xl font-bold">{kpiTrend.conversions.current}</p>
                 </div>
                 <TrendIndicator change={kpiTrend.conversions.change} />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                vs {kpiTrend.conversions.previous} période précédente
+                {t("modules.reports.prevPeriod", { val: kpiTrend.conversions.previous })}
               </p>
             </CardContent>
           </Card>
@@ -254,13 +220,13 @@ export default function Reports() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Clics organiques</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.reports.kpi.organicClicks")}</p>
                   <p className="text-2xl font-bold">{kpiTrend.clicks.current.toLocaleString()}</p>
                 </div>
                 <TrendIndicator change={kpiTrend.clicks.change} />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                vs {kpiTrend.clicks.previous.toLocaleString()} période précédente
+                {t("modules.reports.prevPeriod", { val: kpiTrend.clicks.previous.toLocaleString() })}
               </p>
             </CardContent>
           </Card>
@@ -268,13 +234,13 @@ export default function Reports() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Impressions</p>
+                  <p className="text-sm text-muted-foreground">{t("modules.reports.kpi.impressionsLabel")}</p>
                   <p className="text-2xl font-bold">{(kpiTrend.impressions.current / 1000).toFixed(1)}K</p>
                 </div>
                 <TrendIndicator change={kpiTrend.impressions.change} />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                vs {(kpiTrend.impressions.previous / 1000).toFixed(1)}K période précédente
+                {t("modules.reports.prevPeriod", { val: `${(kpiTrend.impressions.previous / 1000).toFixed(1)}K` })}
               </p>
             </CardContent>
           </Card>
@@ -283,12 +249,12 @@ export default function Reports() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="reports">Rapports</TabsTrigger>
-          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
-          <TabsTrigger value="comparison">Comparaison</TabsTrigger>
+          <TabsTrigger value="reports">{t("modules.reports.tabs.reports")}</TabsTrigger>
+          <TabsTrigger value="audit">{t("modules.reports.tabs.audit")}</TabsTrigger>
+          <TabsTrigger value="comparison">{t("modules.reports.tabs.comparison")}</TabsTrigger>
           <TabsTrigger value="scheduled">
             <Settings2 className="w-4 h-4 mr-1" />
-            Planification
+            {t("modules.reports.tabs.scheduled")}
           </TabsTrigger>
         </TabsList>
 
@@ -297,7 +263,7 @@ export default function Reports() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                Rapports mensuels
+                {t("modules.reports.monthlyReports")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -313,18 +279,14 @@ export default function Reports() {
                       <div>
                         <span className="font-medium capitalize">{formatMonth(report.month)}</span>
                         <p className="text-xs text-muted-foreground">
-                          Généré le {new Date(report.created_at).toLocaleDateString(locale)}
+                          {t("modules.reports.generatedOn", { date: new Date(report.created_at).toLocaleDateString(locale) })}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="gradient">Prêt</Badge>
+                      <Badge variant="gradient">{t("modules.reports.ready")}</Badge>
                       {report.pdf_url && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => window.open(report.pdf_url, '_blank')}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => window.open(report.pdf_url, '_blank')}>
                           <Download className="w-4 h-4" />
                         </Button>
                       )}
@@ -334,11 +296,11 @@ export default function Reports() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Aucun rapport disponible</p>
-                  <p className="text-sm mt-1">Générez votre premier rapport mensuel</p>
+                  <p className="font-medium">{t("modules.reports.noReportsAvailable")}</p>
+                  <p className="text-sm mt-1">{t("modules.reports.generateFirstReport")}</p>
                   <Button variant="outline" className="mt-4" onClick={() => handleGenerateReport()}>
                     <Download className="w-4 h-4 mr-2" />
-                    Générer maintenant
+                    {t("modules.reports.generateNow")}
                   </Button>
                 </div>
               )}
@@ -351,9 +313,9 @@ export default function Reports() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="w-5 h-5" />
-                Historique des actions IA
+                {t("modules.reports.aiActionHistory")}
               </CardTitle>
-              <CardDescription>Toutes les actions effectuées par les agents</CardDescription>
+              <CardDescription>{t("modules.reports.aiActionHistoryDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {auditLoading ? (
@@ -370,9 +332,7 @@ export default function Reports() {
                       <p className="font-medium">{action.description}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">{action.action_type}</Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimeAgo(action.created_at)}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{formatTimeAgo(action.created_at)}</span>
                       </div>
                     </div>
                     <Badge variant={action.result === 'success' ? 'success' : action.result === 'error' ? 'destructive' : 'secondary'}>
@@ -383,8 +343,8 @@ export default function Reports() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
                   <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Aucune action enregistrée</p>
-                  <p className="text-sm mt-1">Les actions IA apparaîtront ici</p>
+                  <p className="font-medium">{t("modules.reports.noActionsRecorded")}</p>
+                  <p className="text-sm mt-1">{t("modules.reports.aiActionsWillAppear")}</p>
                 </div>
               )}
             </CardContent>
@@ -396,9 +356,9 @@ export default function Reports() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" />
-                Comparaison de périodes
+                {t("modules.reports.periodComparison")}
               </CardTitle>
-              <CardDescription>Analysez l'évolution de vos KPIs dans le temps</CardDescription>
+              <CardDescription>{t("modules.reports.periodComparisonDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {kpiTrend ? (
@@ -406,48 +366,48 @@ export default function Reports() {
                   <div className="grid sm:grid-cols-3 gap-6">
                     <div className="p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium">Conversions</span>
+                        <span className="text-sm font-medium">{t("modules.reports.kpi.conversions")}</span>
                         <TrendIndicator change={kpiTrend.conversions.change} />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="text-muted-foreground">{t("modules.reports.thisMonth")}</span>
                           <span className="font-medium">{kpiTrend.conversions.current}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span className="text-muted-foreground">{t("modules.reports.prevMonth")}</span>
                           <span>{kpiTrend.conversions.previous}</span>
                         </div>
                       </div>
                     </div>
                     <div className="p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium">Clics</span>
+                        <span className="text-sm font-medium">{t("modules.reports.kpi.organicClicks")}</span>
                         <TrendIndicator change={kpiTrend.clicks.change} />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="text-muted-foreground">{t("modules.reports.thisMonth")}</span>
                           <span className="font-medium">{kpiTrend.clicks.current.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span className="text-muted-foreground">{t("modules.reports.prevMonth")}</span>
                           <span>{kpiTrend.clicks.previous.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
                     <div className="p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium">Impressions</span>
+                        <span className="text-sm font-medium">{t("modules.reports.kpi.impressionsLabel")}</span>
                         <TrendIndicator change={kpiTrend.impressions.change} />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Ce mois</span>
+                          <span className="text-muted-foreground">{t("modules.reports.thisMonth")}</span>
                           <span className="font-medium">{(kpiTrend.impressions.current / 1000).toFixed(1)}K</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Mois précédent</span>
+                          <span className="text-muted-foreground">{t("modules.reports.prevMonth")}</span>
                           <span>{(kpiTrend.impressions.previous / 1000).toFixed(1)}K</span>
                         </div>
                       </div>
@@ -457,8 +417,8 @@ export default function Reports() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
                   <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Données insuffisantes</p>
-                  <p className="text-sm mt-1">Connectez vos sources de données pour voir les comparaisons</p>
+                  <p className="font-medium">{t("modules.reports.insufficientData")}</p>
+                  <p className="text-sm mt-1">{t("modules.reports.connectDataSources")}</p>
                 </div>
               )}
             </CardContent>
