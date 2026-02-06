@@ -548,6 +548,25 @@ export const fr = {
     serverError: "Erreur serveur",
     networkError: "Erreur réseau",
     tryAgain: "Réessayer",
+    tryAgainLater: "Veuillez réessayer plus tard.",
+  },
+
+  // Error Boundary
+  errorBoundary: {
+    title: "Une erreur inattendue s'est produite",
+    description: "Notre équipe a été notifiée et travaille à résoudre ce problème.",
+    errorId: "ID de l'erreur (à communiquer au support) :",
+    autoReported: "L'erreur a été automatiquement signalée à notre équipe technique.",
+    reload: "Recharger la page",
+    report: "Signaler le problème",
+  },
+
+  // Session
+  session: {
+    expired: "Session expirée",
+    expiredDesc: "Veuillez vous reconnecter pour continuer.",
+    expiringSoon: "Session expire bientôt",
+    expiringSoonDesc: "Votre session expire dans {{minutes}} minute(s). Sauvegardez votre travail.",
   },
 
   // Dashboard Layout (Sidebar navigation)

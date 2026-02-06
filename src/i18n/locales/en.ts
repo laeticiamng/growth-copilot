@@ -548,6 +548,25 @@ export const en = {
     serverError: "Server error",
     networkError: "Network error",
     tryAgain: "Try again",
+    tryAgainLater: "Please try again later.",
+  },
+
+  // Error Boundary
+  errorBoundary: {
+    title: "An unexpected error occurred",
+    description: "Our team has been notified and is working to resolve the issue.",
+    errorId: "Error ID (share with support):",
+    autoReported: "The error has been automatically reported to our technical team.",
+    reload: "Reload page",
+    report: "Report the problem",
+  },
+
+  // Session
+  session: {
+    expired: "Session expired",
+    expiredDesc: "Please log in again to continue.",
+    expiringSoon: "Session expiring soon",
+    expiringSoonDesc: "Your session expires in {{minutes}} minute(s). Save your work.",
   },
 
   // Dashboard Layout (Sidebar navigation)

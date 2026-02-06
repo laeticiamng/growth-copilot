@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface SessionExpiryOptions {
   warningMinutes?: number;
@@ -17,6 +18,7 @@ export function useSessionExpiry(options: SessionExpiryOptions = {}) {
   const { warningMinutes = 5, onExpirySoon, onExpired } = options;
   const { session, user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const warningShownRef = useRef(false);
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -33,8 +35,8 @@ export function useSessionExpiry(options: SessionExpiryOptions = {}) {
         onExpired();
       } else {
         toast({
-          title: "Session expirée",
-          description: "Veuillez vous reconnecter pour continuer.",
+          title: t('session.expired', 'Session expired'),
+          description: t('session.expiredDesc', 'Please log in again to continue.'),
           variant: "destructive",
         });
       }
@@ -49,8 +51,8 @@ export function useSessionExpiry(options: SessionExpiryOptions = {}) {
         onExpirySoon();
       } else {
         toast({
-          title: "Session expire bientôt",
-          description: `Votre session expire dans ${Math.ceil(minutesUntilExpiry)} minute(s). Sauvegardez votre travail.`,
+          title: t('session.expiringSoon', 'Session expiring soon'),
+          description: t('session.expiringSoonDesc', 'Your session expires in {{minutes}} minute(s). Save your work.', { minutes: Math.ceil(minutesUntilExpiry) }),
           variant: "default",
         });
       }
@@ -60,11 +62,11 @@ export function useSessionExpiry(options: SessionExpiryOptions = {}) {
     if (minutesUntilExpiry > warningMinutes) {
       warningShownRef.current = false;
     }
-  }, [session?.expires_at, warningMinutes, onExpirySoon, onExpired, toast]);
+  }, [session?.expires_at, warningMinutes, onExpirySoon, onExpired, toast, t]);
 
   // Set up session change listener
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'TOKEN_REFRESHED') {
         warningShownRef.current = false;
         console.log('[Session] Token refreshed, expiry warning reset');

@@ -75,7 +75,8 @@ export function SitesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchSites();
-  }, [currentWorkspace]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWorkspace?.id]);
 
   const createSite = async (data: Partial<Site>) => {
     if (!currentWorkspace) return { error: new Error('No workspace selected'), site: null };

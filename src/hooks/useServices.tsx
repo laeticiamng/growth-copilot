@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkspace } from './useWorkspace';
 import { useAuth } from './useAuth';
@@ -152,10 +152,19 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
     fetchSubscription();
   }, [fetchWorkspaceServices, fetchSubscription]);
 
-  // Compute enabled services with full details
-  const enabledServiceIds = new Set(workspaceServices.map(ws => ws.service_id));
-  const enabledServices = catalog.filter(s => s.is_core || enabledServiceIds.has(s.id));
-  const enabledSlugs = new Set(enabledServices.map(s => s.slug));
+  // Compute enabled services with full details - stabilized with useMemo
+  const enabledServiceIds = useMemo(
+    () => new Set(workspaceServices.map(ws => ws.service_id)),
+    [workspaceServices]
+  );
+  const enabledServices = useMemo(
+    () => catalog.filter(s => s.is_core || enabledServiceIds.has(s.id)),
+    [catalog, enabledServiceIds]
+  );
+  const enabledSlugs = useMemo(
+    () => new Set(enabledServices.map(s => s.slug)),
+    [enabledServices]
+  );
   
   // Check functions
   const hasService = useCallback((slug: string) => {

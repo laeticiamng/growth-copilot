@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -30,7 +30,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchWorkspaces = async () => {
+  const fetchWorkspaces = useCallback(async () => {
     if (!user) {
       setWorkspaces([]);
       setCurrentWorkspace(null);
@@ -53,19 +53,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setWorkspaces(ws);
     
     // Auto-select first workspace if none selected
-    if (ws.length > 0 && !currentWorkspace) {
-      setCurrentWorkspace(ws[0]);
-    }
+    setCurrentWorkspace(prev => {
+      if (ws.length > 0 && !prev) return ws[0];
+      return prev;
+    });
     
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchWorkspaces();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [fetchWorkspaces]);
 
-  const createWorkspace = async (name: string, slug: string) => {
+  const createWorkspace = useCallback(async (name: string, slug: string) => {
     if (!user) return { error: new Error('Not authenticated'), workspace: null };
 
     const { data, error } = await supabase
@@ -87,7 +87,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setCurrentWorkspace(workspace);
     
     return { error: null, workspace };
-  };
+  }, [user]);
 
   return (
     <WorkspaceContext.Provider value={{ 

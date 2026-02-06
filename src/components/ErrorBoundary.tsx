@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { captureException, isSentryEnabled } from '@/lib/sentry';
+import i18next from 'i18next';
 
 interface Props {
   children: ReactNode;
@@ -29,7 +30,6 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
-    // Capture to Sentry and get event ID
     const eventId = captureException(error, {
       componentStack: errorInfo.componentStack,
       errorBoundary: true,
@@ -37,7 +37,6 @@ export class ErrorBoundary extends Component<Props, State> {
     
     this.setState({ errorInfo, eventId: eventId || null });
     
-    // Log structured error for debugging
     const errorPayload = {
       error: error.message,
       stack: error.stack,
@@ -48,10 +47,8 @@ export class ErrorBoundary extends Component<Props, State> {
       sentryEventId: eventId,
     };
     
-    // Always log structured data
     console.error('[Error Boundary]', errorPayload);
     
-    // In production, store in localStorage for diagnostics
     if (import.meta.env.PROD) {
       try {
         const errors = JSON.parse(localStorage.getItem('app_errors') || '[]');
@@ -82,6 +79,8 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   render() {
+    const t = (key: string, fallback: string) => i18next.t(key, fallback);
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
@@ -94,17 +93,16 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="mx-auto mb-4 p-3 rounded-full bg-destructive/10 w-fit">
                 <AlertTriangle className="w-8 h-8 text-destructive" />
               </div>
-              <CardTitle>Une erreur inattendue s'est produite</CardTitle>
+              <CardTitle>{t('errorBoundary.title', 'An unexpected error occurred')}</CardTitle>
               <CardDescription>
-                Notre équipe a été notifiée et travaille à résoudre ce problème.
+                {t('errorBoundary.description', 'Our team has been notified and is working to resolve the issue.')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Error ID for support reference */}
               {this.state.eventId && (
                 <div className="p-3 rounded-lg bg-muted/50 border border-border">
                   <p className="text-xs text-muted-foreground mb-1">
-                    ID de l'erreur (à communiquer au support) :
+                    {t('errorBoundary.errorId', 'Error ID (share with support):')}
                   </p>
                   <code className="text-sm font-mono text-foreground select-all">
                     {this.state.eventId}
@@ -112,14 +110,12 @@ export class ErrorBoundary extends Component<Props, State> {
                 </div>
               )}
               
-              {/* Sentry status indicator */}
               {isSentryEnabled && (
                 <p className="text-xs text-center text-muted-foreground">
-                  ✓ L'erreur a été automatiquement signalée à notre équipe technique.
+                  ✓ {t('errorBoundary.autoReported', 'The error has been automatically reported to our technical team.')}
                 </p>
               )}
               
-              {/* Dev-only error details */}
               {import.meta.env.DEV && this.state.error && (
                 <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
                   <p className="text-sm font-mono text-destructive break-all">
@@ -138,11 +134,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 </div>
               )}
               
-              {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button onClick={this.handleReset} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Recharger la page
+                  {t('errorBoundary.reload', 'Reload page')}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -150,7 +145,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   className="flex-1"
                 >
                   <Mail className="w-4 h-4 mr-2" />
-                  Signaler le problème
+                  {t('errorBoundary.report', 'Report the problem')}
                 </Button>
               </div>
             </CardContent>
