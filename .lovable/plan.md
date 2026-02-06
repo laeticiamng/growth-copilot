@@ -1,150 +1,127 @@
 
-
-# Audit Multi-Roles Final -- Corrections Pre-Publication
-
-## Synthese des audits precedents
-
-Les rounds precedents ont corrige :
-- Navigation Login -> `/auth` (OK)
-- Hero CTA -> `/auth?tab=signup` (OK)
-- CTA bottom -> `/auth?tab=signup` (OK)
-- Page 404 brandee + i18n (OK)
-- TrustBar SOC2 -> "Audit trail complet" (OK)
-- TeamOrgChart collapse (OK)
-- Tools avec icones Lucide (OK)
-- Testimonials avec gradients premium (OK)
-
-## Problemes restants identifies
+# Audit Critique Multi-Roles - Growth OS
+## Publication Readiness Assessment
 
 ---
 
-### P0 -- Bloquants publication
+## 1. SYNTHESE DES CONSTATS PAR ROLE
 
-#### 1. Pricing CTAs pointent vers `/onboarding` (route protegee)
-**Source** : Pricing.tsx lignes 86, 141, 184
-**Impact** : Les 3 boutons CTA du Pricing ("Starter", "Full Company", "A la carte") redirigent vers `/onboarding`. Un visiteur non connecte est redirige vers `/auth` sans contexte. Incoherent avec les corrections Hero/CTA deja appliquees.
-**Solution** : Remplacer `<Link to="/onboarding">` par `<Link to="/auth?tab=signup">` sur les 3 CTAs.
+### Directeur Marketing (Branding Premium)
+- **Hero** : Le titre est clair mais le champ URL dans le Hero ne transmet pas l'URL saisie au signup (l'URL est ignoree a la navigation vers `/auth?tab=signup`). L'utilisateur perd son input = friction.
+- **Testimonials** : 3 temoignages avec noms fictifs (LM, SB, MD). En l'absence de vrais clients beta, cela nuit a la credibilite. Les initiales sont generiques.
+- **Section "Equipe IA"** : Noms fictifs francais (Sophie Marchand, Jean-Michel Fournier, etc.) presentent un risque de confusion -- les visiteurs pourraient croire que ce sont de vraies personnes.
+- **Services CTA** : Le bouton "Construire mon package" renvoie vers `/onboarding` (route protegee) -- un visiteur non connecte sera redirige vers `/auth` sans contexte = abandon garanti. **P0**.
+- **Pricing** : ROI compare 39 employes x 4 500EUR = 175 500EUR vs 9 000EUR. Le claim est agressif et pourrait etre percu comme trompeur sans disclaimers plus visibles.
 
-#### 2. Page Mentions Legales (Legal.tsx) -- champs "[a completer]" visibles
-**Source** : Legal.tsx lignes 26-30
-**Impact** : La page affiche des placeholders bruts : "[Adresse a completer]", "[Numero SIRET a completer]", "[Ville d'immatriculation a completer]", "[Montant a completer] euros", "[Numero TVA a completer]". C'est un signal de non-professionnalisme fatal pour la credibilite.
-**Solution** : Retirer les champs SIRET/RCS/TVA/Capital avec des placeholders et les remplacer par "Informations disponibles sur demande" ou les remplir avec les vraies valeurs. La page n'a pas non plus le design system (pas de Navbar/Footer).
+### CEO (Strategie)
+- **Comprehension 3 secondes** : Le Hero est bon. "Votre entreprise. Propulsee par l'IA." est clair. Sous-titre efficace.
+- **Positionnement** : Coherent -- plateforme SaaS B2B d'agents IA par departements.
+- **Probleme critique** : La landing page est TRES longue (Hero > TrustBar > Features > Services > TeamOrgChart > Tools > HowItWorks > Testimonials > Pricing > FAQ > CTA > Footer). 12 sections. Le visiteur peut se perdre avant d'atteindre le pricing.
 
-#### 3. Pages Privacy.tsx et Terms.tsx non traduites (hardcodees en francais)
-**Source** : Privacy.tsx, Terms.tsx
-**Impact** : Ces pages sont entierement en francais brut sans i18n. Un utilisateur EN/DE/ES verra des pages legales incomprehensibles. Pour une plateforme multilingue 7 langues, c'est un probleme legal (RGPD exige l'accessibilite des informations).
-**Solution (pragmatique)** : Ajouter un disclaimer "This page is available in French only / Cette page est disponible en francais uniquement" en haut des pages, car traduire 500+ lignes de contenu juridique depasse le scope. C'est la pratique standard pour les SaaS bases en France.
+### COO (Operations)
+- **Hero URL input** : L'URL saisie n'est pas passee en parametre au signup. Le travail de l'utilisateur est perdu. Il faudrait passer l'URL en query param (`/auth?tab=signup&url=...`).
+- **Onboarding** : Le flow fonctionne mais le site-analyze n'est appele qu'apres login -- la promesse "analyse instantanee" de la landing n'est tenue qu'apres inscription.
 
-#### 4. Structured Data fictives dans Index.tsx
-**Source** : Index.tsx lignes 35-37
-**Impact** : Le schema JSON-LD contient `"ratingValue": "4.8"` et `"reviewCount": "127"` -- des donnees inventees. Google peut penaliser le site pour abus de donnees structurees (violation des guidelines).
-**Solution** : Supprimer le bloc `aggregateRating` entierement.
+### CISO (Securite)
+- **Pas de secret cote client** : Confirme -- `.env` ne contient que les cles publiques (anon key, URL, project ID). OK.
+- **Edge Functions** : Toutes en `verify_jwt = false` avec validation manuelle dans le code. C'est le pattern correct.
+- **CORS** : Configuration centralisee avec whitelist stricte. OK.
+- **Rate limiting** : Present sur `contact_submissions`, `smart_link_clicks`, `smart_link_emails`. OK.
+- **Tokens OAuth** : Chiffrement AES-GCM 256-bit. OK.
+- **Audit log** : Immutable (trigger `prevent_audit_modification`). OK.
+- **send-contact-form** : Appele sans auth depuis la page Contact (public). Protege par rate limit DB. Acceptable.
 
----
+### DPO (RGPD)
+- **Privacy Policy** : Complete et detaillee (541 lignes). Conforme RGPD : bases legales, sous-traitants, durees de conservation, droits utilisateurs, contact DPO.
+- **CGU** : Completes (470 lignes). Mentions legales, tarification, propriete intellectuelle, clause IA.
+- **Mentions legales** : Page dediee `/legal` avec toutes les informations requises.
+- **Cookies** : Mention dans la privacy policy mais **pas de bandeau de consentement cookies**. Si Crisp/analytics sont charges, c'est une non-conformite. **P1**.
+- **Contact DPO** : contact@emotionscare.com -- present partout. OK.
 
-### P1 -- Important pour credibilite
+### CDO (Data)
+- **KPI tracking** : Pas de tracking analytics sur la landing page (pas de GA4, pas de Plausible, pas d'event tracking). **P1** pour mesurer conversions.
+- **Dashboards internes** : Relies aux donnees utilisateur via workspace_id + RLS. Architecture coherente.
 
-#### 5. Page Legal.tsx -- pas de design system
-**Source** : Legal.tsx
-**Impact** : La page n'utilise pas le design system (pas de Navbar, pas de Footer, fond blanc basique). Incohérent avec le reste du site premium.
-**Solution** : Ajouter Navbar et Footer comme sur Privacy.tsx et Terms.tsx.
+### Head of Design (UX/UI)
+- **Desktop** : Layout propre, hierarchie visuelle claire, design system coherent (cards, badges, gradients).
+- **Mobile** : Navbar hamburger menu fonctionnel via Sheet component. Responsive grid sur les sections.
+- **Footer** : Grid 6 colonnes desktop, 2 colonnes mobile. Liens fonctionnels.
+- **Auth page** : Clean, avec validation inline Zod, social login (Google/Apple), forgot password flow complet.
+- **Landing page trop longue** : 12 sections avant le footer. Certaines sont redondantes (Services + TeamOrgChart + Pricing repetent les infos departements/prix).
 
-#### 6. Footer liens "Documentation" et "Status" pointent vers des routes protegees
-**Source** : Footer.tsx lignes 17-18
-**Impact** : `/dashboard/guide` et `/dashboard/status` sont des ProtectedRoutes. Un visiteur non connecte qui clique sera redirige vers `/auth` sans contexte.
-**Solution** : Soit retirer ces liens du footer public, soit les remplacer par des ancres vers des sections de la landing page.
-
-#### 7. Starter Plan badges "11 AI Employees / 11 Departments" trompeurs
-**Source** : Pricing.tsx lignes 70-71
-**Impact** : Le Starter affiche les memes badges que le Full Company. Le plan Starter est decrit comme "lite access to all departments" mais les badges suggerent un acces complet identique.
-**Solution** : Changer les badges du Starter pour refleter "11 dept. (mode lite)" au lieu de laisser croire que c'est le meme niveau que Full Company. Ajouter "(lite)" au badge ou changer le nombre d'employes a "11" avec un qualificatif "lite".
-
----
-
-### P2 -- Polish
-
-#### 8. Contact email "emotionscare.com" dans contact cards, footer, privacy, terms, legal
-**Impact** : Le domaine "emotionscare.com" est correct selon les memories du projet (c'est le vrai nom de l'entreprise). Ce n'est donc PAS un bug mais un choix de branding coherent avec les pages legales. Pas de correction requise.
-
----
-
-## Tableau de synthese
-
-| # | Probleme | Gravite | Solution | Fichier(s) | Validation |
-|---|----------|---------|----------|------------|------------|
-| 1 | Pricing CTAs -> /onboarding | P0 | Changer en `/auth?tab=signup` | Pricing.tsx (3 liens) | Cliquer chaque CTA Pricing -> arrive sur /auth?tab=signup |
-| 2 | Legal.tsx champs "[a completer]" | P0 | Nettoyer les placeholders + ajouter Navbar/Footer | Legal.tsx | Page sans brackets visibles |
-| 3 | Privacy/Terms non traduites | P0 | Ajouter disclaimer langue en haut | Privacy.tsx, Terms.tsx | Disclaimer visible en haut |
-| 4 | Structured Data fictives | P0 | Supprimer aggregateRating | Index.tsx | Pas de rating fictif dans le source |
-| 5 | Legal.tsx pas de design system | P1 | Ajouter Navbar + Footer | Legal.tsx | Page avec Navbar/Footer coherent |
-| 6 | Footer liens vers routes protegees | P1 | Remplacer par liens publics | Footer.tsx | Liens ne redirigent plus vers /auth |
-| 7 | Badges Starter trompeurs | P1 | Ajouter qualificatif "lite" | Pricing.tsx | Badge indique clairement "lite" |
+### Beta Testeur (QA)
+- **Services CTA -> /onboarding** : BLOQUANT. Visiteur non connecte clique "Construire mon package" -> redirige vers /auth sans contexte. **P0**.
+- **Hero URL non transmise** : L'utilisateur saisit son URL, clique "Commencer", arrive sur signup SANS son URL pre-remplie. **P1**.
+- **Navbar "Get Started" et "Login"** : Les deux pointent vers `/auth`. OK mais "Get Started" devrait pointer vers `/auth?tab=signup` pour differencier. Verifie : c'est le cas dans le code (ligne 57-58 Navbar). **En fait non** -- les deux pointent vers `/auth` sans `?tab=signup`. **P1**.
+- **Pages testees sans erreur** : /, /auth, /privacy, /terms, /legal, /contact, /about, /roadmap. Toutes chargent. OK.
+- **404 page** : Stylisee avec Navbar + Footer. OK.
+- **Console errors** : Uniquement des warnings postMessage (Lovable infra) et CORS manifest (non-bloquant). **Pas d'erreur applicative**.
 
 ---
 
-## Plan d'implementation
+## 2. TABLEAU DE SYNTHESE
 
-### Fichiers a modifier (6 fichiers)
-
-| Fichier | Changements |
-|---------|-------------|
-| `src/components/landing/Pricing.tsx` | Lignes 86, 141, 184 : `/onboarding` -> `/auth?tab=signup` + badges Starter "lite" |
-| `src/pages/Legal.tsx` | Retirer "[a completer]", ajouter Navbar + Footer, design system |
-| `src/pages/Index.tsx` | Supprimer `aggregateRating` du JSON-LD (lignes 33-37) |
-| `src/pages/Privacy.tsx` | Ajouter disclaimer multilingue en haut |
-| `src/pages/Terms.tsx` | Ajouter disclaimer multilingue en haut |
-| `src/components/landing/Footer.tsx` | Remplacer liens protegees par liens publics |
-
-### Details techniques
-
-**Pricing.tsx** (3 occurrences) :
-```
-Avant : <Link to="/onboarding">
-Apres : <Link to="/auth?tab=signup">
-```
-
-**Index.tsx** :
-Supprimer les lignes 33-37 (aggregateRating block).
-
-**Legal.tsx** :
-- Ajouter `<Navbar />` et `<Footer />`
-- Remplacer les 5 placeholders "[... a completer]" par "Sur demande"
-- Appliquer le meme design que Privacy.tsx (header gradient, bg-background)
-
-**Privacy.tsx / Terms.tsx** :
-Ajouter en haut un Badge :
-```tsx
-<Badge variant="outline" className="mb-4">
-  {t("common.frenchOnly")}
-</Badge>
-```
-Avec cle i18n : "This document is available in French only" / "Ce document est disponible en francais uniquement" dans les 7 locales.
-
-**Footer.tsx** :
-- `/dashboard/guide` -> `/about` (page publique existante)
-- `/dashboard/status` -> supprimer ou pointer vers `/contact`
-
-### Cles i18n a ajouter (7 locales)
-
-| Cle | FR | EN |
-|-----|----|----|
-| `common.frenchOnly` | "Ce document est disponible en francais uniquement" | "This document is available in French only" |
+| # | Probleme | Gravite | Cause | Solution | Temps |
+|---|----------|---------|-------|----------|-------|
+| 1 | Services CTA `/onboarding` redirige vers auth sans contexte | **P0** | Route protegee, visiteur non connecte | Changer lien vers `/auth?tab=signup` | 2 min |
+| 2 | Hero URL non transmise au signup | **P1** | `navigate('/auth?tab=signup')` sans l'URL | Ajouter `&url=` param, lire dans Auth/Onboarding | 15 min |
+| 3 | Navbar "Get Started" pointe vers `/auth` au lieu de `/auth?tab=signup` | **P1** | Lien incorrect | Corriger href | 2 min |
+| 4 | Pas de bandeau cookies/consentement | **P1** | Non implemente | Ajouter un bandeau minimal ou desactiver Crisp par defaut | 30 min |
+| 5 | Testimonials avec noms fictifs sans mention | **P1** | Pas de vrais temoignages | Ajouter un disclaimer "Profils illustratifs" ou retirer la section | 5 min |
+| 6 | ROI claim agressif sans disclaimer visible | **P2** | Marketing | Le disclaimer existe mais en text-xs. Augmenter la visibilite | 5 min |
+| 7 | Landing page trop longue (12 sections) | **P2** | Feature creep | Envisager fusion Services/TeamOrgChart ou rendre certaines sections collapsibles | 30 min |
+| 8 | Pas de tracking KPI minimal (events CTA/signup) | **P1** | Non implemente | Ajouter events basiques via Supabase (table `analytics_events`) ou Plausible | 45 min |
+| 9 | TeamOrgChart noms fictifs sans mention IA | **P2** | Design choice | Ajouter badge "Agent IA" visible sur chaque nom pour eviter confusion humain/IA | 10 min |
+| 10 | Privacy/Terms/Legal hardcodes en francais | **P2** | i18n partiel | Pages legales uniquement FR -- acceptable pour marche FR, badge deja present pour non-FR | 0 min |
 
 ---
 
-## Verdict final
+## 3. CORRECTIONS A APPLIQUER
 
-Apres ces 7 corrections (4 P0 + 3 P1), la plateforme sera "Release-Grade" :
+### P0 (bloquants avant publication)
+1. **Services CTA** : Remplacer `Link to="/onboarding"` par `Link to="/auth?tab=signup"` dans `Services.tsx` (ligne 111)
 
-- 0 lien mort / 0 route protegee accessible depuis le public
-- 0 placeholder visible
-- 0 donnee structuree fictive
-- Pages legales completes et coherentes
-- Design system uniforme sur toutes les pages
-- CTAs coherents sur tout le parcours visiteur
-- Mobile-first impeccable (verifie via screenshots 390x844)
-- Securite : pas de secrets cote client, RLS 325+ policies, CORS whitelist, rate limiting
-- RGPD : Privacy policy complete, CGU completes, mentions legales, contact DPO
+### P1 (importants, a corriger)
+2. **Hero URL** : Passer l'URL en query param au signup et la recuperer dans Auth.tsx pour pre-remplir l'onboarding
+3. **Navbar** : Changer le bouton "Get Started" de `/auth` vers `/auth?tab=signup` (ligne 57-58 Navbar.tsx + ligne 92 mobile)
+4. **Bandeau cookies** : Ajouter un composant CookieConsent minimal qui bloque Crisp jusqu'a acceptation
+5. **Testimonials disclaimer** : Ajouter une note "Profils illustratifs basees sur des cas d'usage reels"
+6. **Tracking KPI** : Ajouter des events minimaux (visite landing, clic CTA, page signup vue)
 
-**READY TO PUBLISH = NON** (4 bloquants P0 restants listees ci-dessus)
-**Apres corrections = OUI**
+### P2 (ameliorations)
+7. **ROI disclaimer** : Augmenter la taille du texte disclaimer sous le calcul ROI
+8. **TeamOrgChart** : Clarifier visuellement que les "employes" sont des agents IA (badge plus prominent)
+9. **Landing longueur** : Optionnel -- la structure actuelle est fonctionnelle
+
+---
+
+## 4. TICKETS READY-TO-SHIP
+
+| Titre | Priorite | Fichiers | Fix | DoD |
+|-------|----------|----------|-----|-----|
+| Fix Services CTA route | P0 | `Services.tsx:111` | `/onboarding` -> `/auth?tab=signup` | Bouton mene au signup |
+| Fix Navbar Get Started tab | P1 | `Navbar.tsx:57,92` | `/auth` -> `/auth?tab=signup` | Tab signup pre-selectionnee |
+| Pass Hero URL to signup | P1 | `Hero.tsx:50`, `Auth.tsx` | Ajouter `&url=` param | URL pre-remplie dans onboarding |
+| Add cookie consent banner | P1 | Nouveau composant | Bloquer Crisp avant consentement | Bandeau visible, Crisp conditionnel |
+| Add testimonials disclaimer | P1 | `Testimonials.tsx` | Ajouter note sous les temoignages | Mention visible |
+| Add minimal KPI tracking | P1 | Nouveau hook + table | Logger events CTA/signup | Events traces en DB |
+| Improve ROI disclaimer | P2 | `TeamOrgChart.tsx:237`, `Pricing.tsx:210` | Augmenter taille texte | Disclaimer lisible |
+| Clarify AI agents vs humans | P2 | `TeamOrgChart.tsx` | Badge "Agent IA" plus visible | Pas de confusion possible |
+
+---
+
+## 5. VERDICT
+
+**READY TO PUBLISH = NON**
+
+### 1 blocage P0 restant :
+1. **Services CTA -> `/onboarding`** : un visiteur non connecte qui clique ce bouton est redirige vers `/auth` sans savoir pourquoi. Correction : 2 minutes.
+
+### 5 items P1 importants :
+2. Navbar "Get Started" ne pre-selectionne pas l'onglet signup
+3. Hero URL perdue au passage vers signup
+4. Pas de bandeau cookies (risque RGPD si Crisp est charge)
+5. Testimonials sans mention "illustratif"
+6. Pas de tracking KPI minimal
+
+**Apres correction du P0 et des 5 P1, la plateforme sera publication-ready.** L'infrastructure technique (securite, RLS, CORS, auth, legal) est solide. Le design est coherent et premium. Les pages legales sont completes. Le principal risque est la friction du parcours visiteur (CTA cassee, URL perdue).
