@@ -24,9 +24,9 @@ export function Testimonials() {
   const { t } = useTranslation();
 
   const testimonials = [
-    { key: "t1", initials: "LM", rating: 5 },
-    { key: "t2", initials: "SB", rating: 5 },
-    { key: "t3", initials: "MD", rating: 5 },
+    { key: "t1", initials: "LM", rating: 5, avatarGradient: "bg-gradient-to-br from-primary/20 to-accent/20" },
+    { key: "t2", initials: "SB", rating: 5, avatarGradient: "bg-gradient-to-br from-chart-3/20 to-primary/20" },
+    { key: "t3", initials: "MD", rating: 5, avatarGradient: "bg-gradient-to-br from-accent/20 to-chart-5/20" },
   ];
 
   return (
@@ -56,7 +56,7 @@ export function Testimonials() {
 
                 <div className="flex items-center gap-3">
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    <AvatarFallback className={`${item.avatarGradient} text-primary text-sm font-semibold`}>
                       {item.initials}
                     </AvatarFallback>
                   </Avatar>

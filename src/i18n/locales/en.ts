@@ -406,6 +406,8 @@ export const en = {
       qualityLabel: "Quality Guardian",
       employeesLabel: "employees",
       costComparison: "A traditional team of {{total}} employees costs ~{{cost}}€/month. With Full Company at 9,000€/month, you save {{savings}}€/month.",
+      showAll: "See {{count}} more departments",
+      showLess: "Show less",
     },
     teamOrg: {
       title: "Your AI marketing team",
