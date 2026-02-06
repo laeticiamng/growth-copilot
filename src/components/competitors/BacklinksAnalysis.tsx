@@ -26,6 +26,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface BacklinkData {
   domain: string;
@@ -58,6 +59,7 @@ interface CompetitorComparison {
 }
 
 export function BacklinksAnalysis() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(false);
@@ -80,7 +82,7 @@ export function BacklinksAnalysis() {
 
   const handleAnalyze = async () => {
     if (!currentSite?.url) {
-      toast.error("Sélectionnez un site à analyser");
+      toast.error(t("backlinksAnalysis.selectSite"));
       return;
     }
 
@@ -102,14 +104,14 @@ export function BacklinksAnalysis() {
       if (data?.backlinks) {
         setBacklinks(data.backlinks);
         setMetrics(data.metrics || metrics);
-        toast.success("Analyse terminée");
+        toast.success(t("backlinksAnalysis.analysisDone"));
       }
     } catch (error) {
       console.error("[Backlinks] Analysis error:", error);
       
       // Generate sample data for demo
       generateSampleData();
-      toast.info("Mode démo - données simulées");
+      toast.info(t("backlinksAnalysis.demoMode"));
     } finally {
       setAnalyzing(false);
     }
@@ -200,7 +202,7 @@ export function BacklinksAnalysis() {
     a.download = `backlinks-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Export téléchargé");
+    toast.success(t("backlinksAnalysis.exportDownloaded"));
   };
 
   const filteredBacklinks = backlinks.filter(b => 

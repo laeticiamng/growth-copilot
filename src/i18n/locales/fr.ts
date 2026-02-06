@@ -30,6 +30,7 @@ export const fr = {
     accessDenied: "Accès refusé",
     accessDeniedDesc: "Vous n'avez pas les permissions nécessaires pour accéder à cette section.",
     contactAdmin: "Contactez un administrateur pour obtenir l'accès",
+    days: "jours",
   },
 
   // Navigation
@@ -3630,6 +3631,44 @@ export const fr = {
     coreOS: "Core OS", departments: "Départements", integrationsTab: "Intégrations",
     thirdPartyIntegrations: "Intégrations Tierces",
     thirdPartyDesc: "Connexions aux plateformes externes pour synchronisation des données",
+  },
+  contentPage: {
+    title: "Contenu & Mots-clés", subtitle: "Stratégie de contenu et opportunités SEO",
+    loading: "Chargement du contenu...", selectSite: "Sélectionnez un site pour voir vos données",
+    selectSiteFirst: "Sélectionnez un site d'abord", briefGenerated: "Brief généré avec succès",
+    generationError: "Erreur lors de la génération", generateBriefBtn: "Générer brief",
+    tabGenerate: "Générer du contenu", tabKeywords: "Mots-clés", tabClusters: "Clusters", tabCalendar: "Calendrier",
+    trackedKeywords: "Mots-clés suivis", totalVolume: "Volume total", opportunities: "Opportunités",
+    mainKeywords: "Mots-clés principaux", viewAll: "Voir tout",
+    keyword: "Mot-clé", volume: "Volume", position: "Position", evolution: "Évolution",
+    mapped: "Mappé", new: "Nouveau",
+    contentPlan: "Plan de contenu", contentPlanDesc: "Articles en cours et planifiés",
+    newBrief: "Nouveau brief", target: "Cible", words: "mots",
+    published: "Publié", draft: "Brouillon",
+    noBriefs: "Aucun brief créé", noBriefsDesc: "Utilisez l'onglet \"Générer du contenu\" pour créer votre premier brief",
+    emptyDesc: "Analysez vos mots-clés, générez des briefs SEO optimisés et planifiez votre stratégie de contenu.",
+    featureKeywords: "Analyse de mots-clés", featureBriefs: "Briefs SEO automatisés",
+    featureClusters: "Clusters sémantiques", featureCalendar: "Calendrier éditorial",
+    connectGSC: "Connecter Google Search Console", generateBrief: "Générer un brief IA",
+  },
+  competitorAlerts: {
+    title: "Alertes Concurrentielles", subtitle: "Soyez notifié des changements importants",
+    newAlert: "Nouvelle alerte", noAlerts: "Aucune alerte configurée",
+    noAlertsDesc: "Créez des alertes pour surveiller vos concurrents", createAlert: "Créer une alerte",
+    selectCompetitor: "Sélectionnez un concurrent", alertCreated: "Alerte créée", alertDeleted: "Alerte supprimée",
+    ranking: "Changement de position", content: "Nouveau contenu", backlinks: "Nouveaux backlinks",
+    social: "Activité sociale", price: "Changement de prix",
+    increase: "Augmentation", decrease: "Diminution", change: "Changement", anyChange: "Tout changement",
+    lastAlert: "Dernière alerte", newAlertTitle: "Nouvelle alerte concurrentielle",
+    competitor: "Concurrent", alertType: "Type d'alerte", condition: "Condition", threshold: "Seuil",
+  },
+  backlinksAnalysis: {
+    selectSite: "Sélectionnez un site à analyser", analysisDone: "Analyse terminée",
+    demoMode: "Mode démo - données simulées", exportDownloaded: "Export téléchargé",
+  },
+  roiCalculator: {
+    noWorkspace: "Aucun workspace sélectionné", analysisGenerated: "Analyse générée !",
+    generationError: "Erreur lors de la génération", pdfInProgress: "Export PDF en cours de développement",
   },
 };
 

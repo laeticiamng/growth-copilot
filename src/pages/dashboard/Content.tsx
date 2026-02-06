@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,21 +25,18 @@ import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty
 import { ContentStrategyGenerator } from "@/components/content";
 
 export default function Content() {
+  const { t } = useTranslation();
   const { currentSite } = useSites();
   const { keywords, clusters, briefs, loading, refetch } = useContent();
-   const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace } = useWorkspace();
   const [syncing, setSyncing] = useState(false);
- 
-   // Real-time subscription for content changes
-   useRealtimeSubscription(
-     `content-briefs-${currentWorkspace?.id}`,
-     {
-       table: 'content_briefs',
-       filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined,
-     },
-     () => refetch(),
-     !!currentWorkspace?.id
-   );
+
+  useRealtimeSubscription(
+    `content-briefs-${currentWorkspace?.id}`,
+    { table: 'content_briefs', filter: currentWorkspace?.id ? `workspace_id=eq.${currentWorkspace.id}` : undefined },
+    () => refetch(),
+    !!currentWorkspace?.id
+  );
 
   const handleSync = async () => {
     setSyncing(true);
@@ -46,12 +44,11 @@ export default function Content() {
     setSyncing(false);
   };
 
-  // Real data only - no demo fallback (Zero Fake Data policy)
   const displayKeywords = keywords.slice(0, 5).map(k => ({
     keyword: k.keyword,
     volume: k.search_volume || 0,
     position: Math.round(k.position_avg || 0),
-    change: 0, // Would need historical data to calculate
+    change: 0,
     intent: k.intent || 'info',
   }));
 
@@ -71,46 +68,38 @@ export default function Content() {
   }));
 
   if (loading) {
-    return <LoadingState message="Chargement du contenu..." />;
+    return <LoadingState message={t("contentPage.loading")} />;
   }
 
-  // Empty state - no site selected
   if (!currentSite) {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
-          <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
+          <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
+          <p className="text-muted-foreground">{t("contentPage.subtitle")}</p>
         </div>
-        <NoSiteEmptyState moduleName="Contenu" icon={FileText} />
+        <NoSiteEmptyState moduleName={t("nav.content")} icon={FileText} />
       </div>
     );
   }
 
-  // Empty state - no data
   const hasData = keywords.length > 0 || briefs.length > 0 || clusters.length > 0;
   if (!hasData) {
     return (
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
-            <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
+            <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
+            <p className="text-muted-foreground">{t("contentPage.subtitle")}</p>
           </div>
         </div>
         <ModuleEmptyState
           icon={FileText}
-          moduleName="Contenu"
-          description="Analysez vos mots-clés, générez des briefs SEO optimisés et planifiez votre stratégie de contenu. Ce module utilise l'IA pour identifier les opportunités de positionnement et créer du contenu pertinent."
-          features={["Analyse de mots-clés", "Briefs SEO automatisés", "Clusters sémantiques", "Calendrier éditorial"]}
-          primaryAction={{
-            label: "Connecter Google Search Console",
-            href: "/dashboard/integrations",
-          }}
-          secondaryAction={{
-            label: "Générer un brief IA",
-            onClick: handleSync,
-          }}
+          moduleName={t("nav.content")}
+          description={t("contentPage.emptyDesc")}
+          features={[t("contentPage.featureKeywords"), t("contentPage.featureBriefs"), t("contentPage.featureClusters"), t("contentPage.featureCalendar")]}
+          primaryAction={{ label: t("contentPage.connectGSC"), href: "/dashboard/integrations" }}
+          secondaryAction={{ label: t("contentPage.generateBrief"), onClick: handleSync }}
         />
       </div>
     );
@@ -120,9 +109,9 @@ export default function Content() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Contenu & Mots-clés</h1>
-          <p className="text-muted-foreground">Stratégie de contenu et opportunités SEO</p>
-          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ Sélectionnez un site pour voir vos données</p>}
+          <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
+          <p className="text-muted-foreground">{t("contentPage.subtitle")}</p>
+          {!currentSite && <p className="text-sm text-muted-foreground mt-1">⚠️ {t("contentPage.selectSite")}</p>}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={handleSync} disabled={syncing}>
@@ -132,19 +121,11 @@ export default function Content() {
           <Button 
             variant="hero"
             onClick={async () => {
-              if (!currentSite) {
-                toast.error("Sélectionnez un site d'abord");
-                return;
-              }
+              if (!currentSite) { toast.error(t("contentPage.selectSiteFirst")); return; }
               setSyncing(true);
               try {
                 const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                  toast.error("Veuillez vous connecter");
-                  setSyncing(false);
-                  return;
-                }
-                
+                if (!session) { toast.error(t("common.verifyingAuth")); setSyncing(false); return; }
                 const { data, error } = await supabase.functions.invoke("ai-gateway", {
                   body: {
                     workspace_id: currentSite.workspace_id,
@@ -153,45 +134,32 @@ export default function Content() {
                     input: {
                       system_prompt: "Tu es un stratège de contenu SEO. Génère un brief de contenu détaillé en français avec un format JSON structuré.",
                       user_prompt: `Génère un brief pour un article optimisé SEO pour le site ${currentSite.url}. Inclus: titre, H2s suggérés, mots-clés cibles, longueur recommandée.`,
-                      context: {
-                        site_url: currentSite.url,
-                        site_name: currentSite.name,
-                        sector: currentSite.sector,
-                      }
+                      context: { site_url: currentSite.url, site_name: currentSite.name, sector: currentSite.sector }
                     }
                   }
                 });
                 if (error) throw error;
-                if (data?.success) {
-                  toast.success("Brief généré avec succès");
-                  refetch();
-                } else {
-                  toast.error(data?.error || "Erreur lors de la génération");
-                }
+                if (data?.success) { toast.success(t("contentPage.briefGenerated")); refetch(); }
+                else { toast.error(data?.error || t("contentPage.generationError")); }
               } catch (err) {
                 console.error("Brief generation error:", err);
-                toast.error("Erreur lors de la génération du brief");
-              } finally {
-                setSyncing(false);
-              }
+                toast.error(t("contentPage.generationError"));
+              } finally { setSyncing(false); }
             }}
             disabled={syncing || !currentSite}
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Générer brief
+            {t("contentPage.generateBriefBtn")}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="generator" className="space-y-6">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="generator">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Générer du contenu
-          </TabsTrigger>
-          <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
-          <TabsTrigger value="clusters">Clusters</TabsTrigger>
-          <TabsTrigger value="calendar">Calendrier</TabsTrigger>
+          <TabsTrigger value="generator"><Sparkles className="w-4 h-4 mr-2" />{t("contentPage.tabGenerate")}</TabsTrigger>
+          <TabsTrigger value="keywords">{t("contentPage.tabKeywords")}</TabsTrigger>
+          <TabsTrigger value="clusters">{t("contentPage.tabClusters")}</TabsTrigger>
+          <TabsTrigger value="calendar">{t("contentPage.tabCalendar")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="generator" className="space-y-6">
@@ -200,27 +168,27 @@ export default function Content() {
 
         <TabsContent value="keywords" className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Mots-clés suivis</p><p className="text-3xl font-bold">{keywords.length || 0}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">{t("contentPage.trackedKeywords")}</p><p className="text-3xl font-bold">{keywords.length || 0}</p></CardContent></Card>
             <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Top 10</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) <= 10).length}</p></CardContent></Card>
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Volume total</p><p className="text-3xl font-bold">{keywords.reduce((sum, k) => sum + (k.search_volume || 0), 0).toLocaleString()}</p></CardContent></Card>
-            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Opportunités</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) > 10 && (k.position_avg || 0) <= 30).length}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">{t("contentPage.totalVolume")}</p><p className="text-3xl font-bold">{keywords.reduce((sum, k) => sum + (k.search_volume || 0), 0).toLocaleString()}</p></CardContent></Card>
+            <Card variant="kpi"><CardContent className="pt-6"><p className="text-sm text-muted-foreground">{t("contentPage.opportunities")}</p><p className="text-3xl font-bold">{keywords.filter(k => (k.position_avg || 0) > 10 && (k.position_avg || 0) <= 30).length}</p></CardContent></Card>
           </div>
 
           <Card variant="feature">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Mots-clés principaux</CardTitle>
-                <Button variant="ghost" size="sm">Voir tout<ArrowRight className="w-4 h-4 ml-1" /></Button>
+                <CardTitle>{t("contentPage.mainKeywords")}</CardTitle>
+                <Button variant="ghost" size="sm">{t("contentPage.viewAll")}<ArrowRight className="w-4 h-4 ml-1" /></Button>
               </div>
             </CardHeader>
             <CardContent>
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Mot-clé</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Volume</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Position</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Évolution</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("contentPage.keyword")}</th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("contentPage.volume")}</th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("contentPage.position")}</th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">{t("contentPage.evolution")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -250,12 +218,12 @@ export default function Content() {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant={cluster.status === "mapped" ? "gradient" : "secondary"}>
-                      {cluster.status === "mapped" ? "Mappé" : "Nouveau"}
+                      {cluster.status === "mapped" ? t("contentPage.mapped") : t("contentPage.new")}
                     </Badge>
                     <Target className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <h3 className="font-semibold mb-1">{cluster.name}</h3>
-                  <p className="text-sm text-muted-foreground">{cluster.keywords} mots-clés • {cluster.volume.toLocaleString()} vol.</p>
+                  <p className="text-sm text-muted-foreground">{cluster.keywords} {t("contentPage.tabKeywords")} • {cluster.volume.toLocaleString()} vol.</p>
                 </CardContent>
               </Card>
             ))}
@@ -267,10 +235,10 @@ export default function Content() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Plan de contenu</CardTitle>
-                  <CardDescription>Articles en cours et planifiés</CardDescription>
+                  <CardTitle>{t("contentPage.contentPlan")}</CardTitle>
+                  <CardDescription>{t("contentPage.contentPlanDesc")}</CardDescription>
                 </div>
-                <Button variant="outline" size="sm"><Plus className="w-4 h-4 mr-2" />Nouveau brief</Button>
+                <Button variant="outline" size="sm"><Plus className="w-4 h-4 mr-2" />{t("contentPage.newBrief")}</Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -280,18 +248,18 @@ export default function Content() {
                     <FileText className="w-5 h-5 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{content.title}</p>
-                      <p className="text-sm text-muted-foreground">Cible : "{content.keyword}" • {content.wordCount} mots</p>
+                      <p className="text-sm text-muted-foreground">{t("contentPage.target")}: "{content.keyword}" • {content.wordCount} {t("contentPage.words")}</p>
                     </div>
                     <Badge variant={content.status === "published" ? "gradient" : "outline"}>
-                      {content.status === "published" ? "Publié" : "Brouillon"}
+                      {content.status === "published" ? t("contentPage.published") : t("contentPage.draft")}
                     </Badge>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun brief créé</p>
-                  <p className="text-sm">Utilisez l'onglet "Générer du contenu" pour créer votre premier brief</p>
+                  <p>{t("contentPage.noBriefs")}</p>
+                  <p className="text-sm">{t("contentPage.noBriefsDesc")}</p>
                 </div>
               )}
             </CardContent>

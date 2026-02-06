@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ const MediaAssets = () => {
       setUrl("");
       setDialogOpen(false);
     } catch {
-      toast.error("Erreur lors de l'import");
+      toast.error(t("common.error"));
     }
   };
 
@@ -131,20 +131,10 @@ const MediaAssets = () => {
                           </a>
                         </Button>
                       )}
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-3 w-3 mr-1" />{t("pages.mediaAssets.viewDetails")}
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Link2 className="h-3 w-3 mr-1" />{t("pages.mediaAssets.smartLink")}
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Wand2 className="h-3 w-3 mr-1" />{t("pages.mediaAssets.generateStrategy")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteAsset(asset.id)}
-                      >
+                      <Button size="sm" variant="outline"><Eye className="h-3 w-3 mr-1" />{t("pages.mediaAssets.viewDetails")}</Button>
+                      <Button size="sm" variant="outline"><Link2 className="h-3 w-3 mr-1" />{t("pages.mediaAssets.smartLink")}</Button>
+                      <Button size="sm" variant="outline"><Wand2 className="h-3 w-3 mr-1" />{t("pages.mediaAssets.generateStrategy")}</Button>
+                      <Button size="sm" variant="destructive" onClick={() => deleteAsset(asset.id)}>
                         <Trash2 className="h-3 w-3 mr-1" />{t("pages.mediaAssets.delete")}
                       </Button>
                     </div>
