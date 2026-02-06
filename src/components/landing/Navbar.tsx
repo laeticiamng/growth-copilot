@@ -8,6 +8,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export function Navbar() {
   const { t, i18n } = useTranslation();
@@ -20,6 +27,16 @@ export function Navbar() {
     { href: "#tools", label: t("landing.tools.title") },
     { href: "#pricing", label: t("landing.navbar.pricing") },
   ];
+
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setIsOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/50">
@@ -39,6 +56,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {link.label}
@@ -61,48 +79,55 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu */}
           <div className="flex md:hidden items-center gap-2">
             <LanguageToggle />
-            <button
-              className="p-2"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle menu"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                  aria-label="Toggle menu"
+                >
+                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[350px]">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-primary-foreground" />
+                    </div>
+                    Growth OS
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={(e) => handleSmoothScroll(e, link.href)}
+                      className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                  <div className="flex flex-col gap-3 pt-4">
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        {t("landing.navbar.login")}
+                      </Button>
+                    </Link>
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>
+                      <Button variant="gradient" className="w-full">
+                        {t("landing.navbar.getStarted")}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
-            <div className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
-              <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                <Link to="/dashboard">
-                  <Button variant="ghost" className="w-full">
-                    {t("landing.navbar.login")}
-                  </Button>
-                </Link>
-                <Link to="/auth">
-                  <Button variant="gradient" className="w-full">
-                    {t("landing.navbar.getStarted")}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
