@@ -2,20 +2,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
-  Activity, 
-  Database, 
-  Shield, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle2, 
-  RefreshCw,
-  Wifi,
-  WifiOff,
-  Server,
-  User,
-  Loader2,
+  Activity, Database, Shield, Clock, AlertTriangle, CheckCircle2, RefreshCw,
+  Wifi, WifiOff, Server, User, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -44,7 +33,7 @@ interface DiagnosticData {
 }
 
 export function DiagnosticsPanel() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, session } = useAuth();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
@@ -55,10 +44,8 @@ export function DiagnosticsPanel() {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -80,17 +67,13 @@ export function DiagnosticsPanel() {
         name: "Authentication",
         status: currentSession ? "ok" : "warning",
         latency: Math.round(authLatency),
-        message: currentSession ? "Session active" : "Non connecté",
+        message: currentSession ? t("components.diagnostics.sessionActive") : t("components.diagnostics.notConnected"),
       });
-    } catch (error) {
-      healthChecks.push({
-        name: "Authentication",
-        status: "error",
-        message: "Échec vérification auth",
-      });
+    } catch {
+      healthChecks.push({ name: "Authentication", status: "error", message: t("components.diagnostics.authCheckFailed") });
     }
 
-    // Check Database Connection
+    // Check Database
     const dbStart = performance.now();
     try {
       const { error } = await supabase.from("workspaces").select("id").limit(1);
@@ -100,45 +83,30 @@ export function DiagnosticsPanel() {
         name: "Database",
         status: error ? "error" : "ok",
         latency: Math.round(dbLatency),
-        message: error ? error.message : "Connexion OK",
+        message: error ? error.message : t("components.diagnostics.connectionOk"),
       });
-    } catch (error) {
-      healthChecks.push({
-        name: "Database",
-        status: "error",
-        message: "Connexion DB échouée",
-      });
+    } catch {
+      healthChecks.push({ name: "Database", status: "error", message: t("components.diagnostics.connectionFailed") });
     }
 
-    // Check Edge Functions (simple ping without AI gateway)
+    // Check Edge Functions
     const edgeStart = performance.now();
     try {
-      // Use a lightweight function check instead of ai-gateway
-      const { error } = await supabase.functions.invoke("webhooks", {
-        body: { action: "ping" },
-      });
+      const { error } = await supabase.functions.invoke("webhooks", { body: { action: "ping" } });
       const edgeLatency = performance.now() - edgeStart;
       latencies.push(edgeLatency);
       healthChecks.push({
         name: "Edge Functions",
         status: error ? "warning" : "ok",
         latency: Math.round(edgeLatency),
-        message: error ? "Disponibilité limitée" : "Fonctionnel",
+        message: error ? t("components.diagnostics.limitedAvailability") : t("components.diagnostics.functional"),
       });
     } catch {
-      healthChecks.push({
-        name: "Edge Functions",
-        status: "warning",
-        message: "Test non concluant",
-      });
+      healthChecks.push({ name: "Edge Functions", status: "warning", message: t("components.diagnostics.testInconclusive") });
     }
 
     // Check RLS
-    healthChecks.push({
-      name: "Row Level Security",
-      status: "ok",
-      message: "RLS activée sur toutes les tables",
-    });
+    healthChecks.push({ name: "Row Level Security", status: "ok", message: t("components.diagnostics.rlsEnabled") });
 
     // Check Storage
     const storageStart = performance.now();
@@ -150,38 +118,25 @@ export function DiagnosticsPanel() {
         name: "Storage",
         status: storageError ? "warning" : "ok",
         latency: Math.round(storageLatency),
-        message: storageError ? "Accès limité" : `${buckets?.length || 0} bucket(s) configuré(s)`,
+        message: storageError ? t("components.diagnostics.limitedAccess") : t("components.diagnostics.bucketsConfigured", { count: buckets?.length || 0 }),
       });
     } catch {
-      healthChecks.push({
-        name: "Storage",
-        status: "warning",
-        message: "Vérification impossible",
-      });
+      healthChecks.push({ name: "Storage", status: "warning", message: t("components.diagnostics.checkImpossible") });
     }
 
     // Check Quotas
     if (currentWorkspace) {
       try {
-        const { data } = await supabase
-          .from("workspace_quotas")
-          .select("*")
-          .eq("workspace_id", currentWorkspace.id)
-          .single();
-        
-        const monthlyUsage = (data?.monthly_tokens_used || 0) / 1000000; // Convert to M
+        const { data } = await supabase.from("workspace_quotas").select("*").eq("workspace_id", currentWorkspace.id).single();
+        const monthlyUsage = (data?.monthly_tokens_used || 0) / 1000000;
         const crawlsUsed = data?.crawls_today || 0;
         healthChecks.push({
           name: "Quotas",
           status: monthlyUsage > 80 ? "warning" : "ok",
-          message: `${monthlyUsage.toFixed(1)}M tokens • ${crawlsUsed} crawls aujourd'hui`,
+          message: `${monthlyUsage.toFixed(1)}M tokens • ${crawlsUsed} crawls ${t("components.diagnostics.today")}`,
         });
       } catch {
-        healthChecks.push({
-          name: "Quotas",
-          status: "ok",
-          message: "Quota disponible",
-        });
+        healthChecks.push({ name: "Quotas", status: "ok", message: t("components.diagnostics.quotaAvailable") });
       }
     }
 
@@ -190,48 +145,34 @@ export function DiagnosticsPanel() {
       const storedErrors = JSON.parse(localStorage.getItem('app_errors') || '[]');
       if (storedErrors.length > 0) {
         healthChecks.push({
-          name: "Erreurs récentes",
+          name: t("components.diagnostics.recentErrors"),
           status: "warning",
-          message: `${storedErrors.length} erreur(s) enregistrée(s)`,
+          message: t("components.diagnostics.errorsRecorded", { count: storedErrors.length }),
         });
       }
-    } catch {
-      // Ignore
-    }
+    } catch { /* Ignore */ }
 
     const avgLatency = latencies.length > 0 
-      ? latencies.reduce((a, b) => a + b, 0) / latencies.length 
-      : 0;
+      ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0;
 
     setDiagnostics({
-      userId: user?.id || null,
-      sessionValid: !!session,
-      workspaceId: currentWorkspace?.id || null,
-      siteId: currentSite?.id || null,
+      userId: user?.id || null, sessionValid: !!session,
+      workspaceId: currentWorkspace?.id || null, siteId: currentSite?.id || null,
       environment: import.meta.env.DEV ? "development" : "production",
-      lastApiError: null,
-      avgLatency: Math.round(avgLatency),
-      healthChecks,
-      timestamp: new Date(),
+      lastApiError: null, avgLatency: Math.round(avgLatency), healthChecks, timestamp: new Date(),
     });
 
     setLoading(false);
   };
 
-  useEffect(() => {
-    runDiagnostics();
-  }, [user, currentWorkspace, currentSite]);
+  useEffect(() => { runDiagnostics(); }, [user, currentWorkspace, currentSite]);
 
   const getStatusIcon = (status: HealthCheck["status"]) => {
     switch (status) {
-      case "ok":
-        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case "warning":
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-      case "error":
-        return <AlertTriangle className="w-4 h-4 text-destructive" />;
-      default:
-        return <Clock className="w-4 h-4 text-muted-foreground" />;
+      case "ok": return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+      case "warning": return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case "error": return <AlertTriangle className="w-4 h-4 text-destructive" />;
+      default: return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -246,9 +187,7 @@ export function DiagnosticsPanel() {
 
   const overallHealth = diagnostics?.healthChecks.every(h => h.status === "ok") 
     ? "ok" 
-    : diagnostics?.healthChecks.some(h => h.status === "error")
-    ? "error"
-    : "warning";
+    : diagnostics?.healthChecks.some(h => h.status === "error") ? "error" : "warning";
 
   return (
     <Card variant="feature">
@@ -257,135 +196,80 @@ export function DiagnosticsPanel() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
-              Diagnostics Système
+              {t("components.diagnostics.title")}
             </CardTitle>
-            <CardDescription>
-              État de santé de l'application
-            </CardDescription>
+            <CardDescription>{t("components.diagnostics.subtitle")}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {isOnline ? (
-              <Badge variant="success" className="gap-1">
-                <Wifi className="w-3 h-3" />
-                En ligne
-              </Badge>
+              <Badge variant="success" className="gap-1"><Wifi className="w-3 h-3" />{t("components.diagnostics.online")}</Badge>
             ) : (
-              <Badge variant="destructive" className="gap-1">
-                <WifiOff className="w-3 h-3" />
-                Hors ligne
-              </Badge>
+              <Badge variant="destructive" className="gap-1"><WifiOff className="w-3 h-3" />{t("components.diagnostics.offline")}</Badge>
             )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={runDiagnostics}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
+            <Button variant="outline" size="sm" onClick={runDiagnostics} disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Overall Status */}
         <div className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-          <div className={`p-3 rounded-full ${
-            overallHealth === "ok" ? "bg-green-500/20" :
-            overallHealth === "error" ? "bg-destructive/20" : "bg-yellow-500/20"
-          }`}>
-            {overallHealth === "ok" ? (
-              <CheckCircle2 className="w-6 h-6 text-green-500" />
-            ) : overallHealth === "error" ? (
-              <AlertTriangle className="w-6 h-6 text-destructive" />
-            ) : (
-              <AlertTriangle className="w-6 h-6 text-yellow-500" />
-            )}
+          <div className={`p-3 rounded-full ${overallHealth === "ok" ? "bg-green-500/20" : overallHealth === "error" ? "bg-destructive/20" : "bg-yellow-500/20"}`}>
+            {overallHealth === "ok" ? <CheckCircle2 className="w-6 h-6 text-green-500" /> :
+             overallHealth === "error" ? <AlertTriangle className="w-6 h-6 text-destructive" /> :
+             <AlertTriangle className="w-6 h-6 text-yellow-500" />}
           </div>
           <div>
             <p className="font-medium">
-              {overallHealth === "ok" ? "Tous les systèmes opérationnels" :
-               overallHealth === "error" ? "Problèmes détectés" :
-               "Fonctionnement dégradé"}
+              {overallHealth === "ok" ? t("components.diagnostics.allOperational") :
+               overallHealth === "error" ? t("components.diagnostics.issuesDetected") :
+               t("components.diagnostics.degraded")}
             </p>
             <p className="text-sm text-muted-foreground">
-              Latence moyenne : {diagnostics?.avgLatency || 0}ms
+              {t("components.diagnostics.avgLatency")}: {diagnostics?.avgLatency || 0}ms
             </p>
           </div>
         </div>
 
-        {/* Context Info */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="p-3 rounded-lg bg-secondary/30">
-            <div className="flex items-center gap-2 mb-1">
-              <User className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">User ID</span>
-            </div>
-            <p className="text-sm font-mono truncate">
-              {diagnostics?.userId?.slice(0, 8) || "—"}...
-            </p>
+            <div className="flex items-center gap-2 mb-1"><User className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">User ID</span></div>
+            <p className="text-sm font-mono truncate">{diagnostics?.userId?.slice(0, 8) || "—"}...</p>
           </div>
           <div className="p-3 rounded-lg bg-secondary/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Shield className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Session</span>
-            </div>
-            <p className="text-sm">
-              {diagnostics?.sessionValid ? "✓ Valide" : "✗ Invalide"}
-            </p>
+            <div className="flex items-center gap-2 mb-1"><Shield className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">Session</span></div>
+            <p className="text-sm">{diagnostics?.sessionValid ? `✓ ${t("components.diagnostics.valid")}` : `✗ ${t("components.diagnostics.invalid")}`}</p>
           </div>
           <div className="p-3 rounded-lg bg-secondary/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Server className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Environnement</span>
-            </div>
+            <div className="flex items-center gap-2 mb-1"><Server className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">{t("components.diagnostics.environment")}</span></div>
             <p className="text-sm capitalize">{diagnostics?.environment || "—"}</p>
           </div>
           <div className="p-3 rounded-lg bg-secondary/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Database className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Workspace</span>
-            </div>
-            <p className="text-sm font-mono truncate">
-              {diagnostics?.workspaceId?.slice(0, 8) || "—"}...
-            </p>
+            <div className="flex items-center gap-2 mb-1"><Database className="w-4 h-4 text-muted-foreground" /><span className="text-xs text-muted-foreground">Workspace</span></div>
+            <p className="text-sm font-mono truncate">{diagnostics?.workspaceId?.slice(0, 8) || "—"}...</p>
           </div>
         </div>
 
-        {/* Health Checks */}
         <div className="space-y-2">
-          <p className="text-sm font-medium mb-3">Vérifications de santé</p>
+          <p className="text-sm font-medium mb-3">{t("components.diagnostics.healthChecks")}</p>
           {diagnostics?.healthChecks.map((check, i) => (
-            <div 
-              key={i} 
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/30"
-            >
+            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
               <div className="flex items-center gap-3">
                 {getStatusIcon(check.status)}
                 <span className="font-medium">{check.name}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">{check.message}</span>
-                {check.latency && (
-                  <Badge variant="outline" className="text-xs">
-                    {check.latency}ms
-                  </Badge>
-                )}
-                <Badge variant={getStatusColor(check.status) as any} className="text-xs capitalize">
-                  {check.status}
-                </Badge>
+                {check.latency && <Badge variant="outline" className="text-xs">{check.latency}ms</Badge>}
+                <Badge variant={getStatusColor(check.status) as any} className="text-xs capitalize">{check.status}</Badge>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Timestamp */}
         {diagnostics?.timestamp && (
           <p className="text-xs text-muted-foreground text-right">
-            Dernière vérification : {diagnostics.timestamp.toLocaleTimeString(getIntlLocale(i18n.language))}
+            {t("components.diagnostics.lastCheck")}: {diagnostics.timestamp.toLocaleTimeString(getIntlLocale(i18n.language))}
           </p>
         )}
       </CardContent>

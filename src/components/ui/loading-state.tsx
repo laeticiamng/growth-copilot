@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface LoadingStateProps {
   message?: string;
@@ -8,10 +9,13 @@ interface LoadingStateProps {
 }
 
 export function LoadingState({ 
-  message = "Chargement...", 
+  message, 
   size = "md",
   className 
 }: LoadingStateProps) {
+  const { t } = useTranslation();
+  const displayMessage = message ?? t("common.loading");
+
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-8 h-8",
@@ -21,8 +25,8 @@ export function LoadingState({
   return (
     <div className={cn("flex flex-col items-center justify-center p-8", className)}>
       <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
-      {message && (
-        <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+      {displayMessage && (
+        <p className="mt-3 text-sm text-muted-foreground">{displayMessage}</p>
       )}
     </div>
   );

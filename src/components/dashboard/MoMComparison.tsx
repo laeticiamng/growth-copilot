@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +48,7 @@ export function MoMComparison({ kpis, onPeriodChange, loading = false, hasData =
     custom: t("cockpit.momPeriodCustom"),
   };
 
-  const intlLocale = i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'de' ? 'de-DE' : i18n.language === 'es' ? 'es-ES' : 'en-US';
+  const intlLocale = getIntlLocale(i18n.language);
 
   const handlePeriodChange = (value: ComparisonPeriod) => {
     setPeriod(value);

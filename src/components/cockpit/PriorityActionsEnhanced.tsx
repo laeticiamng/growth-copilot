@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { 
   ArrowRight, 
@@ -45,30 +48,10 @@ interface PriorityActionsEnhancedProps {
 }
 
 const priorityConfig = {
-  critical: {
-    icon: AlertTriangle,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-    border: "border-destructive/30",
-  },
-  high: {
-    icon: Zap,
-    color: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning/30",
-  },
-  medium: {
-    icon: Target,
-    color: "text-primary",
-    bg: "bg-primary/10",
-    border: "border-primary/30",
-  },
-  low: {
-    icon: Target,
-    color: "text-muted-foreground",
-    bg: "bg-secondary",
-    border: "border-border",
-  },
+  critical: { icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
+  high: { icon: Zap, color: "text-warning", bg: "bg-warning/10", border: "border-warning/30" },
+  medium: { icon: Target, color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" },
+  low: { icon: Target, color: "text-muted-foreground", bg: "bg-secondary", border: "border-border" },
 };
 
 export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityActionsEnhancedProps) {
@@ -78,6 +61,11 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
   const [loading, setLoading] = useState(true);
   const [actions, setActions] = useState<PriorityAction[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  
+  // Rejection dialog state
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
     const fetchPriorityActions = async () => {
@@ -170,20 +158,28 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
     }
   };
 
-  const handleReject = async (id: string) => {
-    const reason = window.prompt(t("cockpit.rejectionPrompt"));
-    if (!reason) return;
+  const openRejectDialog = (id: string) => {
+    setRejectingId(id);
+    setRejectionReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectingId || !rejectionReason.trim()) return;
     
-    setProcessingId(id);
-    const { error } = await rejectAction(id, reason);
+    setRejectDialogOpen(false);
+    setProcessingId(rejectingId);
+    const { error } = await rejectAction(rejectingId, rejectionReason.trim());
     setProcessingId(null);
     
     if (error) {
       toast.error(t("cockpit.rejectionError"));
     } else {
       toast.success(t("cockpit.rejected"));
-      setActions(prev => prev.filter(a => a.id !== id));
+      setActions(prev => prev.filter(a => a.id !== rejectingId));
     }
+    setRejectingId(null);
+    setRejectionReason("");
   };
 
   if (loading) {
@@ -203,124 +199,135 @@ export function PriorityActionsEnhanced({ maxItems = 5, className }: PriorityAct
   }
 
   return (
-    <Card variant="feature" className={cn("h-full flex flex-col", className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{t("cockpit.priorityActions")}</CardTitle>
-          <Badge variant="gradient">Top {actions.length}</Badge>
-        </div>
-        <CardDescription className="text-xs">
-          {t("cockpit.rankedByIceScore")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 flex-1">
-        {actions.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-primary/50" />
-            <p className="text-sm">{t("cockpit.noPriorityActionEnhanced")}</p>
-            <p className="text-xs mt-1">{t("cockpit.agentsWorkingBackground")}</p>
+    <>
+      <Card variant="feature" className={cn("h-full flex flex-col", className)}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">{t("cockpit.priorityActions")}</CardTitle>
+            <Badge variant="gradient">Top {actions.length}</Badge>
           </div>
-        ) : (
-          actions.map((action, index) => {
-            const config = priorityConfig[action.priority];
-            return (
-              <div
-                key={action.id}
-                className={cn(
-                  "flex items-start gap-3 p-4 rounded-lg border transition-all",
-                  config.border,
-                  config.bg
-                )}
-              >
-                <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <div
-                    className={cn(
+          <CardDescription className="text-xs">
+            {t("cockpit.rankedByIceScore")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 flex-1">
+          {actions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckCircle2 className="w-10 h-10 mx-auto mb-3 text-primary/50" />
+              <p className="text-sm">{t("cockpit.noPriorityActionEnhanced")}</p>
+              <p className="text-xs mt-1">{t("cockpit.agentsWorkingBackground")}</p>
+            </div>
+          ) : (
+            actions.map((action, index) => {
+              const config = priorityConfig[action.priority];
+              return (
+                <div
+                  key={action.id}
+                  className={cn("flex items-start gap-3 p-4 rounded-lg border transition-all", config.border, config.bg)}
+                >
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                    <div className={cn(
                       "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm",
-                      action.priority === "critical"
-                        ? "bg-destructive/20 text-destructive"
-                        : action.priority === "high"
-                        ? "bg-warning/20 text-warning"
-                        : "bg-primary/20 text-primary"
-                    )}
-                  >
-                    {action.iceScore}
-                  </div>
-                  <span className="text-[10px] text-muted-foreground uppercase">ICE</span>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-medium text-sm">{action.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                        {action.description}
-                      </p>
+                      action.priority === "critical" ? "bg-destructive/20 text-destructive" :
+                      action.priority === "high" ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary"
+                    )}>
+                      {action.iceScore}
                     </div>
-                    <span className="text-lg font-semibold text-muted-foreground/50">
-                      #{index + 1}
-                    </span>
+                    <span className="text-[10px] text-muted-foreground uppercase">ICE</span>
                   </div>
-                  
-                  <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {action.effort}
-                      </Badge>
-                      {action.service && (
-                        <Badge variant="secondary" className="text-xs">
-                          {action.service}
-                        </Badge>
-                      )}
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-sm">{action.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{action.description}</p>
+                      </div>
+                      <span className="text-lg font-semibold text-muted-foreground/50">#{index + 1}</span>
                     </div>
                     
-                    {action.isApprovalItem ? (
-                      <div className="flex gap-1">
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          className="h-7 text-xs text-destructive hover:text-destructive"
-                          onClick={() => handleReject(action.id)}
-                          disabled={processingId === action.id}
-                        >
-                          {processingId === action.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <XCircle className="w-3 h-3" />
-                          )}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="hero"
-                          className="h-7 text-xs"
-                          onClick={() => handleApprove(action.id)}
-                          disabled={processingId === action.id}
-                        >
-                          {processingId === action.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <>
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                              {t("cockpit.approveAction")}
-                            </>
-                          )}
-                        </Button>
+                    <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {action.effort}
+                        </Badge>
+                        {action.service && (
+                          <Badge variant="secondary" className="text-xs">{action.service}</Badge>
+                        )}
                       </div>
-                    ) : (
-                      <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-                        <Link to={action.link}>
-                          {action.actionLabel}
-                          <ArrowRight className="w-3 h-3 ml-1" />
-                        </Link>
-                      </Button>
-                    )}
+                      
+                      {action.isApprovalItem ? (
+                        <div className="flex gap-1">
+                          <Button 
+                            size="sm" variant="ghost"
+                            className="h-7 text-xs text-destructive hover:text-destructive"
+                            onClick={() => openRejectDialog(action.id)}
+                            disabled={processingId === action.id}
+                          >
+                            {processingId === action.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                          </Button>
+                          <Button 
+                            size="sm" variant="hero" className="h-7 text-xs"
+                            onClick={() => handleApprove(action.id)}
+                            disabled={processingId === action.id}
+                          >
+                            {processingId === action.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <>
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                {t("cockpit.approveAction")}
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+                          <Link to={action.link}>
+                            {action.actionLabel}
+                            <ArrowRight className="w-3 h-3 ml-1" />
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </CardContent>
-    </Card>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("cockpit.rejectionDialogTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Label htmlFor="rejection-reason">{t("cockpit.rejectionReasonLabel")}</Label>
+            <Textarea
+              id="rejection-reason"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder={t("cockpit.rejectionReasonPlaceholder")}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmReject}
+              disabled={!rejectionReason.trim()}
+            >
+              {t("cockpit.confirmRejection")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

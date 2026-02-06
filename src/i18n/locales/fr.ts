@@ -24,6 +24,12 @@ export const fr = {
     noData: "Aucune donnée",
     markAllRead: "Tout lire",
     noNotifications: "Aucune notification",
+    verifyingAuth: "Vérification de l'authentification...",
+    verifyingPermissions: "Vérification des permissions...",
+    verifyingAccess: "Vérification de vos accès...",
+    accessDenied: "Accès refusé",
+    accessDeniedDesc: "Vous n'avez pas les permissions nécessaires pour accéder à cette section.",
+    contactAdmin: "Contactez un administrateur pour obtenir l'accès",
   },
 
   // Navigation
@@ -2133,6 +2139,10 @@ export const fr = {
     rejectionError: "Erreur lors du refus",
     rejected: "Action refusée",
     updateError: "Erreur lors de la mise à jour",
+    rejectionDialogTitle: "Rejeter cette action",
+    rejectionReasonLabel: "Raison du rejet",
+    rejectionReasonPlaceholder: "Expliquez pourquoi vous rejetez cette action...",
+    confirmRejection: "Confirmer le rejet",
   },
 
   // Nav additions
@@ -3430,4 +3440,28 @@ export const fr = {
       emailAutomation: "Automatisation emails",
     },
   },
+
+  // ServiceGuard
+  serviceGuard: {
+    activateService: "Activez ce service pour accéder à cette fonctionnalité.",
+    marketingDesc: "Boostez votre visibilité avec notre suite marketing complète : SEO, contenu, publicités et réseaux sociaux.",
+    marketingF1: "Audit SEO technique automatisé", marketingF2: "Stratégie de contenu IA", marketingF3: "Gestion des campagnes publicitaires", marketingF4: "Planification réseaux sociaux", marketingF5: "Analyse concurrentielle",
+    salesDesc: "Optimisez votre pipeline commercial avec notre CRM intelligent et nos automatisations de prospection.",
+    salesF1: "Gestion du pipeline commercial", salesF2: "Scoring des leads automatisé", salesF3: "Séquences d'emails personnalisées", salesF4: "Suivi des offres et devis", salesF5: "Prévisions de ventes IA",
+    financeDesc: "Gardez le contrôle de vos finances avec des rapports ROI automatisés et des alertes budget.",
+    financeF1: "Rapports ROI par canal", financeF2: "Suivi des dépenses marketing", financeF3: "Alertes budget en temps réel", financeF4: "Prévisions financières", financeF5: "Export comptable",
+    securityDesc: "Protégez vos accès et assurez la conformité avec notre suite de sécurité intégrée.",
+    securityF1: "Audit des accès régulier", securityF2: "Détection d'anomalies", securityF3: "Conformité RGPD automatisée", securityF4: "Logs et traçabilité complète", securityF5: "Gestion des secrets",
+    productDesc: "Pilotez votre roadmap produit avec des insights utilisateurs et une priorisation intelligente.",
+    productF1: "Priorisation par impact", productF2: "Suivi des OKRs", productF3: "Feedback utilisateurs centralisé", productF4: "Roadmap collaborative", productF5: "Métriques produit",
+    engineeringDesc: "Optimisez vos releases avec des gates de qualité et un suivi de la santé technique.",
+    engineeringF1: "Gates de release automatisés", engineeringF2: "Résumé QA quotidien", engineeringF3: "Suivi de la dette technique", engineeringF4: "Métriques de delivery", engineeringF5: "Alertes performance",
+    dataDesc: "Exploitez vos données avec des analyses de funnel et des cohortes de rétention.",
+    dataF1: "Diagnostic funnel complet", dataF2: "Analyse de cohortes", dataF3: "Attribution multi-touch", dataF4: "Tableaux de bord personnalisés", dataF5: "Export data warehouse",
+    supportDesc: "Améliorez votre réputation avec une gestion centralisée des avis et du support client.",
+    supportF1: "Triage automatique des tickets", supportF2: "Gestion des avis Google/Meta", supportF3: "Base de connaissances IA", supportF4: "Réponses suggérées", supportF5: "Métriques NPS/CSAT",
+    governanceDesc: "Centralisez la gestion de votre entreprise avec notre hub de gouvernance.",
+    governanceF1: "Gestion multi-clients (Agence)", governanceF2: "Automatisations avancées", governanceF3: "Intégrations tierces", governanceF4: "Rôles et permissions granulaires", governanceF5: "Audit trail complet",
+  },
 };
+

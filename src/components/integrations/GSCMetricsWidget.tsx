@@ -15,13 +15,12 @@ import {
   Loader2,
   ExternalLink,
   Eye,
-  ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { 
   BarChart, 
   Bar, 
@@ -46,6 +45,7 @@ interface KPIData {
 }
 
 export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const [loading, setLoading] = useState(true);
@@ -106,7 +106,6 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
       
       if (error) throw error;
       
-      // Parse metrics_json into structured data (GSC stores in metrics_json)
       const parsed: KPIData[] = (data || []).map(d => {
         const mj = d.metrics_json as Record<string, unknown> | null;
         return {
@@ -121,7 +120,6 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
       
       setKpiData(parsed);
 
-      // Extract top queries from the most recent day's metrics_json
       if (data && data.length > 0) {
         const lastDay = data[data.length - 1];
         const metricsJson = lastDay.metrics_json as Record<string, unknown> | null;
@@ -138,7 +136,7 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
 
   const handleSync = async () => {
     if (!currentWorkspace?.id || !currentSite?.id) {
-      toast.error("Veuillez sélectionner un site");
+      toast.error(t("components.gscWidget.selectSite"));
       return;
     }
 
@@ -155,15 +153,15 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
       if (error) throw error;
 
       if (data?.success) {
-        toast.success(`${data.rows_synced || 0} jours de données synchronisés`);
+        toast.success(t("components.gscWidget.daysSynced", { count: data.rows_synced || 0 }));
         await loadMetrics();
         await checkConnection();
       } else {
-        toast.error(data?.error || "Erreur lors de la synchronisation");
+        toast.error(data?.error || t("components.gscWidget.syncError"));
       }
     } catch (err) {
       console.error("Sync error:", err);
-      toast.error("Erreur lors de la synchronisation GSC");
+      toast.error(t("components.gscWidget.syncError"));
     } finally {
       setSyncing(false);
     }
@@ -190,11 +188,10 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
       }
     } catch (err) {
       console.error("OAuth init error:", err);
-      toast.error("Erreur lors de l'initialisation OAuth");
+      toast.error(t("components.gscWidget.oauthError"));
     }
   };
 
-  // Calculate summary metrics
   const totalImpressions = kpiData.reduce((sum, d) => sum + (d.impressions || 0), 0);
   const totalClicks = kpiData.reduce((sum, d) => sum + (d.clicks || 0), 0);
   const avgCTR = kpiData.length > 0 
@@ -204,7 +201,6 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
     ? kpiData.reduce((sum, d) => sum + (d.avg_position || 0), 0) / kpiData.length 
     : 0;
 
-  // Chart data
   const chartData = kpiData.slice(-14).map(d => ({
     date: new Date(d.date).toLocaleDateString(undefined, { day: "2-digit", month: "short" }),
     clicks: d.clicks || 0,
@@ -234,17 +230,17 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
             Google Search Console
           </CardTitle>
           <CardDescription>
-            Connectez Search Console pour voir vos données SEO
+            {t("components.gscWidget.connectDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center py-8">
           <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground mb-4">
-            Connectez votre compte Google pour synchroniser vos données Search Console
+            {t("components.gscWidget.connectPrompt")}
           </p>
           <Button variant="hero" onClick={handleConnect}>
             <ExternalLink className="w-4 h-4 mr-2" />
-            Connecter Search Console
+            {t("components.gscWidget.connectBtn")}
           </Button>
         </CardContent>
       </Card>
@@ -261,7 +257,7 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
               Google Search Console
             </CardTitle>
             <CardDescription>
-              Dernière sync: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
+              {t("components.gscWidget.lastSync")}: {lastSync ? new Date(lastSync).toLocaleDateString() : "—"}
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
@@ -274,7 +270,6 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Summary Metrics */}
         <div className="grid grid-cols-4 gap-3">
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-1 mb-1">
@@ -286,7 +281,7 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
           <div className="p-3 rounded-lg bg-secondary/50">
             <div className="flex items-center gap-1 mb-1">
               <MousePointer className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Clics</span>
+              <span className="text-xs text-muted-foreground">{t("components.gscWidget.clicks")}</span>
             </div>
             <p className="text-lg font-bold">{totalClicks.toLocaleString()}</p>
           </div>
@@ -306,31 +301,14 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
           </div>
         </div>
 
-        {/* Chart */}
         {chartData.length > 0 ? (
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 10 }} 
-                  className="text-muted-foreground"
-                  tickLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 10 }} 
-                  className="text-muted-foreground"
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: "hsl(var(--card))", 
-                    borderColor: "hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" tickLine={false} />
+                <YAxis tick={{ fontSize: 10 }} className="text-muted-foreground" tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" }} />
                 <Bar dataKey="clicks" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -338,20 +316,19 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
         ) : (
           <div className="text-center py-6 text-muted-foreground">
             <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Aucune donnée disponible</p>
+            <p className="text-sm">{t("common.noData")}</p>
           </div>
         )}
 
-        {/* Top Queries */}
         {topQueries.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium">Top requêtes</p>
+            <p className="text-sm font-medium">{t("components.gscWidget.topQueries")}</p>
             <div className="space-y-1">
               {topQueries.map((q, i) => (
                 <div key={i} className="flex items-center justify-between text-sm p-2 rounded bg-secondary/30">
                   <span className="truncate flex-1">{q.query}</span>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{q.clicks} clics</span>
+                    <span>{q.clicks} {t("components.gscWidget.clicks")}</span>
                     <span>{q.impressions} imp.</span>
                   </div>
                 </div>

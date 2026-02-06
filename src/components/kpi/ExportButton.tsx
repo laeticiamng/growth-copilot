@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, FileSpreadsheet, FileJson, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface ExportButtonProps {
   data: Record<string, unknown>[];
@@ -15,13 +16,16 @@ interface ExportButtonProps {
   label?: string;
 }
 
-export function ExportButton({ data, filename, label = "Exporter" }: ExportButtonProps) {
+export function ExportButton({ data, filename, label }: ExportButtonProps) {
   const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
+
+  const displayLabel = label ?? t("common.export");
 
   const exportCSV = () => {
     if (data.length === 0) {
-      toast({ title: "Aucune donnée à exporter", variant: "destructive" });
+      toast({ title: t("components.exportButton.noData"), variant: "destructive" });
       return;
     }
 
@@ -33,11 +37,9 @@ export function ExportButton({ data, filename, label = "Exporter" }: ExportButto
         ...data.map(row => 
           headers.map(header => {
             const value = row[header];
-            // Handle nested objects
             if (typeof value === 'object' && value !== null) {
               return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
             }
-            // Handle strings with commas
             if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
               return `"${value.replace(/"/g, '""')}"`;
             }
@@ -48,10 +50,10 @@ export function ExportButton({ data, filename, label = "Exporter" }: ExportButto
 
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
       downloadBlob(blob, `${filename}.csv`);
-      toast({ title: "Export CSV réussi" });
+      toast({ title: t("components.exportButton.csvSuccess") });
     } catch (error) {
       console.error('CSV export error:', error);
-      toast({ title: "Erreur d'export", variant: "destructive" });
+      toast({ title: t("components.exportButton.exportError"), variant: "destructive" });
     } finally {
       setExporting(false);
     }
@@ -59,7 +61,7 @@ export function ExportButton({ data, filename, label = "Exporter" }: ExportButto
 
   const exportJSON = () => {
     if (data.length === 0) {
-      toast({ title: "Aucune donnée à exporter", variant: "destructive" });
+      toast({ title: t("components.exportButton.noData"), variant: "destructive" });
       return;
     }
 
@@ -67,10 +69,10 @@ export function ExportButton({ data, filename, label = "Exporter" }: ExportButto
     try {
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       downloadBlob(blob, `${filename}.json`);
-      toast({ title: "Export JSON réussi" });
+      toast({ title: t("components.exportButton.jsonSuccess") });
     } catch (error) {
       console.error('JSON export error:', error);
-      toast({ title: "Erreur d'export", variant: "destructive" });
+      toast({ title: t("components.exportButton.exportError"), variant: "destructive" });
     } finally {
       setExporting(false);
     }
@@ -96,17 +98,17 @@ export function ExportButton({ data, filename, label = "Exporter" }: ExportButto
           ) : (
             <Download className="w-4 h-4 mr-2" />
           )}
-          {label}
+          {displayLabel}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={exportCSV}>
           <FileSpreadsheet className="w-4 h-4 mr-2" />
-          Export CSV
+          {t("components.exportButton.exportCsv")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportJSON}>
           <FileJson className="w-4 h-4 mr-2" />
-          Export JSON
+          {t("components.exportButton.exportJson")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

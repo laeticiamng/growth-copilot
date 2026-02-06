@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Download, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getIntlLocale } from "@/lib/date-locale";
 
 interface ExportSection {
   id: string;
@@ -60,7 +61,7 @@ export function CockpitPDFExport({ workspaceName, onExport }: CockpitPDFExportPr
   };
 
   const generatePDFContent = async (selectedSections: string[]) => {
-    const dateLocale = i18n.language === 'fr' ? 'fr-FR' : i18n.language === 'de' ? 'de-DE' : i18n.language === 'es' ? 'es-ES' : 'en-US';
+    const dateLocale = getIntlLocale(i18n.language);
     const date = new Date().toLocaleDateString(dateLocale, { day: '2-digit', month: 'long', year: 'numeric' });
 
     const sectionTitles: Record<string, string> = {

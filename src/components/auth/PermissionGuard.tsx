@@ -3,6 +3,7 @@ import { usePermissions, PermissionAction, AppRole } from '@/hooks/usePermission
 import { LoadingState } from '@/components/ui/loading-state';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface PermissionGuardProps {
   children: ReactNode;
@@ -23,10 +24,11 @@ export function PermissionGuard({
   fallback,
   showAccessDenied = true
 }: PermissionGuardProps) {
+  const { t } = useTranslation();
   const { hasPermission, hasAnyPermission, hasAllPermissions, isAtLeastRole, loading } = usePermissions();
 
   if (loading) {
-    return <LoadingState message="Vérification des permissions..." />;
+    return <LoadingState message={t("common.verifyingPermissions")} />;
   }
 
   let allowed = true;
@@ -65,13 +67,13 @@ export function PermissionGuard({
           <div className="p-3 rounded-full bg-destructive/10 w-fit mx-auto mb-4">
             <Lock className="w-8 h-8 text-destructive" />
           </div>
-          <h3 className="font-semibold text-lg mb-2">Accès refusé</h3>
+          <h3 className="font-semibold text-lg mb-2">{t("common.accessDenied")}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Vous n'avez pas les permissions nécessaires pour accéder à cette section.
+            {t("common.accessDeniedDesc")}
           </p>
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <Shield className="w-4 h-4" />
-            <span>Contactez un administrateur pour obtenir l'accès</span>
+            <span>{t("common.contactAdmin")}</span>
           </div>
         </CardContent>
       </Card>
