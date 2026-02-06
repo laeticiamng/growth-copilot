@@ -30,7 +30,7 @@ interface ServiceStatus {
   errorRate?: number;
 }
 
-const dateFnsLocales: Record<string, Locale> = { fr, en: enUS, es, de };
+const dateFnsLocales: Record<string, typeof enUS> = { fr, en: enUS, es, de };
 
 export function ServiceHealthMonitor() {
   const { t, i18n } = useTranslation();

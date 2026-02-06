@@ -35,7 +35,7 @@ interface RunsHistoryProps {
   showHeader?: boolean;
 }
 
-const dateFnsLocales: Record<string, Locale> = { fr, en: enUS, es, de };
+const dateFnsLocales: Record<string, typeof enUS> = { fr, en: enUS, es, de };
 
 export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProps) {
   const { t, i18n } = useTranslation();
