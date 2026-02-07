@@ -80,7 +80,7 @@ export const fr = {
       ariaMenuClose: "Fermer le menu",
     },
     hero: {
-      badge: "Plateforme #1 d'automatisation IA",
+      badge: "Automatisation IA pour entreprises",
       headline1: "39 agents IA pour automatiser",
       headlineHighlight: "votre croissance",
       subheadline: "Marketing, Commercial, Finance, Sécurité — vos départements IA travaillent 24/7. Vous validez, ils exécutent.",
@@ -93,7 +93,8 @@ export const fr = {
       loading: "Analyse en cours...",
       getStarted: "Analyser mon site gratuitement",
       seePricing: "Voir les tarifs",
-      premiumCompetence: "Ils nous font déjà confiance",
+      premiumCompetence: "Growth OS en chiffres",
+      urlAriaLabel: "Entrez l'URL de votre site web",
       statDepartments: "Départements",
       statAutomation: "Automatisation",
       statAuditable: "Auditable",
@@ -101,8 +102,8 @@ export const fr = {
     },
     features: {
       title: "Une équipe IA complète",
-      titleHighlight: "à ta disposition",
-      subtitle: "Des agents spécialisés qui travaillent 24/7 pour maximiser ta croissance",
+      titleHighlight: "à votre disposition",
+      subtitle: "Des agents spécialisés qui travaillent 24/7 pour maximiser votre croissance",
       seo: {
         title: "SEO Technique",
         description: "Crawl, audit, corrections automatiques. Indexation optimisée, Core Web Vitals, schema markup.",
@@ -290,7 +291,7 @@ export const fr = {
       roiDisclaimer: "Basé sur un coût salarial moyen français de 4 500€/mois par employé charges comprises.",
       trialBadge: "14 jours gratuits",
       title: "Tarifs transparents",
-      subtitle: "Choisis le plan adapté à tes ambitions",
+      subtitle: "Choisissez le plan adapté à vos ambitions",
       modules: {
         marketing: "Marketing",
         sales: "Commercial",
@@ -388,8 +389,8 @@ export const fr = {
       loading: "Chargement...",
     },
     footer: {
-      brandDescription: "L'entreprise digitale complète. Abonnez-vous à tous les départements ou choisissez uniquement ce dont vous avez besoin.",
-      premiumCompetence: "Compétence Premium",
+      brandDescription: "39 agents IA pour automatiser votre marketing, ventes et opérations. Full Company ou à la carte.",
+      premiumCompetence: "Automatisation IA",
       productTitle: "Produit",
       resourcesTitle: "Ressources",
       companyTitle: "Entreprise",
