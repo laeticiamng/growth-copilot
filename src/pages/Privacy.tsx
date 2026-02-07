@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock } from "lucide-react";
+import { Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SEOHead } from "@/components/SEOHead";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 const LAST_UPDATED = "5 février 2026";
 
@@ -18,26 +19,10 @@ export default function Privacy() {
         description="Politique de confidentialité de Growth OS. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles conformément au RGPD."
         canonical="/privacy"
       />
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-semibold">Growth OS</span>
-          </Link>
-          <Button variant="ghost" asChild>
-            <Link to="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-primary/5 to-background py-16">
+      <div className="bg-gradient-to-b from-primary/5 to-background py-16 pt-24">
         <div className="container max-w-4xl px-4">
           {!isFr && (
             <Badge variant="outline" className="mb-4">
@@ -153,38 +138,14 @@ export default function Privacy() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="py-3 pr-4">Fourniture et fonctionnement du service</td>
-                    <td className="py-3 pr-4">Exécution du contrat</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Gestion de votre compte et authentification</td>
-                    <td className="py-3 pr-4">Exécution du contrat</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Facturation et paiement</td>
-                    <td className="py-3 pr-4">Exécution du contrat / Obligation légale</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Support client et assistance</td>
-                    <td className="py-3 pr-4">Exécution du contrat</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Amélioration du service et développement</td>
-                    <td className="py-3 pr-4">Intérêt légitime</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Communications importantes (sécurité, mises à jour)</td>
-                    <td className="py-3 pr-4">Intérêt légitime / Obligation légale</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Audit et conformité légale</td>
-                    <td className="py-3 pr-4">Obligation légale</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Analyses statistiques anonymisées</td>
-                    <td className="py-3 pr-4">Intérêt légitime</td>
-                  </tr>
+                  <tr><td className="py-3 pr-4">Fourniture et fonctionnement du service</td><td className="py-3 pr-4">Exécution du contrat</td></tr>
+                  <tr><td className="py-3 pr-4">Gestion de votre compte et authentification</td><td className="py-3 pr-4">Exécution du contrat</td></tr>
+                  <tr><td className="py-3 pr-4">Facturation et paiement</td><td className="py-3 pr-4">Exécution du contrat / Obligation légale</td></tr>
+                  <tr><td className="py-3 pr-4">Support client et assistance</td><td className="py-3 pr-4">Exécution du contrat</td></tr>
+                  <tr><td className="py-3 pr-4">Amélioration du service et développement</td><td className="py-3 pr-4">Intérêt légitime</td></tr>
+                  <tr><td className="py-3 pr-4">Communications importantes (sécurité, mises à jour)</td><td className="py-3 pr-4">Intérêt légitime / Obligation légale</td></tr>
+                  <tr><td className="py-3 pr-4">Audit et conformité légale</td><td className="py-3 pr-4">Obligation légale</td></tr>
+                  <tr><td className="py-3 pr-4">Analyses statistiques anonymisées</td><td className="py-3 pr-4">Intérêt légitime</td></tr>
                 </tbody>
               </table>
             </div>
@@ -213,31 +174,11 @@ export default function Privacy() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Supabase</td>
-                    <td className="py-3 pr-4">Base de données et authentification</td>
-                    <td className="py-3 pr-4">EU (via AWS eu-central-1)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Stripe</td>
-                    <td className="py-3 pr-4">Paiements et facturation</td>
-                    <td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Google Cloud</td>
-                    <td className="py-3 pr-4">APIs (Analytics, Search Console, etc.)</td>
-                    <td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Meta Platforms</td>
-                    <td className="py-3 pr-4">APIs (Facebook Ads, Instagram)</td>
-                    <td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Lovable</td>
-                    <td className="py-3 pr-4">Hébergement de l'application</td>
-                    <td className="py-3 pr-4">EU</td>
-                  </tr>
+                  <tr><td className="py-3 pr-4 font-medium">Supabase</td><td className="py-3 pr-4">Base de données et authentification</td><td className="py-3 pr-4">EU (via AWS eu-central-1)</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Stripe</td><td className="py-3 pr-4">Paiements et facturation</td><td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Google Cloud</td><td className="py-3 pr-4">APIs (Analytics, Search Console, etc.)</td><td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Meta Platforms</td><td className="py-3 pr-4">APIs (Facebook Ads, Instagram)</td><td className="py-3 pr-4">USA (Clauses Contractuelles Types)</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Lovable</td><td className="py-3 pr-4">Hébergement de l'application</td><td className="py-3 pr-4">EU</td></tr>
                 </tbody>
               </table>
             </div>
@@ -271,34 +212,13 @@ export default function Privacy() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="py-3 pr-4">Données de compte</td>
-                    <td className="py-3 pr-4">Durée du contrat + 3 ans</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Données de facturation</td>
-                    <td className="py-3 pr-4">10 ans (obligation comptable)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Logs d'audit</td>
-                    <td className="py-3 pr-4">3 ans</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Métriques analytics (Google, Meta)</td>
-                    <td className="py-3 pr-4">24 mois</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Logs d'exécution des agents IA</td>
-                    <td className="py-3 pr-4">12 mois</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Enregistrements vocaux (Assistant IA)</td>
-                    <td className="py-3 pr-4">Non stockés (traitement temps réel)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4">Cookies analytics</td>
-                    <td className="py-3 pr-4">13 mois maximum</td>
-                  </tr>
+                  <tr><td className="py-3 pr-4">Données de compte</td><td className="py-3 pr-4">Durée du contrat + 3 ans</td></tr>
+                  <tr><td className="py-3 pr-4">Données de facturation</td><td className="py-3 pr-4">10 ans (obligation comptable)</td></tr>
+                  <tr><td className="py-3 pr-4">Logs d'audit</td><td className="py-3 pr-4">3 ans</td></tr>
+                  <tr><td className="py-3 pr-4">Métriques analytics (Google, Meta)</td><td className="py-3 pr-4">24 mois</td></tr>
+                  <tr><td className="py-3 pr-4">Logs d'exécution des agents IA</td><td className="py-3 pr-4">12 mois</td></tr>
+                  <tr><td className="py-3 pr-4">Enregistrements vocaux (Assistant IA)</td><td className="py-3 pr-4">Non stockés (traitement temps réel)</td></tr>
+                  <tr><td className="py-3 pr-4">Cookies analytics</td><td className="py-3 pr-4">13 mois maximum</td></tr>
                 </tbody>
               </table>
             </div>
@@ -317,42 +237,19 @@ export default function Privacy() {
             </p>
             
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">🔍 Droit d'accès</h4>
-                <p className="text-sm text-muted-foreground">
-                  Obtenir confirmation du traitement de vos données et en recevoir une copie.
-                </p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">✏️ Droit de rectification</h4>
-                <p className="text-sm text-muted-foreground">
-                  Faire corriger vos données inexactes ou incomplètes.
-                </p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">🗑️ Droit à l'effacement</h4>
-                <p className="text-sm text-muted-foreground">
-                  Demander la suppression de vos données (« droit à l'oubli »).
-                </p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">📦 Droit à la portabilité</h4>
-                <p className="text-sm text-muted-foreground">
-                  Recevoir vos données dans un format structuré et lisible.
-                </p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">⛔ Droit d'opposition</h4>
-                <p className="text-sm text-muted-foreground">
-                  Vous opposer au traitement de vos données pour motifs légitimes.
-                </p>
-              </div>
-              <div className="bg-secondary/50 rounded-lg p-4">
-                <h4 className="font-medium mb-2">⏸️ Droit à la limitation</h4>
-                <p className="text-sm text-muted-foreground">
-                  Demander la suspension temporaire du traitement.
-                </p>
-              </div>
+              {[
+                { emoji: "🔍", title: "Droit d'accès", desc: "Obtenir confirmation du traitement de vos données et en recevoir une copie." },
+                { emoji: "✏️", title: "Droit de rectification", desc: "Faire corriger vos données inexactes ou incomplètes." },
+                { emoji: "🗑️", title: "Droit à l'effacement", desc: "Demander la suppression de vos données (« droit à l'oubli »)." },
+                { emoji: "📦", title: "Droit à la portabilité", desc: "Recevoir vos données dans un format structuré et lisible." },
+                { emoji: "⛔", title: "Droit d'opposition", desc: "Vous opposer au traitement de vos données pour motifs légitimes." },
+                { emoji: "⏸️", title: "Droit à la limitation", desc: "Demander la suspension temporaire du traitement." },
+              ].map(r => (
+                <div key={r.title} className="bg-secondary/50 rounded-lg p-4">
+                  <h4 className="font-medium mb-2">{r.emoji} {r.title}</h4>
+                  <p className="text-sm text-muted-foreground">{r.desc}</p>
+                </div>
+              ))}
             </div>
 
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
@@ -364,18 +261,10 @@ export default function Privacy() {
                 </a>
               </p>
               <p className="text-sm mt-2 text-muted-foreground">
-                Nous répondrons dans un délai d'un mois. En cas de demande complexe, ce délai peut 
-                être prolongé de deux mois.
+                Nous répondrons dans un délai de 30 jours. Vous pouvez également adresser une réclamation 
+                à la <strong>CNIL</strong> (cnil.fr).
               </p>
             </div>
-
-            <p className="text-sm mt-4">
-              Vous disposez également du droit d'introduire une réclamation auprès de la{" "}
-              <strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés) :{" "}
-              <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                www.cnil.fr
-              </a>
-            </p>
           </section>
 
           <Separator />
@@ -385,10 +274,9 @@ export default function Privacy() {
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">7</span>
               <Cookie className="w-5 h-5" />
-              Cookies
+              Cookies et traceurs
             </h2>
-            
-            <h3 className="text-lg font-medium mt-4">7.1 Types de cookies utilisés</h3>
+            <p>Growth OS utilise les catégories de cookies suivantes :</p>
             
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
@@ -396,35 +284,20 @@ export default function Privacy() {
                   <tr className="border-b border-border">
                     <th className="text-left py-3 pr-4 font-semibold">Type</th>
                     <th className="text-left py-3 pr-4 font-semibold">Finalité</th>
-                    <th className="text-left py-3 pr-4 font-semibold">Consentement</th>
+                    <th className="text-left py-3 pr-4 font-semibold">Consentement requis</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Cookies essentiels</td>
-                    <td className="py-3 pr-4">Authentification, session, préférences</td>
-                    <td className="py-3 pr-4">Non requis (nécessaires)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 pr-4 font-medium">Cookies analytics</td>
-                    <td className="py-3 pr-4">Mesure d'audience, amélioration du service</td>
-                    <td className="py-3 pr-4 text-primary font-medium">Requis</td>
-                  </tr>
+                  <tr><td className="py-3 pr-4 font-medium">Essentiels</td><td className="py-3 pr-4">Authentification, sécurité, préférences</td><td className="py-3 pr-4">Non (nécessaires)</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Analytics</td><td className="py-3 pr-4">Mesure d'audience (anonymisé)</td><td className="py-3 pr-4">Oui</td></tr>
+                  <tr><td className="py-3 pr-4 font-medium">Support</td><td className="py-3 pr-4">Chat d'assistance (Crisp)</td><td className="py-3 pr-4">Oui</td></tr>
                 </tbody>
               </table>
             </div>
 
-            <h3 className="text-lg font-medium mt-4">7.2 Gestion de vos préférences</h3>
-            <p>
-              Lors de votre première visite, un bandeau vous permet de choisir les cookies que vous 
-              acceptez. Vous pouvez modifier vos préférences à tout moment :
-            </p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>Via les paramètres de votre navigateur</li>
-              <li>Via notre bandeau de consentement (accessible en bas de page)</li>
-            </ul>
-            <p className="text-sm text-muted-foreground mt-2">
-              Le refus des cookies analytics n'affecte pas le fonctionnement du service.
+            <p className="text-sm text-muted-foreground">
+              Vous pouvez gérer vos préférences de cookies à tout moment via la bannière de consentement 
+              ou dans les paramètres de votre navigateur.
             </p>
           </section>
 
@@ -434,7 +307,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">8</span>
-              <Lock className="w-5 h-5" />
+              <Shield className="w-5 h-5" />
               Sécurité des données
             </h2>
             <p>
@@ -442,51 +315,35 @@ export default function Privacy() {
               protéger vos données :
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Chiffrement en transit</strong> : TLS 1.3 pour toutes les communications</li>
-              <li><strong>Chiffrement au repos</strong> : AES-256 pour les données sensibles (tokens OAuth)</li>
-              <li><strong>Authentification sécurisée</strong> : mots de passe hashés (bcrypt), MFA disponible</li>
-              <li><strong>Contrôle d'accès</strong> : Row Level Security (RLS) au niveau base de données</li>
-              <li><strong>Audit trail</strong> : journalisation immuable de toutes les actions</li>
-              <li><strong>Sauvegardes</strong> : quotidiennes avec rétention de 30 jours</li>
-              <li><strong>Monitoring</strong> : surveillance 24/7 et alertes de sécurité</li>
+              <li><strong>Chiffrement en transit</strong> : HTTPS/TLS pour toutes les communications</li>
+              <li><strong>Chiffrement au repos</strong> : AES-256 pour les données stockées</li>
+              <li><strong>OAuth 2.0</strong> : pour les connexions aux services tiers (pas de stockage de mots de passe)</li>
+              <li><strong>Tokens chiffrés</strong> : les tokens d'accès sont chiffrés avec AES-256-GCM</li>
+              <li><strong>Audit trail</strong> : journalisation complète des actions pour traçabilité</li>
+              <li><strong>Contrôle d'accès</strong> : RBAC (Role-Based Access Control) par workspace</li>
+              <li><strong>Hébergement européen</strong> : données hébergées sur des serveurs AWS en Europe (eu-central-1)</li>
             </ul>
           </section>
 
           <Separator />
 
-          {/* Mineurs */}
+          {/* IA */}
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">9</span>
-              Protection des mineurs
+              Utilisation de l'Intelligence Artificielle
             </h2>
             <p>
-              Growth OS est une plateforme B2B destinée aux professionnels. Elle n'est pas destinée 
-              aux personnes de moins de 18 ans. Nous ne collectons pas sciemment de données 
-              personnelles auprès de mineurs.
-            </p>
-          </section>
-
-          <Separator />
-
-          {/* Modifications */}
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold flex items-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">10</span>
-              Modifications de la politique
-            </h2>
-            <p>
-              Nous pouvons mettre à jour cette Politique de Confidentialité pour refléter les 
-              évolutions de nos pratiques ou de la réglementation. En cas de modification 
-              substantielle, vous serez informé :
+              Growth OS utilise des modèles d'IA pour fournir des recommandations et générer du contenu. 
+              Concernant vos données et l'IA :
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Par email à l'adresse associée à votre compte</li>
-              <li>Par une notification sur la Plateforme</li>
+              <li>Vos données <strong>ne sont pas utilisées pour entraîner</strong> les modèles d'IA</li>
+              <li>Les requêtes IA sont traitées par des fournisseurs tiers (OpenAI, Google) avec des engagements de confidentialité</li>
+              <li>Les enregistrements vocaux (Assistant IA) sont traités en temps réel et <strong>ne sont pas stockés</strong></li>
+              <li>Chaque décision IA est accompagnée d'un <strong>Evidence Bundle</strong> traçable</li>
+              <li>Vous conservez le <strong>contrôle total</strong> via le système d'approbation</li>
             </ul>
-            <p>
-              La date de « Dernière mise à jour » en haut de cette page indique la version en vigueur.
-            </p>
           </section>
 
           <Separator />
@@ -494,48 +351,26 @@ export default function Privacy() {
           {/* Contact */}
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">11</span>
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">10</span>
+              <Mail className="w-5 h-5" />
               Contact
             </h2>
             <p>
-              Pour toute question relative à cette Politique de Confidentialité ou à la protection 
-              de vos données personnelles, contactez notre Délégué à la Protection des Données (DPO) :
+              Pour toute question concernant cette politique de confidentialité ou l'exercice de vos droits :
             </p>
-            <div className="bg-secondary/50 rounded-lg p-4 flex items-center gap-3">
-              <Mail className="w-5 h-5 text-primary" />
-              <div>
-                <p className="font-medium">Délégué à la Protection des Données</p>
-                <a href="mailto:m.laeticia@hotmail.fr" className="text-primary hover:underline">
-                  m.laeticia@hotmail.fr
-                </a>
-              </div>
+            <div className="bg-secondary/50 rounded-lg p-4 space-y-2">
+              <p><strong>EmotionsCare SASU</strong></p>
+              <p className="text-sm text-muted-foreground">
+                Email : <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a><br />
+                Formulaire : <Link to="/contact" className="text-primary hover:underline">Page de contact</Link>
+              </p>
             </div>
           </section>
 
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 bg-secondary/30 py-8">
-        <div className="container max-w-4xl px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-                <Shield className="w-3 h-3 text-primary-foreground" />
-              </div>
-              <span className="text-sm text-muted-foreground">© {new Date().getFullYear()} EmotionsCare SASU</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                CGU
-              </Link>
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Accueil
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
