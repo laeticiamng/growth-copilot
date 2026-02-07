@@ -110,6 +110,7 @@ export function Hero() {
                   placeholder={t("landing.hero.urlPlaceholder")}
                   value={url}
                   onChange={handleUrlChange}
+                  aria-label={t("landing.hero.urlAriaLabel")}
                   className={cn(
                     "w-full h-14 px-5 pr-10 rounded-xl bg-secondary border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all",
                     urlError 
