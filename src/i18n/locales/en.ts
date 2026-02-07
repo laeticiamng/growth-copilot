@@ -415,6 +415,16 @@ export const en = {
       company: "Company",
       legal: "Legal",
     },
+    accessibility: {
+      skipToContent: "Skip to main content",
+      mainNav: "Main navigation",
+      footer: "Footer",
+      socialLinks: "Social media links",
+      emailUs: "Send us an email",
+      twitter: "Follow us on Twitter",
+      linkedin: "Follow us on LinkedIn",
+      moduleList: "List of available departments",
+    },
     orgChart: {
       team: "AI Workforce",
       title: "Your Complete AI Team",

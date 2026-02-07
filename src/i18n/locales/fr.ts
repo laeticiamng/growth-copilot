@@ -415,6 +415,16 @@ export const fr = {
       company: "Entreprise",
       legal: "Légal",
     },
+    accessibility: {
+      skipToContent: "Aller au contenu principal",
+      mainNav: "Navigation principale",
+      footer: "Pied de page",
+      socialLinks: "Réseaux sociaux",
+      emailUs: "Nous envoyer un email",
+      twitter: "Suivez-nous sur Twitter",
+      linkedin: "Suivez-nous sur LinkedIn",
+      moduleList: "Liste des départements à la carte",
+    },
     orgChart: {
       team: "Équipe IA",
       title: "Votre équipe IA complète",

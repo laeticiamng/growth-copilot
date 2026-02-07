@@ -31,7 +31,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="border-t border-border bg-card/50">
+    <footer className="border-t border-border bg-card/50" role="contentinfo" aria-label={t("landing.accessibility.footer")}>
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           <div className="col-span-2">
@@ -82,11 +82,11 @@ export function Footer() {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">{t("landing.footer.copyright")}</p>
-          <div className="flex items-center gap-4">
-            <a href="mailto:contact@growthOS.ai" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Email"><Mail className="w-5 h-5" /></a>
-            <a href="https://twitter.com/growthOS_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter"><Twitter className="w-5 h-5" /></a>
-            <a href="https://linkedin.com/company/growth-os-ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn"><Linkedin className="w-5 h-5" /></a>
-          </div>
+          <nav className="flex items-center gap-4" aria-label={t("landing.accessibility.socialLinks")}>
+            <a href="mailto:contact@growthOS.ai" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.emailUs")}><Mail className="w-5 h-5" aria-hidden="true" /></a>
+            <a href="https://twitter.com/growthOS_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.twitter")}><Twitter className="w-5 h-5" aria-hidden="true" /></a>
+            <a href="https://linkedin.com/company/growth-os-ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.linkedin")}><Linkedin className="w-5 h-5" aria-hidden="true" /></a>
+          </nav>
         </div>
       </div>
     </footer>

@@ -144,7 +144,7 @@ export function TeamOrgChart() {
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${leadership.color} flex items-center justify-center flex-shrink-0`}>
-                        <Brain className="w-7 h-7 text-white" />
+                        <Brain className="w-7 h-7 text-primary-foreground" aria-hidden="true" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -180,7 +180,7 @@ export function TeamOrgChart() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${dept.color} flex items-center justify-center`}>
-                        <Icon className="w-5 h-5 text-white" />
+                        <Icon className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
                       </div>
                       <div>
                         <h3 className="font-bold text-sm">{dept.name[lang] || dept.name.en}</h3>
