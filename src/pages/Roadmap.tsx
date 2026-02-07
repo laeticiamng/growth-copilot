@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Rocket, Clock, CheckCircle2, Circle, Vote, Calendar, Tag, MessageSquare } from "lucide-react";
+import { Rocket, Clock, CheckCircle2, Circle, Vote, Calendar, Tag, MessageSquare, Lock } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -80,7 +80,7 @@ export default function Roadmap() {
           <h1 className="text-4xl font-bold flex items-center gap-3 mb-4"><Rocket className="w-10 h-10 text-primary" />{t("pages.roadmap.publicRoadmap")}</h1>
           <p className="text-xl text-muted-foreground">{t("pages.roadmap.subtitle")}</p>
         </header>
-        <div className="grid sm:grid-cols-4 gap-4 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
           {[{ val: doneCount, label: t("pages.roadmap.completed"), color: "text-green-600" }, { val: inProgressCount, label: t("pages.roadmap.inProgress"), color: "text-blue-600" }, { val: plannedCount, label: t("pages.roadmap.planned"), color: "text-yellow-600" }, { val: allItems.length, label: t("pages.roadmap.total"), color: "" }].map(s => (
             <Card key={s.label}><CardContent className="pt-6 text-center"><p className={`text-3xl font-bold ${s.color}`}>{s.val}</p><p className="text-sm text-muted-foreground">{s.label}</p></CardContent></Card>
           ))}
@@ -126,7 +126,7 @@ export default function Roadmap() {
           </CardContent>
         </Card>
         <div className="mt-8 flex flex-wrap gap-4 justify-center text-sm">
-          <Link to="/dashboard/status" className="text-primary hover:underline">{t("pages.roadmap.implementationStatus")}</Link>
+          <Link to="/dashboard/status" className="text-primary hover:underline flex items-center gap-1"><Lock className="w-3.5 h-3.5" />{t("pages.roadmap.implementationStatus")}</Link>
         </div>
       </div>
       <Footer />

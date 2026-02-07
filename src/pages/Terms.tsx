@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { Scale, Building2, Mail } from "lucide-react";
+import { Scale, Building2, Mail, FileText, CheckSquare, UserPlus, CreditCard, CalendarClock, Bot, Copyright, Link2, AlertTriangle, Gavel } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SEOHead } from "@/components/SEOHead";
 import { Navbar } from "@/components/landing/Navbar";
@@ -46,6 +46,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
+              <Scale className="w-5 h-5" />
               Préambule et définitions
             </h2>
             <p>
@@ -78,6 +79,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">2</span>
+              <FileText className="w-5 h-5" />
               Objet du service
             </h2>
             <p>
@@ -99,6 +101,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">3</span>
+              <CheckSquare className="w-5 h-5" />
               Acceptation des conditions
             </h2>
             <p>
@@ -117,6 +120,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">4</span>
+              <UserPlus className="w-5 h-5" />
               Inscription et compte utilisateur
             </h2>
             <p>
@@ -159,6 +163,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">6</span>
+              <CalendarClock className="w-5 h-5" />
               Durée et résiliation
             </h2>
             <p>
@@ -173,6 +178,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">7</span>
+              <Bot className="w-5 h-5" />
               Utilisation des agents IA
             </h2>
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
@@ -196,6 +202,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">8</span>
+              <Copyright className="w-5 h-5" />
               Propriété intellectuelle
             </h2>
             <p>
@@ -213,6 +220,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">9</span>
+              <Link2 className="w-5 h-5" />
               Services et intégrations tiers
             </h2>
             <p>
@@ -226,6 +234,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">10</span>
+              <AlertTriangle className="w-5 h-5" />
               Limitation de responsabilité
             </h2>
             <p>
@@ -239,6 +248,7 @@ export default function Terms() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">11</span>
+              <Gavel className="w-5 h-5" />
               Droit applicable et juridiction
             </h2>
             <p>

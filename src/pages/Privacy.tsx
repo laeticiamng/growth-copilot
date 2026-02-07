@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock } from "lucide-react";
+import { Shield, Building2, Mail, Cookie, Database, Users, Clock, Lock, Search, Pencil, Trash2, Package, Ban, Pause, FileText, Brain, Scale } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SEOHead } from "@/components/SEOHead";
 import { Navbar } from "@/components/landing/Navbar";
@@ -46,6 +46,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">1</span>
+              <Shield className="w-5 h-5" />
               Introduction
             </h2>
             <p>
@@ -76,6 +77,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">2</span>
+              <Database className="w-5 h-5" />
               Données personnelles collectées
             </h2>
             
@@ -125,6 +127,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">3</span>
+              <FileText className="w-5 h-5" />
               Finalités du traitement
             </h2>
             <p>Vos données sont traitées pour les finalités suivantes :</p>
@@ -157,6 +160,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">4</span>
+              <Users className="w-5 h-5" />
               Sous-traitants et destinataires
             </h2>
             <p>
@@ -230,6 +234,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">6</span>
+              <Scale className="w-5 h-5" />
               Vos droits
             </h2>
             <p>
@@ -238,22 +243,22 @@ export default function Privacy() {
             
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                { emoji: "🔍", title: "Droit d'accès", desc: "Obtenir confirmation du traitement de vos données et en recevoir une copie." },
-                { emoji: "✏️", title: "Droit de rectification", desc: "Faire corriger vos données inexactes ou incomplètes." },
-                { emoji: "🗑️", title: "Droit à l'effacement", desc: "Demander la suppression de vos données (« droit à l'oubli »)." },
-                { emoji: "📦", title: "Droit à la portabilité", desc: "Recevoir vos données dans un format structuré et lisible." },
-                { emoji: "⛔", title: "Droit d'opposition", desc: "Vous opposer au traitement de vos données pour motifs légitimes." },
-                { emoji: "⏸️", title: "Droit à la limitation", desc: "Demander la suspension temporaire du traitement." },
+                { Icon: Search, title: "Droit d'accès", desc: "Obtenir confirmation du traitement de vos données et en recevoir une copie." },
+                { Icon: Pencil, title: "Droit de rectification", desc: "Faire corriger vos données inexactes ou incomplètes." },
+                { Icon: Trash2, title: "Droit à l'effacement", desc: "Demander la suppression de vos données (« droit à l'oubli »)." },
+                { Icon: Package, title: "Droit à la portabilité", desc: "Recevoir vos données dans un format structuré et lisible." },
+                { Icon: Ban, title: "Droit d'opposition", desc: "Vous opposer au traitement de vos données pour motifs légitimes." },
+                { Icon: Pause, title: "Droit à la limitation", desc: "Demander la suspension temporaire du traitement." },
               ].map(r => (
                 <div key={r.title} className="bg-secondary/50 rounded-lg p-4">
-                  <h4 className="font-medium mb-2">{r.emoji} {r.title}</h4>
+                  <h4 className="font-medium mb-2 flex items-center gap-2"><r.Icon className="w-4 h-4 text-primary" /> {r.title}</h4>
                   <p className="text-sm text-muted-foreground">{r.desc}</p>
                 </div>
               ))}
             </div>
 
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
-              <p className="font-medium mb-2">📧 Exercer vos droits</p>
+              <p className="font-medium mb-2 flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> Exercer vos droits</p>
               <p className="text-sm">
                 Pour exercer vos droits, envoyez un email à notre DPO :{" "}
                 <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline font-medium">
@@ -331,6 +336,7 @@ export default function Privacy() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold flex items-center gap-3">
               <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">9</span>
+              <Brain className="w-5 h-5" />
               Utilisation de l'Intelligence Artificielle
             </h2>
             <p>
