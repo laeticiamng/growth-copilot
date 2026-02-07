@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Play, CheckCircle2, AlertCircle, Building2, Zap, Loader2 } from "lucide-react";
+import { ArrowRight, Sparkles, CheckCircle2, AlertCircle, Building2, Zap, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { urlSchema } from "@/lib/validation";
 import { cn } from "@/lib/utils";
@@ -166,20 +166,9 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="fade-in-up flex flex-wrap items-center justify-center gap-4" style={{ animationDelay: "0.4s" }}>
-            <a 
-              href="#pricing"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <Button variant="hero-outline">
-                <Play className="w-4 h-4 mr-2" />
-                {t("landing.hero.seePricing")}
-              </Button>
-            </a>
-          </div>
+          <p className="fade-in-up text-xs text-muted-foreground" style={{ animationDelay: "0.4s" }}>
+            {t("landing.hero.urlHint")}
+          </p>
 
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
             <p className="text-sm text-muted-foreground mb-6">
