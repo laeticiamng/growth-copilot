@@ -160,7 +160,7 @@ export function Pricing() {
                 <span className="text-muted-foreground">/{t("landing.pricing.deptMonth")}</span>
               </div>
               <p className="text-sm text-muted-foreground mb-6">{t("landing.pricing.aLaCarteNote")}</p>
-              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2">
+              <div className="space-y-2 mb-6 max-h-80 overflow-y-auto pr-2" role="list" tabIndex={0} aria-label={t("landing.accessibility.moduleList")}>
                 {serviceModules.map((s) => {
                   const Icon = s.icon;
                   return (
