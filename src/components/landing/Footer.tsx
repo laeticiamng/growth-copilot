@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Zap, Twitter, Linkedin, Mail } from "lucide-react";
+import { Zap, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function Footer() {
@@ -15,7 +15,7 @@ export function Footer() {
     ],
     [t("landing.footer.resources")]: [
       { label: t("landing.footer.documentation"), href: "/about" },
-      { label: t("landing.footer.status"), href: "/contact" },
+      { label: t("landing.footer.status"), href: "/dashboard/status" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
     ],
     [t("landing.footer.company")]: [
@@ -83,9 +83,7 @@ export function Footer() {
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">{t("landing.footer.copyright")}</p>
           <nav className="flex items-center gap-4" aria-label={t("landing.accessibility.socialLinks")}>
-            <a href="mailto:contact@growthOS.ai" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.emailUs")}><Mail className="w-5 h-5" aria-hidden="true" /></a>
-            <a href="https://twitter.com/growthOS_ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.twitter")}><Twitter className="w-5 h-5" aria-hidden="true" /></a>
-            <a href="https://linkedin.com/company/growth-os-ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.linkedin")}><Linkedin className="w-5 h-5" aria-hidden="true" /></a>
+            <a href="mailto:contact@emotionscare.com" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.emailUs")}><Mail className="w-5 h-5" aria-hidden="true" /></a>
           </nav>
         </div>
       </div>
