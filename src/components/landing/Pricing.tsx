@@ -54,7 +54,12 @@ export function Pricing() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           {/* Starter */}
           <Card variant="feature" className="relative">
-            <CardHeader className="text-center pb-2">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+              <Badge variant="secondary" className="px-3 py-1 text-xs bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                {t("landing.pricing.trialBadge")}
+              </Badge>
+            </div>
+            <CardHeader className="text-center pt-10 pb-2">
               <div className="mx-auto p-3 rounded-xl bg-green-500/10 w-fit mb-4">
                 <TrendingUp className="w-8 h-8 text-green-500" />
               </div>
