@@ -197,6 +197,16 @@ export const en = {
       gbp: "Business listing and local reviews",
       meta: "Instagram, Facebook, and social ads",
       cms: "Connected CMS for automatic fixes",
+      integrations: {
+        seoTech: "Technical SEO",
+        contentBranding: "Content & Branding",
+        gsc: "Google Search Console",
+        ga4: "Google Analytics 4",
+        googleAds: "Google Ads",
+        gbp: "Google Business Profile",
+        meta: "Meta Business Suite",
+        cms: "WordPress / Shopify",
+      },
     },
     howItWorks: {
       title: "How it Works",

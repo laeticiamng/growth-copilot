@@ -125,7 +125,7 @@ export function TeamOrgChart() {
   const visibleDepartments = showAll ? otherDepartments : otherDepartments.slice(0, 4);
 
   return (
-    <section id="services" className="py-20 px-4 bg-secondary/30">
+    <section id="departments" className="py-20 px-4 bg-secondary/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4"><Bot className="w-3 h-3 mr-1" />{t("landing.orgChart.team")}</Badge>

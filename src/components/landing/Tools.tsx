@@ -19,15 +19,15 @@ export function Tools() {
     { titleKey: "landing.tools.step4Title", descKey: "landing.tools.step4Desc", icon: LineChart, badge: "4" },
   ];
 
-  const integrations: { name: string; descKey: string; category: string; icon: LucideIcon; phase: "instant" | "oauth" }[] = [
-    { name: "SEO Technique", descKey: "landing.tools.seoTech", category: "SEO", icon: Search, phase: "instant" },
-    { name: "Contenu & Branding", descKey: "landing.tools.contentBranding", category: "Content", icon: Code, phase: "instant" },
-    { name: "Google Search Console", descKey: "landing.tools.gsc", category: "SEO", icon: Search, phase: "oauth" },
-    { name: "Google Analytics 4", descKey: "landing.tools.ga4", category: "Analytics", icon: BarChart3, phase: "oauth" },
-    { name: "Google Ads", descKey: "landing.tools.googleAds", category: "Ads", icon: Target, phase: "oauth" },
-    { name: "Google Business Profile", descKey: "landing.tools.gbp", category: "Local", icon: MapPin, phase: "oauth" },
-    { name: "Meta Business Suite", descKey: "landing.tools.meta", category: "Social", icon: Share2, phase: "oauth" },
-    { name: "WordPress / Shopify", descKey: "landing.tools.cms", category: "CMS", icon: Code, phase: "oauth" },
+  const integrations: { nameKey: string; descKey: string; category: string; icon: LucideIcon; phase: "instant" | "oauth" }[] = [
+    { nameKey: "landing.tools.integrations.seoTech", descKey: "landing.tools.seoTech", category: "SEO", icon: Search, phase: "instant" },
+    { nameKey: "landing.tools.integrations.contentBranding", descKey: "landing.tools.contentBranding", category: "Content", icon: Code, phase: "instant" },
+    { nameKey: "landing.tools.integrations.gsc", descKey: "landing.tools.gsc", category: "SEO", icon: Search, phase: "oauth" },
+    { nameKey: "landing.tools.integrations.ga4", descKey: "landing.tools.ga4", category: "Analytics", icon: BarChart3, phase: "oauth" },
+    { nameKey: "landing.tools.integrations.googleAds", descKey: "landing.tools.googleAds", category: "Ads", icon: Target, phase: "oauth" },
+    { nameKey: "landing.tools.integrations.gbp", descKey: "landing.tools.gbp", category: "Local", icon: MapPin, phase: "oauth" },
+    { nameKey: "landing.tools.integrations.meta", descKey: "landing.tools.meta", category: "Social", icon: Share2, phase: "oauth" },
+    { nameKey: "landing.tools.integrations.cms", descKey: "landing.tools.cms", category: "CMS", icon: Code, phase: "oauth" },
   ];
 
   const instantIntegrations = integrations.filter(i => i.phase === "instant");
@@ -75,15 +75,15 @@ export function Tools() {
             <Badge variant="success" className="text-xs">{t("landing.tools.noAccountNeeded")}</Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {instantIntegrations.map((tool) => (
-              <Card key={tool.name} variant="feature" className="group">
+             {instantIntegrations.map((tool) => (
+              <Card key={tool.nameKey} variant="feature" className="group">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center flex-shrink-0">
                     <tool.icon className="w-5 h-5 text-chart-3" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm">{tool.name}</h4>
+                      <h4 className="font-medium text-sm">{t(tool.nameKey)}</h4>
                       <CheckCircle2 className="w-3.5 h-3.5 text-chart-3" />
                     </div>
                     <p className="text-xs text-muted-foreground">{t(tool.descKey)}</p>
@@ -102,15 +102,15 @@ export function Tools() {
             <Badge variant="secondary" className="text-xs">{t("landing.tools.oneClick")}</Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {oauthIntegrations.map((tool) => (
-              <Card key={tool.name} variant="feature" className="group">
+             {oauthIntegrations.map((tool) => (
+              <Card key={tool.nameKey} variant="feature" className="group">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
                     <tool.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm">{tool.name}</h4>
+                      <h4 className="font-medium text-sm">{t(tool.nameKey)}</h4>
                       <Badge variant="outline" className="text-[10px]">{tool.category}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{t(tool.descKey)}</p>
