@@ -1,106 +1,223 @@
 
 
-# Audit Beta Testeur - Post-corrections
+# Audit detaille de chaque page de la plateforme Growth OS
 
-## 1) Test "3 secondes"
-
-- **En 3 secondes, je crois que cette plateforme sert a :** Automatiser son business avec 39 agents IA. C'est beaucoup plus clair qu'avant.
-- **Public cible :** PME/startups qui veulent automatiser marketing, ventes, ops.
-- **2 confusions restantes :**
-  1. "Plateforme #1" -- #1 selon qui ? Pas de source = affirmation gratuite
-  2. "Ils nous font deja confiance" dans les stats hero, mais il n'y a plus de temoignages = mensonge visible
-- **Clarte immediate : 7/10** (ameliore de 5 a 7 grace aux corrections precedentes)
-
-## 2) Parcours utilisateur
-
-| Etape | Fait | Resultat | Ressenti | Bloquant | Attendu |
-|---|---|---|---|---|---|
-| Hero | Je lis le titre | "39 agents IA pour automatiser votre croissance" | Clair, je comprends | RAS | OK |
-| Stats hero | Je vois "Ils nous font deja confiance" | Pas de logos, pas de temoignages en dessous | Mensonger | La phrase promet une preuve sociale absente | Changer pour "Les chiffres cles" ou retirer |
-| Features | "a ta disposition" + "ta croissance" | Tutoiement soudain alors que le hero dit "Vous validez" | Incoherent | Mix tu/vous | Uniformiser en "vous" |
-| Pricing subtitle | "Choisis le plan adapte a tes ambitions" | Encore du tutoiement | Incoherent | Meme probleme | Passer en "vous" |
-| Footer | "Competence Premium" + "EmotionsCare SASU" | Marque differente | Confus | C'est qui EmotionsCare ? C'est Growth OS non ? | Retirer "Competence Premium", garder raison sociale mais clarifier |
-| Footer description | "L'entreprise digitale complete" | Ancien slogan qui contredit le nouveau hero | Incoherent | Pas aligne avec les nouvelles copies | Mettre a jour |
-
-## 3) Audit confiance : 6.5/10
-
-Ameliore par rapport a 5/10, mais reste :
-- **"Ils nous font deja confiance" sans preuves** = mensonger (MAJEUR)
-- **"Plateforme #1"** sans source = affirmation non credible (MOYEN)
-- **"Competence Premium"** badge footer = jargon interne restant (MOYEN)
-- **Footer brandDescription** encore l'ancien texte (MOYEN)
-- **Mix tu/vous** = manque de professionnalisme (MOYEN)
-- **aria-label manquant** sur le champ URL (MOYEN)
-
-## 4) Comprehension & guidance
-
-- Premier clic evident ? OUI - "Analyser mon site gratuitement" est clair
-- Apres le premier clic ? OUI - redirection /auth fonctionne
-- Ou je me perds ? Nulle part, la page est bien structuree maintenant
-- Phrases floues restantes :
-  - "Ils nous font deja confiance" (faux sans preuve)
-  - "Competence Premium" (jargon)
-  - "L'entreprise digitale complete" (ancien slogan dans le footer)
-
-## 5) Audit visuel
-
-- **Premium :** Design, gradients, animations, badge "14 jours gratuits"
-- **Cheap :** Rien visuellement
-- **Trop charge :** Page bien structuree maintenant
-- **Manque :** Coherence des copies (tu/vous)
-- **Mobile :** OK
-
-## 6) Problemes restants
-
-| Probleme | Ou | Gravite | Impact | Suggestion |
-|---|---|---|---|---|
-| "Ils nous font deja confiance" sans preuve | Hero stats | Majeur | Mensonger, casse la confiance | Changer pour "Growth OS en chiffres" |
-| Mix tu/vous | features, pricing subtitle | Majeur | Manque de professionnalisme | Uniformiser en "vous" |
-| "Competence Premium" badge footer | Footer | Moyen | Jargon interne | Remplacer par "Automatisation IA" |
-| Footer brandDescription ancien texte | Footer | Moyen | Incoherence | Aligner avec nouveau positionnement |
-| "#1" sans source dans badge hero | Hero | Moyen | Affirmation gratuite | Changer pour "Automatisation IA pour entreprises" |
-| Pas d'aria-label sur input URL | Hero | Moyen | Accessibilite | Ajouter aria-label |
-
-## 7) Top 6 ameliorations restantes
-
-### P0
-1. **Remplacer "Ils nous font deja confiance"** par "Growth OS en chiffres" (fausse preuve sociale)
-2. **Uniformiser tu -> vous** dans features et pricing subtitle
-3. **Remplacer "#1" dans badge hero** par "Automatisation IA pour entreprises" (affirmation non prouvable)
-
-### P1
-4. **Footer : remplacer "Competence Premium"** par "Automatisation IA"
-5. **Footer : mettre a jour brandDescription** pour aligner avec nouveau positionnement
-6. **Ajouter aria-label** sur le champ URL du hero
-
-## 8) Verdict
-
-- **Publiable ?** PRESQUE - les 3 P0 ci-dessus sont rapides a corriger
-- **Phrase hero :** Deja bonne : "39 agents IA pour automatiser votre croissance"
-- **CTA :** Deja bon : "Analyser mon site gratuitement"
+## Methodologie
+Test systematique de chaque page accessible publiquement et inspection du code des pages protegees (dashboard). Audit visuel, fonctionnel et de coherence pour chaque page.
 
 ---
 
-## Plan technique
+## 1. Page d'accueil `/` - Landing Page
 
-### Fichier 1 : `src/i18n/locales/fr.ts`
-- Ligne 83 `badge` : "Plateforme #1 d'automatisation IA" -> "Automatisation IA pour entreprises"
-- Ligne 96 `premiumCompetence` : "Ils nous font deja confiance" -> "Growth OS en chiffres"
-- Ligne 104 `titleHighlight` : "a ta disposition" -> "a votre disposition"
-- Ligne 105 `subtitle` features : "ta croissance" -> "votre croissance"
-- Ligne 293 pricing `subtitle` : "Choisis le plan adapte a tes ambitions" -> "Choisissez le plan adapte a vos ambitions"
-- Ligne 391 footer `brandDescription` : "L'entreprise digitale complete..." -> "39 agents IA pour automatiser votre marketing, ventes et operations. Full Company ou a la carte."
-- Ligne 392 footer `premiumCompetence` : "Competence Premium" -> "Automatisation IA"
+**Etat : OK avec reserves**
 
-### Fichier 2 : `src/i18n/locales/en.ts`
-- Ligne 83 `badge` : "#1 AI Automation Platform" -> "AI Automation for Business"
-- Ligne 96 `premiumCompetence` : "Trusted by growing companies" -> "Growth OS in numbers"
-- Ligne 391 footer `brandDescription` : "The complete digital company..." -> "39 AI agents to automate your marketing, sales and operations. Full Company or a la carte."
-- Ligne 392 footer `premiumCompetence` : "Premium Competence" -> "AI Automation"
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Page Install non traduite | Majeur | Tout le contenu est en francais dur (pas i18n) |
+| Page Privacy non traduite | Majeur | Contenu entierement en francais, pas de t() |
+| Page Terms non traduite | Majeur | Contenu entierement en francais, pas de t() |
+| Page Roadmap utilise un pattern mixte (titleFr/titleEn) au lieu de i18n | Moyen | Inconsistant avec le reste de l'app |
+| Lien GitHub Releases mort | Majeur | Pointe vers `github.com/your-org/growth-os/releases` (placeholder) |
+| Email footer `contact@growthOS.ai` incoherent | Moyen | Le reste de l'app utilise `contact@emotionscare.com` |
+| Liens sociaux Twitter/LinkedIn fictifs | Moyen | `twitter.com/growthOS_ai` et `linkedin.com/company/growth-os-ai` n'existent probablement pas |
+| Footer "Documentation" pointe vers `/about` | Moyen | Devrait pointer vers une vraie doc ou etre renomme |
+| Footer "Status" pointe vers `/contact` | Moyen | Devrait pointer vers `/dashboard/status` ou etre un lien coherent |
 
-### Fichier 3 : `src/components/landing/Hero.tsx`
-- Ligne 108 : Ajouter `aria-label={t("landing.hero.urlAriaLabel")}` sur l'input URL
+**Hero, TrustBar, Features, TeamOrgChart, Tools, HowItWorks, Pricing, FAQ, CTA** : Fonctionnels et bien traduits (i18n). Design premium.
 
-### Fichier 4 : `src/i18n/locales/fr.ts` + `en.ts`
-- Ajouter cle `urlAriaLabel: "Entrez l'URL de votre site web"` / `"Enter your website URL"`
+---
+
+## 2. Page Auth `/auth`
+
+**Etat : OK**
+
+- Formulaires login/signup fonctionnels avec validation Zod
+- Google/Apple OAuth integre
+- Reset password et confirmation email geres
+- Liens CGU et confidentialite presents
+- Design professionnel, coherent
+
+**Aucun probleme bloquant.**
+
+---
+
+## 3. Page About `/about`
+
+**Etat : OK avec reserves**
+
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Structured data `publisher: EmotionsCare SASU` | Info | Coherent avec les mentions legales |
+| Email `contact@emotionscare.com` present | OK | Coherent |
+
+**Page propre, bien traduite via i18n.**
+
+---
+
+## 4. Page Contact `/contact`
+
+**Etat : OK**
+
+- Formulaire de contact fonctionnel (appel edge function `send-contact-form`)
+- Cards email/chat/docs
+- Validation Zod des champs
+- Feedback utilisateur (succes/erreur)
+
+**Aucun probleme bloquant.**
+
+---
+
+## 5. Page Privacy `/privacy`
+
+**Etat : Probleme majeur**
+
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Contenu non traduit via i18n | Majeur | Tout est en francais dur, seul un badge "French only" s'affiche pour les non-FR |
+| Bouton "Retour" non traduit | Moyen | Ecrit en dur "Retour" |
+| Lien `emotionscare.com` dans le footer de la page | Info | Coherent avec les mentions legales |
+
+---
+
+## 6. Page Terms `/terms`
+
+**Etat : Probleme majeur**
+
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Contenu non traduit via i18n | Majeur | Tout est en francais dur |
+| Bouton "Retour" non traduit | Moyen | Ecrit en dur "Retour" |
+| Pas de Navbar coherente | Moyen | Utilise un header custom different de la Navbar globale |
+| Pas de Footer global | Moyen | Pas de footer du tout |
+
+---
+
+## 7. Page Legal `/legal`
+
+**Etat : OK avec reserves**
+
+- Utilise la Navbar et le Footer globaux (coherent)
+- Contenu en francais dur mais avec badge "French only" pour les non-FR
+- Liens internes fonctionnels (vers /privacy, /contact)
+- Informations d'immatriculation "Disponibles sur demande" : acceptable
+
+---
+
+## 8. Page Roadmap `/roadmap`
+
+**Etat : Probleme majeur**
+
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Lien GitHub Releases mort | Bloquant | `github.com/your-org/growth-os/releases` est un placeholder jamais mis a jour |
+| Pas de Navbar/Footer globaux | Moyen | Utilise un layout custom avec juste un bouton "Retour" |
+| Pattern `titleFr/titleEn` au lieu de i18n | Moyen | Inconsistant avec le reste de l'app |
+
+---
+
+## 9. Page Install `/install`
+
+**Etat : Probleme majeur**
+
+| Probleme | Gravite | Detail |
+|---|---|---|
+| Aucune traduction i18n | Bloquant | Toute la page est en francais dur : titres, descriptions, FAQ, footer |
+| Pas de Navbar/Footer globaux | Majeur | Header et footer custom, incoherent avec le reste |
+| Footer copyright "EmotionsCare SASU" | Moyen | Incoherent avec le footer principal |
+| Bouton "Se connecter" non traduit | Moyen | Dur en francais |
+| Contenu des features et FAQ en dur | Majeur | Pas de t() |
+
+---
+
+## 10. Page 404 `/nonexistent`
+
+**Etat : OK**
+
+- Design professionnel avec Navbar et Footer globaux
+- Message traduit via i18n
+- Bouton de retour fonctionnel
+- Pas de probleme
+
+---
+
+## 11. Dashboard `/dashboard`
+
+**Etat : Fonctionnel (necessite authentification)**
+
+- Layout riche : Welcome Card, Daily Briefing, Department Semaphores, Approvals, KPIs
+- Bien traduit via i18n
+- Gestion des etats vides (pas de workspace)
+- Sentry integre pour le suivi d'erreurs
+
+---
+
+## 12. Problemes transversaux
+
+| Probleme | Pages affectees | Gravite |
+|---|---|---|
+| Inconsistance layout : certaines pages utilisent la Navbar/Footer globaux, d'autres non | Privacy, Terms, Roadmap, Install | Majeur |
+| Pages legales (Privacy, Terms) non traduites en anglais | Privacy, Terms | Majeur |
+| Page Install entierement en dur (pas de i18n) | Install | Bloquant |
+| Lien GitHub placeholder non remplace | Roadmap | Bloquant |
+| Email incoherent footer (`growthOS.ai` vs `emotionscare.com`) | Footer global | Moyen |
+| Liens sociaux fictifs (Twitter, LinkedIn) | Footer global | Moyen |
+
+---
+
+## Plan de corrections (par priorite)
+
+### P0 - Bloquants avant publication (5 actions)
+
+1. **Supprimer le lien GitHub Releases mort** dans `/roadmap` (ligne 124) - Remplacer par un lien vers `/contact` ou le retirer
+2. **Page Install : ajouter Navbar/Footer globaux** et remplacer le header/footer custom
+3. **Page Install : migrer tout le contenu vers i18n** (features, FAQ, titres, descriptions, CTA)
+4. **Pages Privacy et Terms : ajouter Navbar/Footer globaux** pour coherence
+5. **Footer global : corriger l'email** `contact@growthOS.ai` vers `contact@emotionscare.com` (ou un email reel)
+
+### P1 - Ameliorations fortes (5 actions)
+
+6. **Pages Privacy et Terms : traduire les boutons** "Retour" via i18n
+7. **Footer global : "Documentation" -> renommer** ou pointer vers `/dashboard/guide`
+8. **Footer global : "Status" -> pointer vers** `/dashboard/status` au lieu de `/contact`
+9. **Liens sociaux** : soit les retirer, soit les mettre a jour avec de vrais liens
+10. **Page Roadmap : ajouter Navbar/Footer globaux** pour coherence de navigation
+
+### P2 - Polish (3 actions)
+
+11. **Pages Privacy/Terms : preparer les traductions anglaises** (meme si le contenu legal francais est obligatoire pour le droit francais)
+12. **Page Install : ajouter le SEO multilingue** (titre, description en EN)
+13. **Page Roadmap : migrer le pattern `titleFr/titleEn`** vers des cles i18n standard
+
+---
+
+## Implementation technique
+
+### Fichier 1 : `src/pages/Roadmap.tsx`
+- Ligne 124 : Supprimer ou remplacer le lien `github.com/your-org/growth-os/releases`
+- Ajouter import de Navbar et Footer, envelopper le contenu avec
+
+### Fichier 2 : `src/pages/Install.tsx`
+- Remplacer le header custom par `<Navbar />`
+- Remplacer le footer custom par `<Footer />`
+- Migrer toutes les chaines en dur vers `t("pages.install.xxx")`
+- Ajouter les cles correspondantes dans `fr.ts` et `en.ts`
+
+### Fichier 3 : `src/pages/Privacy.tsx`
+- Remplacer le header custom par `<Navbar />`
+- Ajouter `<Footer />` en bas
+- Traduire le bouton "Retour" via t()
+
+### Fichier 4 : `src/pages/Terms.tsx`
+- Remplacer le header custom par `<Navbar />`
+- Ajouter `<Footer />` en bas
+- Traduire le bouton "Retour" via t()
+
+### Fichier 5 : `src/components/landing/Footer.tsx`
+- Ligne 86 : Corriger `mailto:contact@growthOS.ai` vers `mailto:contact@emotionscare.com`
+- Ligne 14 : Corriger "Status" href de `/contact` vers `/dashboard/status`
+- Ligne 13 : Renommer "Documentation" ou corriger le lien
+
+### Fichier 6 : `src/i18n/locales/fr.ts` et `en.ts`
+- Ajouter toutes les cles de la page Install (features, FAQ, titres, descriptions, boutons)
+- Ajouter les cles manquantes pour les boutons "Retour" des pages legales
 
