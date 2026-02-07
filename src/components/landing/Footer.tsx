@@ -9,12 +9,12 @@ export function Footer() {
   const footerLinks = {
     [t("landing.footer.product")]: [
       { label: t("landing.footer.features"), href: "#features" },
-      { label: t("landing.footer.departments"), href: "#services" },
+      { label: t("landing.footer.departments"), href: "#departments" },
       { label: t("landing.footer.pricing"), href: "#pricing" },
       { label: t("landing.footer.integrations"), href: "#tools" },
     ],
     [t("landing.footer.resources")]: [
-      { label: t("landing.footer.documentation"), href: "/about" },
+      { label: t("landing.footer.about"), href: "/about" },
       { label: t("landing.footer.status"), href: "/dashboard/status" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
     ],
