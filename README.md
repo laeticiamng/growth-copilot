@@ -345,13 +345,13 @@ npm run test src/test/smoke.test.ts
 
 Ce logiciel est propriétaire et ne peut être copié, modifié ou redistribué sans autorisation écrite explicite.
 
-**Contact** : m.laeticia@hotmail.fr
+**Contact** : contact@emotionscare.com
 
 ---
 
 ## 🤝 Support
 
-- **Email** : m.laeticia@hotmail.fr
+- **Email** : contact@emotionscare.com
 - **Documentation** : [docs/](./docs/)
 - **Issues** : Via le dépôt GitHub
 
