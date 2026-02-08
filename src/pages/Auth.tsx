@@ -210,7 +210,10 @@ export default function Auth() {
     if (!validateSignUpForm()) return;
     
     setLoading(true);
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, {
+      full_name: fullName.trim(),
+      company_name: companyName.trim(),
+    });
     setLoading(false);
     
     if (error) {

@@ -2289,6 +2289,12 @@ export const en = {
     words: "words",
     internalLinks: "internal links",
     connectForMore: "Connect Google Analytics and Search Console to unlock advanced data.",
+    startFree: "Start for free",
+    freePlanDesc: "Free plan, 14-day trial — no credit card required",
+    creatingFreeWorkspace: "Creating...",
+    orFree: "or start for free",
+    freeWorkspaceCreated: "Workspace created! Welcome to Growth OS 🎉",
+    freeWorkspaceError: "Unable to create workspace",
   },
 
   // Nav additions

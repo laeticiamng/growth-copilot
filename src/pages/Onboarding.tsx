@@ -100,6 +100,7 @@ export default function Onboarding() {
   const [siteAnalysis, setSiteAnalysis] = useState<SiteAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisTriggered, setAnalysisTriggered] = useState(false);
+  const [isCreatingFree, setIsCreatingFree] = useState(false);
 
   const triggerSiteAnalysis = useCallback(async (url: string) => {
     if (isAnalyzing || analysisTriggered) return;
@@ -225,6 +226,47 @@ export default function Onboarding() {
 
   const handleObjectivesNext = () => {
     setStep("payment");
+  };
+
+  const handleFreePlan = async () => {
+    if (!user) return;
+    setIsCreatingFree(true);
+
+    try {
+      const workspaceName = siteName || detectedInfo?.name || "Mon Workspace";
+      const formattedUrl = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
+      const slug = generateSlug(workspaceName);
+
+      // Create workspace directly (triggers auto_enable_core_services + handle_new_workspace)
+      const { data: workspace, error: wsError } = await supabase
+        .from('workspaces')
+        .insert({ name: workspaceName, slug, owner_id: user.id })
+        .select()
+        .single();
+
+      if (wsError) throw wsError;
+
+      // Create associated site
+      const { error: siteError } = await supabase
+        .from('sites')
+        .insert({
+          workspace_id: workspace.id,
+          url: formattedUrl,
+          name: workspaceName,
+        });
+
+      if (siteError) {
+        console.error("Site creation error (non-blocking):", siteError);
+      }
+
+      toast.success(t("onboardingFlow.freeWorkspaceCreated"));
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Free plan error:", error);
+      toast.error(error instanceof Error ? error.message : t("onboardingFlow.freeWorkspaceError"));
+    } finally {
+      setIsCreatingFree(false);
+    }
   };
 
   const handlePayment = async () => {
@@ -638,8 +680,27 @@ export default function Onboarding() {
                   </Button>
                 </div>
 
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><Separator /></div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">{t("onboardingFlow.orFree")}</span>
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={handleFreePlan}
+                  className="w-full h-12 border-chart-3/50 hover:bg-chart-3/10"
+                  disabled={isCreatingFree || isSubmitting}
+                >
+                  {isCreatingFree ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("onboardingFlow.creatingFreeWorkspace")}</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4 mr-2 text-chart-3" />{t("onboardingFlow.startFree")}</>
+                  )}
+                </Button>
                 <p className="text-xs text-center text-muted-foreground">
-                  {t("onboardingFlow.securePayment")} {useTrial ? t("onboardingFlow.notChargedUntil") : t("onboardingFlow.billedMonthly")}
+                  {t("onboardingFlow.freePlanDesc")}
                 </p>
               </CardContent>
             </Card>
