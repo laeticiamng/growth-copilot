@@ -210,7 +210,7 @@ export default function Auth() {
     if (!validateSignUpForm()) return;
     
     setLoading(true);
-    const { error } = await signUp(email, password, {
+    const { error, user: newUser } = await signUp(email, password, {
       full_name: fullName.trim(),
       company_name: companyName.trim(),
     });
@@ -224,6 +224,13 @@ export default function Auth() {
         message = txt.passwordMin;
       }
       toast({ title: txt.error, description: message, variant: "destructive" });
+    } else if (!newUser || !newUser.identities || newUser.identities.length === 0) {
+      // Silent failure: no error but no user created (e.g. email already exists with different provider)
+      toast({ 
+        title: txt.error, 
+        description: txt.accountExists || "Un compte avec cet email existe déjà.", 
+        variant: "destructive" 
+      });
     } else {
       const siteUrl = searchParams.get("url");
       localStorage.setItem("signup_data", JSON.stringify({
