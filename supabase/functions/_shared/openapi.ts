@@ -13,7 +13,7 @@ export const openApiSpec = {
     version: "2.0.0",
     contact: {
       name: "Growth OS Support",
-      email: "support@growthwizard.io"
+      email: "contact@emotionscare.com"
     }
   },
   servers: [

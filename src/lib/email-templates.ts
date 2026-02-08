@@ -6,7 +6,7 @@
 const BRAND = {
   name: 'Growth OS',
   company: 'EmotionsCare SASU',
-  supportEmail: 'support@agent-growth-automator.com',
+  supportEmail: 'contact@emotionscare.com',
   primaryColor: '#6366f1', // Indigo
   secondaryColor: '#8b5cf6', // Violet
   backgroundColor: '#0f1117',
