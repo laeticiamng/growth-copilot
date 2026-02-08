@@ -573,7 +573,7 @@ export default function DemoOAuth() {
             <p className="font-bold text-lg">© 2025 {OAUTH_CONFIG.companyName}</p>
             <p className="text-muted-foreground">{OAUTH_CONFIG.appName}</p>
             <p className="text-sm mt-2">
-              📧 Contact : m.laeticia@hotmail.fr
+              📧 Contact : contact@emotionscare.com
             </p>
             <div className="flex justify-center gap-4 mt-2">
               <a href={OAUTH_CONFIG.privacyUrl} className="text-primary hover:underline text-sm">

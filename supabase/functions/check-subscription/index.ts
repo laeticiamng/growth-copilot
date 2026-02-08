@@ -76,7 +76,7 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Check if user is founder (special unlimited access)
-    const FOUNDER_EMAILS = ["m.laeticia@hotmail.fr"];
+    const FOUNDER_EMAILS = ["m.laeticia@hotmail.fr", "contact@emotionscare.com"];
     if (FOUNDER_EMAILS.includes(user.email.toLowerCase())) {
       logStep("Founder detected - returning unlimited access");
       return new Response(JSON.stringify({

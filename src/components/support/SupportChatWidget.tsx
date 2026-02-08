@@ -32,7 +32,7 @@ export function SupportChatWidget() {
   // Fallback: floating support button that opens mailto
   return (
     <a
-      href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS"
+      href="mailto:contact@emotionscare.com?subject=Demande de support Growth OS"
       className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 group"
       title="Contactez le support"
     >
@@ -57,7 +57,7 @@ export function SupportChatWidget() {
 export function SupportLink({ className }: { className?: string }) {
   return (
     <a
-      href="mailto:support@agent-growth-automator.com?subject=Demande de support Growth OS"
+      href="mailto:contact@emotionscare.com?subject=Demande de support Growth OS"
       className={className || "text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"}
     >
       <svg

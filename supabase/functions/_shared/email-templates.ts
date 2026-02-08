@@ -4,7 +4,7 @@
 const BRAND = {
   name: 'Growth OS',
   company: 'EmotionsCare SASU',
-  supportEmail: 'support@agent-growth-automator.com',
+  supportEmail: 'contact@emotionscare.com',
   dashboardUrl: 'https://www.agent-growth-automator.com/dashboard',
   billingUrl: 'https://www.agent-growth-automator.com/dashboard/billing',
 };
