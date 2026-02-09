@@ -9,7 +9,7 @@ import {
   getAgentsByDepartment,
   DEPARTMENTS_CATALOG,
 } from "@/data/agents-catalog";
-import { ArrowLeft, ArrowRight, Bot, CheckCircle, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, CheckCircle, Users, Zap, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function DepartmentDetail() {
@@ -61,7 +61,7 @@ export default function DepartmentDetail() {
           </div>
         </div>
 
-        {/* Hero */}
+        {/* Hero with Metric */}
         <section className="py-20 relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-5"
@@ -97,6 +97,17 @@ export default function DepartmentDetail() {
                   {department.description[lang]}
                 </p>
 
+                {/* Hero Metric */}
+                <div
+                  className="inline-flex items-center gap-3 px-5 py-3 rounded-xl border-2 mb-6"
+                  style={{ borderColor: `${department.color}40`, backgroundColor: `${department.color}08` }}
+                >
+                  <Zap className="w-5 h-5" style={{ color: department.color }} />
+                  <span className="text-lg font-bold" style={{ color: department.color }}>
+                    {department.heroMetric[lang]}
+                  </span>
+                </div>
+
                 <div className="flex items-center gap-4 flex-wrap">
                   <Badge variant="secondary" className="text-sm px-3 py-1">
                     <Bot className="w-3 h-3 mr-1" />
@@ -106,9 +117,6 @@ export default function DepartmentDetail() {
                   <Badge variant="outline" className="text-sm px-3 py-1">
                     <Users className="w-3 h-3 mr-1" />
                     {lang === "fr" ? "Disponible 24/7" : "Available 24/7"}
-                  </Badge>
-                  <Badge variant="outline" className="text-sm px-3 py-1">
-                    1 900€/{lang === "fr" ? "mois" : "month"}
                   </Badge>
                 </div>
               </div>
@@ -133,6 +141,92 @@ export default function DepartmentDetail() {
                     style={{ color: department.color }}
                   />
                   <span className="text-sm font-medium">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Workflow Diagram */}
+        <section className="py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold mb-2">
+              {lang === "fr" ? "Workflow automatisé" : "Automated Workflow"}
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              {lang === "fr"
+                ? "Comment les agents collaborent pour produire des résultats."
+                : "How agents collaborate to deliver results."}
+            </p>
+
+            <div className="max-w-4xl mx-auto">
+              {/* SVG Workflow */}
+              <div className="relative">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {department.workflow.map((step, index) => (
+                    <div key={index} className="relative">
+                      <div className="flex flex-col items-center text-center">
+                        {/* Step circle */}
+                        <div
+                          className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white mb-3 relative z-10"
+                          style={{ backgroundColor: department.color }}
+                        >
+                          {index + 1}
+                        </div>
+
+                        {/* Arrow between steps (hidden on mobile, hidden for last item) */}
+                        {index < department.workflow.length - 1 && (
+                          <div className="hidden md:block absolute top-7 left-[calc(50%+28px)] w-[calc(100%-56px)] z-0">
+                            <div className="flex items-center">
+                              <div
+                                className="flex-1 h-0.5"
+                                style={{ backgroundColor: `${department.color}40` }}
+                              />
+                              <ChevronRight
+                                className="w-4 h-4 -ml-1 flex-shrink-0"
+                                style={{ color: `${department.color}60` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <h4 className="font-bold text-sm mb-1">{step.label[lang]}</h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {step.description[lang]}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Integrations */}
+        <section className="py-12 bg-secondary/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold mb-2">
+              {lang === "fr" ? "Intégrations supportées" : "Supported Integrations"}
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              {lang === "fr"
+                ? "Connectez vos outils existants en quelques clics."
+                : "Connect your existing tools in a few clicks."}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {department.integrations.map((integration) => (
+                <div
+                  key={integration}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-background border hover:border-primary/30 transition-colors"
+                >
+                  <div
+                    className="w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold text-white"
+                    style={{ backgroundColor: department.color }}
+                  >
+                    {integration.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium">{integration}</span>
                 </div>
               ))}
             </div>
@@ -253,8 +347,8 @@ export default function DepartmentDetail() {
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
               {lang === "fr"
-                ? "À partir de 1 900€/mois par département, ou 9 000€/mois pour les 11 départements."
-                : "Starting at 1,900€/month per department, or 9,000€/month for all 11 departments."}
+                ? "Essai gratuit 14 jours, aucune carte bancaire requise."
+                : "14-day free trial, no credit card required."}
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link to="/auth?tab=signup">
@@ -263,7 +357,7 @@ export default function DepartmentDetail() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
-              <Link to="/#pricing">
+              <Link to="/pricing">
                 <Button variant="outline" size="lg">
                   {lang === "fr" ? "Voir les tarifs" : "View pricing"}
                 </Button>
