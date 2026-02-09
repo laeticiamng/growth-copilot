@@ -65,6 +65,18 @@ import LegalPage from "./pages/Legal";
 import About from "./pages/About";
 import Install from "./pages/Install";
 
+// New public pages
+import AgentsCatalog from "./pages/AgentsCatalog";
+import AgentDetail from "./pages/AgentDetail";
+import DepartmentDetail from "./pages/DepartmentDetail";
+import Features from "./pages/Features";
+import Blog from "./pages/Blog";
+import Changelog from "./pages/Changelog";
+import Help from "./pages/Help";
+import PublicStatus from "./pages/Status";
+import ApiDocs from "./pages/ApiDocs";
+import PricingPage from "./pages/PricingPage";
+
 // Crisp Chat widget
 import { CrispChat } from "@/components/CrispChat";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -248,7 +260,19 @@ function App() {
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/link/:slug" element={<SmartLink />} />
-              
+
+              {/* New public pages */}
+              <Route path="/agents" element={<AgentsCatalog />} />
+              <Route path="/agents/:slug" element={<AgentDetail />} />
+              <Route path="/departments/:slug" element={<DepartmentDetail />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/changelog" element={<Changelog />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/status" element={<PublicStatus />} />
+              <Route path="/api-docs" element={<ApiDocs />} />
+
               {/* Dashboard - Foundation */}
               <Route path="/dashboard" element={<DashboardRoute><DashboardHome /></DashboardRoute>} />
               <Route path="/dashboard/sites" element={<DashboardRoute><Sites /></DashboardRoute>} />

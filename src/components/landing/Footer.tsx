@@ -8,20 +8,25 @@ export function Footer() {
 
   const footerLinks = {
     [t("landing.footer.product")]: [
-      { label: t("landing.footer.features"), href: "#features" },
-      { label: t("landing.footer.departments"), href: "#departments" },
-      { label: t("landing.footer.pricing"), href: "#pricing" },
+      { label: t("landing.footer.features"), href: "/features" },
+      { label: "Agents IA", href: "/agents" },
+      { label: t("landing.footer.departments"), href: "/agents" },
+      { label: t("landing.footer.pricing"), href: "/pricing" },
       { label: t("landing.footer.integrations"), href: "#tools" },
     ],
     [t("landing.footer.resources")]: [
+      { label: "Blog", href: "/blog" },
       { label: t("landing.footer.about"), href: "/about" },
-      { label: t("landing.footer.status"), href: "/dashboard/status" },
+      { label: "Changelog", href: "/changelog" },
+      { label: t("landing.footer.status"), href: "/status" },
+      { label: "API Docs", href: "/api-docs" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
     ],
     [t("landing.footer.company")]: [
       { label: t("landing.footer.about"), href: "/about" },
       { label: t("landing.footer.contact"), href: "/contact" },
       { label: t("landing.footer.legalNotice"), href: "/legal" },
+      { label: "Help", href: "/help" },
     ],
     [t("landing.footer.legal")]: [
       { label: t("landing.footer.terms"), href: "/terms" },
