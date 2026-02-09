@@ -2,36 +2,39 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Zap, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language.startsWith("fr") ? "fr" : "en";
+
+  const departmentLinks = DEPARTMENTS_CATALOG.slice(0, 6).map((dept) => ({
+    label: dept.name[lang],
+    href: `/departments/${dept.slug}`,
+  }));
 
   const footerLinks = {
     [t("landing.footer.product")]: [
       { label: t("landing.footer.features"), href: "/features" },
       { label: "Agents IA", href: "/agents" },
-      { label: t("landing.footer.departments"), href: "/agents" },
       { label: t("landing.footer.pricing"), href: "/pricing" },
       { label: t("landing.footer.integrations"), href: "#tools" },
     ],
+    [lang === "fr" ? "Départements" : "Departments"]: departmentLinks,
     [t("landing.footer.resources")]: [
       { label: "Blog", href: "/blog" },
-      { label: t("landing.footer.about"), href: "/about" },
       { label: "Changelog", href: "/changelog" },
       { label: t("landing.footer.status"), href: "/status" },
       { label: "API Docs", href: "/api-docs" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
+      { label: "Help", href: "/help" },
     ],
     [t("landing.footer.company")]: [
       { label: t("landing.footer.about"), href: "/about" },
       { label: t("landing.footer.contact"), href: "/contact" },
       { label: t("landing.footer.legalNotice"), href: "/legal" },
-      { label: "Help", href: "/help" },
-    ],
-    [t("landing.footer.legal")]: [
       { label: t("landing.footer.terms"), href: "/terms" },
       { label: t("landing.footer.privacy"), href: "/privacy" },
-      { label: t("landing.footer.rgpd"), href: "/privacy#gdpr" },
     ],
   };
 

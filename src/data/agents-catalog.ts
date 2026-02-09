@@ -28,6 +28,11 @@ export interface AgentCatalogItem {
   persona: { name: string; initials: string };
 }
 
+export interface DepartmentWorkflowStep {
+  label: Record<string, string>;
+  description: Record<string, string>;
+}
+
 export interface DepartmentCatalogItem {
   slug: string;
   name: Record<string, string>;
@@ -38,6 +43,9 @@ export interface DepartmentCatalogItem {
   gradientTo: string;
   agentCount: number;
   features: Record<string, string[]>;
+  heroMetric: Record<string, string>;
+  workflow: DepartmentWorkflowStep[];
+  integrations: string[];
 }
 
 export const AGENTS_CATALOG: AgentCatalogItem[] = [
@@ -902,6 +910,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Orchestration de tous les agents", "Scoring ICE des priorités", "Briefing quotidien exécutif", "Contrôle qualité & conformité"],
       en: ["Orchestration of all agents", "ICE priority scoring", "Daily executive briefing", "Quality control & compliance"],
     },
+    heroMetric: { fr: "Coordonne 39 agents en temps réel", en: "Coordinates 39 agents in real-time" },
+    workflow: [
+      { label: { fr: "Collecte", en: "Collect" }, description: { fr: "Agrège les données de tous les départements", en: "Aggregates data from all departments" } },
+      { label: { fr: "Analyse ICE", en: "ICE Analysis" }, description: { fr: "Score chaque action par Impact, Confiance, Facilité", en: "Scores each action by Impact, Confidence, Ease" } },
+      { label: { fr: "Priorisation", en: "Prioritization" }, description: { fr: "Classe les actions par score ICE décroissant", en: "Ranks actions by descending ICE score" } },
+      { label: { fr: "Briefing", en: "Briefing" }, description: { fr: "Génère le briefing quotidien exécutif", en: "Generates the daily executive briefing" } },
+    ],
+    integrations: ["Google Analytics", "Search Console", "Meta Business", "Stripe", "Slack"],
   },
   {
     slug: "marketing",
@@ -919,6 +935,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Audit SEO technique complet", "Clusters sémantiques & mots-clés", "Contenu optimisé SEO", "Gestion réseaux sociaux", "SEO local & Google Business"],
       en: ["Full technical SEO audit", "Semantic clusters & keywords", "SEO-optimized content", "Social media management", "Local SEO & Google Business"],
     },
+    heroMetric: { fr: "+340% de trafic organique en 4 mois", en: "+340% organic traffic in 4 months" },
+    workflow: [
+      { label: { fr: "Audit SEO", en: "SEO Audit" }, description: { fr: "Crawl technique du site et analyse des erreurs", en: "Technical site crawl and error analysis" } },
+      { label: { fr: "Stratégie", en: "Strategy" }, description: { fr: "Clusters de mots-clés et calendrier éditorial", en: "Keyword clusters and editorial calendar" } },
+      { label: { fr: "Création", en: "Creation" }, description: { fr: "Contenu SEO-first avec frameworks AIDA/PAS", en: "SEO-first content with AIDA/PAS frameworks" } },
+      { label: { fr: "Distribution", en: "Distribution" }, description: { fr: "Publication multi-canal et suivi des KPIs", en: "Multi-channel publishing and KPI tracking" } },
+    ],
+    integrations: ["Google Analytics", "Search Console", "Google Ads", "Meta Ads", "Google Business Profile", "Instagram"],
   },
   {
     slug: "sales",
@@ -936,6 +960,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Architecture d'offres commerciales", "Lead scoring & qualification", "Séquences email automatisées", "Optimisation du closing"],
       en: ["Sales offer architecture", "Lead scoring & qualification", "Automated email sequences", "Closing optimization"],
     },
+    heroMetric: { fr: "Réduit le cycle de vente de 60%", en: "Reduces sales cycle by 60%" },
+    workflow: [
+      { label: { fr: "Qualification", en: "Qualification" }, description: { fr: "Scoring automatique des leads entrants", en: "Automatic scoring of inbound leads" } },
+      { label: { fr: "Nurturing", en: "Nurturing" }, description: { fr: "Séquences email personnalisées par segment", en: "Personalized email sequences by segment" } },
+      { label: { fr: "Offre", en: "Offer" }, description: { fr: "Création d'offres optimisées par l'IA", en: "AI-optimized offer creation" } },
+      { label: { fr: "Closing", en: "Closing" }, description: { fr: "Accompagnement jusqu'à la signature", en: "Guidance through to signature" } },
+    ],
+    integrations: ["Stripe", "HubSpot", "Salesforce", "Google Sheets", "Slack"],
   },
   {
     slug: "finance",
@@ -953,6 +985,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Analyse des revenus & prévisions", "Optimisation budgétaire", "Facturation automatisée", "Rapports de rentabilité"],
       en: ["Revenue analysis & forecasting", "Budget optimization", "Automated billing", "Profitability reports"],
     },
+    heroMetric: { fr: "Réduit le temps de reporting de 80%", en: "Reduces reporting time by 80%" },
+    workflow: [
+      { label: { fr: "Collecte", en: "Collect" }, description: { fr: "Agrège les données financières de toutes les sources", en: "Aggregates financial data from all sources" } },
+      { label: { fr: "Analyse", en: "Analyze" }, description: { fr: "Détecte les anomalies et tendances de revenus", en: "Detects revenue anomalies and trends" } },
+      { label: { fr: "Optimisation", en: "Optimize" }, description: { fr: "Recommandations d'allocation budgétaire", en: "Budget allocation recommendations" } },
+      { label: { fr: "Rapport", en: "Report" }, description: { fr: "Rapports automatisés et prévisions", en: "Automated reports and forecasts" } },
+    ],
+    integrations: ["Stripe", "QuickBooks", "Google Sheets", "Xero"],
   },
   {
     slug: "security",
@@ -970,6 +1010,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Audit de vulnérabilités", "Contrôle d'accès & RBAC", "Monitoring des menaces en temps réel", "Conformité RGPD"],
       en: ["Vulnerability audit", "Access control & RBAC", "Real-time threat monitoring", "GDPR compliance"],
     },
+    heroMetric: { fr: "99.9% de disponibilité garantie", en: "99.9% guaranteed uptime" },
+    workflow: [
+      { label: { fr: "Scan", en: "Scan" }, description: { fr: "Audit automatisé des vulnérabilités", en: "Automated vulnerability audit" } },
+      { label: { fr: "Détection", en: "Detection" }, description: { fr: "Monitoring en temps réel des menaces", en: "Real-time threat monitoring" } },
+      { label: { fr: "Alerte", en: "Alert" }, description: { fr: "Notification immédiate des incidents", en: "Immediate incident notification" } },
+      { label: { fr: "Remédiation", en: "Remediation" }, description: { fr: "Actions correctives automatisées", en: "Automated corrective actions" } },
+    ],
+    integrations: ["AWS", "Supabase", "Sentry", "Cloudflare"],
   },
   {
     slug: "product",
@@ -987,6 +1035,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Analyse des fonctionnalités", "Optimisation UX", "Planification roadmap & OKR", "Gestion du backlog"],
       en: ["Feature analysis", "UX optimization", "Roadmap & OKR planning", "Backlog management"],
     },
+    heroMetric: { fr: "2x plus rapide sur la priorisation produit", en: "2x faster product prioritization" },
+    workflow: [
+      { label: { fr: "Recherche", en: "Research" }, description: { fr: "Analyse des feedbacks et demandes utilisateurs", en: "Analysis of user feedback and requests" } },
+      { label: { fr: "Priorisation", en: "Prioritization" }, description: { fr: "Scoring des features par impact business", en: "Feature scoring by business impact" } },
+      { label: { fr: "Planification", en: "Planning" }, description: { fr: "Roadmap et OKR alignés sur la stratégie", en: "Roadmap and OKR aligned with strategy" } },
+      { label: { fr: "Mesure", en: "Measure" }, description: { fr: "Suivi de l'adoption et de l'impact", en: "Adoption and impact tracking" } },
+    ],
+    integrations: ["Jira", "Linear", "Notion", "Figma", "Hotjar"],
   },
   {
     slug: "engineering",
@@ -1004,6 +1060,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Revue de code automatisée", "Optimisation des performances", "CI/CD & DevOps", "Intégrations API", "Tests automatisés"],
       en: ["Automated code review", "Performance optimization", "CI/CD & DevOps", "API integrations", "Automated testing"],
     },
+    heroMetric: { fr: "-45% de bugs en production", en: "-45% production bugs" },
+    workflow: [
+      { label: { fr: "Code Review", en: "Code Review" }, description: { fr: "Analyse statique et détection de bugs", en: "Static analysis and bug detection" } },
+      { label: { fr: "Tests", en: "Tests" }, description: { fr: "Tests unitaires, E2E et couverture", en: "Unit tests, E2E and coverage" } },
+      { label: { fr: "Deploy", en: "Deploy" }, description: { fr: "Pipeline CI/CD et déploiement automatisé", en: "CI/CD pipeline and automated deployment" } },
+      { label: { fr: "Monitor", en: "Monitor" }, description: { fr: "Performance monitoring et alertes", en: "Performance monitoring and alerts" } },
+    ],
+    integrations: ["GitHub", "GitLab", "Vercel", "AWS", "Sentry", "Datadog"],
   },
   {
     slug: "data",
@@ -1021,6 +1085,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Analytics & détection d'anomalies", "Pipelines de données", "Modèles prédictifs ML", "Rapports & dashboards automatisés"],
       en: ["Analytics & anomaly detection", "Data pipelines", "ML predictive models", "Automated reports & dashboards"],
     },
+    heroMetric: { fr: "Insights 10x plus rapides", en: "10x faster insights" },
+    workflow: [
+      { label: { fr: "Ingestion", en: "Ingestion" }, description: { fr: "Collecte multi-sources (GA4, GSC, Meta, etc.)", en: "Multi-source collection (GA4, GSC, Meta, etc.)" } },
+      { label: { fr: "Pipeline", en: "Pipeline" }, description: { fr: "ETL automatisé et qualité des données", en: "Automated ETL and data quality" } },
+      { label: { fr: "ML", en: "ML" }, description: { fr: "Modèles prédictifs et scoring", en: "Predictive models and scoring" } },
+      { label: { fr: "Dashboard", en: "Dashboard" }, description: { fr: "Visualisations interactives et alertes", en: "Interactive visualizations and alerts" } },
+    ],
+    integrations: ["Google Analytics", "Search Console", "BigQuery", "Snowflake", "Tableau"],
   },
   {
     slug: "support",
@@ -1038,6 +1110,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Monitoring de la réputation", "Gestion intelligente des tickets", "Base de connaissances enrichie", "SLA & satisfaction client"],
       en: ["Reputation monitoring", "Smart ticket management", "Enriched knowledge base", "SLA & customer satisfaction"],
     },
+    heroMetric: { fr: "Temps de réponse réduit de 75%", en: "Response time reduced by 75%" },
+    workflow: [
+      { label: { fr: "Réception", en: "Receive" }, description: { fr: "Tri et classification automatique des tickets", en: "Automatic ticket sorting and classification" } },
+      { label: { fr: "Analyse", en: "Analyze" }, description: { fr: "Détection de la priorité et du sentiment", en: "Priority and sentiment detection" } },
+      { label: { fr: "Réponse", en: "Respond" }, description: { fr: "Suggestion de réponse pré-qualifiée", en: "Pre-qualified response suggestion" } },
+      { label: { fr: "Suivi", en: "Follow-up" }, description: { fr: "Mesure de satisfaction et enrichissement KB", en: "Satisfaction measurement and KB enrichment" } },
+    ],
+    integrations: ["Crisp", "Zendesk", "Intercom", "Slack"],
   },
   {
     slug: "governance",
@@ -1055,6 +1135,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Audit de conformité réglementaire", "Application des politiques", "Évaluation des risques", "Monitoring continu"],
       en: ["Regulatory compliance audit", "Policy enforcement", "Risk assessment", "Continuous monitoring"],
     },
+    heroMetric: { fr: "100% de conformité RGPD", en: "100% GDPR compliance" },
+    workflow: [
+      { label: { fr: "Audit", en: "Audit" }, description: { fr: "Scan de conformité réglementaire", en: "Regulatory compliance scan" } },
+      { label: { fr: "Politiques", en: "Policies" }, description: { fr: "Application et suivi des règles internes", en: "Internal rule enforcement and tracking" } },
+      { label: { fr: "Risques", en: "Risks" }, description: { fr: "Évaluation et quantification des risques", en: "Risk evaluation and quantification" } },
+      { label: { fr: "Rapport", en: "Report" }, description: { fr: "Tableau de bord de gouvernance", en: "Governance dashboard" } },
+    ],
+    integrations: ["Supabase", "AWS", "Vanta", "Drata"],
   },
   {
     slug: "hr",
@@ -1072,6 +1160,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Screening & matching automatisé", "Programme d'onboarding", "Suivi de l'engagement", "Développement des talents"],
       en: ["Automated screening & matching", "Onboarding program", "Engagement tracking", "Talent development"],
     },
+    heroMetric: { fr: "Temps de recrutement divisé par 3", en: "Recruitment time divided by 3" },
+    workflow: [
+      { label: { fr: "Sourcing", en: "Sourcing" }, description: { fr: "Screening automatisé des candidatures", en: "Automated application screening" } },
+      { label: { fr: "Matching", en: "Matching" }, description: { fr: "Scoring des candidats par compétences", en: "Candidate scoring by skills" } },
+      { label: { fr: "Onboarding", en: "Onboarding" }, description: { fr: "Parcours d'intégration personnalisé", en: "Personalized onboarding journey" } },
+      { label: { fr: "Engagement", en: "Engagement" }, description: { fr: "Suivi de la satisfaction et rétention", en: "Satisfaction and retention tracking" } },
+    ],
+    integrations: ["LinkedIn", "Slack", "BambooHR", "Google Workspace"],
   },
   {
     slug: "legal",
@@ -1089,6 +1185,14 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
       fr: ["Analyse automatique de contrats", "Détection des clauses à risque", "Conformité légale", "Veille réglementaire"],
       en: ["Automatic contract analysis", "Risky clause detection", "Legal compliance", "Regulatory monitoring"],
     },
+    heroMetric: { fr: "Analyse un contrat en 30 secondes", en: "Analyzes a contract in 30 seconds" },
+    workflow: [
+      { label: { fr: "Upload", en: "Upload" }, description: { fr: "Import du contrat (PDF, DOCX)", en: "Contract import (PDF, DOCX)" } },
+      { label: { fr: "Extraction", en: "Extraction" }, description: { fr: "Identification des clauses et parties", en: "Clause and party identification" } },
+      { label: { fr: "Analyse", en: "Analysis" }, description: { fr: "Détection des clauses à risque", en: "Risky clause detection" } },
+      { label: { fr: "Rapport", en: "Report" }, description: { fr: "Synthèse et recommandations", en: "Summary and recommendations" } },
+    ],
+    integrations: ["DocuSign", "Google Drive", "Notion"],
   },
 ];
 

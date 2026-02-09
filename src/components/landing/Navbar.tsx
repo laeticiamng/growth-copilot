@@ -17,6 +17,7 @@ export function Navbar() {
     { href: "/agents", label: "Agents", isRoute: true },
     { href: "/pricing", label: t("landing.navbar.pricing"), isRoute: true },
     { href: "/blog", label: "Blog", isRoute: true },
+    { href: "/help", label: t("landing.navbar.help", "Help"), isRoute: true },
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

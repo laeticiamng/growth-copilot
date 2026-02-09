@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { SEOHead } from "@/components/SEOHead";
 import {
   getAgentBySlug,
@@ -16,6 +18,9 @@ import {
   CheckCircle,
   Shield,
   AlertTriangle,
+  Play,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +41,10 @@ export default function AgentDetail() {
   const { i18n } = useTranslation();
   const lang = i18n.language.startsWith("fr") ? "fr" : "en";
 
+  const [demoInput, setDemoInput] = useState("");
+  const [demoRunning, setDemoRunning] = useState(false);
+  const [demoResult, setDemoResult] = useState<string | null>(null);
+
   const agent = slug ? getAgentBySlug(slug) : undefined;
 
   if (!agent) {
@@ -48,6 +57,36 @@ export default function AgentDetail() {
   );
   const Icon = agent.icon;
   const RiskIcon = RISK_ICONS[agent.riskLevel];
+
+  const handleDemoRun = () => {
+    setDemoRunning(true);
+    setDemoResult(null);
+    setTimeout(() => {
+      setDemoRunning(false);
+      const input = demoInput || "example.com";
+      const results: Record<string, Record<string, string>> = {
+        fr: {
+          default: `Analyse terminee pour "${input}". 3 actions identifiees avec un score ICE moyen de 8.2/10. Recommandation prioritaire : optimiser les meta-descriptions des 15 pages principales.`,
+          marketing: `Audit SEO de "${input}" termine. Score global : 72/100. 12 erreurs techniques detectees, 3 opportunites de mots-cles a fort volume identifiees. Gain potentiel : +45% de trafic organique.`,
+          sales: `Pipeline analyse pour "${input}". 8 leads qualifies detectes, score moyen 7.5/10. 3 opportunites d'upsell identifiees. Recommandation : relancer les 2 prospects inactifs depuis 14 jours.`,
+          finance: `Rapport financier genere pour "${input}". Revenue MRR : 12 450EUR. Croissance +8.3% MoM. Alerte : 2 factures impayees detectees (1 250EUR total).`,
+          security: `Scan de securite de "${input}" termine. 0 vulnerabilite critique, 2 moyennes, 5 faibles. Score de securite : 94/100. Conformite RGPD : 98%.`,
+          data: `Analyse des donnees de "${input}" terminee. 3 anomalies detectees dans les conversions. Tendance : +12% de sessions organiques cette semaine. Modele predictif : croissance estimee +25% M+3.`,
+        },
+        en: {
+          default: `Analysis completed for "${input}". 3 actions identified with an average ICE score of 8.2/10. Priority recommendation: optimize meta descriptions for the top 15 pages.`,
+          marketing: `SEO audit of "${input}" completed. Global score: 72/100. 12 technical errors detected, 3 high-volume keyword opportunities identified. Potential gain: +45% organic traffic.`,
+          sales: `Pipeline analyzed for "${input}". 8 qualified leads detected, average score 7.5/10. 3 upsell opportunities identified. Recommendation: follow up on 2 prospects inactive for 14 days.`,
+          finance: `Financial report generated for "${input}". MRR Revenue: EUR12,450. Growth +8.3% MoM. Alert: 2 unpaid invoices detected (EUR1,250 total).`,
+          security: `Security scan of "${input}" completed. 0 critical vulnerabilities, 2 medium, 5 low. Security score: 94/100. GDPR compliance: 98%.`,
+          data: `Data analysis for "${input}" completed. 3 conversion anomalies detected. Trend: +12% organic sessions this week. Predictive model: estimated growth +25% M+3.`,
+        },
+      };
+      const deptKey = agent.departmentSlug;
+      const langResults = results[lang] || results.en;
+      setDemoResult(langResults[deptKey] || langResults.default);
+    }, 2000);
+  };
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -157,6 +196,89 @@ export default function AgentDetail() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Demo */}
+        <section className="py-12 bg-secondary/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h2 className="text-2xl font-bold">
+                  {lang === "fr" ? "Essayez cet agent" : "Try this agent"}
+                </h2>
+              </div>
+              <Card className="border-primary/20">
+                <CardContent className="p-6">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {lang === "fr"
+                      ? `Simulez une exécution de ${agent.name}. Entrez une URL ou un terme pour voir un exemple de résultat.`
+                      : `Simulate a ${agent.name} run. Enter a URL or term to see an example result.`}
+                  </p>
+                  <div className="flex gap-2 mb-4">
+                    <Input
+                      placeholder={
+                        lang === "fr"
+                          ? "ex: example.com ou votre domaine"
+                          : "e.g., example.com or your domain"
+                      }
+                      value={demoInput}
+                      onChange={(e) => setDemoInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !demoRunning) handleDemoRun();
+                      }}
+                    />
+                    <Button
+                      onClick={handleDemoRun}
+                      disabled={demoRunning}
+                      variant="hero"
+                    >
+                      {demoRunning ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
+                      <span className="ml-2">
+                        {demoRunning
+                          ? lang === "fr" ? "Analyse..." : "Analyzing..."
+                          : lang === "fr" ? "Lancer" : "Run"}
+                      </span>
+                    </Button>
+                  </div>
+
+                  {demoResult && (
+                    <div className="animate-fade-in rounded-lg bg-background border p-4">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
+                          style={{ backgroundColor: agent.color }}
+                        >
+                          {agent.persona.initials}
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {agent.persona.name} — {agent.name}
+                          </p>
+                          <p className="text-sm">{demoResult}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          {lang === "fr" ? "Ceci est une simulation." : "This is a simulation."}
+                        </p>
+                        <Link to="/auth?tab=signup">
+                          <Button variant="outline" size="sm">
+                            {lang === "fr" ? "Essai gratuit" : "Free trial"}
+                            <ArrowRight className="w-3 h-3 ml-1" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
