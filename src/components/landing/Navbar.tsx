@@ -13,10 +13,10 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { href: "#features", label: t("landing.navbar.features") },
-    { href: "#departments", label: t("landing.navbar.departments") },
-    { href: "#tools", label: t("landing.tools.title") },
-    { href: "#pricing", label: t("landing.navbar.pricing") },
+    { href: "/features", label: t("landing.navbar.features"), isRoute: true },
+    { href: "/agents", label: "Agents", isRoute: true },
+    { href: "/pricing", label: t("landing.navbar.pricing"), isRoute: true },
+    { href: "/blog", label: "Blog", isRoute: true },
   ];
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -41,12 +41,19 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.isRoute ? (
+                <Link key={link.href} to={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  {link.label}
+                </a>
+              )
+            )}
           </div>
 
           <div className="hidden md:flex items-center gap-2">
@@ -78,12 +85,19 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
-                  {navLinks.map((link) => (
-                    <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
-                      className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30">
-                      {link.label}
-                    </a>
-                  ))}
+                  {navLinks.map((link) =>
+                    link.isRoute ? (
+                      <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}
+                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30">
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
+                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30">
+                        {link.label}
+                      </a>
+                    )
+                  )}
                   <div className="flex flex-col gap-3 pt-4">
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">{t("landing.navbar.login")}</Button>
