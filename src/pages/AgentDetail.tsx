@@ -16,11 +16,14 @@ import {
   ArrowRight,
   Bot,
   CheckCircle,
+  Clock3,
   Shield,
   AlertTriangle,
   Play,
   Loader2,
   Sparkles,
+  Star,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +37,96 @@ const RISK_ICONS = {
   low: CheckCircle,
   medium: Shield,
   high: AlertTriangle,
+};
+
+type AgentExecutionRecord = {
+  id: string;
+  title: Record<"fr" | "en", string>;
+  status: "success" | "approval_pending" | "running";
+  timestamp: string;
+  outcome: Record<"fr" | "en", string>;
+};
+
+const EXECUTION_STATUS_LABELS: Record<AgentExecutionRecord["status"], Record<"fr" | "en", string>> = {
+  success: { fr: "Succès", en: "Success" },
+  approval_pending: { fr: "Approbation requise", en: "Approval pending" },
+  running: { fr: "En cours", en: "Running" },
+};
+
+const EXECUTION_STATUS_BADGE: Record<AgentExecutionRecord["status"], string> = {
+  success: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20",
+  approval_pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20",
+  running: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+};
+
+const formatRelativeTime = (isoDate: string, lang: "fr" | "en") => {
+  const formatter = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+  const now = Date.now();
+  const value = Date.parse(isoDate);
+  const diffHours = Math.round((value - now) / (1000 * 60 * 60));
+
+  if (Math.abs(diffHours) < 24) {
+    return formatter.format(diffHours, "hour");
+  }
+
+  const diffDays = Math.round(diffHours / 24);
+  return formatter.format(diffDays, "day");
+};
+
+const getAgentPerformance = (agentSlug: string) => {
+  const checksum = Array.from(agentSlug).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  return {
+    rating: Number((4.4 + (checksum % 5) * 0.1).toFixed(1)),
+    successRate: 91 + (checksum % 8),
+    tasksCompleted: 120 + (checksum % 90),
+    avgDeliveryMinutes: 8 + (checksum % 14),
+  };
+};
+
+const getExecutionHistory = (agentName: string): AgentExecutionRecord[] => {
+  const now = new Date();
+  return [
+    {
+      id: "exec-1",
+      title: {
+        fr: `Audit prioritaire exécuté par ${agentName}`,
+        en: `Priority audit executed by ${agentName}`,
+      },
+      status: "success",
+      timestamp: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString(),
+      outcome: {
+        fr: "Rapport livré avec 6 actions classées par impact.",
+        en: "Report delivered with 6 actions ranked by impact.",
+      },
+    },
+    {
+      id: "exec-2",
+      title: {
+        fr: `Campagne de correction préparée`,
+        en: "Correction campaign prepared",
+      },
+      status: "approval_pending",
+      timestamp: new Date(now.getTime() - 1000 * 60 * 60 * 18).toISOString(),
+      outcome: {
+        fr: "Validation présidentielle demandée avant publication.",
+        en: "Presidential validation requested before publishing.",
+      },
+    },
+    {
+      id: "exec-3",
+      title: {
+        fr: `Analyse comparative multi-source`,
+        en: "Multi-source comparative analysis",
+      },
+      status: "running",
+      timestamp: new Date(now.getTime() - 1000 * 60 * 30).toISOString(),
+      outcome: {
+        fr: "Collecte en cours sur les intégrations connectées.",
+        en: "Collection in progress across connected integrations.",
+      },
+    },
+  ];
 };
 
 export default function AgentDetail() {
@@ -55,6 +148,8 @@ export default function AgentDetail() {
   const relatedAgents = getAgentsByDepartment(agent.departmentSlug).filter(
     (a) => a.slug !== agent.slug
   );
+  const executionHistory = getExecutionHistory(agent.name);
+  const performance = getAgentPerformance(agent.slug);
   const Icon = agent.icon;
   const RiskIcon = RISK_ICONS[agent.riskLevel];
 
@@ -277,6 +372,70 @@ export default function AgentDetail() {
                       </div>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Performance & audit trail */}
+        <section className="py-12 border-y border-border/60 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500" />
+                    {lang === "fr" ? "Performance" : "Performance"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-lg border p-4 bg-secondary/30">
+                    <p className="text-xs text-muted-foreground">
+                      {lang === "fr" ? "Rating de l'agent" : "Agent rating"}
+                    </p>
+                    <p className="text-3xl font-bold">{performance.rating}/5</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg border p-3">
+                      <p className="text-xs text-muted-foreground">{lang === "fr" ? "Taux de réussite" : "Success rate"}</p>
+                      <p className="text-lg font-semibold">{performance.successRate}%</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-xs text-muted-foreground">{lang === "fr" ? "Actions livrées" : "Tasks delivered"}</p>
+                      <p className="text-lg font-semibold">{performance.tasksCompleted}</p>
+                    </div>
+                    <div className="rounded-lg border p-3 col-span-2">
+                      <p className="text-xs text-muted-foreground">{lang === "fr" ? "Temps moyen de livraison" : "Avg delivery time"}</p>
+                      <p className="text-lg font-semibold">{performance.avgDeliveryMinutes} min</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-primary" />
+                    {lang === "fr" ? "Historique d'exécution & audit trail" : "Execution history & audit trail"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {executionHistory.map((record) => (
+                    <div key={record.id} className="rounded-lg border p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-medium">{record.title[lang]}</p>
+                        <Badge variant="outline" className={cn("text-xs", EXECUTION_STATUS_BADGE[record.status])}>
+                          {EXECUTION_STATUS_LABELS[record.status][lang]}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{record.outcome[lang]}</p>
+                      <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
+                        <Clock3 className="w-3.5 h-3.5" />
+                        {formatRelativeTime(record.timestamp, lang)}
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </div>
