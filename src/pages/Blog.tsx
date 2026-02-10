@@ -25,45 +25,55 @@ interface BlogPost {
 
 const BLOG_POSTS: BlogPost[] = [
   {
-    slug: "what-is-growth-os",
-    title: { fr: "Qu'est-ce que Growth OS ? Guide complet 2025", en: "What is Growth OS? Complete Guide 2025" },
-    excerpt: { fr: "Découvrez comment 39 agents IA peuvent transformer votre marketing, ventes et croissance en automatisant les tâches répétitives.", en: "Discover how 39 AI agents can transform your marketing, sales and growth by automating repetitive tasks." },
+    slug: "how-39-ai-agents-replace-marketing-team",
+    title: { fr: "Comment 39 agents IA remplacent une équipe marketing complète", en: "How 39 AI Agents Replace a Complete Marketing Team" },
+    excerpt: { fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches marketing d'une entreprise B2B.", en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's marketing tasks." },
     category: "growth",
     author: "Sophie Marchand",
-    date: "2025-12-15",
+    date: "2026-01-15",
     readTime: 8,
-    tags: ["growth hacking", "AI", "automation"],
+    tags: ["IA", "marketing", "automatisation"],
     featured: true,
   },
   {
-    slug: "seo-audit-automation",
-    title: { fr: "Comment automatiser votre audit SEO avec l'IA", en: "How to Automate Your SEO Audit with AI" },
-    excerpt: { fr: "Un audit SEO complet en 30 secondes ? Découvrez comment notre agent Tech SEO Auditor analyse votre site automatiquement.", en: "A complete SEO audit in 30 seconds? Discover how our Tech SEO Auditor agent automatically analyzes your site." },
+    slug: "roi-growth-automation",
+    title: { fr: "ROI de l'automatisation Growth : chiffres et méthodologie", en: "Growth Automation ROI: Numbers and Methodology" },
+    excerpt: { fr: "Analyse complète du retour sur investissement de l'automatisation growth avec des données réelles de nos clients.", en: "Complete analysis of growth automation ROI with real client data." },
+    category: "analytics",
+    author: "François Martin",
+    date: "2026-01-08",
+    readTime: 10,
+    tags: ["ROI", "analytics", "growth"],
+  },
+  {
+    slug: "seo-automation-complete-guide",
+    title: { fr: "Guide complet : automatiser son SEO avec l'IA en 2026", en: "Complete Guide: Automating SEO with AI in 2026" },
+    excerpt: { fr: "De l'audit technique au contenu optimisé, comment l'IA révolutionne chaque étape du SEO.", en: "From technical audit to optimized content, how AI revolutionizes every step of SEO." },
     category: "seo",
     author: "Emma Lefebvre",
-    date: "2025-12-10",
-    readTime: 6,
-    tags: ["SEO", "audit", "automation"],
+    date: "2025-12-20",
+    readTime: 12,
+    tags: ["SEO", "IA", "audit", "contenu"],
   },
   {
-    slug: "ice-scoring-prioritization",
-    title: { fr: "Le scoring ICE : prioriser vos actions growth comme un pro", en: "ICE Scoring: Prioritize Your Growth Actions Like a Pro" },
-    excerpt: { fr: "Impact, Confiance, Facilité : comment le framework ICE vous aide à prioriser les actions les plus rentables.", en: "Impact, Confidence, Ease: how the ICE framework helps you prioritize the most profitable actions." },
+    slug: "approval-system-ai-governance",
+    title: { fr: "Système d'approbation : garder le contrôle sur vos agents IA", en: "Approval System: Keeping Control Over Your AI Agents" },
+    excerpt: { fr: "Comment le système d'approbation de Growth OS garantit la sécurité tout en maximisant l'efficacité de vos agents.", en: "How Growth OS's approval system ensures security while maximizing agent efficiency." },
+    category: "security",
+    author: "Philippe Renaud",
+    date: "2025-12-10",
+    readTime: 7,
+    tags: ["gouvernance", "sécurité", "approbation"],
+  },
+  {
+    slug: "11-departments-explained",
+    title: { fr: "Les 11 départements de Growth OS expliqués", en: "Growth OS's 11 Departments Explained" },
+    excerpt: { fr: "Présentation détaillée de chaque département, ses agents, et comment ils travaillent ensemble pour votre croissance.", en: "Detailed presentation of each department, its agents, and how they work together for your growth." },
     category: "growth",
     author: "Sophie Marchand",
-    date: "2025-12-05",
-    readTime: 5,
-    tags: ["ICE", "prioritization", "framework"],
-  },
-  {
-    slug: "ai-content-strategy",
-    title: { fr: "Stratégie de contenu IA : clusters sémantiques et calendrier éditorial", en: "AI Content Strategy: Semantic Clusters and Editorial Calendar" },
-    excerpt: { fr: "Comment notre agent Keyword Strategist crée des clusters sémantiques et planifie votre calendrier éditorial automatiquement.", en: "How our Keyword Strategist agent creates semantic clusters and plans your editorial calendar automatically." },
-    category: "content",
-    author: "Thomas Duval",
     date: "2025-11-28",
-    readTime: 7,
-    tags: ["content", "SEO", "keywords"],
+    readTime: 9,
+    tags: ["départements", "agents", "organisation"],
   },
   {
     slug: "lead-scoring-ai",
@@ -74,26 +84,6 @@ const BLOG_POSTS: BlogPost[] = [
     date: "2025-11-20",
     readTime: 6,
     tags: ["lead scoring", "sales", "AI"],
-  },
-  {
-    slug: "gdpr-compliance-automation",
-    title: { fr: "Conformité RGPD automatisée : comment l'IA vous protège", en: "Automated GDPR Compliance: How AI Protects You" },
-    excerpt: { fr: "Notre agent Compliance Auditor vérifie automatiquement votre conformité RGPD et génère les rapports nécessaires.", en: "Our Compliance Auditor agent automatically checks your GDPR compliance and generates necessary reports." },
-    category: "security",
-    author: "Claire Dubois",
-    date: "2025-11-15",
-    readTime: 5,
-    tags: ["GDPR", "compliance", "security"],
-  },
-  {
-    slug: "roi-ai-marketing",
-    title: { fr: "Mesurer le ROI de l'IA en marketing : guide pratique", en: "Measuring AI ROI in Marketing: Practical Guide" },
-    excerpt: { fr: "Comment calculer le retour sur investissement de vos agents IA et prouver la valeur de l'automatisation.", en: "How to calculate the ROI of your AI agents and prove the value of automation." },
-    category: "analytics",
-    author: "François Martin",
-    date: "2025-11-10",
-    readTime: 9,
-    tags: ["ROI", "analytics", "marketing"],
   },
   {
     slug: "social-media-automation",
@@ -232,10 +222,12 @@ export default function Blog() {
                       <Clock className="w-3 h-3" /> {featuredPost.readTime} min
                     </span>
                   </div>
-                  <Button variant="hero">
-                    {lang === "fr" ? "Lire l'article" : "Read article"}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  <Link to={`/blog/${featuredPost.slug}`}>
+                    <Button variant="hero">
+                      {lang === "fr" ? "Lire l'article" : "Read article"}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -249,8 +241,8 @@ export default function Blog() {
               {filteredPosts
                 .filter((p) => !p.featured || searchQuery || selectedCategory !== "all")
                 .map((post, index) => (
+                <Link key={post.slug} to={`/blog/${post.slug}`}>
                 <Card
-                  key={post.slug}
                   className="overflow-hidden hover:border-primary/30 transition-all duration-300 group animate-fade-in-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -281,6 +273,7 @@ export default function Blog() {
                     </div>
                   </CardContent>
                 </Card>
+                </Link>
               ))}
             </div>
             {filteredPosts.length === 0 && (

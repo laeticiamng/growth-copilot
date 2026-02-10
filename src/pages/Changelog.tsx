@@ -28,6 +28,53 @@ const VERSION_COLORS = {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.7.0",
+    date: "2026-02-10",
+    type: "major",
+    title: { fr: "Dashboard & Workspace Complet", en: "Complete Dashboard & Workspace" },
+    changes: [
+      { type: "feature", text: { fr: "Dashboard principal avec KPI cards, feed d'activité agents et graphique performances", en: "Main dashboard with KPI cards, agent activity feed and performance chart" } },
+      { type: "feature", text: { fr: "Vue département avec agents, tâches en cours et métriques", en: "Department view with agents, current tasks and metrics" } },
+      { type: "feature", text: { fr: "Chat interactif avec chaque agent IA — réponses contextuelles", en: "Interactive chat with each AI agent — contextual responses" } },
+      { type: "feature", text: { fr: "Analyse URL avec audit SEO instantané et recommandations", en: "URL analysis with instant SEO audit and recommendations" } },
+      { type: "improvement", text: { fr: "Section « En attente de validation » avec badges de priorité", en: "'Pending validation' section with priority badges" } },
+    ],
+  },
+  {
+    version: "2.6.0",
+    date: "2026-01-20",
+    type: "minor",
+    title: { fr: "Blog & Contenu Enrichi", en: "Blog & Rich Content" },
+    changes: [
+      { type: "feature", text: { fr: "5 articles seed avec contenu complet (headings, corps, auteur)", en: "5 seed articles with full content (headings, body, author)" } },
+      { type: "feature", text: { fr: "Page article détaillée /blog/[slug] avec articles similaires", en: "Detailed article page /blog/[slug] with related articles" } },
+      { type: "improvement", text: { fr: "Nouveau design des cartes blog avec liens vers les articles", en: "New blog card design with links to articles" } },
+    ],
+  },
+  {
+    version: "2.5.0",
+    date: "2026-01-10",
+    type: "major",
+    title: { fr: "Nouveau département Juridique", en: "New Legal Department" },
+    changes: [
+      { type: "feature", text: { fr: "3 agents juridiques : Analyste Contractuel, Spécialiste PI, Conseiller Réglementaire", en: "3 legal agents: Contract Analyzer, IP Specialist, Regulatory Advisor" } },
+      { type: "feature", text: { fr: "Analyse automatique de contrats avec détection des clauses à risque", en: "Automatic contract analysis with risky clause detection" } },
+      { type: "feature", text: { fr: "Veille réglementaire et conformité EU AI Act", en: "Regulatory monitoring and EU AI Act compliance" } },
+      { type: "security", text: { fr: "Chiffrement end-to-end pour les documents juridiques", en: "End-to-end encryption for legal documents" } },
+    ],
+  },
+  {
+    version: "2.4.1",
+    date: "2025-12-28",
+    type: "patch",
+    title: { fr: "Département RH Étendu", en: "Extended HR Department" },
+    changes: [
+      { type: "feature", text: { fr: "2 nouveaux agents RH : Coach Formation et Manager Performance", en: "2 new HR agents: Training Coach and Performance Manager" } },
+      { type: "improvement", text: { fr: "Suivi des OKR et évaluations de performance automatisées", en: "OKR tracking and automated performance evaluations" } },
+      { type: "fix", text: { fr: "Correction du scoring candidats dans l'agent Recrutement", en: "Fixed candidate scoring in Recruitment agent" } },
+    ],
+  },
+  {
     version: "2.4.0",
     date: "2025-12-15",
     type: "major",

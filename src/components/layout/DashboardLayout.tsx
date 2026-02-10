@@ -82,7 +82,9 @@ interface NavDepartment {
 // Main navigation - CEO-level (always visible) - uses i18n keys
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { path: "/dashboard", label: t("layout.cockpit"), icon: LayoutDashboard },
+  { path: "/dashboard/app", label: "Dashboard", icon: BarChart3 },
   { path: "/dashboard/agents", label: t("layout.myTeam"), icon: Bot },
+  { path: "/dashboard/analyze", label: "Analyse URL", icon: Target },
 ];
 
 // Advanced items organized by department - uses i18n keys
@@ -107,6 +109,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-emerald-500",
     description: t("layout.marketingDesc"),
     items: [
+      { path: "/dashboard/dept/marketing", label: "Vue département", icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
       { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
       { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
@@ -124,6 +127,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-blue-500",
     description: t("layout.salesDesc"),
     items: [
+      { path: "/dashboard/dept/sales", label: "Vue département", icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/offers", label: t("nav.offers"), icon: () => <span className="text-base">📦</span> },
       { path: "/dashboard/lifecycle", label: t("nav.lifecycle"), icon: () => <span className="text-base">📧</span> },
       { path: "/dashboard/reputation", label: t("nav.reputation"), icon: () => <span className="text-base">⭐</span> },
