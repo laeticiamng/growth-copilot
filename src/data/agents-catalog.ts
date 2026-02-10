@@ -8,7 +8,8 @@ import {
   Target, Share2, Eye, Users, Briefcase, Code, HeadphonesIcon, Database,
   Settings, Bot, TrendingUp, Lock, AlertTriangle, Clipboard, Palette,
   Map, GitBranch, TestTube, Link2, Wrench, Cpu, LineChart, Receipt,
-  UserCheck, Heart, Scale, Globe, Mail, Layers, Activity, Gauge
+  UserCheck, Heart, Scale, Globe, Mail, Layers, Activity, Gauge,
+  BookOpen, Gavel
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -49,51 +50,7 @@ export interface DepartmentCatalogItem {
 }
 
 export const AGENTS_CATALOG: AgentCatalogItem[] = [
-  // ── DIRECTION (2) ──
-  {
-    slug: "chief-growth-officer",
-    name: "Chief Growth Officer",
-    role: { fr: "Directrice de la Croissance", en: "Chief Growth Officer" },
-    department: "Direction",
-    departmentSlug: "direction",
-    description: {
-      fr: "Orchestre tous les agents et priorise les actions selon l'impact business via le scoring ICE. Sophie coordonne les 11 départements et génère le briefing quotidien.",
-      en: "Orchestrates all agents and prioritizes actions by business impact via ICE scoring. Sophie coordinates all 11 departments and generates the daily briefing.",
-    },
-    useCases: {
-      fr: ["Briefing quotidien exécutif", "Priorisation ICE des actions", "Coordination inter-départements", "Rapport de performance global"],
-      en: ["Daily executive briefing", "ICE action prioritization", "Cross-department coordination", "Global performance report"],
-    },
-    capabilities: ["analytics_analysis", "report_generation"],
-    icon: Brain,
-    color: "#6366f1",
-    riskLevel: "low",
-    requiresApproval: false,
-    persona: { name: "Sophie Marchand", initials: "SM" },
-  },
-  {
-    slug: "quality-compliance-officer",
-    name: "Quality & Compliance Officer",
-    role: { fr: "Responsable Qualité & Conformité", en: "Quality & Compliance Officer" },
-    department: "Direction",
-    departmentSlug: "direction",
-    description: {
-      fr: "Valide chaque livrable pour assurer la conformité éthique et technique. Vérifie le respect du RGPD, des politiques internes et des standards de qualité.",
-      en: "Validates each deliverable to ensure ethical and technical compliance. Verifies GDPR adherence, internal policies, and quality standards.",
-    },
-    useCases: {
-      fr: ["Validation des livrables", "Audit de conformité RGPD", "Contrôle qualité des contenus", "Revue des politiques"],
-      en: ["Deliverable validation", "GDPR compliance audit", "Content quality control", "Policy review"],
-    },
-    capabilities: ["compliance_check"],
-    icon: Shield,
-    color: "#10b981",
-    riskLevel: "low",
-    requiresApproval: false,
-    persona: { name: "Jean-Michel Fournier", initials: "JF" },
-  },
-
-  // ── MARKETING (5) ──
+  // ── MARKETING (4) ──
   {
     slug: "seo-tech-auditor",
     name: "Tech SEO Auditor",
@@ -158,35 +115,14 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     persona: { name: "Léa Fontaine", initials: "LF" },
   },
   {
-    slug: "local-seo-optimizer",
-    name: "Local SEO Manager",
-    role: { fr: "Manager SEO Local", en: "Local SEO Manager" },
-    department: "Marketing",
-    departmentSlug: "marketing",
-    description: {
-      fr: "Optimise la présence locale et les fiches Google Business Profile. Gère les posts, FAQ et le suivi des avis clients.",
-      en: "Optimizes local presence and Google Business Profile listings. Manages posts, FAQ and customer review tracking.",
-    },
-    useCases: {
-      fr: ["Optimisation fiche GBP", "Réponse aux avis", "Posts Google locaux", "Suivi du classement local"],
-      en: ["GBP listing optimization", "Review responses", "Local Google posts", "Local ranking tracking"],
-    },
-    capabilities: ["seo_audit"],
-    icon: Globe,
-    color: "#14b8a6",
-    riskLevel: "low",
-    requiresApproval: false,
-    persona: { name: "Lucas Bernier", initials: "LB" },
-  },
-  {
     slug: "social-media-manager",
     name: "Social Media Manager",
     role: { fr: "Manager Réseaux Sociaux", en: "Social Media Manager" },
     department: "Marketing",
     departmentSlug: "marketing",
     description: {
-      fr: "Planifie et optimise la présence sur les réseaux sociaux. Génère du contenu, analyse les performances et gère la communauté.",
-      en: "Plans and optimizes social media presence. Generates content, analyzes performance, and manages community.",
+      fr: "Planifie et optimise la présence sur les réseaux sociaux et la visibilité locale. Génère du contenu, analyse les performances, gère la communauté et les fiches Google Business Profile.",
+      en: "Plans and optimizes social media presence and local visibility. Generates content, analyzes performance, manages community and Google Business Profile listings.",
     },
     useCases: {
       fr: ["Planification de posts", "Analyse des performances", "Gestion de communauté", "Veille concurrentielle sociale"],
@@ -502,7 +438,7 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     persona: { name: "Maxime Faure", initials: "MF" },
   },
 
-  // ── ENGINEERING (5) ──
+  // ── ENGINEERING (4) ──
   {
     slug: "code-reviewer",
     name: "Code Reviewer",
@@ -510,8 +446,8 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     department: "Engineering",
     departmentSlug: "engineering",
     description: {
-      fr: "Définit l'architecture technique et les standards. Revue de code automatisée et détection des problèmes.",
-      en: "Defines technical architecture and standards. Automated code review and problem detection.",
+      fr: "Définit l'architecture technique et les standards. Revue de code automatisée, détection des problèmes et exécution des tests automatisés.",
+      en: "Defines technical architecture and standards. Automated code review, problem detection and automated test execution.",
     },
     useCases: {
       fr: ["Revue de code automatisée", "Détection de bugs", "Standards de qualité", "Analyse de la dette technique"],
@@ -586,27 +522,6 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     riskLevel: "medium",
     requiresApproval: true,
     persona: { name: "Élise Perrin", initials: "EP" },
-  },
-  {
-    slug: "testing-agent",
-    name: "Testing Agent",
-    role: { fr: "Agent de Tests", en: "Testing Agent" },
-    department: "Engineering",
-    departmentSlug: "engineering",
-    description: {
-      fr: "Documente les APIs et les processus techniques. Génère et exécute les tests automatisés.",
-      en: "Documents APIs and technical processes. Generates and executes automated tests.",
-    },
-    useCases: {
-      fr: ["Tests unitaires automatisés", "Tests E2E", "Couverture de code", "Rapports de qualité"],
-      en: ["Automated unit tests", "E2E tests", "Code coverage", "Quality reports"],
-    },
-    capabilities: ["code_review"],
-    icon: TestTube,
-    color: "#083344",
-    riskLevel: "low",
-    requiresApproval: false,
-    persona: { name: "Thibault Robert", initials: "TR" },
   },
 
   // ── DATA (4) ──
@@ -825,7 +740,7 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     persona: { name: "David Gauthier", initials: "DG" },
   },
 
-  // ── HR (2) ──
+  // ── HR (4) ──
   {
     slug: "recruitment-agent",
     name: "Recruitment Agent",
@@ -868,8 +783,50 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     requiresApproval: false,
     persona: { name: "Aurélien Brun", initials: "AB" },
   },
+  {
+    slug: "training-coach",
+    name: "Training Coach",
+    role: { fr: "Coach Formation", en: "Training Coach" },
+    department: "HR",
+    departmentSlug: "hr",
+    description: {
+      fr: "Conçoit et gère les programmes de formation. Identifie les besoins en compétences et mesure l'efficacité des formations.",
+      en: "Designs and manages training programs. Identifies skill gaps and measures training effectiveness.",
+    },
+    useCases: {
+      fr: ["Programmes de formation", "Analyse des compétences", "E-learning personnalisé", "Certification tracking"],
+      en: ["Training programs", "Skills analysis", "Personalized e-learning", "Certification tracking"],
+    },
+    capabilities: ["training_management", "analytics_analysis"],
+    icon: BookOpen,
+    color: "#9d174d",
+    riskLevel: "low",
+    requiresApproval: false,
+    persona: { name: "Diane Perret", initials: "DP" },
+  },
+  {
+    slug: "performance-manager",
+    name: "Performance Manager",
+    role: { fr: "Manager Performance", en: "Performance Manager" },
+    department: "HR",
+    departmentSlug: "hr",
+    description: {
+      fr: "Pilote les évaluations de performance et les plans de développement. Automatise les revues et le suivi des objectifs OKR.",
+      en: "Drives performance evaluations and development plans. Automates reviews and OKR objective tracking.",
+    },
+    useCases: {
+      fr: ["Évaluations de performance", "Plans de développement", "Suivi des OKR", "Rapports de compétences"],
+      en: ["Performance evaluations", "Development plans", "OKR tracking", "Skills reports"],
+    },
+    capabilities: ["analytics_analysis", "report_generation"],
+    icon: BarChart3,
+    color: "#881337",
+    riskLevel: "medium",
+    requiresApproval: true,
+    persona: { name: "Guillaume Fabre", initials: "GF" },
+  },
 
-  // ── LEGAL (1) ──
+  // ── LEGAL (3) ──
   {
     slug: "contract-analyzer",
     name: "Contract Analyzer",
@@ -891,49 +848,66 @@ export const AGENTS_CATALOG: AgentCatalogItem[] = [
     requiresApproval: true,
     persona: { name: "Margaux Picard", initials: "MP" },
   },
+  {
+    slug: "ip-specialist",
+    name: "IP Specialist",
+    role: { fr: "Spécialiste Propriété Intellectuelle", en: "IP Specialist" },
+    department: "Legal",
+    departmentSlug: "legal",
+    description: {
+      fr: "Protège la propriété intellectuelle de l'entreprise. Surveille les marques, brevets et droits d'auteur.",
+      en: "Protects company intellectual property. Monitors trademarks, patents and copyrights.",
+    },
+    useCases: {
+      fr: ["Veille marques & brevets", "Protection des droits d'auteur", "Audit de propriété intellectuelle", "Gestion des licences"],
+      en: ["Trademark & patent monitoring", "Copyright protection", "IP audit", "License management"],
+    },
+    capabilities: ["contract_review", "compliance_check"],
+    icon: FileText,
+    color: "#92400e",
+    riskLevel: "medium",
+    requiresApproval: true,
+    persona: { name: "Élodie Renard", initials: "ER" },
+  },
+  {
+    slug: "regulatory-advisor",
+    name: "Regulatory Advisor",
+    role: { fr: "Conseiller Réglementaire", en: "Regulatory Advisor" },
+    department: "Legal",
+    departmentSlug: "legal",
+    description: {
+      fr: "Assure la veille réglementaire et conseille sur la conformité. Analyse l'impact des nouvelles régulations sur l'activité.",
+      en: "Ensures regulatory monitoring and compliance advisory. Analyzes the impact of new regulations on business.",
+    },
+    useCases: {
+      fr: ["Veille réglementaire", "Analyse d'impact réglementaire", "Mise en conformité", "Rapports de conformité"],
+      en: ["Regulatory monitoring", "Regulatory impact analysis", "Compliance implementation", "Compliance reports"],
+    },
+    capabilities: ["compliance_check", "risk_assessment"],
+    icon: Gavel,
+    color: "#78350f",
+    riskLevel: "low",
+    requiresApproval: false,
+    persona: { name: "Xavier Morin", initials: "XM" },
+  },
 ];
 
 export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
   {
-    slug: "direction",
-    name: { fr: "Direction", en: "Leadership" },
-    description: {
-      fr: "Le cerveau de Growth OS. La direction orchestre l'ensemble des 39 agents IA, priorise les actions et assure la qualité de chaque livrable.",
-      en: "The brain of Growth OS. Leadership orchestrates all 39 AI agents, prioritizes actions and ensures the quality of every deliverable.",
-    },
-    icon: Brain,
-    color: "#6366f1",
-    gradientFrom: "from-primary",
-    gradientTo: "to-primary/60",
-    agentCount: 2,
-    features: {
-      fr: ["Orchestration de tous les agents", "Scoring ICE des priorités", "Briefing quotidien exécutif", "Contrôle qualité & conformité"],
-      en: ["Orchestration of all agents", "ICE priority scoring", "Daily executive briefing", "Quality control & compliance"],
-    },
-    heroMetric: { fr: "Coordonne 39 agents en temps réel", en: "Coordinates 39 agents in real-time" },
-    workflow: [
-      { label: { fr: "Collecte", en: "Collect" }, description: { fr: "Agrège les données de tous les départements", en: "Aggregates data from all departments" } },
-      { label: { fr: "Analyse ICE", en: "ICE Analysis" }, description: { fr: "Score chaque action par Impact, Confiance, Facilité", en: "Scores each action by Impact, Confidence, Ease" } },
-      { label: { fr: "Priorisation", en: "Prioritization" }, description: { fr: "Classe les actions par score ICE décroissant", en: "Ranks actions by descending ICE score" } },
-      { label: { fr: "Briefing", en: "Briefing" }, description: { fr: "Génère le briefing quotidien exécutif", en: "Generates the daily executive briefing" } },
-    ],
-    integrations: ["Google Analytics", "Search Console", "Meta Business", "Stripe", "Slack"],
-  },
-  {
     slug: "marketing",
     name: { fr: "Marketing", en: "Marketing" },
     description: {
-      fr: "SEO technique, stratégie de contenu, publicités, réseaux sociaux et optimisation locale. 5 agents spécialisés pour maximiser votre visibilité.",
-      en: "Technical SEO, content strategy, ads, social media and local optimization. 5 specialized agents to maximize your visibility.",
+      fr: "SEO technique, stratégie de contenu, réseaux sociaux et optimisation locale. 4 agents spécialisés pour maximiser votre visibilité.",
+      en: "Technical SEO, content strategy, social media and local optimization. 4 specialized agents to maximize your visibility.",
     },
     icon: Megaphone,
     color: "#3b82f6",
     gradientFrom: "from-blue-500",
     gradientTo: "to-blue-400",
-    agentCount: 5,
+    agentCount: 4,
     features: {
-      fr: ["Audit SEO technique complet", "Clusters sémantiques & mots-clés", "Contenu optimisé SEO", "Gestion réseaux sociaux", "SEO local & Google Business"],
-      en: ["Full technical SEO audit", "Semantic clusters & keywords", "SEO-optimized content", "Social media management", "Local SEO & Google Business"],
+      fr: ["Audit SEO technique complet", "Clusters sémantiques & mots-clés", "Contenu optimisé SEO", "Gestion réseaux sociaux & SEO local"],
+      en: ["Full technical SEO audit", "Semantic clusters & keywords", "SEO-optimized content", "Social media management & local SEO"],
     },
     heroMetric: { fr: "+340% de trafic organique en 4 mois", en: "+340% organic traffic in 4 months" },
     workflow: [
@@ -1048,17 +1022,17 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
     slug: "engineering",
     name: { fr: "Ingénierie", en: "Engineering" },
     description: {
-      fr: "Revue de code, performance, DevOps, intégrations API et tests. 5 agents pour une excellence technique.",
-      en: "Code review, performance, DevOps, API integrations and testing. 5 agents for technical excellence.",
+      fr: "Revue de code, performance, DevOps et intégrations API. 4 agents pour une excellence technique.",
+      en: "Code review, performance, DevOps and API integrations. 4 agents for technical excellence.",
     },
     icon: Code,
     color: "#06b6d4",
     gradientFrom: "from-orange-500",
     gradientTo: "to-orange-400",
-    agentCount: 5,
+    agentCount: 4,
     features: {
-      fr: ["Revue de code automatisée", "Optimisation des performances", "CI/CD & DevOps", "Intégrations API", "Tests automatisés"],
-      en: ["Automated code review", "Performance optimization", "CI/CD & DevOps", "API integrations", "Automated testing"],
+      fr: ["Revue de code & tests automatisés", "Optimisation des performances", "CI/CD & DevOps", "Intégrations API"],
+      en: ["Code review & automated testing", "Performance optimization", "CI/CD & DevOps", "API integrations"],
     },
     heroMetric: { fr: "-45% de bugs en production", en: "-45% production bugs" },
     workflow: [
@@ -1148,17 +1122,17 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
     slug: "hr",
     name: { fr: "RH", en: "HR" },
     description: {
-      fr: "Recrutement automatisé et expérience employé. 2 agents pour optimiser votre gestion des talents.",
-      en: "Automated recruitment and employee experience. 2 agents to optimize your talent management.",
+      fr: "Recrutement automatisé, expérience employé, formation et performance. 4 agents pour optimiser votre gestion des talents.",
+      en: "Automated recruitment, employee experience, training and performance. 4 agents to optimize your talent management.",
     },
     icon: Users,
     color: "#ec4899",
     gradientFrom: "from-indigo-500",
     gradientTo: "to-indigo-400",
-    agentCount: 2,
+    agentCount: 4,
     features: {
-      fr: ["Screening & matching automatisé", "Programme d'onboarding", "Suivi de l'engagement", "Développement des talents"],
-      en: ["Automated screening & matching", "Onboarding program", "Engagement tracking", "Talent development"],
+      fr: ["Screening & matching automatisé", "Programme d'onboarding", "Formation & développement", "Évaluations de performance", "Suivi de l'engagement"],
+      en: ["Automated screening & matching", "Onboarding program", "Training & development", "Performance evaluations", "Engagement tracking"],
     },
     heroMetric: { fr: "Temps de recrutement divisé par 3", en: "Recruitment time divided by 3" },
     workflow: [
@@ -1173,17 +1147,17 @@ export const DEPARTMENTS_CATALOG: DepartmentCatalogItem[] = [
     slug: "legal",
     name: { fr: "Juridique", en: "Legal" },
     description: {
-      fr: "Analyse de contrats et conformité légale. 1 agent spécialisé pour sécuriser vos engagements contractuels.",
-      en: "Contract analysis and legal compliance. 1 specialized agent to secure your contractual commitments.",
+      fr: "Analyse de contrats, propriété intellectuelle et conformité légale. 3 agents spécialisés pour sécuriser vos engagements.",
+      en: "Contract analysis, intellectual property and legal compliance. 3 specialized agents to secure your commitments.",
     },
     icon: Scale,
     color: "#78350f",
     gradientFrom: "from-slate-500",
     gradientTo: "to-slate-400",
-    agentCount: 1,
+    agentCount: 3,
     features: {
-      fr: ["Analyse automatique de contrats", "Détection des clauses à risque", "Conformité légale", "Veille réglementaire"],
-      en: ["Automatic contract analysis", "Risky clause detection", "Legal compliance", "Regulatory monitoring"],
+      fr: ["Analyse automatique de contrats", "Détection des clauses à risque", "Protection de la propriété intellectuelle", "Veille réglementaire", "Conformité légale"],
+      en: ["Automatic contract analysis", "Risky clause detection", "Intellectual property protection", "Regulatory monitoring", "Legal compliance"],
     },
     heroMetric: { fr: "Analyse un contrat en 30 secondes", en: "Analyzes a contract in 30 seconds" },
     workflow: [
