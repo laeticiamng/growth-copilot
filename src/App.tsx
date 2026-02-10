@@ -133,6 +133,15 @@ import ServiceCatalog from "./pages/dashboard/ServiceCatalog";
 import AICostDashboard from "./pages/dashboard/AICostDashboard";
 import Settings from "./pages/dashboard/Settings";
 
+// Dashboard pages - New Growth OS app pages
+import AppDashboard from "./pages/dashboard/AppDashboard";
+import DeptDashboard from "./pages/dashboard/DeptDashboard";
+import AgentChat from "./pages/dashboard/AgentChat";
+import AnalyzeUrl from "./pages/dashboard/AnalyzeUrl";
+
+// Blog article detail
+import BlogArticle from "./pages/BlogArticle";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -268,6 +277,7 @@ function App() {
               <Route path="/features" element={<Features />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogArticle />} />
               <Route path="/changelog" element={<Changelog />} />
               <Route path="/help" element={<Help />} />
               <Route path="/status" element={<PublicStatus />} />
@@ -326,7 +336,13 @@ function App() {
               <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
               <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
               <Route path="/dashboard/settings" element={<DashboardRoute><Settings /></DashboardRoute>} />
-              
+
+              {/* Dashboard - Growth OS App Pages */}
+              <Route path="/dashboard/app" element={<DashboardRoute><AppDashboard /></DashboardRoute>} />
+              <Route path="/dashboard/dept/:slug" element={<DashboardRoute><DeptDashboard /></DashboardRoute>} />
+              <Route path="/dashboard/agent/:slug" element={<DashboardRoute><AgentChat /></DashboardRoute>} />
+              <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
