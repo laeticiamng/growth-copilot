@@ -27,8 +27,8 @@ const OAUTH_CONFIG = {
   companyName: "EmotionsCare Sasu",
   clientId: "VOTRE_CLIENT_ID.apps.googleusercontent.com", // Remplacez par votre vrai Client ID
   redirectUri: "https://goiklfzouhshghsvpxjo.supabase.co/functions/v1/oauth-callback",
-  privacyUrl: "https://www.agent-growth-automator.com/privacy",
-  termsUrl: "https://www.agent-growth-automator.com/terms",
+  privacyUrl: "https://agent-growth-automator.lovable.app/privacy",
+  termsUrl: "https://agent-growth-automator.lovable.app/terms",
 };
 
 const SCOPES = [

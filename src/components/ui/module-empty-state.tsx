@@ -34,7 +34,7 @@ export function ModuleEmptyState({
   primaryAction,
   secondaryAction,
   features,
-  docUrl = "https://docs.agent-growth-automator.com",
+  docUrl = "https://docs.agent-growth-automator.lovable.app",
   className,
 }: ModuleEmptyStateProps) {
   return (

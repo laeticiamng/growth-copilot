@@ -34,7 +34,7 @@ const Index = () => {
     "provider": {
       "@type": "Organization",
       "name": "Growth OS",
-      "url": "https://www.agent-growth-automator.com",
+      "url": "https://agent-growth-automator.lovable.app",
     },
   };
 

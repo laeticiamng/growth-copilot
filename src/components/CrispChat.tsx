@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { hasAnalyticsConsent } from "@/components/CookieConsent";
+
+const CONSENT_KEY = "cookie_consent";
 
 // Crisp global type declaration
 declare global {
@@ -35,8 +36,9 @@ export function CrispChat() {
       return;
     }
 
-    // Respect cookie consent - only load if user explicitly accepted
-    if (!hasAnalyticsConsent()) {
+    // Respect cookie consent
+    const consent = localStorage.getItem(CONSENT_KEY);
+    if (consent === "false") {
       return;
     }
 
