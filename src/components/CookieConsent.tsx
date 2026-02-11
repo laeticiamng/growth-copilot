@@ -19,9 +19,27 @@ export function useCookieConsent() {
   const decline = () => {
     localStorage.setItem(CONSENT_KEY, "false");
     setConsent(false);
+    removeNonEssentialCookies();
   };
 
   return { consent, accept, decline, isDecided: consent !== null };
+}
+
+/**
+ * Returns true only if the user has explicitly accepted cookies.
+ * Use this to gate non-essential scripts (analytics, chat widgets, Sentry).
+ */
+export function hasAnalyticsConsent(): boolean {
+  return localStorage.getItem(CONSENT_KEY) === "true";
+}
+
+function removeNonEssentialCookies() {
+  document.cookie.split(";").forEach((c) => {
+    const name = c.trim().split("=")[0];
+    if (name && !name.startsWith("sb-")) {
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    }
+  });
 }
 
 export function CookieConsent() {
@@ -42,14 +60,14 @@ export function CookieConsent() {
     <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in slide-in-from-bottom-4 duration-300">
       <div className="container mx-auto max-w-2xl">
         <div className="bg-card border border-border rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5 sm:mt-0" />
+          <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5 sm:mt-0" aria-hidden="true" />
           <p className="text-sm text-muted-foreground flex-1">
             {t("cookies.message")}{" "}
             <a href="/privacy" className="underline hover:text-foreground transition-colors">
               {t("cookies.learnMore")}
             </a>
           </p>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0" role="group" aria-label="Cookie preferences">
             <Button variant="ghost" size="sm" onClick={decline}>
               {t("cookies.decline")}
             </Button>
