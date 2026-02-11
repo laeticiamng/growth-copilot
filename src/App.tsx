@@ -64,6 +64,7 @@ import Contact from "./pages/Contact";
 import LegalPage from "./pages/Legal";
 import About from "./pages/About";
 import Install from "./pages/Install";
+import CGV from "./pages/CGV";
 
 // New public pages
 import AgentsCatalog from "./pages/AgentsCatalog";
@@ -261,6 +262,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/legal" element={<LegalPage />} />
+              <Route path="/cgv" element={<CGV />} />
               <Route path="/about" element={<About />} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/contact" element={<Contact />} />

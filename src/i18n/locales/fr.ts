@@ -416,6 +416,7 @@ export const fr = {
       contact: "Contact",
       legalNotice: "Mentions légales",
       terms: "CGU",
+      cgv: "CGV",
       privacy: "Confidentialité",
       rgpd: "RGPD",
       copyright: "© 2026 EmotionsCare SASU — Tous droits réservés.",

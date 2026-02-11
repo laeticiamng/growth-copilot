@@ -34,6 +34,7 @@ export function Footer() {
       { label: t("landing.footer.contact"), href: "/contact" },
       { label: t("landing.footer.legalNotice"), href: "/legal" },
       { label: t("landing.footer.terms"), href: "/terms" },
+      { label: t("landing.footer.cgv"), href: "/cgv" },
       { label: t("landing.footer.privacy"), href: "/privacy" },
     ],
   };
