@@ -170,7 +170,7 @@ async function handleCheckoutCompleted(
         userName: metadata?.user_name,
         planName,
         amount,
-        dashboardUrl: "https://agent-growth-automator.lovable.app/dashboard",
+        dashboardUrl: "https://www.agent-growth-automator.com/dashboard",
         invoiceUrl: session.invoice as string | undefined,
       },
       workspaceId

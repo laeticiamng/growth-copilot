@@ -64,6 +64,7 @@ import Contact from "./pages/Contact";
 import LegalPage from "./pages/Legal";
 import About from "./pages/About";
 import Install from "./pages/Install";
+import SalesTerms from "./pages/SalesTerms";
 
 // New public pages
 import AgentsCatalog from "./pages/AgentsCatalog";
@@ -265,6 +266,7 @@ function App() {
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/sales-terms" element={<SalesTerms />} />
               <Route path="/demo-oauth" element={<DemoOAuth />} />
               <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />

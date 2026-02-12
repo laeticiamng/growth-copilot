@@ -21,7 +21,7 @@ export function SEOHead({
   structuredData,
 }: SEOHeadProps) {
   const fullTitle = title.includes("Growth OS") ? title : `${title} | Growth OS`;
-  const baseUrl = "https://agent-growth-automator.lovable.app";
+  const baseUrl = "https://www.agent-growth-automator.com";
   const canonicalUrl = canonical ? `${baseUrl}${canonical}` : undefined;
 
   return (

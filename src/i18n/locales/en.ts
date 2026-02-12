@@ -416,6 +416,7 @@ export const en = {
       contact: "Contact",
       legalNotice: "Legal Notice",
       terms: "Terms",
+      salesTerms: "Sales Terms",
       privacy: "Privacy",
       rgpd: "RGPD",
       copyright: "© 2026 EmotionsCare SASU — All rights reserved.",

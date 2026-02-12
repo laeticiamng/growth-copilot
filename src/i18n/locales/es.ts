@@ -230,6 +230,7 @@ export const es = {
       partners: "Socios",
       privacy: "Privacidad",
       terms: "Términos",
+      salesTerms: "CGV",
       cookies: "Cookies",
       rights: "Todos los derechos reservados",
     },

@@ -151,6 +151,7 @@ export const it = {
       partners: "Partner",
       privacy: "Privacy",
       terms: "Termini",
+      salesTerms: "CGV",
       cookies: "Cookie",
       rights: "Tutti i diritti riservati",
     },
