@@ -151,6 +151,7 @@ export const nl = {
       partners: "Partners",
       privacy: "Privacy",
       terms: "Voorwaarden",
+      salesTerms: "Verkoopvoorwaarden",
       cookies: "Cookies",
       rights: "Alle rechten voorbehouden",
     },

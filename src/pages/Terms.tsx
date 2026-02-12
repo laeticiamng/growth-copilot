@@ -66,7 +66,7 @@ export default function Terms() {
             </div>
             <p>Dans les présentes CGU, les termes suivants ont la signification indiquée :</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>« Plateforme »</strong> : le service Growth OS accessible à l'adresse agent-growth-automator.lovable.app</li>
+              <li><strong>« Plateforme »</strong> : le service Growth OS accessible à l'adresse www.agent-growth-automator.com</li>
               <li><strong>« Utilisateur »</strong> : toute personne physique ou morale accédant à la Plateforme</li>
               <li><strong>« Client »</strong> : tout Utilisateur ayant souscrit un abonnement payant</li>
               <li><strong>« Agents IA »</strong> : les assistants artificiels intégrés à la Plateforme</li>
