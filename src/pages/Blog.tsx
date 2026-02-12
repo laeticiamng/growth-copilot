@@ -25,9 +25,9 @@ interface BlogPost {
 
 const BLOG_POSTS: BlogPost[] = [
   {
-    slug: "how-39-ai-agents-replace-marketing-team",
-    title: { fr: "Comment 39 agents IA remplacent une équipe marketing complète", en: "How 39 AI Agents Replace a Complete Marketing Team" },
-    excerpt: { fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches marketing d'une entreprise B2B.", en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's marketing tasks." },
+    slug: "how-39-ai-agents-replace-company-team",
+    title: { fr: "Comment 39 agents IA remplacent une équipe entreprise entière", en: "How 39 AI Agents Replace an Entire Company Team" },
+    excerpt: { fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches d'une entreprise B2B.", en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's tasks." },
     category: "growth",
     author: "Sophie Marchand",
     date: "2026-01-15",

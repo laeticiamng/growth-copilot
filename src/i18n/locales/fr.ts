@@ -253,7 +253,7 @@ export const fr = {
         name: "Sophie Bertrand",
         role: "Fondatrice & CEO",
         company: "Startup SaaS B2B",
-        quote: "En tant que fondatrice solo, je n'avais pas le temps de gérer le marketing. Maintenant, 39 agents s'en occupent pendant que je développe le produit.",
+        quote: "En tant que fondatrice solo, je n'avais pas les moyens de recruter une équipe complète. Maintenant, 39 agents gèrent toute l'entreprise pendant que je développe le produit.",
       },
       t3: {
         name: "Marc Dubois",
@@ -399,7 +399,7 @@ export const fr = {
       loading: "Chargement...",
     },
     footer: {
-      brandDescription: "39 agents IA pour automatiser votre marketing, ventes et opérations. Full Company ou à la carte.",
+      brandDescription: "39 agents IA pour automatiser votre entreprise entière : marketing, ventes, finance, sécurité et plus. Full Company ou à la carte.",
       premiumCompetence: "Automatisation IA",
       productTitle: "Produit",
       resourcesTitle: "Ressources",
@@ -454,7 +454,7 @@ export const fr = {
       showLess: "Voir moins",
     },
     teamOrg: {
-      title: "Ton équipe marketing IA",
+      title: "Ton équipe entreprise IA",
       subtitle: "Des agents spécialisés qui collaborent pour ta croissance",
     },
   },
@@ -1875,8 +1875,8 @@ export const fr = {
   pages: {
     index: {
       title: "Growth OS - 39 Agents IA pour Automatiser Votre Croissance",
-      description: "Plateforme SaaS d'automatisation marketing pilotée par l'IA. SEO, Ads, Content, Social, Analytics - 39 agents travaillent 24/7 pour votre croissance.",
-      schemaDescription: "Plateforme SaaS d'automatisation marketing pilotée par 39 agents IA. SEO, Ads, Content, Social, Analytics - tout en autopilot.",
+      description: "Plateforme SaaS avec 39 agents IA répartis dans 11 départements. Marketing, Commercial, Finance, Sécurité, Support et plus - travaillent 24/7 pour votre croissance.",
+      schemaDescription: "Plateforme SaaS avec 39 agents IA répartis dans 11 départements. Marketing, Commercial, Finance, Sécurité, Support - votre entreprise entière en autopilot.",
       trialOffer: "Essai gratuit 14 jours",
     },
     notFound: {

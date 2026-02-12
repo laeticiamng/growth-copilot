@@ -399,7 +399,7 @@ export const en = {
       loading: "Loading...",
     },
     footer: {
-      brandDescription: "39 AI agents to automate your marketing, sales and operations. Full Company or a la carte.",
+      brandDescription: "39 AI agents to automate your entire company: marketing, sales, finance, security and more. Full Company or a la carte.",
       premiumCompetence: "AI Automation",
       productTitle: "Product",
       resourcesTitle: "Resources",
@@ -454,7 +454,7 @@ export const en = {
       showLess: "Show less",
     },
     teamOrg: {
-      title: "Your AI marketing team",
+      title: "Your AI company team",
       subtitle: "Specialized agents collaborating for your growth",
     },
   },
@@ -1875,8 +1875,8 @@ export const en = {
   pages: {
     index: {
       title: "Growth OS - 39 AI Agents to Automate Your Growth",
-      description: "AI-powered SaaS marketing automation platform. SEO, Ads, Content, Social, Analytics - 39 agents working 24/7 for your growth.",
-      schemaDescription: "AI-powered SaaS marketing automation platform with 39 AI agents. SEO, Ads, Content, Social, Analytics - all on autopilot.",
+      description: "AI-powered SaaS platform with 39 agents across 11 departments. Marketing, Sales, Finance, Security, Support and more - working 24/7 for your growth.",
+      schemaDescription: "AI-powered SaaS platform with 39 AI agents across 11 departments. Marketing, Sales, Finance, Security, Support - your entire company on autopilot.",
       trialOffer: "14-day free trial",
     },
     notFound: {
@@ -1885,7 +1885,7 @@ export const en = {
     },
     about: {
       seoTitle: "About",
-      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents. Created by EmotionsCare SASU.",
+      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents across 11 departments. Created by EmotionsCare SASU.",
       missionBadge: "Our mission",
       missionTitle: "Democratize access to a ",
       missionTitleHighlight: "complete digital company",
