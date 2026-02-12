@@ -83,7 +83,7 @@ const TESTIMONIALS = [
     name: "Marie D.",
     role: { fr: "CMO, TechStartup", en: "CMO, TechStartup" },
     plan: "Full Company",
-    quote: { fr: "Nos 39 agents IA ont remplacé 3 postes et généré +340% de trafic organique en 4 mois.", en: "Our 39 AI agents replaced 3 positions and generated +340% organic traffic in 4 months." },
+    quote: { fr: "Nos 39 agents IA couvrent 11 départements et ont généré +340% de trafic organique en 4 mois.", en: "Our 39 AI agents cover 11 departments and generated +340% organic traffic in 4 months." },
     rating: 5,
   },
   {

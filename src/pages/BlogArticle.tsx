@@ -33,14 +33,14 @@ interface BlogArticle {
 
 const ARTICLES: BlogArticle[] = [
   {
-    slug: "how-39-ai-agents-replace-marketing-team",
+    slug: "how-39-ai-agents-replace-company-team",
     title: {
-      fr: "Comment 39 agents IA remplacent une équipe marketing complète",
-      en: "How 39 AI Agents Replace a Complete Marketing Team",
+      fr: "Comment 39 agents IA remplacent une équipe entreprise entière",
+      en: "How 39 AI Agents Replace an Entire Company Team",
     },
     excerpt: {
-      fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches marketing d'une entreprise B2B.",
-      en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's marketing tasks.",
+      fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches d'une entreprise B2B.",
+      en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's tasks.",
     },
     category: "growth",
     author: "Sophie Marchand",
@@ -49,9 +49,9 @@ const ARTICLES: BlogArticle[] = [
     readTime: 8,
     tags: ["IA", "marketing", "automatisation"],
     body: {
-      fr: `## Le problème : des équipes marketing surchargées
+      fr: `## Le problème : des équipes entreprise surchargées
 
-Les équipes marketing B2B modernes sont confrontées à un paradoxe : plus d'outils que jamais, mais toujours pas assez de temps. Entre l'audit SEO, la stratégie de contenu, le monitoring des réseaux sociaux, l'analyse concurrentielle et le reporting, une équipe de 5 personnes passe 60% de son temps sur des tâches répétitives.
+Les entreprises B2B modernes sont confrontées à un paradoxe : plus d'outils que jamais, mais toujours pas assez de temps. Entre l'audit SEO, la stratégie commerciale, la finance, la sécurité, le support et le reporting, une équipe complète passe 60% de son temps sur des tâches répétitives.
 
 ## La solution : 39 agents IA spécialisés
 
@@ -80,10 +80,10 @@ Nos clients observent en moyenne :
 
 ## Conclusion
 
-L'avenir du marketing B2B n'est pas dans l'embauche de plus de personnes, mais dans l'orchestration intelligente d'agents IA spécialisés. Growth OS vous permet de démarrer dès aujourd'hui.`,
-      en: `## The Problem: Overloaded Marketing Teams
+L'avenir de l'entreprise B2B n'est pas dans l'embauche de plus de personnes, mais dans l'orchestration intelligente d'agents IA spécialisés. Growth OS vous permet de démarrer dès aujourd'hui.`,
+      en: `## The Problem: Overloaded Company Teams
 
-Modern B2B marketing teams face a paradox: more tools than ever, but still not enough time. Between SEO audits, content strategy, social media monitoring, competitive analysis, and reporting, a team of 5 spends 60% of their time on repetitive tasks.
+Modern B2B companies face a paradox: more tools than ever, but still not enough time. Between SEO, sales strategy, finance, security, support, and reporting, a full team spends 60% of their time on repetitive tasks.
 
 ## The Solution: 39 Specialized AI Agents
 
@@ -112,7 +112,7 @@ Our clients observe on average:
 
 ## Conclusion
 
-The future of B2B marketing isn't about hiring more people, but about intelligent orchestration of specialized AI agents. Growth OS lets you start today.`,
+The future of B2B companies isn't about hiring more people, but about intelligent orchestration of specialized AI agents. Growth OS lets you start today.`,
     },
   },
   {
