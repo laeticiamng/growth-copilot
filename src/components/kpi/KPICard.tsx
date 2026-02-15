@@ -64,12 +64,14 @@ export function KPICard({
 }
 
 // Utility to calculate trend percentage
+// eslint-disable-next-line react-refresh/only-export-components
 export function calculateTrend(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
   return Math.round(((current - previous) / previous) * 100);
 }
 
 // Format large numbers
+// eslint-disable-next-line react-refresh/only-export-components
 export function formatNumber(num: number): string {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
@@ -81,6 +83,7 @@ export function formatNumber(num: number): string {
 }
 
 // Format duration in minutes to human readable
+// eslint-disable-next-line react-refresh/only-export-components
 export function formatDuration(minutes: number): string {
   if (minutes >= 60) {
     const hours = Math.floor(minutes / 60);

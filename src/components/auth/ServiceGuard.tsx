@@ -78,6 +78,7 @@ export function ServiceGuard({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function withServiceGuard<P extends object>(
   Component: React.ComponentType<P>,
   service: string
