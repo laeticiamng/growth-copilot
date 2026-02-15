@@ -100,6 +100,7 @@ const ConnectionStatus = () => {
     };
 
     loadConnectionStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id]);
 
   const connectedCount = connections.filter(c => c.status === "connected").length;

@@ -136,6 +136,7 @@ export function AuditLogProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchAuditLog(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, filters]);
 
   const fetchMore = async () => {

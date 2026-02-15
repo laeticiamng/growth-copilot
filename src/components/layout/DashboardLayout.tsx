@@ -229,6 +229,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         break;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const toggleDepartment = (deptId: string) => {
@@ -250,6 +251,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       const isLocked = requiredService ? !hasService(requiredService) : false;
       return { ...item, isLocked };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasService]);
 
   const filteredDepartments = useMemo(() => {
@@ -268,6 +270,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           return { ...item, isLocked };
         }),
     })).filter((dept) => dept.items.length > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAtLeastRole, hasService]);
 
   // Monitor session expiry

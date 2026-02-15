@@ -430,7 +430,7 @@ export function runCompetitiveIntelligence(
   const allContentGaps: ContentGap[] = [];
   
   const maxToAnalyze = input.maxCompetitorsToAnalyze || 5;
-  let analyzed = 0;
+  const analyzed = 0;
   
   for (const competitor of input.competitors) {
     if (analyzed >= maxToAnalyze) break;

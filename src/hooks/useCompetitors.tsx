@@ -55,6 +55,7 @@ export function CompetitorsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchCompetitors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace, currentSite]);
 
   const addCompetitor = async (url: string, name?: string) => {

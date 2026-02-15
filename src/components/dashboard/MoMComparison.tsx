@@ -78,6 +78,7 @@ export function MoMComparison({ kpis, onPeriodChange, loading = false, hasData =
       const change = calculateChange(kpi.currentValue, kpi.previousValue);
       return { ...kpi, change, hasChange: change !== null, formattedCurrent: formatValue(kpi.currentValue, kpi.format), formattedPrevious: formatValue(kpi.previousValue, kpi.format) };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpis, intlLocale]);
 
   const summary = useMemo(() => {

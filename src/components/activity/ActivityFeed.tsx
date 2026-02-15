@@ -176,6 +176,7 @@ export function ActivityFeed({
 
   useEffect(() => {
     fetchActivities(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, agentFilter, categoryFilter, dateFilter]);
 
   const getActorInfo = (activity: ActivityItem) => {

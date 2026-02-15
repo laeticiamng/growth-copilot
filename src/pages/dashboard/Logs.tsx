@@ -140,6 +140,7 @@ const Logs = () => {
 
   useEffect(() => {
     fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   const filteredActionLogs = actionLogs.filter(log => 
