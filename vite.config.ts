@@ -22,11 +22,11 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    // Ensure env variables are available
+    // Ensure env variables are available — values must come from .env files, never hardcoded
     define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || 'https://goiklfzouhshghsvpxjo.supabase.co'),
-      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaWtsZnpvdWhzaGdoc3ZweGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NTk0OTgsImV4cCI6MjA4NTQzNTQ5OH0.ab5-dWDHygOu08tO3lbY-DXpBB2YVr4nVMBWztYDf9s'),
-      'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(env.VITE_SUPABASE_PROJECT_ID || 'goiklfzouhshghsvpxjo'),
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
+      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(env.VITE_SUPABASE_PUBLISHABLE_KEY || ''),
+      'import.meta.env.VITE_SUPABASE_PROJECT_ID': JSON.stringify(env.VITE_SUPABASE_PROJECT_ID || ''),
     },
   };
 });
