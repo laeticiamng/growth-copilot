@@ -1,29 +1,35 @@
-const CACHE_NAME = 'growth-os-v1';
+// Growth OS Service Worker
+// Cache version — update on each deploy to bust stale caches
+const APP_VERSION = '2.0.0';
+const CACHE_NAME = `growth-os-v${APP_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets');
+      console.log('[SW] Caching static assets for version', APP_VERSION);
       return cache.addAll(STATIC_ASSETS);
     })
   );
+  // Activate immediately without waiting for old SW to finish
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate event - clean ALL old caches from previous versions
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name.startsWith('growth-os-') && name !== CACHE_NAME)
           .map((name) => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
@@ -34,23 +40,42 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - smart caching strategy
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip API calls and external resources
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/functions/') || 
+
+  // Skip API calls, Supabase, and external resources
+  if (url.pathname.startsWith('/functions/') ||
       url.pathname.startsWith('/rest/') ||
+      url.pathname.startsWith('/auth/') ||
       !url.origin.includes(self.location.origin)) {
     return;
   }
 
+  // For Vite-hashed assets (immutable), use cache-first strategy
+  if (url.pathname.startsWith('/assets/') && url.pathname.match(/\.[a-f0-9]{8}\./)) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // For everything else, use network-first strategy
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone and cache successful responses
         if (response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -60,16 +85,15 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Fallback to cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Return offline page for navigation requests
+          // Return cached index.html for navigation requests (SPA fallback)
           if (event.request.mode === 'navigate') {
-            return caches.match('/');
+            return caches.match('/index.html');
           }
-          return new Response('Offline', { status: 503 });
+          return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
         });
       })
   );
@@ -100,20 +124,18 @@ self.addEventListener('push', (event) => {
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
+
   const urlToOpen = event.notification.data?.url || '/';
-  
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // Focus existing window if found
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
             client.navigate(urlToOpen);
             return client.focus();
           }
         }
-        // Open new window
         if (self.clients.openWindow) {
           return self.clients.openWindow(urlToOpen);
         }
