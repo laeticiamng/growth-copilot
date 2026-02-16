@@ -148,6 +148,7 @@ export function ReputationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, currentSite?.id]);
 
   const sendReviewRequest = async (data: { name: string; email: string; phone?: string; gbp_profile_id: string }) => {

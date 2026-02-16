@@ -123,6 +123,7 @@ export function LifecycleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchLifecycle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   const createLead = async (data: Partial<Lead>) => {

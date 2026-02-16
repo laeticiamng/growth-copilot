@@ -60,6 +60,7 @@ export function GSCMetricsWidget({ className }: GSCMetricsWidgetProps) {
       checkConnection();
       loadMetrics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, currentSite?.id]);
 
   const checkConnection = async () => {

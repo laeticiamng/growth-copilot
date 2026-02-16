@@ -86,7 +86,7 @@ export default function SmartLinkPage() {
           return;
         }
 
-        const config = (asset.smart_link_config || {}) as Record<string, any>;
+        const config = (asset.smart_link_config || {}) as Record<string, unknown>;
         const links = config.links || {};
 
         // Build platform links

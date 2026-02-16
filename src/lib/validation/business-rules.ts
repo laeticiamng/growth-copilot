@@ -29,7 +29,7 @@ export const leadSchema = z.object({
   name: z.string().min(1, 'Nom requis').max(100, 'Nom trop long'),
   email: z.string().email('Email invalide'),
   company: z.string().max(100).optional(),
-  phone: z.string().regex(/^(\+?[0-9\s\-]{8,20})?$/, 'Téléphone invalide').optional(),
+  phone: z.string().regex(/^(\+?[0-9\s-]{8,20})?$/, 'Téléphone invalide').optional(),
   source: z.enum(['direct', 'organic', 'paid', 'referral', 'social', 'other']).default('direct'),
 });
 

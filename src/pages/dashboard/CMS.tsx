@@ -360,7 +360,7 @@ function PageEditorDialog({ page, onClose, onSave, isSaving, t }: {
   const [metaDescription, setMetaDescription] = useState(page.meta_description || '');
   const [bodyContent, setBodyContent] = useState(
     Array.isArray(page.content) && page.content.length > 0
-      ? page.content.map((b: any) => b.text || '').join('\n\n') : ''
+      ? page.content.map((b: Record<string, unknown>) => (b.text as string) || '').join('\n\n') : ''
   );
 
   const handleSave = async () => {

@@ -1,8 +1,18 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /dashboard/
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /link/
+Disallow: /demo-oauth
 
 User-agent: Bingbot
 Allow: /
+Disallow: /dashboard/
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /link/
+Disallow: /demo-oauth
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +22,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /link/
+Disallow: /demo-oauth
 
 Sitemap: https://www.agent-growth-automator.com/sitemap.xml

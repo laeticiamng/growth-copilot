@@ -165,6 +165,7 @@ export function DiagnosticsPanel() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { runDiagnostics(); }, [user, currentWorkspace, currentSite]);
 
   const getStatusIcon = (status: HealthCheck["status"]) => {

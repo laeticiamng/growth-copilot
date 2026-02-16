@@ -115,6 +115,7 @@ export function LocalSEOProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchLocalSEO();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace, currentSite, currentProfile?.id]);
 
   const createPost = async (data: Partial<GBPPost>) => {

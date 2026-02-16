@@ -89,6 +89,7 @@ export function ApprovalsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchApprovals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   // Subscribe to realtime updates for approvals

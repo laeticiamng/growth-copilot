@@ -113,6 +113,7 @@ export default function SEOTech() {
     if (currentWorkspace?.id) {
       loadHistory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, currentSite?.id]);
 
   const loadHistory = async () => {

@@ -98,6 +98,7 @@ export function ServiceHealthMonitor() {
     checkServiceHealth();
     const interval = setInterval(checkServiceHealth, 60000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, enabledServices.length]);
 
   const getStatusIcon = (status: ServiceStatus["status"]) => {

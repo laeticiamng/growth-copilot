@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,24 +22,30 @@ import {
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
+// Eagerly loaded cockpit widgets (lightweight)
 import {
   ExecutiveSummary,
   PriorityActionsEnhanced,
   QuickLaunchers,
   ApprovalsWidget,
-  RunsHistory,
-  BusinessHealthScore,
-  ROITrackerWidget,
   WelcomeCard,
-  RealtimeStatus,
-  DailyBriefing,
   DepartmentSemaphores,
 } from "@/components/cockpit";
-import { AgentPerformanceChart } from "@/components/agents/AgentPerformanceChart";
-import { VoiceAssistant } from "@/components/ai/VoiceAssistant";
-import { SmartAlertsPanel } from "@/components/notifications/SmartAlertsPanel";
 import { MoMComparison } from "@/components/dashboard/MoMComparison";
-import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
+
+// Lazy-loaded heavy components (recharts, @elevenlabs, date-fns locales)
+const AgentPerformanceChart = lazy(() => import("@/components/agents/AgentPerformanceChart").then(m => ({ default: m.AgentPerformanceChart })));
+const VoiceAssistant = lazy(() => import("@/components/ai/VoiceAssistant").then(m => ({ default: m.VoiceAssistant })));
+const SmartAlertsPanel = lazy(() => import("@/components/notifications/SmartAlertsPanel").then(m => ({ default: m.SmartAlertsPanel })));
+const RunsHistory = lazy(() => import("@/components/cockpit/RunsHistory").then(m => ({ default: m.RunsHistory })));
+const BusinessHealthScore = lazy(() => import("@/components/cockpit/BusinessHealthScore").then(m => ({ default: m.BusinessHealthScore })));
+const ROITrackerWidget = lazy(() => import("@/components/cockpit/ROITrackerWidget").then(m => ({ default: m.ROITrackerWidget })));
+const RealtimeStatus = lazy(() => import("@/components/cockpit/RealtimeStatus").then(m => ({ default: m.RealtimeStatus })));
+const DailyBriefing = lazy(() => import("@/components/cockpit/DailyBriefing").then(m => ({ default: m.DailyBriefing })));
+
+function ChartSkeleton() {
+  return <Skeleton className="h-64 w-full rounded-lg" />;
+}
 
 // CGO Agent Persona - translated in component
 const CGO_PERSONA = {
@@ -262,7 +268,9 @@ export default function DashboardHome() {
       />
 
       {/* Daily Briefing from Sophie Marchand (CGO) */}
-      <DailyBriefing />
+      <Suspense fallback={<ChartSkeleton />}>
+        <DailyBriefing />
+      </Suspense>
 
       {/* Department Semaphores - Health Overview */}
       <DepartmentSemaphores />
@@ -281,10 +289,14 @@ export default function DashboardHome() {
         <PriorityActionsEnhanced maxItems={5} />
 
         {/* Business Health Score */}
-        <BusinessHealthScore className="h-full" />
+        <Suspense fallback={<ChartSkeleton />}>
+          <BusinessHealthScore className="h-full" />
+        </Suspense>
 
         {/* ROI Tracker Widget */}
-        <ROITrackerWidget className="h-full" />
+        <Suspense fallback={<ChartSkeleton />}>
+          <ROITrackerWidget className="h-full" />
+        </Suspense>
       </div>
 
       {/* Approvals Widget */}
@@ -296,7 +308,9 @@ export default function DashboardHome() {
         />
         
         {/* Agent Performance Chart */}
-        <AgentPerformanceChart />
+        <Suspense fallback={<ChartSkeleton />}>
+          <AgentPerformanceChart />
+        </Suspense>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -304,7 +318,9 @@ export default function DashboardHome() {
         <QuickLaunchers launchers={quickLaunchers} onLaunch={handleLaunchRun} />
 
         {/* Runs History */}
-        <RunsHistory maxItems={4} />
+        <Suspense fallback={<ChartSkeleton />}>
+          <RunsHistory maxItems={4} />
+        </Suspense>
       </div>
 
       {/* Voice Assistant & Real-Time Alerts */}
@@ -320,17 +336,23 @@ export default function DashboardHome() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <VoiceAssistant />
+            <Suspense fallback={<ChartSkeleton />}>
+              <VoiceAssistant />
+            </Suspense>
           </CardContent>
         </Card>
 
         {/* Smart Alerts */}
-        <SmartAlertsPanel />
+        <Suspense fallback={<ChartSkeleton />}>
+          <SmartAlertsPanel />
+        </Suspense>
       </div>
 
     {/* Realtime Status - Connections Monitor */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-      <RealtimeStatus />
+      <Suspense fallback={<ChartSkeleton />}>
+        <RealtimeStatus />
+      </Suspense>
       <Card className="md:col-span-2">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">

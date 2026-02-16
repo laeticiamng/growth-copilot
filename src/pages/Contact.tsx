@@ -64,7 +64,8 @@ export default function Contact() {
 
   const contactCards = [
     { icon: Mail, title: "Email", description: t("pages.contact.emailDesc"), action: "contact@emotionscare.com", href: "mailto:contact@emotionscare.com", color: "text-blue-500", bgColor: "bg-blue-500/10" },
-    { icon: MessageCircle, title: t("pages.contact.liveChat"), description: t("pages.contact.liveChatDesc"), action: t("pages.contact.openChat"), onClick: () => { if (typeof window !== "undefined" && (window as any).$crisp) { (window as any).$crisp.push(["do", "chat:open"]); } }, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { icon: MessageCircle, title: t("pages.contact.liveChat"), description: t("pages.contact.liveChatDesc"), action: t("pages.contact.openChat"), onClick: () => { if (typeof window !== "undefined" && (window as Record<string, any>).$crisp) { (window as Record<string, any>).$crisp.push(["do", "chat:open"]); } }, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
     { icon: BookOpen, title: "Documentation", description: t("pages.contact.docsDesc"), action: t("pages.contact.viewGuide"), href: "/dashboard/guide", isInternal: true, color: "text-purple-500", bgColor: "bg-purple-500/10" },
   ];
 
@@ -84,8 +85,9 @@ export default function Contact() {
             const Icon = card.icon;
             const CardWrapper = card.href ? (card.isInternal ? Link : "a") : "button";
             const cardProps = card.href ? (card.isInternal ? { to: card.href } : { href: card.href }) : { onClick: card.onClick, type: "button" as const };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return (
-              <CardWrapper key={card.title} {...(cardProps as any)} className="block group">
+              <CardWrapper key={card.title} {...(cardProps as Record<string, any>)} className="block group">
                 <Card className="h-full transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
                   <CardHeader className="text-center">
                     <div className={`w-12 h-12 rounded-xl ${card.bgColor} flex items-center justify-center mx-auto mb-3`}>

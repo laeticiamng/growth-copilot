@@ -117,7 +117,7 @@ export function transformToMetaAdsInput(
     campaignId: c.campaign_id,
     name: c.name,
     status: (c.effective_status as "ACTIVE" | "PAUSED" | "DELETED" | "ARCHIVED") || "PAUSED",
-    objective: c.objective as any || "OUTCOME_TRAFFIC",
+    objective: (c.objective as MetaCampaign["objective"]) || "OUTCOME_TRAFFIC",
     dailyBudget: c.daily_budget ? c.daily_budget / 100 : undefined, // Meta stores in cents
     lifetimeBudget: c.lifetime_budget ? c.lifetime_budget / 100 : undefined,
   }));
@@ -131,7 +131,7 @@ export function transformToMetaAdsInput(
     optimizationGoal: a.optimization_goal || "",
     billingEvent: a.billing_event || "IMPRESSIONS",
     bidAmount: a.bid_amount ? a.bid_amount / 100 : undefined,
-    targeting: a.targeting as any,
+    targeting: a.targeting as MetaAdset["targeting"],
   }));
 
   const mappedAds: MetaAd[] = ads.map(a => ({

@@ -88,6 +88,7 @@ export function useSEOAudit() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace, currentSite]);
 
   const saveCrawlResults = async (data: any, workspaceId: string, siteId: string) => {

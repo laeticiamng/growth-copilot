@@ -158,6 +158,7 @@ export default function Onboarding() {
       setSiteAnalysis(null);
       setAnalysisTriggered(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siteUrl]);
 
   useEffect(() => {

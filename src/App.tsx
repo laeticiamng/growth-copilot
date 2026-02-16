@@ -1,9 +1,11 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LoadingState } from "@/components/ui/loading-state";
 
 // Core providers
 import { AuthProvider } from "@/hooks/useAuth";
@@ -50,98 +52,100 @@ import { ServiceGuard } from "@/components/auth/ServiceGuard";
 // Sentry routing hook
 import { useSentryRouting } from "@/hooks/useSentryRouting";
 
-// Pages
+// Dynamic html lang sync
+import { useLanguageSync } from "@/hooks/useLanguageSync";
+
+// Lazy-loaded global widgets (not critical for first paint)
+const CrispChat = lazy(() => import("@/components/CrispChat").then(m => ({ default: m.CrispChat })));
+const CookieConsent = lazy(() => import("@/components/CookieConsent").then(m => ({ default: m.CookieConsent })));
+
+// ─── Eagerly loaded pages (critical for first paint / SEO) ───
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
-import SmartLink from "./pages/SmartLink";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Roadmap from "./pages/Roadmap";
-import DemoOAuth from "./pages/DemoOAuth";
-import Contact from "./pages/Contact";
-import LegalPage from "./pages/Legal";
-import About from "./pages/About";
-import Install from "./pages/Install";
-import SalesTerms from "./pages/SalesTerms";
 
-// New public pages
-import AgentsCatalog from "./pages/AgentsCatalog";
-import AgentDetail from "./pages/AgentDetail";
-import DepartmentDetail from "./pages/DepartmentDetail";
-import Features from "./pages/Features";
-import Blog from "./pages/Blog";
-import Changelog from "./pages/Changelog";
-import Help from "./pages/Help";
-import PublicStatus from "./pages/Status";
-import ApiDocs from "./pages/ApiDocs";
-import PricingPage from "./pages/PricingPage";
+// ─── Lazy-loaded public pages ───
+const Auth = lazy(() => import("./pages/Auth"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const SmartLink = lazy(() => import("./pages/SmartLink"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Roadmap = lazy(() => import("./pages/Roadmap"));
+const DemoOAuth = lazy(() => import("./pages/DemoOAuth"));
+const Contact = lazy(() => import("./pages/Contact"));
+const LegalPage = lazy(() => import("./pages/Legal"));
+const About = lazy(() => import("./pages/About"));
+const Install = lazy(() => import("./pages/Install"));
+const SalesTerms = lazy(() => import("./pages/SalesTerms"));
+const AgentsCatalog = lazy(() => import("./pages/AgentsCatalog"));
+const AgentDetail = lazy(() => import("./pages/AgentDetail"));
+const DepartmentDetail = lazy(() => import("./pages/DepartmentDetail"));
+const Features = lazy(() => import("./pages/Features"));
+const Blog = lazy(() => import("./pages/Blog"));
+const Changelog = lazy(() => import("./pages/Changelog"));
+const Help = lazy(() => import("./pages/Help"));
+const PublicStatus = lazy(() => import("./pages/Status"));
+const ApiDocs = lazy(() => import("./pages/ApiDocs"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 
-// Crisp Chat widget
-import { CrispChat } from "@/components/CrispChat";
-import { CookieConsent } from "@/components/CookieConsent";
+// ─── Lazy-loaded dashboard pages ───
+// Foundation
+const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
+const Sites = lazy(() => import("./pages/dashboard/Sites"));
+const Integrations = lazy(() => import("./pages/dashboard/Integrations"));
+const ConnectionStatus = lazy(() => import("./pages/dashboard/ConnectionStatus"));
+const BrandKit = lazy(() => import("./pages/dashboard/BrandKit"));
+const Logs = lazy(() => import("./pages/dashboard/Logs"));
+const Billing = lazy(() => import("./pages/dashboard/Billing"));
 
-// Dashboard pages - Foundation
-import DashboardHome from "./pages/dashboard/DashboardHome";
-import Sites from "./pages/dashboard/Sites";
-import Integrations from "./pages/dashboard/Integrations";
-import ConnectionStatus from "./pages/dashboard/ConnectionStatus";
-import BrandKit from "./pages/dashboard/BrandKit";
-import Logs from "./pages/dashboard/Logs";
-import Billing from "./pages/dashboard/Billing";
+// Modules
+const SEOTech = lazy(() => import("./pages/dashboard/SEOTech"));
+const Content = lazy(() => import("./pages/dashboard/Content"));
+const LocalSEO = lazy(() => import("./pages/dashboard/LocalSEO"));
+const Ads = lazy(() => import("./pages/dashboard/Ads"));
+const Social = lazy(() => import("./pages/dashboard/Social"));
+const CRO = lazy(() => import("./pages/dashboard/CRO"));
+const Offers = lazy(() => import("./pages/dashboard/Offers"));
+const Lifecycle = lazy(() => import("./pages/dashboard/Lifecycle"));
+const Reputation = lazy(() => import("./pages/dashboard/Reputation"));
+const Reports = lazy(() => import("./pages/dashboard/Reports"));
 
-// Dashboard pages - Modules
-import SEOTech from "./pages/dashboard/SEOTech";
-import Content from "./pages/dashboard/Content";
-import LocalSEO from "./pages/dashboard/LocalSEO";
-import Ads from "./pages/dashboard/Ads";
-import Social from "./pages/dashboard/Social";
-import CRO from "./pages/dashboard/CRO";
-import Offers from "./pages/dashboard/Offers";
-import Lifecycle from "./pages/dashboard/Lifecycle";
-import Reputation from "./pages/dashboard/Reputation";
-import Reports from "./pages/dashboard/Reports";
+// Advanced
+const Approvals = lazy(() => import("./pages/dashboard/Approvals"));
+const Competitors = lazy(() => import("./pages/dashboard/Competitors"));
+const Agency = lazy(() => import("./pages/dashboard/Agency"));
+const OnboardingGuide = lazy(() => import("./pages/dashboard/Onboarding"));
+const Automations = lazy(() => import("./pages/dashboard/Automations"));
 
-// Dashboard pages - Advanced
-import Approvals from "./pages/dashboard/Approvals";
-import Competitors from "./pages/dashboard/Competitors";
-import Agency from "./pages/dashboard/Agency";
-import OnboardingGuide from "./pages/dashboard/Onboarding";
-import Automations from "./pages/dashboard/Automations";
+// Media Launch
+const MediaAssets = lazy(() => import("./pages/dashboard/MediaAssets"));
+const LaunchPlan = lazy(() => import("./pages/dashboard/LaunchPlan"));
+const CreativesStudio = lazy(() => import("./pages/dashboard/CreativesStudio"));
+const MediaKPIs = lazy(() => import("./pages/dashboard/MediaKPIs"));
+const TemplateAdsFactory = lazy(() => import("./pages/dashboard/TemplateAdsFactory"));
 
-// Dashboard pages - Media Launch
-import MediaAssets from "./pages/dashboard/MediaAssets";
-import LaunchPlan from "./pages/dashboard/LaunchPlan";
-import CreativesStudio from "./pages/dashboard/CreativesStudio";
-import MediaKPIs from "./pages/dashboard/MediaKPIs";
-import TemplateAdsFactory from "./pages/dashboard/TemplateAdsFactory";
+// Diagnostics & Ops
+const Diagnostics = lazy(() => import("./pages/dashboard/Diagnostics"));
+const Ops = lazy(() => import("./pages/dashboard/Ops"));
+const ApprovalsV2 = lazy(() => import("./pages/dashboard/ApprovalsV2"));
+const Agents = lazy(() => import("./pages/dashboard/Agents"));
+const CMS = lazy(() => import("./pages/dashboard/CMS"));
+const Research = lazy(() => import("./pages/dashboard/Research"));
+const HR = lazy(() => import("./pages/dashboard/HR"));
+const Legal = lazy(() => import("./pages/dashboard/Legal"));
+const AccessReview = lazy(() => import("./pages/dashboard/AccessReview"));
+const AuditLogPage = lazy(() => import("./pages/dashboard/AuditLog"));
+const StatusPage = lazy(() => import("./pages/dashboard/StatusPage"));
+const ROIDashboard = lazy(() => import("./pages/dashboard/ROIDashboard"));
+const ServiceCatalog = lazy(() => import("./pages/dashboard/ServiceCatalog"));
+const AICostDashboard = lazy(() => import("./pages/dashboard/AICostDashboard"));
+const Settings = lazy(() => import("./pages/dashboard/Settings"));
 
-// Dashboard pages - Diagnostics & Ops
-import Diagnostics from "./pages/dashboard/Diagnostics";
-import Ops from "./pages/dashboard/Ops";
-import ApprovalsV2 from "./pages/dashboard/ApprovalsV2";
-import Agents from "./pages/dashboard/Agents";
-import CMS from "./pages/dashboard/CMS";
-import Research from "./pages/dashboard/Research";
-import HR from "./pages/dashboard/HR";
-import Legal from "./pages/dashboard/Legal";
-import AccessReview from "./pages/dashboard/AccessReview";
-import AuditLogPage from "./pages/dashboard/AuditLog";
-import StatusPage from "./pages/dashboard/StatusPage";
-import ROIDashboard from "./pages/dashboard/ROIDashboard";
-import ServiceCatalog from "./pages/dashboard/ServiceCatalog";
-import AICostDashboard from "./pages/dashboard/AICostDashboard";
-import Settings from "./pages/dashboard/Settings";
-
-// Dashboard pages - New Growth OS app pages
-import AppDashboard from "./pages/dashboard/AppDashboard";
-import DeptDashboard from "./pages/dashboard/DeptDashboard";
-import AgentChat from "./pages/dashboard/AgentChat";
-import AnalyzeUrl from "./pages/dashboard/AnalyzeUrl";
-
-// Blog article detail
-import BlogArticle from "./pages/BlogArticle";
+// Growth OS App Pages
+const AppDashboard = lazy(() => import("./pages/dashboard/AppDashboard"));
+const DeptDashboard = lazy(() => import("./pages/dashboard/DeptDashboard"));
+const AgentChat = lazy(() => import("./pages/dashboard/AgentChat"));
+const AnalyzeUrl = lazy(() => import("./pages/dashboard/AnalyzeUrl"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -220,6 +224,13 @@ const InnerProviders = composeProviders([
 ]);
 
 /**
+ * Suspense fallback for lazy-loaded routes
+ */
+function PageLoader() {
+  return <LoadingState message="Loading..." />;
+}
+
+/**
  * Dashboard route wrapper for cleaner route definitions
  */
 function DashboardRoute({ children, service }: { children: React.ReactNode; service?: string }) {
@@ -245,6 +256,14 @@ function SentryRouteTracker() {
   return null;
 }
 
+/**
+ * Syncs i18next language to <html lang> attribute
+ */
+function LanguageSyncTracker() {
+  useLanguageSync();
+  return null;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -252,101 +271,104 @@ function App() {
         <InnerProviders>
           <Toaster />
           <Sonner />
-           <CrispChat />
-            <CookieConsent />
+          <Suspense fallback={null}><CrispChat /></Suspense>
+          <Suspense fallback={null}><CookieConsent /></Suspense>
           <BrowserRouter>
             <SentryRouteTracker />
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/legal" element={<LegalPage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/roadmap" element={<Roadmap />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/install" element={<Install />} />
-              <Route path="/sales-terms" element={<SalesTerms />} />
-              <Route path="/demo-oauth" element={<DemoOAuth />} />
-              <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
-              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-              <Route path="/link/:slug" element={<SmartLink />} />
+            <LanguageSyncTracker />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/roadmap" element={<Roadmap />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/install" element={<Install />} />
+                <Route path="/sales-terms" element={<SalesTerms />} />
+                <Route path="/demo-oauth" element={<DemoOAuth />} />
+                <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+                <Route path="/link/:slug" element={<SmartLink />} />
 
-              {/* New public pages */}
-              <Route path="/agents" element={<AgentsCatalog />} />
-              <Route path="/agents/:slug" element={<AgentDetail />} />
-              <Route path="/departments/:slug" element={<DepartmentDetail />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogArticle />} />
-              <Route path="/changelog" element={<Changelog />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/status" element={<PublicStatus />} />
-              <Route path="/api-docs" element={<ApiDocs />} />
+                {/* New public pages */}
+                <Route path="/agents" element={<AgentsCatalog />} />
+                <Route path="/agents/:slug" element={<AgentDetail />} />
+                <Route path="/departments/:slug" element={<DepartmentDetail />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogArticle />} />
+                <Route path="/changelog" element={<Changelog />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/status" element={<PublicStatus />} />
+                <Route path="/api-docs" element={<ApiDocs />} />
 
-              {/* Dashboard - Foundation */}
-              <Route path="/dashboard" element={<DashboardRoute><DashboardHome /></DashboardRoute>} />
-              <Route path="/dashboard/sites" element={<DashboardRoute><Sites /></DashboardRoute>} />
-              <Route path="/dashboard/connections" element={<DashboardRoute><ConnectionStatus /></DashboardRoute>} />
-              <Route path="/dashboard/integrations" element={<DashboardRoute><Integrations /></DashboardRoute>} />
-              <Route path="/dashboard/brand-kit" element={<DashboardRoute><BrandKit /></DashboardRoute>} />
-              <Route path="/dashboard/logs" element={<DashboardRoute><Logs /></DashboardRoute>} />
-              <Route path="/dashboard/billing" element={<DashboardRoute><Billing /></DashboardRoute>} />
-              
-              {/* Dashboard - Modules (Service-Gated) */}
-              <Route path="/dashboard/seo" element={<DashboardRoute service="marketing"><SEOTech /></DashboardRoute>} />
-              <Route path="/dashboard/content" element={<DashboardRoute service="marketing"><Content /></DashboardRoute>} />
-              <Route path="/dashboard/local" element={<DashboardRoute service="marketing"><LocalSEO /></DashboardRoute>} />
-              <Route path="/dashboard/ads" element={<DashboardRoute service="marketing"><Ads /></DashboardRoute>} />
-              <Route path="/dashboard/social" element={<DashboardRoute service="marketing"><Social /></DashboardRoute>} />
-              <Route path="/dashboard/cro" element={<DashboardRoute service="marketing"><CRO /></DashboardRoute>} />
-              <Route path="/dashboard/offers" element={<DashboardRoute service="sales"><Offers /></DashboardRoute>} />
-              <Route path="/dashboard/lifecycle" element={<DashboardRoute service="sales"><Lifecycle /></DashboardRoute>} />
-              <Route path="/dashboard/reputation" element={<DashboardRoute service="support"><Reputation /></DashboardRoute>} />
-              <Route path="/dashboard/reports" element={<DashboardRoute service="finance"><Reports /></DashboardRoute>} />
-              
-              {/* Dashboard - Advanced (Service-Gated) */}
-              <Route path="/dashboard/approvals" element={<DashboardRoute><Approvals /></DashboardRoute>} />
-              <Route path="/dashboard/competitors" element={<DashboardRoute service="marketing"><Competitors /></DashboardRoute>} />
-              <Route path="/dashboard/agency" element={<DashboardRoute service="governance"><Agency /></DashboardRoute>} />
-              <Route path="/dashboard/guide" element={<DashboardRoute><OnboardingGuide /></DashboardRoute>} />
-              <Route path="/dashboard/automations" element={<DashboardRoute service="governance"><Automations /></DashboardRoute>} />
-              
-              {/* Dashboard - Media Launch (Marketing-Gated) */}
-              <Route path="/dashboard/media" element={<DashboardRoute service="marketing"><MediaAssets /></DashboardRoute>} />
-              <Route path="/dashboard/media/launch" element={<DashboardRoute service="marketing"><LaunchPlan /></DashboardRoute>} />
-              <Route path="/dashboard/media/creatives" element={<DashboardRoute service="marketing"><CreativesStudio /></DashboardRoute>} />
-              <Route path="/dashboard/media/kpis" element={<DashboardRoute service="marketing"><MediaKPIs /></DashboardRoute>} />
-              <Route path="/dashboard/media/ads-factory" element={<DashboardRoute service="marketing"><TemplateAdsFactory /></DashboardRoute>} />
-              
-              {/* Dashboard - Diagnostics & Ops (Security-Gated) */}
-              <Route path="/dashboard/diagnostics" element={<DashboardRoute service="security"><Diagnostics /></DashboardRoute>} />
-              <Route path="/dashboard/ops" element={<DashboardRoute service="security"><Ops /></DashboardRoute>} />
-              <Route path="/dashboard/approvals-v2" element={<DashboardRoute><ApprovalsV2 /></DashboardRoute>} />
-              <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
-              <Route path="/dashboard/cms" element={<DashboardRoute service="marketing"><CMS /></DashboardRoute>} />
-              <Route path="/dashboard/research" element={<DashboardRoute><Research /></DashboardRoute>} />
-              
-              {/* Dashboard - HR & Legal (New Departments) */}
-              <Route path="/dashboard/hr" element={<DashboardRoute service="hr"><HR /></DashboardRoute>} />
-              <Route path="/dashboard/legal" element={<DashboardRoute service="legal"><Legal /></DashboardRoute>} />
-              <Route path="/dashboard/access-review" element={<DashboardRoute service="security"><AccessReview /></DashboardRoute>} />
-              <Route path="/dashboard/audit-log" element={<DashboardRoute><AuditLogPage /></DashboardRoute>} />
-              <Route path="/dashboard/status" element={<DashboardRoute><StatusPage /></DashboardRoute>} />
-              <Route path="/dashboard/roi" element={<DashboardRoute><ROIDashboard /></DashboardRoute>} />
-              <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
-              <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
-              <Route path="/dashboard/settings" element={<DashboardRoute><Settings /></DashboardRoute>} />
+                {/* Dashboard - Foundation */}
+                <Route path="/dashboard" element={<DashboardRoute><DashboardHome /></DashboardRoute>} />
+                <Route path="/dashboard/sites" element={<DashboardRoute><Sites /></DashboardRoute>} />
+                <Route path="/dashboard/connections" element={<DashboardRoute><ConnectionStatus /></DashboardRoute>} />
+                <Route path="/dashboard/integrations" element={<DashboardRoute><Integrations /></DashboardRoute>} />
+                <Route path="/dashboard/brand-kit" element={<DashboardRoute><BrandKit /></DashboardRoute>} />
+                <Route path="/dashboard/logs" element={<DashboardRoute><Logs /></DashboardRoute>} />
+                <Route path="/dashboard/billing" element={<DashboardRoute><Billing /></DashboardRoute>} />
 
-              {/* Dashboard - Growth OS App Pages */}
-              <Route path="/dashboard/app" element={<DashboardRoute><AppDashboard /></DashboardRoute>} />
-              <Route path="/dashboard/dept/:slug" element={<DashboardRoute><DeptDashboard /></DashboardRoute>} />
-              <Route path="/dashboard/agent/:slug" element={<DashboardRoute><AgentChat /></DashboardRoute>} />
-              <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
+                {/* Dashboard - Modules (Service-Gated) */}
+                <Route path="/dashboard/seo" element={<DashboardRoute service="marketing"><SEOTech /></DashboardRoute>} />
+                <Route path="/dashboard/content" element={<DashboardRoute service="marketing"><Content /></DashboardRoute>} />
+                <Route path="/dashboard/local" element={<DashboardRoute service="marketing"><LocalSEO /></DashboardRoute>} />
+                <Route path="/dashboard/ads" element={<DashboardRoute service="marketing"><Ads /></DashboardRoute>} />
+                <Route path="/dashboard/social" element={<DashboardRoute service="marketing"><Social /></DashboardRoute>} />
+                <Route path="/dashboard/cro" element={<DashboardRoute service="marketing"><CRO /></DashboardRoute>} />
+                <Route path="/dashboard/offers" element={<DashboardRoute service="sales"><Offers /></DashboardRoute>} />
+                <Route path="/dashboard/lifecycle" element={<DashboardRoute service="sales"><Lifecycle /></DashboardRoute>} />
+                <Route path="/dashboard/reputation" element={<DashboardRoute service="support"><Reputation /></DashboardRoute>} />
+                <Route path="/dashboard/reports" element={<DashboardRoute service="finance"><Reports /></DashboardRoute>} />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Dashboard - Advanced (Service-Gated) */}
+                <Route path="/dashboard/approvals" element={<DashboardRoute><Approvals /></DashboardRoute>} />
+                <Route path="/dashboard/competitors" element={<DashboardRoute service="marketing"><Competitors /></DashboardRoute>} />
+                <Route path="/dashboard/agency" element={<DashboardRoute service="governance"><Agency /></DashboardRoute>} />
+                <Route path="/dashboard/guide" element={<DashboardRoute><OnboardingGuide /></DashboardRoute>} />
+                <Route path="/dashboard/automations" element={<DashboardRoute service="governance"><Automations /></DashboardRoute>} />
+
+                {/* Dashboard - Media Launch (Marketing-Gated) */}
+                <Route path="/dashboard/media" element={<DashboardRoute service="marketing"><MediaAssets /></DashboardRoute>} />
+                <Route path="/dashboard/media/launch" element={<DashboardRoute service="marketing"><LaunchPlan /></DashboardRoute>} />
+                <Route path="/dashboard/media/creatives" element={<DashboardRoute service="marketing"><CreativesStudio /></DashboardRoute>} />
+                <Route path="/dashboard/media/kpis" element={<DashboardRoute service="marketing"><MediaKPIs /></DashboardRoute>} />
+                <Route path="/dashboard/media/ads-factory" element={<DashboardRoute service="marketing"><TemplateAdsFactory /></DashboardRoute>} />
+
+                {/* Dashboard - Diagnostics & Ops (Security-Gated) */}
+                <Route path="/dashboard/diagnostics" element={<DashboardRoute service="security"><Diagnostics /></DashboardRoute>} />
+                <Route path="/dashboard/ops" element={<DashboardRoute service="security"><Ops /></DashboardRoute>} />
+                <Route path="/dashboard/approvals-v2" element={<DashboardRoute><ApprovalsV2 /></DashboardRoute>} />
+                <Route path="/dashboard/agents" element={<DashboardRoute><Agents /></DashboardRoute>} />
+                <Route path="/dashboard/cms" element={<DashboardRoute service="marketing"><CMS /></DashboardRoute>} />
+                <Route path="/dashboard/research" element={<DashboardRoute><Research /></DashboardRoute>} />
+
+                {/* Dashboard - HR & Legal (New Departments) */}
+                <Route path="/dashboard/hr" element={<DashboardRoute service="hr"><HR /></DashboardRoute>} />
+                <Route path="/dashboard/legal" element={<DashboardRoute service="legal"><Legal /></DashboardRoute>} />
+                <Route path="/dashboard/access-review" element={<DashboardRoute service="security"><AccessReview /></DashboardRoute>} />
+                <Route path="/dashboard/audit-log" element={<DashboardRoute><AuditLogPage /></DashboardRoute>} />
+                <Route path="/dashboard/status" element={<DashboardRoute><StatusPage /></DashboardRoute>} />
+                <Route path="/dashboard/roi" element={<DashboardRoute><ROIDashboard /></DashboardRoute>} />
+                <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
+                <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
+                <Route path="/dashboard/settings" element={<DashboardRoute><Settings /></DashboardRoute>} />
+
+                {/* Dashboard - Growth OS App Pages */}
+                <Route path="/dashboard/app" element={<DashboardRoute><AppDashboard /></DashboardRoute>} />
+                <Route path="/dashboard/dept/:slug" element={<DashboardRoute><DeptDashboard /></DashboardRoute>} />
+                <Route path="/dashboard/agent/:slug" element={<DashboardRoute><AgentChat /></DashboardRoute>} />
+                <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
+
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </InnerProviders>
       </QueryClientProvider>

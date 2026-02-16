@@ -118,7 +118,7 @@ export class ApprovalEngine {
       allowed_actions: (data?.allowed_actions as string[]) ?? ["seo_fix", "review_response"],
       require_approval_above_risk: (data?.require_approval_above_risk as "low" | "medium" | "high") ?? "low",
       max_actions_per_week: data?.max_actions_per_week ?? 10,
-      max_daily_budget: Number(data?.max_daily_budget) ?? 0,
+      max_daily_budget: Number(data?.max_daily_budget ?? 0),
     };
   }
 

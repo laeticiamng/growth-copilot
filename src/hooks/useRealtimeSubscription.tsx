@@ -114,7 +114,7 @@ export function useMultiTableSubscription(
         channelRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [channelName, configsKey, enabled]);
 
   return channelRef.current;

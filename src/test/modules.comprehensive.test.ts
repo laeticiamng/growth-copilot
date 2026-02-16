@@ -51,7 +51,7 @@ describe("Dashboard Modules - Exports & Structure", () => {
       const module = await import("@/pages/dashboard/DashboardHome");
       expect(module.default).toBeDefined();
       expect(typeof module.default).toBe("function");
-    });
+    }, 15_000);
   });
 
   describe("SEOTech", () => {

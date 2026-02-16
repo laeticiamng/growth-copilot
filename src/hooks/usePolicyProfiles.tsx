@@ -167,7 +167,7 @@ export function PolicyProfilesProvider({ children }: { children: ReactNode }) {
       }) as unknown
     };
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const { data, error } = await supabase
       .from('policy_profiles')
       .insert(insertData as any)

@@ -74,6 +74,7 @@ export const en = {
       howItWorks: "How it Works",
       pricing: "Pricing",
       faq: "FAQ",
+      help: "Help",
       login: "Login",
       getStarted: "Get Started",
       ariaMenuOpen: "Open menu",

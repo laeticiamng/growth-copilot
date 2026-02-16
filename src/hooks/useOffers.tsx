@@ -125,6 +125,7 @@ export function OffersProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchOffers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id, currentSite?.id]);
 
   const createOffer = async (data: CreateOfferData): Promise<Offer | null> => {

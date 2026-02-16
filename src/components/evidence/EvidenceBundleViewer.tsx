@@ -56,6 +56,7 @@ export function EvidenceBundleViewer({
     } else {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [executiveRunId, agentRunId]);
 
   if (loading) {

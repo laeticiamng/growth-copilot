@@ -39,7 +39,7 @@ export function isValidEmail(email: string): boolean {
 // Phone validation (international format)
 export function isValidPhone(phone: string): boolean {
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-  const cleaned = phone.replace(/[\s\-\(\)\.]/g, '');
+  const cleaned = phone.replace(/[\s\-().]/g, '');
   return phoneRegex.test(cleaned);
 }
 
@@ -59,6 +59,7 @@ export function sanitizeText(str: string): string {
   // Remove zero-width chars, control chars (except newlines/tabs), and normalize
   return str
     .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width chars
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Control chars (keep \n, \r, \t)
     .trim();
 }

@@ -71,7 +71,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
             .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
         ]);
 
-        let seoStatus: DepartmentStatus = {
+        const seoStatus: DepartmentStatus = {
           id: "seo",
           name: "SEO",
           icon: Search,
@@ -82,7 +82,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
         };
 
         const pendingBriefs = contentRes.data?.length || 0;
-        let contentStatus: DepartmentStatus = {
+        const contentStatus: DepartmentStatus = {
           id: "content",
           name: "Content",
           icon: FileText,
@@ -119,7 +119,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
         const totalLeads = leads.length;
         const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
         
-        let commercialStatus: DepartmentStatus = {
+        const commercialStatus: DepartmentStatus = {
           id: "commercial",
           name: "Commercial",
           icon: Users,

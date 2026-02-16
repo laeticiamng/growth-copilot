@@ -71,6 +71,7 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchFlags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   const isEnabled = (flag: keyof FeatureFlags) => flags[flag];

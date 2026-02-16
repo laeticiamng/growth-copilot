@@ -5,6 +5,7 @@ import { Cookie } from "lucide-react";
 
 const CONSENT_KEY = "cookie_consent";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCookieConsent() {
   const [consent, setConsent] = useState<boolean | null>(() => {
     const stored = localStorage.getItem(CONSENT_KEY);

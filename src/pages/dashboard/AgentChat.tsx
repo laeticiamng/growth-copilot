@@ -58,6 +58,7 @@ export default function AgentChat() {
         },
       ]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent, lang]);
 
   // Scroll to bottom on new messages

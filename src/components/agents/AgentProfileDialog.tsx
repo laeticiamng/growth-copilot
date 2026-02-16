@@ -1870,6 +1870,7 @@ const AGENT_PROFILES: Record<string, AgentProfile> = {
 };
 
 // Get profile by agent ID
+// eslint-disable-next-line react-refresh/only-export-components
 export function getAgentProfile(agentId: string): AgentProfile | undefined {
   return AGENT_PROFILES[agentId];
 }

@@ -174,6 +174,7 @@ export default function Diagnostics() {
     if (currentWorkspace?.id) {
       runHealthCheck();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace?.id]);
 
   const exportDiagnostics = () => {

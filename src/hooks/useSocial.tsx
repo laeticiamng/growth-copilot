@@ -123,6 +123,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchSocial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   const createPost = async (data: Partial<SocialPost>) => {

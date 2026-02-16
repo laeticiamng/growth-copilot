@@ -107,7 +107,7 @@ export default function AnalyzeUrl() {
     setShowResults(false);
     setProgress(0);
 
-    let currentPhase = 0;
+    const currentPhase = 0;
     const totalDuration = PHASES.reduce((sum, p) => sum + p.duration, 0);
 
     setPhase(PHASES[0].key);
