@@ -79,7 +79,8 @@ describe("Utility Functions", () => {
     const { cn } = await import("@/lib/utils");
     
     expect(cn("class1", "class2")).toBe("class1 class2");
-    expect(cn("class1", false && "class2")).toBe("class1");
+    const hidden = false as boolean;
+    expect(cn("class1", hidden && "class2")).toBe("class1");
     expect(cn("base", { conditional: true })).toContain("base");
   });
 });

@@ -173,6 +173,7 @@ export function AgencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchAgencyData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWorkspace]);
 
   const addClient = async (name: string, slug: string) => {

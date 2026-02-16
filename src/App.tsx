@@ -55,9 +55,9 @@ import { useSentryRouting } from "@/hooks/useSentryRouting";
 // Dynamic html lang sync
 import { useLanguageSync } from "@/hooks/useLanguageSync";
 
-// Crisp Chat widget
-import { CrispChat } from "@/components/CrispChat";
-import { CookieConsent } from "@/components/CookieConsent";
+// Lazy-loaded global widgets (not critical for first paint)
+const CrispChat = lazy(() => import("@/components/CrispChat").then(m => ({ default: m.CrispChat })));
+const CookieConsent = lazy(() => import("@/components/CookieConsent").then(m => ({ default: m.CookieConsent })));
 
 // ─── Eagerly loaded pages (critical for first paint / SEO) ───
 import Index from "./pages/Index";
@@ -271,8 +271,8 @@ function App() {
         <InnerProviders>
           <Toaster />
           <Sonner />
-          <CrispChat />
-          <CookieConsent />
+          <Suspense fallback={null}><CrispChat /></Suspense>
+          <Suspense fallback={null}><CookieConsent /></Suspense>
           <BrowserRouter>
             <SentryRouteTracker />
             <LanguageSyncTracker />

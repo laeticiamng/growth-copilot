@@ -44,7 +44,7 @@ export const nameSchema = z
   .trim()
   .min(1, "Nom requis")
   .max(100, "Nom trop long (max 100 caractères)")
-  .regex(/^[^<>{}[\]\\\/]*$/, "Caractères spéciaux non autorisés");
+  .regex(/^[^<>{}[\]\\/]*$/, "Caractères spéciaux non autorisés");
 
 export const textSchema = z
   .string()

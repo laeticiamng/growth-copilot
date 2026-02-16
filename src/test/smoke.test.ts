@@ -131,7 +131,8 @@ describe("Smoke Tests - Critical Paths", () => {
     it("should have cn utility for class merging", async () => {
       const { cn } = await import("@/lib/utils");
       expect(cn("class1", "class2")).toBe("class1 class2");
-      expect(cn("base", false && "hidden")).toBe("base");
+      const isHidden = false as boolean;
+      expect(cn("base", isHidden && "hidden")).toBe("base");
     });
 
     it("should have validation utilities", async () => {
