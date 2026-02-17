@@ -36,17 +36,10 @@ import {
   Lock,
   Target,
   Briefcase,
-  Shield,
-  Users,
-  Scale,
-  Database,
   Cog,
-   Layers,
-   FileCheck,
-   History,
-   BarChart3,
-   UserCog,
-   ShieldCheck,
+  FileCheck,
+  History,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -79,110 +72,40 @@ interface NavDepartment {
   items: NavItem[];
 }
 
-// Main navigation - CEO-level (always visible) - uses i18n keys
+// Main navigation - CEO essentials (always visible)
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { path: "/dashboard", label: t("layout.cockpit"), icon: LayoutDashboard },
-  { path: "/dashboard/app", label: "Dashboard", icon: BarChart3 },
   { path: "/dashboard/agents", label: t("layout.myTeam"), icon: Bot },
-  { path: "/dashboard/analyze", label: "Analyse URL", icon: Target },
+  { path: "/dashboard/approvals", label: t("nav.approvals"), icon: FileCheck },
 ];
 
-// Advanced items organized by department - uses i18n keys
+// Simplified department groups - 3 instead of 8
 const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => [
   {
-    id: "operations",
-    label: t("layout.operations"),
-    icon: Layers,
-    color: "text-violet-500",
-    description: t("layout.operationsDesc"),
-    items: [
-      { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
-      { path: "/dashboard/approvals", label: t("nav.approvals"), icon: FileCheck },
-      { path: "/dashboard/reports", label: t("nav.reports"), icon: () => <span className="text-base">📊</span> },
-      { path: "/dashboard/automations", label: t("nav.automations"), icon: () => <span className="text-base">⚡</span> },
-    ],
-  },
-  {
-    id: "marketing",
-    label: t("layout.marketing"),
+    id: "business",
+    label: t("layout.marketing") + " & " + t("layout.sales"),
     icon: Target,
     color: "text-emerald-500",
     description: t("layout.marketingDesc"),
     items: [
-      { path: "/dashboard/dept/marketing", label: "Vue département", icon: () => <span className="text-base">📋</span> },
-      { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/dept/marketing", label: t("layout.marketing"), icon: Target },
+      { path: "/dashboard/dept/sales", label: t("layout.sales"), icon: Briefcase },
       { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
-      { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
       { path: "/dashboard/ads", label: t("nav.ads"), icon: () => <span className="text-base">📣</span> },
-      { path: "/dashboard/social", label: t("nav.social"), icon: () => <span className="text-base">📱</span> },
-      { path: "/dashboard/cro", label: t("nav.cro"), icon: () => <span className="text-base">🎯</span> },
-      { path: "/dashboard/competitors", label: t("nav.competitors"), icon: () => <span className="text-base">👥</span> },
-      { path: "/dashboard/brand-kit", label: t("nav.brandKit"), icon: () => <span className="text-base">🎨</span> },
-    ],
-  },
-  {
-    id: "sales",
-    label: t("layout.sales"),
-    icon: Briefcase,
-    color: "text-blue-500",
-    description: t("layout.salesDesc"),
-    items: [
-      { path: "/dashboard/dept/sales", label: "Vue département", icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/offers", label: t("nav.offers"), icon: () => <span className="text-base">📦</span> },
-      { path: "/dashboard/lifecycle", label: t("nav.lifecycle"), icon: () => <span className="text-base">📧</span> },
-      { path: "/dashboard/reputation", label: t("nav.reputation"), icon: () => <span className="text-base">⭐</span> },
     ],
   },
   {
-    id: "data-analytics",
-    label: t("layout.dataAnalytics"),
-    icon: Database,
-    color: "text-purple-500",
-    description: t("layout.dataAnalyticsDesc"),
+    id: "monitoring",
+    label: t("nav.reports") + " & " + t("layout.governance"),
+    icon: BarChart3,
+    color: "text-violet-500",
+    description: t("layout.operationsDesc"),
     items: [
-      { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
-      { path: "/dashboard/media", label: t("nav.media"), icon: () => <span className="text-base">🎬</span> },
-      { path: "/dashboard/media/kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
-      { path: "/dashboard/media/creatives", label: "Creatives Studio", icon: () => <span className="text-base">🎨</span> },
-      { path: "/dashboard/media/ads-factory", label: "Ads Factory", icon: () => <span className="text-base">🏭</span> },
-    ],
-  },
-  {
-    id: "resources",
-    label: t("layout.resources"),
-    icon: UserCog,
-    color: "text-amber-500",
-    description: t("layout.resourcesDesc"),
-    items: [
-      { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
-      { path: "/dashboard/legal", label: "Legal", icon: () => <span className="text-base">⚖️</span> },
-      { path: "/dashboard/services", label: t("nav.serviceCatalog"), icon: () => <span className="text-base">📋</span> },
-    ],
-  },
-  {
-    id: "governance",
-    label: t("layout.governance"),
-    icon: Shield,
-    color: "text-red-500",
-    description: t("layout.governanceDesc"),
-    items: [
-      { path: "/dashboard/audit-log", label: "Audit Log", icon: History, requiresRole: "manager" },
-      { path: "/dashboard/access-review", label: "Access Review", icon: () => <span className="text-base">🔐</span> },
+      { path: "/dashboard/reports", label: t("nav.reports"), icon: () => <span className="text-base">📊</span> },
+      { path: "/dashboard/roi", label: "ROI", icon: () => <span className="text-base">💰</span> },
       { path: "/dashboard/diagnostics", label: t("nav.diagnostics"), icon: () => <span className="text-base">🔧</span> },
-      { path: "/dashboard/agency", label: t("nav.agency"), icon: Building2, requiresRole: "admin" },
-    ],
-  },
-  {
-    id: "compliance",
-    label: t("layout.compliance"),
-    icon: ShieldCheck,
-    color: "text-teal-500",
-    description: t("layout.complianceDesc"),
-    items: [
-      { path: "/dashboard/logs", label: t("nav.logs"), icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
-      { path: "/dashboard/status", label: "Status Page", icon: () => <span className="text-base">🟢</span> },
-      { path: "/dashboard/roi", label: "ROI Dashboard", icon: () => <span className="text-base">💰</span> },
-      { path: "/dashboard/ai-costs", label: "AI Costs", icon: () => <span className="text-base">🤖</span>, requiresRole: "admin" },
+      { path: "/dashboard/audit-log", label: "Audit", icon: History, requiresRole: "manager" },
     ],
   },
   {
@@ -194,11 +117,8 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/sites", label: t("nav.sites"), icon: Building2 },
       { path: "/dashboard/integrations", label: "API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
-      { path: "/dashboard/connections", label: "Access", icon: () => <span className="text-base">🔑</span> },
-      { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
       { path: "/dashboard/billing", label: t("layout.billing"), icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
       { path: "/dashboard/settings", label: t("common.configure"), icon: Settings },
-      { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
     ],
   },
 ];
