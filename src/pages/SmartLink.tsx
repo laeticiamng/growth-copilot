@@ -87,7 +87,7 @@ export default function SmartLinkPage() {
         }
 
         const config = (asset.smart_link_config || {}) as Record<string, unknown>;
-        const links = config.links || {};
+        const links = (config.links || {}) as Record<string, string>;
 
         // Build platform links
         const platformLinks: SmartLinkData['links'] = [];
@@ -152,11 +152,11 @@ export default function SmartLinkPage() {
           platform: asset.platform,
           links: platformLinks,
         workspace_id: asset.workspace_id,
-          show_email_capture: config.show_email_capture || false,
-          email_capture_text: config.email_capture_text || 'Get notified about new releases',
-          background_color: config.background_color || '#1a1a2e',
-          text_color: config.text_color || '#ffffff',
-          accent_color: config.accent_color || '#4a90d9'
+          show_email_capture: (config.show_email_capture as boolean) || false,
+          email_capture_text: (config.email_capture_text as string) || 'Get notified about new releases',
+          background_color: (config.background_color as string) || '#1a1a2e',
+          text_color: (config.text_color as string) || '#ffffff',
+          accent_color: (config.accent_color as string) || '#4a90d9'
         });
       } catch (error) {
         console.error('Error fetching smart link:', error);

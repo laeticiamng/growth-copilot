@@ -188,18 +188,18 @@ Deno.serve(async (req) => {
     }
 
     // Check quotas
-    const { data: quota } = await serviceClient.rpc('get_workspace_quota', { p_workspace_id: workspace_id });
-    if (quota?.[0]?.concurrent_runs >= 3) {
+    const { data: quota } = await serviceClient.rpc('get_workspace_quota', { p_workspace_id: workspace_id } as any);
+    if ((quota as any)?.[0]?.concurrent_runs >= 3) {
       return new Response(JSON.stringify({ error: 'quota_exceeded' }), 
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Increment concurrent runs
-    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_increment_concurrent: true });
+    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_increment_concurrent: true } as any);
     quotaIncremented = true;
 
     // Update job status
-    await serviceClient.from('creative_jobs').update({ status: 'running' }).eq('id', job_id);
+    await serviceClient.from('creative_jobs').update({ status: 'running' } as any).eq('id', job_id);
 
     // Fetch approved blueprints
     const { data: blueprints } = await serviceClient
@@ -221,15 +221,15 @@ Deno.serve(async (req) => {
       .eq('asset_type', 'copy_pack')
       .single();
 
-    const copywriting = copyAsset?.meta_json || {};
-    const inputJson = job.input_json as Record<string, unknown>;
+    const copywriting = (copyAsset as any)?.meta_json || {};
+    const inputJson = (job as any).input_json as Record<string, unknown>;
     const logoUrl = inputJson?.logo_url as string;
 
     const renderResults: Array<{ aspect_ratio: string; url: string; render_id: string }> = [];
 
     // Render each format
     for (const bp of blueprints) {
-      const blueprint = bp.blueprint_json as Record<string, unknown>;
+      const blueprint = (bp as any).blueprint_json as Record<string, unknown>;
       const aspectRatio = blueprint.aspect_ratio as string;
 
       try {
@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
         await serviceClient.from('creative_assets').insert({
           job_id, workspace_id, asset_type: assetType, url: completed.url,
           meta_json: { render_id: render.id, aspect_ratio: aspectRatio }
-        });
+        } as any);
 
         console.log(`[creative-render] Completed ${aspectRatio}`);
       } catch (err) {
@@ -259,11 +259,11 @@ Deno.serve(async (req) => {
       status: renderResults.length > 0 ? 'done' : 'failed',
       output_json: { renders: renderResults, render_count: renderResults.length },
       duration_ms, cost_estimate: costEstimate
-    }).eq('id', job_id);
+    } as any).eq('id', job_id);
 
     // Decrement quota
     quotaIncremented = false;
-    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_decrement_concurrent: true });
+    await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspace_id, p_decrement_concurrent: true } as any);
 
     console.log('[creative-render] Completed:', renderResults.length, 'renders');
 
@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
   } finally {
     if (quotaIncremented && workspaceId && serviceClient) {
       try {
-        await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspaceId, p_decrement_concurrent: true });
+        await serviceClient.rpc('update_workspace_quota', { p_workspace_id: workspaceId, p_decrement_concurrent: true } as any);
       } catch (e) {
         console.error('[creative-render] Quota cleanup failed:', e);
       }

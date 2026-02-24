@@ -83,25 +83,28 @@ export default function Contact() {
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
           {contactCards.map((card) => {
             const Icon = card.icon;
-            const CardWrapper = card.href ? (card.isInternal ? Link : "a") : "button";
-            const cardProps = card.href ? (card.isInternal ? { to: card.href } : { href: card.href }) : { onClick: card.onClick, type: "button" as const };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return (
-              <CardWrapper key={card.title} {...(cardProps as Record<string, any>)} className="block group">
-                <Card className="h-full transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
-                  <CardHeader className="text-center">
-                    <div className={`w-12 h-12 rounded-xl ${card.bgColor} flex items-center justify-center mx-auto mb-3`}>
-                      <Icon className={`w-6 h-6 ${card.color}`} />
-                    </div>
-                    <CardTitle className="text-lg">{card.title}</CardTitle>
-                    <CardDescription>{card.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <span className="text-sm font-medium text-primary group-hover:underline">{card.action}</span>
-                  </CardContent>
-                </Card>
-              </CardWrapper>
+            const cardContent = (
+              <Card className="h-full transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
+                <CardHeader className="text-center">
+                  <div className={`w-12 h-12 rounded-xl ${card.bgColor} flex items-center justify-center mx-auto mb-3`}>
+                    <Icon className={`w-6 h-6 ${card.color}`} />
+                  </div>
+                  <CardTitle className="text-lg">{card.title}</CardTitle>
+                  <CardDescription>{card.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <span className="text-sm font-medium text-primary group-hover:underline">{card.action}</span>
+                </CardContent>
+              </Card>
             );
+
+            if (card.isInternal && card.href) {
+              return <Link key={card.title} to={card.href} className="block group">{cardContent}</Link>;
+            }
+            if (card.href) {
+              return <a key={card.title} href={card.href} className="block group">{cardContent}</a>;
+            }
+            return <button key={card.title} onClick={card.onClick} type="button" className="block group text-left w-full">{cardContent}</button>;
           })}
         </div>
 
