@@ -1,21 +1,19 @@
 /**
  * P1 — Dashboard Principal
  * Vue d'ensemble avec KPI cards, feed d'activité agents, graphique performances, validations en attente
+ * Wired to real Lovable Cloud data (agent_runs, action_log, approval_queue)
  */
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Activity,
   ArrowRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Bot,
   CheckCircle2,
-  Clock,
   AlertTriangle,
   TrendingUp,
   Zap,
@@ -34,46 +32,189 @@ import {
   Legend,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import {
-  MOCK_KPIS,
-  MOCK_ACTIVITY_FEED,
-  MOCK_WEEKLY_PERFORMANCE,
-  MOCK_WEEKLY_PERFORMANCE_EN,
-  MOCK_PENDING_APPROVALS,
-} from "@/data/mock-dashboard";
-import { AGENTS_CATALOG, DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
+import { DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useApprovals } from "@/hooks/useApprovals";
+
+// ── Helpers ──
+
+function useDashboardKPIs(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["app-dashboard-kpis", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekAgoStr = weekAgo.toISOString();
+
+      // Parallel queries
+      const [runsRes, completedRes, activeRes, healthRes] = await Promise.all([
+        // Tasks in progress
+        supabase
+          .from("agent_runs")
+          .select("id", { count: "exact", head: true })
+          .eq("workspace_id", workspaceId)
+          .eq("status", "running"),
+        // Completed this week
+        supabase
+          .from("agent_runs")
+          .select("id", { count: "exact", head: true })
+          .eq("workspace_id", workspaceId)
+          .eq("status", "completed")
+          .gte("completed_at", weekAgoStr),
+        // Distinct active agent types (last 30d)
+        supabase
+          .from("agent_runs")
+          .select("agent_type")
+          .eq("workspace_id", workspaceId)
+          .gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+        // Health score
+        supabase.rpc("calculate_health_score", { _workspace_id: workspaceId }),
+      ]);
+
+      const uniqueAgents = new Set((activeRes.data || []).map((r: any) => r.agent_type)).size;
+
+      return {
+        tasksInProgress: runsRes.count ?? 0,
+        tasksCompletedThisWeek: completedRes.count ?? 0,
+        activeAgents: uniqueAgents,
+        growthScore: (healthRes.data as number) ?? 50,
+      };
+    },
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+  });
+}
+
+function useActivityFeed(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["app-dashboard-activity", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+
+      const { data, error } = await supabase
+        .from("action_log")
+        .select("id, action_type, actor_type, description, created_at, action_category, entity_type")
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!workspaceId,
+    staleTime: 30_000,
+  });
+}
+
+function useWeeklyPerformance(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["app-dashboard-weekly", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const [runsRes, approvalsRes] = await Promise.all([
+        supabase
+          .from("agent_runs")
+          .select("created_at, status")
+          .eq("workspace_id", workspaceId)
+          .gte("created_at", sevenDaysAgo.toISOString()),
+        supabase
+          .from("approval_queue")
+          .select("created_at, status")
+          .eq("workspace_id", workspaceId)
+          .gte("created_at", sevenDaysAgo.toISOString()),
+      ]);
+
+      // Aggregate by day
+      const dayMap = new Map<string, { tasks: number; approvals: number; alerts: number }>();
+      const dayNames: Record<string, string[]> = {
+        fr: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+        en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      };
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().split("T")[0];
+        dayMap.set(key, { tasks: 0, approvals: 0, alerts: 0 });
+      }
+
+      for (const run of runsRes.data || []) {
+        const key = run.created_at?.split("T")[0];
+        if (key && dayMap.has(key)) {
+          const entry = dayMap.get(key)!;
+          entry.tasks++;
+          if (run.status === "failed") entry.alerts++;
+        }
+      }
+
+      for (const appr of approvalsRes.data || []) {
+        const key = appr.created_at?.split("T")[0];
+        if (key && dayMap.has(key)) {
+          dayMap.get(key)!.approvals++;
+        }
+      }
+
+      return Array.from(dayMap.entries()).map(([dateStr, counts]) => {
+        const d = new Date(dateStr);
+        return {
+          dayFr: dayNames.fr[d.getDay()],
+          dayEn: dayNames.en[d.getDay()],
+          ...counts,
+        };
+      });
+    },
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+  });
+}
+
+// ── Component ──
 
 export default function AppDashboard() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("fr") ? "fr" : "en";
-  const weeklyData = lang === "fr" ? MOCK_WEEKLY_PERFORMANCE : MOCK_WEEKLY_PERFORMANCE_EN;
+  const { currentWorkspace } = useWorkspace();
+  const wsId = currentWorkspace?.id;
+
+  const { data: kpiData, isLoading: kpiLoading } = useDashboardKPIs(wsId);
+  const { data: activityData = [], isLoading: activityLoading } = useActivityFeed(wsId);
+  const { data: weeklyData = [], isLoading: weeklyLoading } = useWeeklyPerformance(wsId);
+  const { pendingApprovals, approveAction, rejectAction } = useApprovals();
 
   const kpis = [
     {
       label: lang === "fr" ? "Tâches en cours" : "Tasks in progress",
-      value: MOCK_KPIS.tasksInProgress,
+      value: kpiData?.tasksInProgress ?? "–",
       icon: Activity,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },
     {
       label: lang === "fr" ? "Terminées cette semaine" : "Completed this week",
-      value: MOCK_KPIS.tasksCompletedThisWeek,
+      value: kpiData?.tasksCompletedThisWeek ?? "–",
       icon: CheckCircle2,
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10",
     },
     {
       label: lang === "fr" ? "Agents actifs" : "Active agents",
-      value: `${MOCK_KPIS.activeAgents}/39`,
+      value: kpiData ? `${kpiData.activeAgents}/39` : "–",
       icon: Bot,
       color: "text-violet-500",
       bgColor: "bg-violet-500/10",
     },
     {
       label: lang === "fr" ? "Score de croissance" : "Growth score",
-      value: `${MOCK_KPIS.growthScore}/100`,
+      value: kpiData ? `${kpiData.growthScore}/100` : "–",
       icon: TrendingUp,
       color: "text-amber-500",
       bgColor: "bg-amber-500/10",
@@ -87,26 +228,21 @@ export default function AppDashboard() {
     low: "bg-gray-500/10 text-gray-500 border-gray-500/20",
   };
 
-  const priorityLabels = {
-    urgent: lang === "fr" ? "Urgent" : "Urgent",
-    high: lang === "fr" ? "Haute" : "High",
-    normal: lang === "fr" ? "Normale" : "Normal",
-    low: lang === "fr" ? "Basse" : "Low",
+  const activityTypeIcon = (type: string) => {
+    if (type.includes("complet")) return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
+    if (type.includes("alert") || type.includes("fail")) return <AlertTriangle className="w-4 h-4 text-amber-500" />;
+    if (type.includes("report")) return <BarChart3 className="w-4 h-4 text-blue-500" />;
+    if (type.includes("approval")) return <Shield className="w-4 h-4 text-violet-500" />;
+    return <Zap className="w-4 h-4 text-cyan-500" />;
   };
 
-  const activityTypeIcons = {
-    task_completed: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-    alert: <AlertTriangle className="w-4 h-4 text-amber-500" />,
-    report: <BarChart3 className="w-4 h-4 text-blue-500" />,
-    approval_needed: <Shield className="w-4 h-4 text-violet-500" />,
-    insight: <Zap className="w-4 h-4 text-cyan-500" />,
-  };
-
-  const handleApprove = (id: string) => {
+  const handleApprove = async (id: string) => {
+    await approveAction(id);
     toast.success(lang === "fr" ? "Action approuvée" : "Action approved");
   };
 
-  const handleReject = (id: string) => {
+  const handleReject = async (id: string) => {
+    await rejectAction(id, "Rejected by user");
     toast.success(lang === "fr" ? "Action rejetée" : "Action rejected");
   };
 
@@ -121,6 +257,13 @@ export default function AppDashboard() {
     if (hours < 24) return lang === "fr" ? `Il y a ${hours}h` : `${hours}h ago`;
     return date.toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "short" });
   };
+
+  const chartData = weeklyData.map((d: any) => ({
+    day: lang === "fr" ? d.dayFr : d.dayEn,
+    tasks: d.tasks,
+    approvals: d.approvals,
+    alerts: d.alerts,
+  }));
 
   return (
     <div className="space-y-6">
@@ -148,7 +291,11 @@ export default function AppDashboard() {
                     <Icon className={cn("w-4 h-4", kpi.color)} />
                   </div>
                 </div>
-                <div className="text-2xl font-bold">{kpi.value}</div>
+                {kpiLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <div className="text-2xl font-bold">{kpi.value}</div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">{kpi.label}</p>
               </CardContent>
             </Card>
@@ -169,31 +316,42 @@ export default function AppDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="max-h-[500px] overflow-y-auto space-y-1 px-4">
-            {MOCK_ACTIVITY_FEED.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0"
-              >
+            {activityLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full mb-2" />
+              ))
+            ) : activityData.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                {lang === "fr" ? "Aucune activité récente" : "No recent activity"}
+              </p>
+            ) : (
+              activityData.map((item: any) => (
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                  style={{ backgroundColor: item.departmentColor }}
+                  key={item.id}
+                  className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0"
                 >
-                  {item.agentInitials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{item.agentName}</span>
-                    {activityTypeIcons[item.type]}
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    {activityTypeIcon(item.action_type)}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
-                    {item.action[lang]}
-                  </p>
-                  <span className="text-xs text-muted-foreground/60 mt-1 block">
-                    {formatTime(item.timestamp)}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm capitalize">
+                        {item.actor_type === "agent" ? item.action_category || "Agent" : "User"}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {item.action_type.replace(/_/g, " ")}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                      {item.description}
+                    </p>
+                    <span className="text-xs text-muted-foreground/60 mt-1 block">
+                      {formatTime(item.created_at)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -211,53 +369,31 @@ export default function AppDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[340px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="day"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                  />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                      color: "hsl(var(--foreground))",
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="tasks"
-                    name={lang === "fr" ? "Tâches" : "Tasks"}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="approvals"
-                    name={lang === "fr" ? "Approbations" : "Approvals"}
-                    stroke="hsl(var(--chart-2))"
-                    strokeWidth={2}
-                    dot={{ fill: "hsl(var(--chart-2))", r: 4 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="alerts"
-                    name={lang === "fr" ? "Alertes" : "Alerts"}
-                    stroke="hsl(var(--chart-5))"
-                    strokeWidth={2}
-                    dot={{ fill: "hsl(var(--chart-5))", r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {weeklyLoading ? (
+              <Skeleton className="h-[340px] w-full" />
+            ) : (
+              <div className="h-[340px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        color: "hsl(var(--foreground))",
+                      }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="tasks" name={lang === "fr" ? "Tâches" : "Tasks"} stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: "hsl(var(--primary))", r: 4 }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="approvals" name={lang === "fr" ? "Approbations" : "Approvals"} stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-2))", r: 4 }} />
+                    <Line type="monotone" dataKey="alerts" name={lang === "fr" ? "Alertes" : "Alerts"} stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ fill: "hsl(var(--chart-5))", r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -271,20 +407,11 @@ export default function AppDashboard() {
           {DEPARTMENTS_CATALOG.map((dept) => {
             const DeptIcon = dept.icon;
             return (
-              <Link
-                key={dept.slug}
-                to={`/dashboard/dept/${dept.slug}`}
-                className="group"
-              >
+              <Link key={dept.slug} to={`/dashboard/dept/${dept.slug}`} className="group">
                 <div className="p-3 rounded-lg border border-border/50 hover:border-primary/30 transition-all bg-secondary/20 hover:bg-secondary/40 text-center">
-                  <DeptIcon
-                    className="w-5 h-5 mx-auto mb-2 group-hover:text-primary transition-colors"
-                    style={{ color: dept.color }}
-                  />
+                  <DeptIcon className="w-5 h-5 mx-auto mb-2 group-hover:text-primary transition-colors" style={{ color: dept.color }} />
                   <p className="text-xs font-medium truncate">{dept.name[lang]}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {dept.agentCount} agents
-                  </p>
+                  <p className="text-[10px] text-muted-foreground">{dept.agentCount} agents</p>
                 </div>
               </Link>
             );
@@ -292,7 +419,7 @@ export default function AppDashboard() {
         </div>
       </div>
 
-      {/* Pending Validations */}
+      {/* Pending Validations — Real data from approval_queue */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -300,9 +427,7 @@ export default function AppDashboard() {
               <CardTitle className="text-lg flex items-center gap-2">
                 <ListChecks className="w-5 h-5 text-primary" />
                 {lang === "fr" ? "En attente de validation" : "Pending Validation"}
-                <Badge variant="secondary" className="ml-2">
-                  {MOCK_PENDING_APPROVALS.length}
-                </Badge>
+                <Badge variant="secondary" className="ml-2">{pendingApprovals.length}</Badge>
               </CardTitle>
               <CardDescription>
                 {lang === "fr"
@@ -319,41 +444,42 @@ export default function AppDashboard() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {MOCK_PENDING_APPROVALS.map((item) => {
-            const agent = AGENTS_CATALOG.find((a) => a.slug === item.agentSlug);
-            return (
+          {pendingApprovals.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {lang === "fr" ? "Aucune validation en attente 🎉" : "No pending validations 🎉"}
+            </p>
+          ) : (
+            pendingApprovals.slice(0, 5).map((item) => (
               <div
                 key={item.id}
                 className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50"
               >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                  style={{ backgroundColor: agent?.color || "#6366f1" }}
-                >
-                  {item.agentInitials}
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="font-medium text-sm">{item.agentName}</span>
-                    <Badge variant="outline" className={cn("text-[10px]", priorityColors[item.priority])}>
-                      {priorityLabels[item.priority]}
-                    </Badge>
+                    <span className="font-medium text-sm capitalize">
+                      {item.agent_type.replace(/_/g, " ")}
+                    </span>
                     <Badge
                       variant="outline"
                       className={cn(
                         "text-[10px]",
-                        item.riskLevel === "low"
+                        item.risk_level === "low"
                           ? "text-emerald-500"
-                          : item.riskLevel === "medium"
+                          : item.risk_level === "medium"
                           ? "text-amber-500"
                           : "text-red-500"
                       )}
                     >
-                      {lang === "fr" ? "Risque" : "Risk"}: {item.riskLevel}
+                      {lang === "fr" ? "Risque" : "Risk"}: {item.risk_level}
                     </Badge>
                   </div>
-                  <p className="text-sm">{item.action[lang]}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{item.impact[lang]}</p>
+                  <p className="text-sm">{item.action_type.replace(/_/g, " ")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatTime(item.created_at || "")}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Button
@@ -369,8 +495,8 @@ export default function AppDashboard() {
                   </Button>
                 </div>
               </div>
-            );
-          })}
+            ))
+          )}
         </CardContent>
       </Card>
 
