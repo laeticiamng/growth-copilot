@@ -16,7 +16,7 @@ export function SEOHead({
   title,
   description,
   canonical,
-  ogImage = "https://lovable.dev/opengraph-image-p98pqg.png",
+  ogImage = "https://www.agent-growth-automator.com/og-image.png",
   noindex = false,
   structuredData,
 }: SEOHeadProps) {
