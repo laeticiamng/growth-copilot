@@ -1,6 +1,6 @@
 /**
  * P1 — Vue Département /dashboard/dept/:slug
- * Liste agents, tâches en cours, métriques département, formulaire nouvelle tâche
+ * Real data from agent_runs + ops_metrics_daily
  */
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -38,16 +38,14 @@ import { cn } from "@/lib/utils";
 import {
   getDepartmentBySlug,
   getAgentsByDepartment,
-  DEPARTMENTS_CATALOG,
 } from "@/data/agents-catalog";
-import {
-  getMockTasksForDepartment,
-  getMockMetricsForDepartment,
-} from "@/data/mock-dashboard";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useWorkspace } from "@/hooks/useWorkspace";
 
-const statusConfig = {
-  in_progress: {
+const statusConfig: Record<string, { label: Record<string, string>; color: string; icon: React.ReactNode }> = {
+  running: {
     label: { fr: "En cours", en: "In progress" },
     color: "bg-blue-500/10 text-blue-500",
     icon: <Loader2 className="w-3 h-3 animate-spin" />,
@@ -62,24 +60,103 @@ const statusConfig = {
     color: "bg-gray-500/10 text-gray-500",
     icon: <Clock className="w-3 h-3" />,
   },
-  review: {
-    label: { fr: "En revue", en: "In review" },
-    color: "bg-violet-500/10 text-violet-500",
+  failed: {
+    label: { fr: "Échoué", en: "Failed" },
+    color: "bg-red-500/10 text-red-500",
     icon: <MessageSquare className="w-3 h-3" />,
   },
 };
 
-const priorityConfig = {
-  urgent: { label: { fr: "Urgent", en: "Urgent" }, color: "bg-red-500/10 text-red-500 border-red-500/20" },
-  high: { label: { fr: "Haute", en: "High" }, color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-  normal: { label: { fr: "Normale", en: "Normal" }, color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-  low: { label: { fr: "Basse", en: "Low" }, color: "bg-gray-500/10 text-gray-500 border-gray-500/20" },
+function useDeptRuns(workspaceId: string | undefined, agentTypes: string[]) {
+  return useQuery({
+    queryKey: ["dept-runs", workspaceId, agentTypes],
+    queryFn: async () => {
+      if (!workspaceId || agentTypes.length === 0) return [];
+      const { data, error } = await supabase
+        .from("agent_runs")
+        .select("id, agent_type, status, created_at, completed_at, duration_ms")
+        .eq("workspace_id", workspaceId)
+        .in("agent_type", agentTypes as any)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!workspaceId && agentTypes.length > 0,
+    staleTime: 30_000,
+  });
+}
+
+function useDeptMetrics(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: ["dept-metrics", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return null;
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data, error } = await supabase
+        .from("ops_metrics_daily")
+        .select("*")
+        .eq("workspace_id", workspaceId)
+        .gte("date", sevenDaysAgo.toISOString().split("T")[0])
+        .order("date", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!workspaceId,
+    staleTime: 60_000,
+  });
+}
+
+// Map agent capabilities to agent_type enum values
+const AGENT_TYPE_MAP: Record<string, string> = {
+  "seo-tech-auditor": "tech_auditor",
+  "keyword-strategist": "keyword_strategist",
+  "content-builder": "content_builder",
+  "social-media-manager": "social_manager",
+  "offer-architect": "offer_architect",
+  "sales-accelerator": "sales_ops",
+  "lifecycle-manager": "lifecycle_manager",
+  "deal-closer": "sales_ops",
+  "revenue-analyst": "analytics_guardian",
+  "budget-optimizer": "analytics_guardian",
+  "billing-manager": "analytics_guardian",
+  "security-auditor": "tech_auditor",
+  "access-controller": "tech_auditor",
+  "threat-monitor": "tech_auditor",
+  "feature-analyst": "analytics_guardian",
+  "ux-optimizer": "cro_optimizer",
+  "roadmap-planner": "analytics_guardian",
+  "backlog-manager": "analytics_guardian",
+  "code-reviewer": "tech_auditor",
+  "performance-engineer": "tech_auditor",
+  "devops-agent": "tech_auditor",
+  "api-integrator": "tech_auditor",
+  "analytics-guardian": "analytics_guardian",
+  "data-engineer": "analytics_guardian",
+  "ml-trainer": "analytics_guardian",
+  "reporting-agent": "analytics_guardian",
+  "reputation-guardian": "reputation_manager",
+  "ticket-handler": "reputation_manager",
+  "knowledge-manager": "content_builder",
+  "compliance-auditor": "quality_compliance",
+  "policy-enforcer": "quality_compliance",
+  "risk-assessor": "quality_compliance",
+  "recruitment-agent": "analytics_guardian",
+  "employee-experience": "analytics_guardian",
+  "training-coach": "analytics_guardian",
+  "performance-manager": "analytics_guardian",
+  "contract-analyzer": "analytics_guardian",
+  "ip-specialist": "analytics_guardian",
+  "regulatory-advisor": "analytics_guardian",
 };
 
 export default function DeptDashboard() {
   const { slug } = useParams<{ slug: string }>();
   const { i18n } = useTranslation();
   const lang = i18n.language.startsWith("fr") ? "fr" : "en";
+  const { currentWorkspace } = useWorkspace();
+  const wsId = currentWorkspace?.id;
   const [newTaskOpen, setNewTaskOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskAgent, setNewTaskAgent] = useState("");
@@ -87,8 +164,12 @@ export default function DeptDashboard() {
 
   const department = getDepartmentBySlug(slug || "");
   const agents = getAgentsByDepartment(slug || "");
-  const tasks = getMockTasksForDepartment(slug || "");
-  const metrics = getMockMetricsForDepartment(slug || "");
+
+  // Get unique agent_type values for this department
+  const agentTypes = [...new Set(agents.map(a => AGENT_TYPE_MAP[a.slug]).filter(Boolean))];
+
+  const { data: runs = [], isLoading: runsLoading } = useDeptRuns(wsId, agentTypes);
+  const { data: metricsData, isLoading: metricsLoading } = useDeptMetrics(wsId);
 
   if (!department) {
     return (
@@ -107,22 +188,51 @@ export default function DeptDashboard() {
     );
   }
 
+  // Compute metrics from ops_metrics_daily
+  const computedMetrics = (() => {
+    if (!metricsData || metricsData.length === 0) return [];
+    const total = metricsData.reduce((acc: any, d: any) => ({
+      runs: acc.runs + (d.agent_runs_total || 0),
+      success: acc.success + (d.agent_runs_success || 0),
+      failed: acc.failed + (d.agent_runs_failed || 0),
+      cost: acc.cost + (d.total_cost_usd || 0),
+    }), { runs: 0, success: 0, failed: 0, cost: 0 });
+
+    const successRate = total.runs > 0 ? Math.round((total.success / total.runs) * 100) : 0;
+
+    return [
+      { label: { fr: "Runs (7j)", en: "Runs (7d)" }, value: String(total.runs), change: "", positive: true },
+      { label: { fr: "Taux de succès", en: "Success rate" }, value: `${successRate}%`, change: "", positive: successRate >= 80 },
+      { label: { fr: "Échecs", en: "Failures" }, value: String(total.failed), change: "", positive: total.failed === 0 },
+      { label: { fr: "Coût IA", en: "AI Cost" }, value: `$${total.cost.toFixed(2)}`, change: "", positive: true },
+    ];
+  })();
+
   const DeptIcon = department.icon;
 
-  const handleCreateTask = () => {
-    if (!newTaskTitle.trim() || !newTaskAgent) return;
-    toast.success(
-      lang === "fr"
-        ? `Tâche créée : ${newTaskTitle}`
-        : `Task created: ${newTaskTitle}`
-    );
+  const handleCreateTask = async () => {
+    if (!newTaskTitle.trim() || !newTaskAgent || !wsId) return;
+    const agentType = AGENT_TYPE_MAP[newTaskAgent];
+    if (!agentType) {
+      toast.error(lang === "fr" ? "Type d'agent non mappé" : "Agent type not mapped");
+      return;
+    }
+    const { error } = await supabase.from("agent_runs").insert({
+      workspace_id: wsId,
+      agent_type: agentType as any,
+      status: "pending",
+      inputs: { title: newTaskTitle, priority: newTaskPriority },
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === "fr" ? `Tâche créée : ${newTaskTitle}` : `Task created: ${newTaskTitle}`);
+    }
     setNewTaskTitle("");
     setNewTaskAgent("");
     setNewTaskPriority("normal");
     setNewTaskOpen(false);
   };
-
-  const getAgentForTask = (agentSlug: string) => agents.find((a) => a.slug === agentSlug);
 
   return (
     <div className="space-y-6">
@@ -215,31 +325,36 @@ export default function DeptDashboard() {
       </div>
 
       {/* Department Metrics */}
-      <div className={cn("grid gap-4", metrics.length <= 3 ? "grid-cols-3" : "grid-cols-2 lg:grid-cols-4")}>
-        {metrics.map((metric) => (
-          <Card key={metric.label[lang]}>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{metric.label[lang]}</p>
-              <div className="flex items-end gap-2 mt-1">
-                <span className="text-xl font-bold">{metric.value}</span>
-                <span
-                  className={cn(
-                    "text-xs font-medium flex items-center gap-0.5",
-                    metric.positive ? "text-emerald-500" : "text-red-500"
+      {metricsLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}><CardContent className="p-4"><Skeleton className="h-12 w-full" /></CardContent></Card>
+          ))}
+        </div>
+      ) : computedMetrics.length > 0 ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {computedMetrics.map((metric) => (
+            <Card key={metric.label[lang]}>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground">{metric.label[lang]}</p>
+                <div className="flex items-end gap-2 mt-1">
+                  <span className="text-xl font-bold">{metric.value}</span>
+                  {metric.change && (
+                    <span className={cn("text-xs font-medium", metric.positive ? "text-emerald-500" : "text-red-500")}>
+                      {metric.positive && <ArrowUpRight className="w-3 h-3 inline" />}
+                      {metric.change}
+                    </span>
                   )}
-                >
-                  {metric.positive ? (
-                    <ArrowUpRight className="w-3 h-3" />
-                  ) : (
-                    <span className="w-3 h-3" />
-                  )}
-                  {metric.change}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">
+          {lang === "fr" ? "Aucune métrique disponible — lancez des agents pour générer des données." : "No metrics available — run agents to generate data."}
+        </CardContent></Card>
+      )}
 
       {/* Agents List */}
       <Card>
@@ -257,14 +372,11 @@ export default function DeptDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {agents.map((agent) => {
-              const agentTasks = tasks.filter((t) => t.agentSlug === agent.slug);
-              const activeTasks = agentTasks.filter((t) => t.status === "in_progress" || t.status === "review");
+              const agentType = AGENT_TYPE_MAP[agent.slug];
+              const agentRuns = runs.filter((r: any) => r.agent_type === agentType);
+              const activeRuns = agentRuns.filter((r: any) => r.status === "running" || r.status === "pending");
               return (
-                <Link
-                  key={agent.slug}
-                  to={`/dashboard/agent/${agent.slug}`}
-                  className="group"
-                >
+                <Link key={agent.slug} to={`/dashboard/agent/${agent.slug}`} className="group">
                   <div className="p-4 rounded-lg border border-border/50 hover:border-primary/30 transition-all duration-200 bg-secondary/20 hover:bg-secondary/40">
                     <div className="flex items-center gap-3 mb-3">
                       <div
@@ -289,9 +401,9 @@ export default function DeptDashboard() {
                           {lang === "fr" ? "Actif" : "Active"}
                         </span>
                       </div>
-                      {activeTasks.length > 0 && (
+                      {activeRuns.length > 0 && (
                         <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                          {activeTasks.length} {lang === "fr" ? "tâche(s)" : "task(s)"}
+                          {activeRuns.length} {lang === "fr" ? "tâche(s)" : "task(s)"}
                         </Badge>
                       )}
                     </div>
@@ -303,51 +415,56 @@ export default function DeptDashboard() {
         </CardContent>
       </Card>
 
-      {/* Tasks by Agent */}
+      {/* Recent Runs */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">
-            {lang === "fr" ? "Tâches en cours" : "Current Tasks"}
-            <Badge variant="secondary" className="ml-2">{tasks.length}</Badge>
+            {lang === "fr" ? "Exécutions récentes" : "Recent Runs"}
+            <Badge variant="secondary" className="ml-2">{runs.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {tasks.map((task) => {
-            const agent = getAgentForTask(task.agentSlug);
-            const status = statusConfig[task.status];
-            const priority = priorityConfig[task.priority];
-            return (
-              <div
-                key={task.id}
-                className="flex items-center gap-4 p-3 rounded-lg bg-secondary/20 border border-border/50"
-              >
-                {agent && (
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-                    style={{ backgroundColor: agent.color }}
-                  >
-                    {agent.persona.initials}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{task.title[lang]}</p>
+          {runsLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)
+          ) : runs.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {lang === "fr" ? "Aucune exécution récente" : "No recent runs"}
+            </p>
+          ) : (
+            runs.map((run: any) => {
+              const agent = agents.find(a => AGENT_TYPE_MAP[a.slug] === run.agent_type);
+              const status = statusConfig[run.status] || statusConfig.pending;
+              const createdDate = new Date(run.created_at).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", { day: "numeric", month: "short" });
+              return (
+                <div key={run.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/20 border border-border/50">
                   {agent && (
-                    <p className="text-xs text-muted-foreground">{agent.persona.name}</p>
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                      style={{ backgroundColor: agent.color }}
+                    >
+                      {agent.persona.initials}
+                    </div>
                   )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {run.agent_type.replace(/_/g, " ")}
+                    </p>
+                    {agent && <p className="text-xs text-muted-foreground">{agent.persona.name}</p>}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant="outline" className={cn("text-[10px] flex items-center gap-1", status.color)}>
+                      {status.icon}
+                      {status.label[lang]}
+                    </Badge>
+                    {run.duration_ms && (
+                      <span className="text-[10px] text-muted-foreground">{(run.duration_ms / 1000).toFixed(1)}s</span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground">{createdDate}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline" className={cn("text-[10px]", priority.color)}>
-                    {priority.label[lang]}
-                  </Badge>
-                  <Badge variant="outline" className={cn("text-[10px] flex items-center gap-1", status.color)}>
-                    {status.icon}
-                    {status.label[lang]}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">{task.dueDate}</span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </CardContent>
       </Card>
 
