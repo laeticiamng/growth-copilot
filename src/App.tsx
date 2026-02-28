@@ -147,6 +147,7 @@ const AppDashboard = lazy(() => import("./pages/dashboard/AppDashboard"));
 const DeptDashboard = lazy(() => import("./pages/dashboard/DeptDashboard"));
 const AgentChat = lazy(() => import("./pages/dashboard/AgentChat"));
 const AnalyzeUrl = lazy(() => import("./pages/dashboard/AnalyzeUrl"));
+const SetupWizard = lazy(() => import("./pages/dashboard/SetupWizard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -367,6 +368,7 @@ function App() {
                 <Route path="/dashboard/dept/:slug" element={<DashboardRoute><DeptDashboard /></DashboardRoute>} />
                 <Route path="/dashboard/agent/:slug" element={<DashboardRoute><AgentChat /></DashboardRoute>} />
                 <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
+                <Route path="/dashboard/setup" element={<DashboardRoute><SetupWizard /></DashboardRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
