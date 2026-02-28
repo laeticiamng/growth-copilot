@@ -1,60 +1,124 @@
 
 
-# Plan d'execution : 8 tickets production-ready Growth Copilot
+# Replace remaining mock data with real database queries
 
-## Etat actuel (audit du code)
+## Summary
 
-Apres inspection complete du code, voici le statut reel de chaque ticket :
+3 dashboard pages still consume `mock-dashboard.ts`. This plan replaces each with real Lovable Cloud queries while keeping useful UX patterns intact.
 
-| # | Ticket | Statut | Action requise |
-|---|--------|--------|----------------|
-| 1 | .env override | 90% fait | Ajouter runtime guard anti-placeholder |
-| 2 | Env validation + fallback | 80% fait | Ajouter composant EnvGuard dans App.tsx |
-| 3 | oauth_tokens RLS | DONE | Migration deja appliquee |
-| 4 | Code splitting | DONE | Toutes routes utilisent lazy() |
-| 5 | Vendor splitting + i18n | DONE | 7 manualChunks configures |
-| 6 | PWA | DONE | SW versione, cache-first/network-first |
-| 7 | SEO | DONE | robots.txt, sitemap, OG corrects |
-| 8 | CI guardrails | A faire | Tests anti-regression a creer |
+## Current state
 
-## Actions a implementer
+| Page | Mock used | Real data source |
+|------|-----------|-----------------|
+| `DeptDashboard.tsx` | `getMockTasksForDepartment`, `getMockMetricsForDepartment` | `agent_runs` (tasks), `ops_metrics_daily` (metrics) |
+| `AnalyzeUrl.tsx` | `MOCK_ANALYSIS_RESULT` | `site-analyze` edge function (already exists) |
+| `AgentChat.tsx` | `getAgentGreeting`, `getAgentResponses` | `ai-gateway` edge function (real AI responses) |
 
-### Action 1 : Runtime guard anti-placeholder (Ticket 1)
+## Changes
 
-Creer un composant `EnvGuard` qui detecte `placeholder.supabase.co` au runtime et bloque le rendu avec un message explicite au lieu de laisser des requetes echouer silencieusement.
+### 1. DeptDashboard.tsx -- Wire to real data
 
-**Fichier** : `src/components/EnvGuard.tsx`
-- Importer `isSupabaseConfigured` depuis le client auto-genere
-- Si non configure : afficher un ecran d'erreur bilingue (FR/EN) avec instructions
-- Si configure : rendre les children normalement
+**Remove** imports from `mock-dashboard.ts`.
 
-**Fichier modifie** : `src/App.tsx`
-- Envelopper `InnerProviders` avec `EnvGuard` pour bloquer toute interaction backend si les variables sont absentes
+**Add query: Department tasks** -- Query `agent_runs` filtered by `workspace_id` and agent types belonging to the department. Map agent_type to department using the existing `AGENTS_CATALOG` data. Show real status, created_at as due date proxy.
 
-### Action 2 : Tests anti-regression (Ticket 8)
+**Add query: Department metrics** -- Query `ops_metrics_daily` for the workspace (last 7 days). Compute department-specific metrics (runs total, success rate, avg duration). Display computed metrics with week-over-week change.
 
-Creer un fichier de tests Vitest validant les garde-fous critiques :
+**Task creation** -- Wire the "New Task" button to actually INSERT into `agent_runs` with status `pending` (or show a toast that the run was queued). Use `supabase.functions.invoke("run-executor")` to launch a real agent run.
 
-**Fichier** : `src/test/env-guardrails.test.ts`
-- Test 1 : Verifier que `vite.config.ts` ne contient pas de bloc `define`
-- Test 2 : Verifier que `.gitignore` contient `.env`
-- Test 3 : Verifier que `robots.txt` exclut `/dashboard/` et `/auth`
-- Test 4 : Verifier que `sitemap.xml` ne contient pas `/dashboard` ni `/auth`
-- Test 5 : Verifier que `public/sw.js` contient un cache versione
+**Fallback** -- Show Skeleton loaders while fetching, and empty states when no data exists.
 
-### Section technique
+### 2. AnalyzeUrl.tsx -- Call real site-analyze edge function
+
+**Remove** `MOCK_ANALYSIS_RESULT` import.
+
+**Replace** the fake progress animation with a real call to the `site-analyze` edge function (already deployed, supports Firecrawl).
+
+**Flow:**
+1. User enters URL, clicks Analyze
+2. Call `supabase.functions.invoke("site-analyze", { body: { url } })`
+3. Show progress bar during the call
+4. On response, map `analysis` result fields (title, wordCount, techStack, hasAnalytics, etc.) to the score display
+5. Compute scores from real signals (e.g., hasAnalytics = good, no meta description = warning)
+6. Generate recommendations dynamically from the analysis response
+
+**Scores calculation logic:**
+- SEO: based on title presence, description, h1, internal links count
+- Content: based on wordCount thresholds
+- Speed: placeholder (no real measurement yet, show N/A or use a reasonable default)
+- Technical: based on techStack detection, analytics, CMS presence
+
+### 3. AgentChat.tsx -- Connect to AI gateway for real responses
+
+**Remove** `getAgentGreeting` and `getAgentResponses` imports.
+
+**Keep** the greeting as a client-side static message based on agent persona (from `agents-catalog.ts` which is NOT mock data -- it's the real catalog). Generate a greeting dynamically from agent role + name.
+
+**Replace** scripted responses with real AI calls:
+1. User sends message
+2. Call `supabase.functions.invoke("ai-gateway", { body: { prompt, model, context } })` with the agent's persona as system prompt
+3. Stream or display the AI response when received
+4. Fall back to a generic "I'm processing your request" message if the call fails
+
+**System prompt construction:** Use agent's `role`, `persona.name`, `departmentSlug` from the catalog to build a contextual system prompt like: "You are {name}, {role} in the {department} department. Respond helpfully in {language}."
+
+### 4. Clean up mock-dashboard.ts
+
+After all 3 pages are migrated, **delete** `src/data/mock-dashboard.ts` entirely. The file will have zero consumers.
+
+## Technical details
 
 ```text
-Flux de demarrage apres modification :
+Files to modify:
+  src/pages/dashboard/DeptDashboard.tsx  -- replace mock with agent_runs + ops_metrics queries
+  src/pages/dashboard/AnalyzeUrl.tsx     -- replace mock with site-analyze edge function call
+  src/pages/dashboard/AgentChat.tsx      -- replace scripted responses with ai-gateway calls
 
-main.tsx (try/catch)
-  --> App.tsx
-    --> EnvGuard (check isSupabaseConfigured)
-      --> Si KO : ecran erreur FR/EN
-      --> Si OK : InnerProviders + Routes
+Files to delete:
+  src/data/mock-dashboard.ts             -- no longer needed
+
+No database migrations needed -- all tables already exist.
+No new edge functions needed -- site-analyze and ai-gateway are already deployed.
 ```
 
-Le composant `EnvGuard` utilise le flag `isSupabaseConfigured` deja exporte par le client auto-genere. Aucune modification du fichier `client.ts` (interdit).
+### Query patterns (DeptDashboard)
 
-Les tests lisent les fichiers source au format texte via `fs.readFileSync` pour valider la structure statique du projet sans executer de build.
+Tasks query:
+```typescript
+supabase.from("agent_runs")
+  .select("id, agent_type, status, created_at, completed_at, duration_ms")
+  .eq("workspace_id", wsId)
+  .in("agent_type", agentTypesForDepartment)
+  .order("created_at", { ascending: false })
+  .limit(20)
+```
+
+Metrics query:
+```typescript
+supabase.from("ops_metrics_daily")
+  .select("*")
+  .eq("workspace_id", wsId)
+  .gte("date", sevenDaysAgo)
+  .order("date", { ascending: false })
+```
+
+### Edge function calls (AnalyzeUrl + AgentChat)
+
+```typescript
+// AnalyzeUrl
+const { data } = await supabase.functions.invoke("site-analyze", {
+  body: { url: formattedUrl }
+});
+
+// AgentChat
+const { data } = await supabase.functions.invoke("ai-gateway", {
+  body: {
+    model: "google/gemini-2.5-flash",
+    messages: [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory
+    ]
+  }
+});
+```
 
