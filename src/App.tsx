@@ -48,6 +48,7 @@ import { composeProviders, createProviderGroup } from "@/lib/compose-providers";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth/ProtectedRoute";
 import { ServiceGuard } from "@/components/auth/ServiceGuard";
+import { EnvGuard } from "@/components/EnvGuard";
 
 // Sentry routing hook
 import { useSentryRouting } from "@/hooks/useSentryRouting";
@@ -268,6 +269,7 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <EnvGuard>
         <InnerProviders>
           <Toaster />
           <Sonner />
@@ -371,6 +373,7 @@ function App() {
             </Suspense>
           </BrowserRouter>
         </InnerProviders>
+        </EnvGuard>
       </QueryClientProvider>
     </ErrorBoundary>
   );
