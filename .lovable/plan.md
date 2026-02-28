@@ -1,26 +1,60 @@
 
 
-# Nettoyage final : suppression de la note memoire obsolete
+# Plan d'execution : 8 tickets production-ready Growth Copilot
 
-## Probleme identifie
+## Etat actuel (audit du code)
 
-La note memoire `architecture/vite-environment-variable-injection` recommande encore d'utiliser le bloc `define` avec `loadEnv` dans `vite.config.ts`. C'est exactement le pattern qui causait le Probleme #1 (override des variables Lovable Cloud par le `.env` local, envoyant les requetes vers `placeholder.supabase.co`).
+Apres inspection complete du code, voici le statut reel de chaque ticket :
 
-Cette note doit etre supprimee pour eviter qu'un futur prompt ne re-introduise le bloc `define`.
+| # | Ticket | Statut | Action requise |
+|---|--------|--------|----------------|
+| 1 | .env override | 90% fait | Ajouter runtime guard anti-placeholder |
+| 2 | Env validation + fallback | 80% fait | Ajouter composant EnvGuard dans App.tsx |
+| 3 | oauth_tokens RLS | DONE | Migration deja appliquee |
+| 4 | Code splitting | DONE | Toutes routes utilisent lazy() |
+| 5 | Vendor splitting + i18n | DONE | 7 manualChunks configures |
+| 6 | PWA | DONE | SW versione, cache-first/network-first |
+| 7 | SEO | DONE | robots.txt, sitemap, OG corrects |
+| 8 | CI guardrails | A faire | Tests anti-regression a creer |
 
-## Action
+## Actions a implementer
 
-1. **Supprimer la note memoire** `architecture/vite-environment-variable-injection` via les parametres du projet (Settings -> Manage Knowledge)
+### Action 1 : Runtime guard anti-placeholder (Ticket 1)
 
-Il n'y a aucune modification de code necessaire -- le `vite.config.ts` est deja corrige (pas de bloc `define`), le `.env` est auto-gere par Lovable Cloud, et `client.ts` est auto-genere.
+Creer un composant `EnvGuard` qui detecte `placeholder.supabase.co` au runtime et bloque le rendu avec un message explicite au lieu de laisser des requetes echouer silencieusement.
 
-## Comment proceder
+**Fichier** : `src/components/EnvGuard.tsx`
+- Importer `isSupabaseConfigured` depuis le client auto-genere
+- Si non configure : afficher un ecran d'erreur bilingue (FR/EN) avec instructions
+- Si configure : rendre les children normalement
 
-Cette suppression se fait manuellement dans l'interface Lovable :
-- Ouvrir **Settings** (en haut a droite)
-- Aller dans **Manage Knowledge**
-- Trouver la note `architecture/vite-environment-variable-injection`
-- La supprimer
+**Fichier modifie** : `src/App.tsx`
+- Envelopper `InnerProviders` avec `EnvGuard` pour bloquer toute interaction backend si les variables sont absentes
 
-Aucun changement de code n'est requis de mon cote.
+### Action 2 : Tests anti-regression (Ticket 8)
+
+Creer un fichier de tests Vitest validant les garde-fous critiques :
+
+**Fichier** : `src/test/env-guardrails.test.ts`
+- Test 1 : Verifier que `vite.config.ts` ne contient pas de bloc `define`
+- Test 2 : Verifier que `.gitignore` contient `.env`
+- Test 3 : Verifier que `robots.txt` exclut `/dashboard/` et `/auth`
+- Test 4 : Verifier que `sitemap.xml` ne contient pas `/dashboard` ni `/auth`
+- Test 5 : Verifier que `public/sw.js` contient un cache versione
+
+### Section technique
+
+```text
+Flux de demarrage apres modification :
+
+main.tsx (try/catch)
+  --> App.tsx
+    --> EnvGuard (check isSupabaseConfigured)
+      --> Si KO : ecran erreur FR/EN
+      --> Si OK : InnerProviders + Routes
+```
+
+Le composant `EnvGuard` utilise le flag `isSupabaseConfigured` deja exporte par le client auto-genere. Aucune modification du fichier `client.ts` (interdit).
+
+Les tests lisent les fichiers source au format texte via `fs.readFileSync` pour valider la structure statique du projet sans executer de build.
 
