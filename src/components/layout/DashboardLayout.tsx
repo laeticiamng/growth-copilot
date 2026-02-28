@@ -199,6 +199,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
       { path: "/dashboard/billing", label: t("layout.billing"), icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
       { path: "/dashboard/settings", label: t("common.configure"), icon: Settings },
       { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
+      { path: "/dashboard/setup", label: "Setup Wizard", icon: () => <span className="text-base">✨</span> },
     ],
   },
 ];
