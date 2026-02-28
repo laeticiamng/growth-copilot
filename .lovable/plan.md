@@ -1,51 +1,43 @@
 
-# Plan d'action : Correction critique connexion + securite
+# Plan d'implementation -- 8 tickets audit
 
-## Probleme #1 (CRITIQUE) : L'app ne se connecte pas au backend
+## Analyse de l'existant
 
-**Diagnostic** : Les requetes reseau vont vers `placeholder.supabase.co` au lieu du vrai serveur. La cause est dans `vite.config.ts` lignes 26-30 : le bloc `define` ecrase les variables d'environnement injectees par Lovable Cloud avec des chaines vides (car il n'y a pas de fichier `.env` local).
+Apres inspection du code actuel, voici le statut de chaque ticket :
 
-**Correction** : Supprimer le bloc `define` de `vite.config.ts`. Lovable Cloud injecte automatiquement les variables `VITE_SUPABASE_*` -- le bloc `define` interfere avec ce mecanisme.
+| # | Ticket | Statut actuel |
+|---|--------|--------------|
+| 1 | Fix .env / placeholder | **Partiellement fait** -- `vite.config.ts` corrige, mais `client.ts` (auto-genere) utilise encore le fallback `placeholder.supabase.co`. Ce fichier ne peut PAS etre edite (auto-genere par Lovable Cloud). Le vrai probleme est que les env vars ne sont pas injectees au build. |
+| 2 | Hardening env vars / startup error page | **Deja fait** -- `main.tsx` a un try/catch avec page d'erreur, `ErrorBoundary` existe, `client.ts` a un flag `isSupabaseConfigured` |
+| 3 | RLS oauth_tokens consolidation | **Deja fait** -- Migration appliquee (4 policies propres) |
+| 4 | RLS leads + performance_reviews | **Deja fait** -- Findings marques reviewed/accepted |
+| 5 | Lazy routes + code splitting | **Deja fait** -- Toutes les routes dashboard utilisent `React.lazy()` + `Suspense` |
+| 6 | Vendor splitting + i18n lazy | **Deja fait** -- `manualChunks` configure, i18n lazy-load implemente |
+| 7 | PWA manifest + SW cache-busting | **Deja fait** -- Icons maskable, SW versione, cache-first/network-first |
+| 8 | SEO/PWA hygiene | **Partiellement fait** -- robots.txt et sitemap OK, mais OG image pointe vers `lovable.dev` |
+
+## Actions restantes (2 items)
+
+### Action 1 : Corriger l'image OG (Ticket 8)
+
+**Fichier** : `src/components/SEOHead.tsx` ligne 19
+
+Le default `ogImage` pointe vers `https://lovable.dev/opengraph-image-p98pqg.png`. Cela doit pointer vers le domaine de production ou une image hebergee dans le bucket `cms-media`.
+
+**Modification** : Changer la valeur par defaut de `ogImage` vers `https://www.agent-growth-automator.com/og-image.png` et ajouter une image OG dans `/public/og-image.png` (ou utiliser le placeholder existant en attendant une vraie image).
+
+### Action 2 : Supprimer le fichier .env (Ticket 1 -- prevention)
+
+Le fichier `.env` est auto-genere par Lovable Cloud et ne doit jamais etre cree manuellement. Le systeme le recree automatiquement avec les bonnes valeurs. Le probleme de `placeholder.supabase.co` dans les requetes reseau vient probablement d'un cycle de build qui n'a pas encore pris en compte la suppression du bloc `define` dans `vite.config.ts`. Un rebuild devrait resoudre cela.
+
+**Verification** : Apres le prochain build, confirmer que les requetes ne vont plus vers `placeholder.supabase.co`.
 
 ---
 
-## Probleme #2 (SECURITE) : Politiques RLS oauth_tokens redondantes
+## Resume
 
-**Diagnostic** : La table `oauth_tokens` a plus de 10 politiques RLS qui se chevauchent (oauth_tokens_owner_only, oauth_tokens_owner_strict, oauth_tokens_owner_only_v5, etc.). Toutes verifient `is_workspace_owner()` mais la redondance cree de la confusion et un risque de faille si une politique plus permissive est ajoutee.
+6 des 8 tickets sont deja completement implementes. Les 2 actions restantes sont mineures :
+1. Remplacer l'image OG par defaut (1 ligne dans `SEOHead.tsx` + ajouter image)
+2. Verifier que la connexion backend fonctionne apres rebuild (le fix `vite.config.ts` est deja applique)
 
-**Correction** : Migration SQL pour :
-- Supprimer toutes les politiques existantes sur `oauth_tokens`
-- Creer 4 politiques propres (SELECT, INSERT, UPDATE, DELETE) toutes basees sur `is_workspace_owner()` via la table `integrations`
-
----
-
-## Probleme #3 (SECURITE) : Acces leads trop large
-
-**Diagnostic** : `has_sales_access()` accorde l'acces aux roles `owner`, `admin` et `manager`. C'est un choix fonctionnel acceptable pour un CRM. Le scan le signale comme erreur mais les politiques sont coherentes.
-
-**Action** : Marquer comme revise/accepte dans le tableau de bord securite avec justification.
-
----
-
-## Probleme #4 (SECURITE) : performance_reviews acces HR
-
-**Diagnostic** : `has_hr_access()` limite deja aux roles `owner` et `admin` uniquement. La politique `perf_reviews_strict_access` ajoute l'acces a l'employe concerne et au reviewer direct. C'est correct.
-
-**Action** : Marquer comme revise/accepte dans le tableau de bord securite.
-
----
-
-## Resume des fichiers modifies
-
-| Fichier | Modification |
-|---------|-------------|
-| `vite.config.ts` | Supprimer le bloc `define` (lignes 26-30) |
-| Migration SQL | Consolider les politiques RLS de `oauth_tokens` |
-| Tableau securite | Mettre a jour les findings revises |
-
-## Ordre d'execution
-
-1. Corriger `vite.config.ts` (restaure la connexion backend)
-2. Appliquer la migration SQL (consolide les politiques oauth_tokens)
-3. Mettre a jour les findings securite
-4. Verifier que l'app se connecte correctement
+Temps estime : 15-30 minutes.
