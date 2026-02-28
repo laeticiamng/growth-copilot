@@ -1,12 +1,11 @@
 /**
  * P2 — Chat avec un Agent /dashboard/agent/:slug
- * Interface de conversation avec un agent spécifique
- * Réponses pré-scriptées contextuelles par agent
+ * Real AI responses via ai-gateway edge function
  */
 import { useState, useRef, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAgentBySlug, getDepartmentBySlug } from "@/data/agents-catalog";
-import { getAgentGreeting, getAgentResponses } from "@/data/mock-dashboard";
+import { supabase } from "@/integrations/supabase/client";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessage {
   id: string;
@@ -30,44 +32,62 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+function buildGreeting(agentName: string, role: string, deptName: string, lang: string): string {
+  if (lang === "fr") {
+    return `Bonjour ! Je suis ${agentName}, ${role} du département ${deptName}. Comment puis-je vous aider aujourd'hui ?`;
+  }
+  return `Hello! I'm ${agentName}, ${role} in the ${deptName} department. How can I help you today?`;
+}
+
+function buildSystemPrompt(agent: any, department: any, lang: string): string {
+  return `You are ${agent.persona.name}, an AI agent with the role "${agent.role.en}" in the ${department.name.en} department of a Growth OS platform.
+
+Your capabilities include: ${agent.capabilities.join(", ")}.
+Your risk level is: ${agent.riskLevel}.
+${agent.requiresApproval ? "You require approval for actions." : "You can act autonomously on low-risk tasks."}
+
+Respond in ${lang === "fr" ? "French" : "English"}.
+Be helpful, specific, and actionable. Reference your specific domain expertise.
+Keep responses concise but informative. Use markdown formatting when helpful.`;
+}
+
 export default function AgentChat() {
   const { slug } = useParams<{ slug: string }>();
   const { i18n } = useTranslation();
   const lang = i18n.language.startsWith("fr") ? "fr" : "en";
+  const { currentWorkspace } = useWorkspace();
+  const wsId = currentWorkspace?.id;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [responseIndex, setResponseIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const agent = getAgentBySlug(slug || "");
   const department = agent ? getDepartmentBySlug(agent.departmentSlug) : null;
-  const greeting = getAgentGreeting(slug || "");
-  const responses = getAgentResponses(slug || "");
 
   // Send initial greeting
   useEffect(() => {
-    if (agent && messages.length === 0) {
+    if (agent && department && messages.length === 0) {
       setMessages([
         {
           id: "greeting",
           role: "agent",
-          content: greeting[lang],
+          content: buildGreeting(agent.persona.name, agent.role[lang], department.name[lang], lang),
           timestamp: new Date(),
         },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agent, lang]);
+  }, [agent, department, lang]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim() || isTyping) return;
+  const handleSend = async () => {
+    if (!input.trim() || isTyping || !agent || !department) return;
 
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -77,22 +97,63 @@ export default function AgentChat() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput("");
     setIsTyping(true);
 
-    // Simulate agent typing and responding
-    setTimeout(() => {
-      const response = responses[responseIndex % responses.length];
+    try {
+      if (!wsId) throw new Error("No workspace");
+
+      // Build conversation context for the AI
+      const conversationHistory = messages
+        .filter(m => m.id !== "greeting")
+        .map(m => `${m.role === "user" ? "User" : "Agent"}: ${m.content}`)
+        .join("\n");
+
+      const { data, error } = await supabase.functions.invoke("ai-gateway", {
+        body: {
+          workspace_id: wsId,
+          agent_name: agent.slug,
+          purpose: "analysis" as const,
+          input: {
+            system_prompt: buildSystemPrompt(agent, department, lang),
+            user_prompt: conversationHistory
+              ? `Previous conversation:\n${conversationHistory}\n\nUser: ${currentInput}`
+              : currentInput,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      // The ai-gateway returns an artifact with a summary
+      const responseText = data?.artifact?.summary
+        || data?.summary
+        || (lang === "fr" ? "Je traite votre demande. Veuillez réessayer." : "I'm processing your request. Please try again.");
+
       const agentMessage: ChatMessage = {
         id: `agent-${Date.now()}`,
         role: "agent",
-        content: response[lang],
+        content: responseText,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, agentMessage]);
+    } catch (err: any) {
+      console.error("AgentChat error:", err);
+      // Fallback message
+      const fallback: ChatMessage = {
+        id: `agent-${Date.now()}`,
+        role: "agent",
+        content: lang === "fr"
+          ? "Désolé, je rencontre un problème technique. Veuillez réessayer dans quelques instants."
+          : "Sorry, I'm experiencing a technical issue. Please try again in a moment.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, fallback]);
+      toast.error(err.message || "Error");
+    } finally {
       setIsTyping(false);
-      setResponseIndex((prev) => prev + 1);
-    }, 1500 + Math.random() * 1000);
+    }
   };
 
   if (!agent || !department) {
@@ -111,8 +172,6 @@ export default function AgentChat() {
       </div>
     );
   }
-
-  const AgentIcon = agent.icon;
 
   const suggestedQuestions = lang === "fr"
     ? [
@@ -160,11 +219,7 @@ export default function AgentChat() {
           <Badge
             variant="outline"
             className={cn(
-              agent.riskLevel === "low"
-                ? "text-emerald-500"
-                : agent.riskLevel === "medium"
-                ? "text-amber-500"
-                : "text-red-500"
+              agent.riskLevel === "low" ? "text-emerald-500" : agent.riskLevel === "medium" ? "text-amber-500" : "text-red-500"
             )}
           >
             {lang === "fr" ? "Risque" : "Risk"}: {agent.riskLevel}
@@ -177,8 +232,8 @@ export default function AgentChat() {
         <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
           {lang === "fr"
-            ? `${agent.persona.name} est un agent IA du département ${department.name[lang]}. Les réponses sont des démonstrations contextuelles.`
-            : `${agent.persona.name} is an AI agent from the ${department.name[lang]} department. Responses are contextual demonstrations.`}
+            ? `${agent.persona.name} est un agent IA du département ${department.name[lang]}. Les réponses sont générées par IA.`
+            : `${agent.persona.name} is an AI agent from the ${department.name[lang]} department. Responses are AI-generated.`}
         </p>
       </div>
 
@@ -212,7 +267,13 @@ export default function AgentChat() {
                   : "bg-primary/10 border border-primary/20"
               )}
             >
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              {message.role === "agent" ? (
+                <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed">{message.content}</p>
+              )}
               <span className="text-[10px] text-muted-foreground/60 mt-1 block">
                 {message.timestamp.toLocaleTimeString(lang === "fr" ? "fr-FR" : "en-US", {
                   hour: "2-digit",
@@ -281,11 +342,10 @@ export default function AgentChat() {
           className="flex-1"
         />
         <Button onClick={handleSend} disabled={!input.trim() || isTyping} size="icon">
-          <Send className="w-4 h-4" />
+          {isTyping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </Button>
       </div>
 
-      {/* Footer */}
       <p className="text-center text-[10px] text-muted-foreground/60 py-2">
         &copy; 2026 EmotionsCare SASU — {lang === "fr" ? "Tous droits réservés" : "All rights reserved"}
       </p>
