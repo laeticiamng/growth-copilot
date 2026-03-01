@@ -82,9 +82,9 @@ interface NavDepartment {
 // Main navigation - CEO-level (always visible) - uses i18n keys
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { path: "/dashboard", label: t("layout.cockpit"), icon: LayoutDashboard },
-  { path: "/dashboard/app", label: "Dashboard", icon: BarChart3 },
+  { path: "/dashboard/app", label: t("nav.dashboard"), icon: BarChart3 },
   { path: "/dashboard/agents", label: t("layout.myTeam"), icon: Bot },
-  { path: "/dashboard/analyze", label: "Analyse URL", icon: Target },
+  { path: "/dashboard/analyze", label: t("nav.analyzeUrl"), icon: Target },
 ];
 
 // Advanced items organized by department - uses i18n keys
@@ -96,7 +96,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-violet-500",
     description: t("layout.operationsDesc"),
     items: [
-      { path: "/dashboard/research", label: "Intelligence", icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/research", label: t("nav.intelligence"), icon: () => <span className="text-base">🔍</span> },
       { path: "/dashboard/approvals", label: t("nav.approvals"), icon: FileCheck },
       { path: "/dashboard/reports", label: t("nav.reports"), icon: () => <span className="text-base">📊</span> },
       { path: "/dashboard/automations", label: t("nav.automations"), icon: () => <span className="text-base">⚡</span> },
@@ -109,7 +109,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-emerald-500",
     description: t("layout.marketingDesc"),
     items: [
-      { path: "/dashboard/dept/marketing", label: "Vue département", icon: () => <span className="text-base">📋</span> },
+      { path: "/dashboard/dept/marketing", label: t("nav.deptView"), icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
       { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
       { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
@@ -127,7 +127,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-blue-500",
     description: t("layout.salesDesc"),
     items: [
-      { path: "/dashboard/dept/sales", label: "Vue département", icon: () => <span className="text-base">📋</span> },
+      { path: "/dashboard/dept/sales", label: t("nav.deptView"), icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/offers", label: t("nav.offers"), icon: () => <span className="text-base">📦</span> },
       { path: "/dashboard/lifecycle", label: t("nav.lifecycle"), icon: () => <span className="text-base">📧</span> },
       { path: "/dashboard/reputation", label: t("nav.reputation"), icon: () => <span className="text-base">⭐</span> },
@@ -140,11 +140,11 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-purple-500",
     description: t("layout.dataAnalyticsDesc"),
     items: [
-      { path: "/dashboard/cms", label: "CMS", icon: () => <span className="text-base">📄</span> },
+      { path: "/dashboard/cms", label: t("nav.cms"), icon: () => <span className="text-base">📄</span> },
       { path: "/dashboard/media", label: t("nav.media"), icon: () => <span className="text-base">🎬</span> },
       { path: "/dashboard/media/kpis", label: t("nav.mediaKpis"), icon: BarChart3 },
-      { path: "/dashboard/media/creatives", label: "Creatives Studio", icon: () => <span className="text-base">🎨</span> },
-      { path: "/dashboard/media/ads-factory", label: "Ads Factory", icon: () => <span className="text-base">🏭</span> },
+      { path: "/dashboard/media/creatives", label: t("nav.creativesStudio"), icon: () => <span className="text-base">🎨</span> },
+      { path: "/dashboard/media/ads-factory", label: t("nav.adsFactory"), icon: () => <span className="text-base">🏭</span> },
     ],
   },
   {
@@ -154,8 +154,8 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-amber-500",
     description: t("layout.resourcesDesc"),
     items: [
-      { path: "/dashboard/hr", label: "RH", icon: () => <span className="text-base">👥</span> },
-      { path: "/dashboard/legal", label: "Legal", icon: () => <span className="text-base">⚖️</span> },
+      { path: "/dashboard/hr", label: t("nav.hr"), icon: () => <span className="text-base">👥</span> },
+      { path: "/dashboard/legal", label: t("nav.legal"), icon: () => <span className="text-base">⚖️</span> },
       { path: "/dashboard/services", label: t("nav.serviceCatalog"), icon: () => <span className="text-base">📋</span> },
     ],
   },
@@ -166,8 +166,8 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     color: "text-red-500",
     description: t("layout.governanceDesc"),
     items: [
-      { path: "/dashboard/audit-log", label: "Audit Log", icon: History, requiresRole: "manager" },
-      { path: "/dashboard/access-review", label: "Access Review", icon: () => <span className="text-base">🔐</span> },
+      { path: "/dashboard/audit-log", label: t("nav.auditLog"), icon: History, requiresRole: "manager" },
+      { path: "/dashboard/access-review", label: t("nav.accessReview"), icon: () => <span className="text-base">🔐</span> },
       { path: "/dashboard/diagnostics", label: t("nav.diagnostics"), icon: () => <span className="text-base">🔧</span> },
       { path: "/dashboard/agency", label: t("nav.agency"), icon: Building2, requiresRole: "admin" },
     ],
@@ -180,9 +180,9 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     description: t("layout.complianceDesc"),
     items: [
       { path: "/dashboard/logs", label: t("nav.logs"), icon: () => <span className="text-base">📋</span>, requiresRole: "manager" },
-      { path: "/dashboard/status", label: "Status Page", icon: () => <span className="text-base">🟢</span> },
-      { path: "/dashboard/roi", label: "ROI Dashboard", icon: () => <span className="text-base">💰</span> },
-      { path: "/dashboard/ai-costs", label: "AI Costs", icon: () => <span className="text-base">🤖</span>, requiresRole: "admin" },
+      { path: "/dashboard/status", label: t("nav.statusPage"), icon: () => <span className="text-base">🟢</span> },
+      { path: "/dashboard/roi", label: t("nav.roiDashboard"), icon: () => <span className="text-base">💰</span> },
+      { path: "/dashboard/ai-costs", label: t("nav.aiCosts"), icon: () => <span className="text-base">🤖</span>, requiresRole: "admin" },
     ],
   },
   {
@@ -193,13 +193,13 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     description: t("layout.configurationDesc"),
     items: [
       { path: "/dashboard/sites", label: t("nav.sites"), icon: Building2 },
-      { path: "/dashboard/integrations", label: "API", icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
-      { path: "/dashboard/connections", label: "Access", icon: () => <span className="text-base">🔑</span> },
-      { path: "/dashboard/ops", label: "Ops", icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
+      { path: "/dashboard/integrations", label: t("nav.api"), icon: () => <span className="text-base">🔧</span>, requiresRole: "admin" },
+      { path: "/dashboard/connections", label: t("nav.access"), icon: () => <span className="text-base">🔑</span> },
+      { path: "/dashboard/ops", label: t("nav.ops"), icon: () => <span className="text-base">⚙️</span>, requiresRole: "admin" },
       { path: "/dashboard/billing", label: t("layout.billing"), icon: () => <span className="text-base">💳</span>, requiresRole: "owner" },
       { path: "/dashboard/settings", label: t("common.configure"), icon: Settings },
-      { path: "/dashboard/guide", label: "Guide", icon: () => <span className="text-base">🚀</span> },
-      { path: "/dashboard/setup", label: "Setup Wizard", icon: () => <span className="text-base">✨</span> },
+      { path: "/dashboard/guide", label: t("nav.guide"), icon: () => <span className="text-base">🚀</span> },
+      { path: "/dashboard/setup", label: t("nav.setupWizard"), icon: () => <span className="text-base">✨</span> },
     ],
   },
 ];

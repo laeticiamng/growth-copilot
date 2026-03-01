@@ -14,9 +14,9 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/features", label: t("landing.navbar.features"), isRoute: true },
-    { href: "/agents", label: "Agents", isRoute: true },
+    { href: "/agents", label: t("landing.navbar.agents"), isRoute: true },
     { href: "/pricing", label: t("landing.navbar.pricing"), isRoute: true },
-    { href: "/blog", label: "Blog", isRoute: true },
+    { href: "/blog", label: t("landing.navbar.blog"), isRoute: true },
     { href: "/help", label: t("landing.navbar.help", "Help"), isRoute: true },
   ];
 

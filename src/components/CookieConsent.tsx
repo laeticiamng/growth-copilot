@@ -40,9 +40,9 @@ export function CookieConsent() {
   if (isDecided || !visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-[60] p-4 pb-6 animate-in slide-in-from-bottom-4 duration-300 pointer-events-none">
       <div className="container mx-auto max-w-2xl">
-        <div className="bg-card border border-border rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="bg-card border border-border rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-4 pointer-events-auto">
           <Cookie className="w-5 h-5 text-primary shrink-0 mt-0.5 sm:mt-0" />
           <p className="text-sm text-muted-foreground flex-1">
             {t("cookies.message")}{" "}

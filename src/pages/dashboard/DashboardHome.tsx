@@ -1,4 +1,4 @@
-import { useCallback, lazy, Suspense } from "react";
+import { useCallback, lazy, Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { captureException, addBreadcrumb } from "@/lib/sentry";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
+import { AGENTS_CATALOG } from "@/data/agents-catalog";
 import {
   ArrowRight,
   Bot,
@@ -361,7 +362,7 @@ export default function DashboardHome() {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             🤖 {t("cockpit.aiTeamAvailable")}
-            <Badge variant="secondary" className="ml-auto">39 {t("cockpit.agents")}</Badge>
+            <Badge variant="secondary" className="ml-auto">{AGENTS_CATALOG.length} {t("cockpit.agents")}</Badge>
           </CardTitle>
           <CardDescription>
             {t("cockpit.welcomeAiTeamDesc")}
