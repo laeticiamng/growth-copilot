@@ -111,6 +111,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/dept/marketing", label: t("nav.deptView"), icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
+      { path: "/dashboard/geo", label: "GEO", icon: () => <span className="text-base">🤖</span> },
       { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
       { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
       { path: "/dashboard/ads", label: t("nav.ads"), icon: () => <span className="text-base">📣</span> },
