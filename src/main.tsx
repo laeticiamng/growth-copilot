@@ -17,7 +17,7 @@ try {
   createRoot(rootEl!).render(
     <React.StrictMode>
       <HelmetProvider>
-        <App />
+        <><App /></>
       </HelmetProvider>
     </React.StrictMode>
   );
