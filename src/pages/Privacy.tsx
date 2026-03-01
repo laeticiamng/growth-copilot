@@ -25,9 +25,29 @@ export default function Privacy() {
       <div className="bg-gradient-to-b from-primary/5 to-background py-16 pt-24">
         <div className="container max-w-4xl px-4">
           {!isFr && (
-            <Badge variant="outline" className="mb-4">
-              {t("common.frenchOnly")}
-            </Badge>
+            <>
+              <Badge variant="outline" className="mb-4">
+                {t("common.frenchOnly")}
+              </Badge>
+              <div className="bg-secondary/50 rounded-lg p-6 mb-6 space-y-3">
+                <h2 className="text-xl font-semibold">Privacy Policy — Summary (English)</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  <strong>EmotionsCare SASU</strong> operates Growth OS. We collect your professional email, company name, website URL,
+                  integration metrics (Google Analytics, Meta Ads via OAuth), AI-generated content, usage logs, and technical connection data.
+                  We do <strong>not</strong> store credit card data (handled by Stripe) or voice recordings (processed in real-time only).
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Your data is used to provide the service, manage billing, improve the platform, and comply with legal obligations.
+                  Sub-processors include Supabase (EU), Stripe, Google Cloud, and Meta (US, under Standard Contractual Clauses).
+                  Data is retained for the contract duration + 3 years, except billing data (10 years) and analytics (24 months).
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Under the GDPR, you have the right to access, rectify, erase, port, restrict, and object to the processing of your data.
+                  Contact our DPO at <a href="mailto:contact@emotionscare.com" className="text-primary hover:underline">contact@emotionscare.com</a>.
+                  You may also lodge a complaint with the CNIL (French data protection authority).
+                </p>
+              </div>
+            </>
           )}
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Politique de Confidentialité

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, forwardRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -237,6 +237,7 @@ function PageLoader() {
  */
 function DashboardRoute({ children, service }: { children: React.ReactNode; service?: string }) {
   return (
+    <EnvGuard>
     <ProtectedRoute>
       <DashboardLayout>
         {service ? (
@@ -246,6 +247,7 @@ function DashboardRoute({ children, service }: { children: React.ReactNode; serv
         )}
       </DashboardLayout>
     </ProtectedRoute>
+    </EnvGuard>
   );
 }
 
@@ -266,11 +268,10 @@ function LanguageSyncTracker() {
   return null;
 }
 
-function App() {
+const App = forwardRef<HTMLDivElement>(function App(_props, _ref) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <EnvGuard>
         <InnerProviders>
           <Toaster />
           <Sonner />
@@ -375,10 +376,9 @@ function App() {
             </Suspense>
           </BrowserRouter>
         </InnerProviders>
-        </EnvGuard>
       </QueryClientProvider>
     </ErrorBoundary>
   );
-}
+});
 
 export default App;

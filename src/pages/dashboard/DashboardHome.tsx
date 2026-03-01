@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { captureException, addBreadcrumb } from "@/lib/sentry";
 import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
-import { AGENTS_CATALOG } from "@/data/agents-catalog";
+import { AGENTS_CATALOG, DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
 import {
   ArrowRight,
   Bot,
@@ -372,7 +372,7 @@ export default function DashboardHome() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                11 {t("cockpit.departments")} • {t("cockpit.directionMarketing")}
+                {DEPARTMENTS_CATALOG.length} {t("cockpit.departments")} • {t("cockpit.directionMarketing")}
               </p>
               <p className="text-xs text-muted-foreground">
                 {t("cockpit.readyToExecute")}

@@ -6,7 +6,7 @@ import { DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
 
 export function Footer() {
   const { t, i18n } = useTranslation();
-  const lang = i18n.language.startsWith("fr") ? "fr" : "en";
+  const lang = (i18n.language.startsWith("fr") ? "fr" : "en") as "fr" | "en";
 
   const departmentLinks = DEPARTMENTS_CATALOG.slice(0, 6).map((dept) => ({
     label: dept.name[lang],
@@ -16,18 +16,18 @@ export function Footer() {
   const footerLinks = {
     [t("landing.footer.product")]: [
       { label: t("landing.footer.features"), href: "/features" },
-      { label: "Agents IA", href: "/agents" },
+      { label: t("landing.footer.agentsIA"), href: "/agents" },
       { label: t("landing.footer.pricing"), href: "/pricing" },
       { label: t("landing.footer.integrations"), href: "/#tools" },
     ],
-    [lang === "fr" ? "Départements" : "Departments"]: departmentLinks,
+    [t("landing.footer.departments")]: departmentLinks,
     [t("landing.footer.resources")]: [
-      { label: "Blog", href: "/blog" },
-      { label: "Changelog", href: "/changelog" },
+      { label: t("landing.footer.blog"), href: "/blog" },
+      { label: t("landing.footer.changelog"), href: "/changelog" },
       { label: t("landing.footer.status"), href: "/status" },
-      { label: "API Docs", href: "/api-docs" },
+      { label: t("landing.footer.apiDocs"), href: "/api-docs" },
       { label: t("landing.footer.roadmap"), href: "/roadmap" },
-      { label: "Help", href: "/help" },
+      { label: t("landing.footer.help"), href: "/help" },
     ],
     [t("landing.footer.company")]: [
       { label: t("landing.footer.about"), href: "/about" },
