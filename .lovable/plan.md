@@ -1,44 +1,66 @@
 
 
-# Fix: Application bloquee par EnvGuard
+# Audit Beta Testeur Complet - Growth OS (Mars 2026, Round 3)
 
-## Diagnostic
+## Resume
 
-L'application affiche "Configuration backend manquante" parce que le fichier `.env` n'est pas present au moment du build. Le composant `EnvGuard` detecte que les variables Supabase sont absentes et bloque l'affichage.
+L'application est desormais **ACCESSIBLE** -- le bloqueur EnvGuard a ete corrige avec succes. Toutes les pages publiques fonctionnent. Les corrections precedentes (Footer i18n, Privacy EN summary, departments dynamique) sont en place. Il reste 2 problemes residuels a corriger.
 
-**Bonne nouvelle** : les changements precedents ont deja deplace `EnvGuard` pour ne proteger que les routes dashboard. Les pages publiques (landing, pricing, contact, etc.) devraient fonctionner. Le probleme est que le preview semble charger une route dashboard.
+---
 
-## Cause racine
+## CORRECTIONS VERIFIEES (tout est en place)
 
-Le fichier `.env` est auto-genere par Lovable Cloud mais les edits precedents l'ont ecrase avec `created .env`, ce qui interfere avec l'injection automatique.
+| Item | Statut | Preuve |
+|------|--------|--------|
+| EnvGuard non-bloquant (console.warn uniquement) | OK | Landing, Pricing, Contact, Privacy accessibles |
+| EnvGuard retire du DashboardRoute | OK | `App.tsx` ligne 238-249 ne contient plus `<EnvGuard>` |
+| Footer -- tous les labels utilisent `t()` | OK | Screenshot footer montre "Agents IA", "Blog", "API Docs", "Aide" traduits |
+| Footer -- "Departements" utilise `t()` | OK | `Footer.tsx` ligne 23 utilise `t("landing.footer.departments")` |
+| Footer -- lien Integrations pointe vers `/#tools` | OK | `Footer.tsx` ligne 21 |
+| Privacy -- resume anglais en haut de page | OK | Screenshot montre "Privacy Policy -- Summary (English)" |
+| Privacy -- badge "French Only" | OK | Visible en haut |
+| DashboardHome -- departments dynamique | OK | `DashboardHome.tsx` ligne 375 utilise `DEPARTMENTS_CATALOG.length` |
+| Testimonials sur la landing | OK | Section presente |
+| CookieConsent cliquable | OK | Boutons Decline/Accept visibles et cliquables |
+| Navbar labels i18n | OK | "Fonctionnalites", "Agents", "Tarifs", "Blog", "Aide" traduits |
+
+---
+
+## PROBLEMES RESIDUELS (2 items)
+
+### 1. LanguageToggle -- forwardRef warning (P2)
+
+- **Console** : 2 warnings `Function components cannot be given refs` dans `LanguageToggle` et `Navbar`
+- **Cause** : `LanguageToggle` est un function component sans `forwardRef`. Le composant `Navbar` tente de lui passer un ref (probablement via la composition avec Radix DropdownMenu)
+- **Fichier** : `src/components/LanguageToggle.tsx`
+- **Correction** : Envelopper `LanguageToggle` avec `React.forwardRef`
+- **Effort** : 5 min
+
+### 2. Pricing page -- "11 departments" hardcode (P1)
+
+- **Constat** : Sur la page `/pricing`, le texte affiche "11 departments" en dur dans les badges des plans
+- **Impact** : Si le catalogue change, le chiffre sera faux
+- **Correction** : Utiliser `DEPARTMENTS_CATALOG.length` dans `PricingPage.tsx` ou `Pricing.tsx`
+- **Effort** : 5 min
+
+---
+
+## POSITIF -- Bilan global
+
+- **Accessibilite** : 100% des pages publiques accessibles (landing, pricing, contact, privacy, agents, blog, changelog, help, status, api-docs)
+- **i18n** : Footer entierement traduit, navbar traduite, Privacy avec resume EN
+- **Architecture** : EnvGuard non-bloquant, ProtectedRoute gere la redirection naturellement
+- **CookieConsent** : Fonctionne correctement, ne bloque pas les interactions
+- **Donnees dynamiques** : Agents (39) et departments utilises via catalogues
+
+---
 
 ## Plan de correction
 
-### 1. Ne plus jamais toucher au fichier `.env`
-Le systeme Lovable Cloud injecte automatiquement les variables. Aucune modification manuelle n'est necessaire.
+| Priorite | Item | Fichier | Effort |
+|----------|------|---------|--------|
+| P1 | "11 departments" dynamique sur Pricing | `src/components/landing/Pricing.tsx` ou `src/pages/PricingPage.tsx` | 5 min |
+| P2 | LanguageToggle forwardRef | `src/components/LanguageToggle.tsx` | 5 min |
 
-### 2. Rendre EnvGuard non-bloquant (solution structurelle)
-Au lieu de bloquer avec un ecran plein page, `EnvGuard` devrait afficher un message d'avertissement discret ou simplement laisser passer. Les routes dashboard redirigeront naturellement vers `/auth` via `ProtectedRoute` si l'utilisateur n'est pas connecte, et l'authentification echouera gracieusement si le backend est absent.
-
-**Changement dans `EnvGuard.tsx`** : 
-- Pour les routes dashboard, au lieu d'un ecran bloquant, afficher un message dans le layout dashboard
-- Ou mieux : supprimer completement `EnvGuard` et laisser `ProtectedRoute` gerer le cas (si pas de backend, `useAuth` retournera `user: null` et redirigera vers `/auth`)
-
-### 3. Supprimer EnvGuard du DashboardRoute
-- `ProtectedRoute` gere deja la redirection vers `/auth` si l'utilisateur n'est pas connecte
-- Sans backend, l'auth echouera et l'utilisateur sera redirige naturellement
-- `EnvGuard` est donc redondant pour les routes dashboard
-
-## Detail technique
-
-```text
-Fichiers modifies :
-- src/App.tsx : Retirer <EnvGuard> de DashboardRoute
-- src/components/EnvGuard.tsx : Transformer en warning non-bloquant (console.warn) ou supprimer
-```
-
-## Resultat attendu
-- Pages publiques : accessibles immediatement (deja le cas)
-- Routes dashboard : redirigent vers `/auth` au lieu d'afficher un ecran noir
-- Plus aucun ecran bloquant lie aux variables d'environnement
+**Temps total estime : 10 min**
 
