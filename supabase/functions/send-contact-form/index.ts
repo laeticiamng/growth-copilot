@@ -82,7 +82,7 @@ serve(async (req) => {
         email,
         subject,
         message,
-        status: "new",
+        status: "pending",
       });
 
     if (insertError) {
