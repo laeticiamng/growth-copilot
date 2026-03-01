@@ -60,7 +60,6 @@ export function useExecutiveRuns() {
       return (data || []) as ExecutiveRun[];
     },
     enabled: !!currentWorkspace?.id,
-    refetchInterval: 10000, // Refetch every 10s to catch run updates
   });
 
   // Launch a run
