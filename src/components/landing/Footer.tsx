@@ -17,6 +17,7 @@ export function Footer() {
     [t("landing.footer.product")]: [
       { label: t("landing.footer.features"), href: "/features" },
       { label: t("landing.footer.agentsIA"), href: "/agents" },
+      { label: "GEO", href: "/#geo" },
       { label: t("landing.footer.pricing"), href: "/pricing" },
       { label: t("landing.footer.integrations"), href: "/#tools" },
     ],
