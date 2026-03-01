@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from "react";
+import { useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useServices } from "@/hooks/useServices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { captureException, addBreadcrumb } from "@/lib/sentry";
+import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
 import {
   ArrowRight,
   Bot,
@@ -60,6 +61,9 @@ export default function DashboardHome() {
   const { currentSite, loading: sitesLoading } = useSites();
   const { pendingApprovals, approveAction, rejectAction } = useApprovals();
   const { enabledServices, servicesLoading, hasService } = useServices();
+
+  // Real-time subscriptions for instant dashboard updates
+  useDashboardRealtime();
 
   // Get translated persona role
   const getCGORole = () => t("cockpit.welcomeCgoRole");
