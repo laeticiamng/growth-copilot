@@ -267,6 +267,7 @@ function LanguageSyncTracker() {
   return null;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 function App() {
   return (
     <ErrorBoundary>
