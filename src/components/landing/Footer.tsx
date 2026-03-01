@@ -18,7 +18,7 @@ export function Footer() {
       { label: t("landing.footer.features"), href: "/features" },
       { label: "Agents IA", href: "/agents" },
       { label: t("landing.footer.pricing"), href: "/pricing" },
-      { label: t("landing.footer.integrations"), href: "#tools" },
+      { label: t("landing.footer.integrations"), href: "/#tools" },
     ],
     [lang === "fr" ? "Départements" : "Departments"]: departmentLinks,
     [t("landing.footer.resources")]: [

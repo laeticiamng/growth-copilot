@@ -11,7 +11,7 @@ const LAST_UPDATED = "5 février 2026";
 
 export default function Privacy() {
   const { t, i18n } = useTranslation();
-  const isFr = i18n.language === "fr";
+  const isFr = i18n.language.startsWith("fr");
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
