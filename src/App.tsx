@@ -1,4 +1,4 @@
-import { lazy, Suspense, forwardRef } from "react";
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -267,7 +267,7 @@ function LanguageSyncTracker() {
   return null;
 }
 
-const App = forwardRef<HTMLDivElement>(function App(_props, _ref) {
+function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -379,6 +379,6 @@ const App = forwardRef<HTMLDivElement>(function App(_props, _ref) {
       </QueryClientProvider>
     </ErrorBoundary>
   );
-});
+}
 
 export default App;

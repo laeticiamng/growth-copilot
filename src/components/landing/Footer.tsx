@@ -67,17 +67,18 @@ export function Footer() {
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.label}>
-                    {link.href.startsWith('/') ? (
-                      <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {link.label}
-                      </Link>
-                    ) : link.href.startsWith('#') ? (
+                    {link.href.includes('#') ? (
                       <a href={link.href} onClick={(e) => {
                         e.preventDefault();
-                        document.getElementById(link.href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const anchor = link.href.split('#').pop() || '';
+                        document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                         {link.label}
                       </a>
+                    ) : link.href.startsWith('/') ? (
+                      <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {link.label}
+                      </Link>
                     ) : (
                       <a href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                         {link.label}
