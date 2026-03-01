@@ -47,6 +47,17 @@ export function SEOHead({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
 
+      {/* Hreflang */}
+      {canonicalUrl && (
+        <>
+          <link rel="alternate" hrefLang="fr" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="en" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="es" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="de" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+        </>
+      )}
+
       {/* Structured Data */}
       {structuredData && (
         <script type="application/ld+json">

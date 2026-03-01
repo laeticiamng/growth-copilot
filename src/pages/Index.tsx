@@ -59,9 +59,9 @@ const Index = () => {
         <TeamOrgChart />
         <Tools />
         <HowItWorks />
-        <Testimonials />
         <GEOSection />
         <Pricing />
+        <Testimonials />
         <FAQ />
         <CTA />
       </main>
