@@ -276,7 +276,7 @@ const App = forwardRef<HTMLDivElement>(function App(_props, _ref) {
           <Sonner />
           <Suspense fallback={null}><CrispChat /></Suspense>
           <Suspense fallback={null}><CookieConsent /></Suspense>
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <SentryRouteTracker />
             <LanguageSyncTracker />
             <Suspense fallback={<PageLoader />}>
