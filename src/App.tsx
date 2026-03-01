@@ -237,7 +237,6 @@ function PageLoader() {
  */
 function DashboardRoute({ children, service }: { children: React.ReactNode; service?: string }) {
   return (
-    <EnvGuard>
     <ProtectedRoute>
       <DashboardLayout>
         {service ? (
@@ -247,7 +246,6 @@ function DashboardRoute({ children, service }: { children: React.ReactNode; serv
         )}
       </DashboardLayout>
     </ProtectedRoute>
-    </EnvGuard>
   );
 }
 
