@@ -9,6 +9,9 @@ const lazyResources: Record<string, () => Promise<Record<string, unknown>>> = {
   en: () => import("./locales/en").then(m => m.en as Record<string, unknown>),
   es: () => import("./locales/es").then(m => m.es as Record<string, unknown>),
   de: () => import("./locales/de").then(m => m.de as Record<string, unknown>),
+  it: () => import("./locales/it").then(m => m.it as Record<string, unknown>),
+  nl: () => import("./locales/nl").then(m => m.nl as Record<string, unknown>),
+  pt: () => import("./locales/pt").then(m => m.pt as Record<string, unknown>),
 };
 
 i18n
@@ -20,7 +23,7 @@ i18n
     },
     partialBundledLanguages: true,
     fallbackLng: "fr",
-    supportedLngs: ["fr", "en", "es", "de"],
+    supportedLngs: ["fr", "en", "es", "de", "it", "nl", "pt"],
     interpolation: {
       escapeValue: false,
     },
