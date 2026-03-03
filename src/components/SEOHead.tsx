@@ -54,6 +54,9 @@ export function SEOHead({
           <link rel="alternate" hrefLang="en" href={canonicalUrl} />
           <link rel="alternate" hrefLang="es" href={canonicalUrl} />
           <link rel="alternate" hrefLang="de" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="it" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="nl" href={canonicalUrl} />
+          <link rel="alternate" hrefLang="pt" href={canonicalUrl} />
           <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
         </>
       )}
