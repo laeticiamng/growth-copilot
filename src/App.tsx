@@ -88,6 +88,8 @@ const PublicStatus = lazy(() => import("./pages/Status"));
 const ApiDocs = lazy(() => import("./pages/ApiDocs"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const UseCases = lazy(() => import("./pages/UseCases"));
+const ForAgencies = lazy(() => import("./pages/ForAgencies"));
 
 // ─── Lazy-loaded dashboard pages ───
 // Foundation
@@ -303,6 +305,8 @@ function App() {
                 <Route path="/departments/:slug" element={<DepartmentDetail />} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/use-cases" element={<UseCases />} />
+                <Route path="/for-agencies" element={<ForAgencies />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogArticle />} />
                 <Route path="/changelog" element={<Changelog />} />

@@ -19,6 +19,8 @@ export function Footer() {
       { label: t("landing.footer.agentsIA"), href: "/agents" },
       { label: "GEO", href: "/#geo" },
       { label: t("landing.footer.pricing"), href: "/pricing" },
+      { label: t("landing.footer.useCases"), href: "/use-cases" },
+      { label: t("landing.footer.forAgencies"), href: "/for-agencies" },
       { label: t("landing.footer.integrations"), href: "/#tools" },
     ],
     [t("landing.footer.departments")]: departmentLinks,
