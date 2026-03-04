@@ -4,5 +4,6 @@ export { AgentPerformanceChart } from './AgentPerformanceChart';
 export { AgentBreakdownChart } from './AgentBreakdownChart';
 export { AgentOrgChart } from './AgentOrgChart';
 export { AgentProfileDialog, getAgentProfile, type AgentProfile } from './AgentProfileDialog';
- export { AgentsByDepartment } from './AgentsByDepartment';
- export { DepartmentHeadDashboard } from './DepartmentHeadDashboard';
+export { AgentsByDepartment } from './AgentsByDepartment';
+export { DepartmentHeadDashboard } from './DepartmentHeadDashboard';
+export { AgentWorkflowPipeline } from './AgentWorkflowPipeline';
