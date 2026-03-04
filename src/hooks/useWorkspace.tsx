@@ -1,6 +1,8 @@
 import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useDemoMode } from './useDemoMode';
+import { DEMO_WORKSPACE } from '@/data/demo-data';
 
 interface Workspace {
   id: string;
@@ -26,11 +28,20 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchWorkspaces = useCallback(async () => {
+    // Demo mode: return fake workspace
+    if (isDemoMode) {
+      setWorkspaces([DEMO_WORKSPACE as Workspace]);
+      setCurrentWorkspace(DEMO_WORKSPACE as Workspace);
+      setLoading(false);
+      return;
+    }
+
     if (!user) {
       setWorkspaces([]);
       setCurrentWorkspace(null);
@@ -52,20 +63,20 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const ws = (data || []) as Workspace[];
     setWorkspaces(ws);
     
-    // Auto-select first workspace if none selected
     setCurrentWorkspace(prev => {
       if (ws.length > 0 && !prev) return ws[0];
       return prev;
     });
     
     setLoading(false);
-  }, [user]);
+  }, [user, isDemoMode]);
 
   useEffect(() => {
     fetchWorkspaces();
   }, [fetchWorkspaces]);
 
   const createWorkspace = useCallback(async (name: string, slug: string) => {
+    if (isDemoMode) return { error: new Error('Not available in demo mode'), workspace: null };
     if (!user) return { error: new Error('Not authenticated'), workspace: null };
 
     const { data, error } = await supabase
@@ -87,7 +98,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setCurrentWorkspace(workspace);
     
     return { error: null, workspace };
-  }, [user]);
+  }, [user, isDemoMode]);
 
   return (
     <WorkspaceContext.Provider value={{ 
