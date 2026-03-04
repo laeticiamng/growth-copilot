@@ -56,7 +56,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { SupportChatWidget } from "@/components/support/SupportChatWidget";
 import { SubscriptionStatusBadge } from "@/components/billing/SubscriptionStatusBadge";
 import { OfflineBanner } from "@/components/ui/offline-banner";
-import { CommandPalette } from "@/components/CommandPalette";
+import { CommandPalette, triggerCommandPalette } from "@/components/CommandPalette";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface DashboardLayoutProps {
@@ -539,7 +539,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Desktop notification bar */}
         <div className="hidden lg:flex h-14 items-center justify-end gap-2 px-6 border-b border-border bg-card/50">
           <button
-            onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+            onClick={() => triggerCommandPalette()}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors mr-auto"
           >
             <Search className="w-4 h-4" />
