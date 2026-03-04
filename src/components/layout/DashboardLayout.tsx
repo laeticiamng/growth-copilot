@@ -46,7 +46,8 @@ import {
    History,
    BarChart3,
    UserCog,
-   ShieldCheck,
+    ShieldCheck,
+    Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -55,6 +56,8 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { SupportChatWidget } from "@/components/support/SupportChatWidget";
 import { SubscriptionStatusBadge } from "@/components/billing/SubscriptionStatusBadge";
 import { OfflineBanner } from "@/components/ui/offline-banner";
+import { CommandPalette } from "@/components/CommandPalette";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -364,6 +367,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <LanguageToggle />
           <NotificationCenter />
         </div>
@@ -534,6 +538,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         {/* Desktop notification bar */}
         <div className="hidden lg:flex h-14 items-center justify-end gap-2 px-6 border-b border-border bg-card/50">
+          <button
+            onClick={() => document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors mr-auto"
+          >
+            <Search className="w-4 h-4" />
+            <span>{t("commandPalette.search") || "Rechercher..."}</span>
+            <kbd className="ml-2 text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">⌘K</kbd>
+          </button>
+          <ThemeToggle />
           <LanguageToggle />
           <NotificationCenter />
         </div>
@@ -541,6 +554,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <ErrorBoundary>{children}</ErrorBoundary>
         </div>
       </main>
+
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* AI Assistant */}
       <AIAssistant />

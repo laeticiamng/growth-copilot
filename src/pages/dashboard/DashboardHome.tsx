@@ -34,6 +34,7 @@ import {
   DepartmentSemaphores,
 } from "@/components/cockpit";
 import { MoMComparison } from "@/components/dashboard/MoMComparison";
+import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
 
 // Lazy-loaded heavy components (recharts, @elevenlabs, date-fns locales)
 const AgentPerformanceChart = lazy(() => import("@/components/agents/AgentPerformanceChart").then(m => ({ default: m.AgentPerformanceChart })));
@@ -262,15 +263,20 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Card - Apple-like */}
-      <WelcomeCard
-        agentName={CGO_PERSONA.name}
-        agentRole={getCGORole()}
-        agentAvatar={CGO_PERSONA.avatarFr}
-        siteName={currentSite?.name || currentWorkspace.name}
-        pendingCount={pendingApprovals.length}
-        onExport={() => {}}
-      />
+      {/* Welcome Card + PDF Export */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex-1">
+          <WelcomeCard
+            agentName={CGO_PERSONA.name}
+            agentRole={getCGORole()}
+            agentAvatar={CGO_PERSONA.avatarFr}
+            siteName={currentSite?.name || currentWorkspace.name}
+            pendingCount={pendingApprovals.length}
+            onExport={() => {}}
+          />
+        </div>
+        <CockpitPDFExport workspaceName={currentWorkspace.name} />
+      </div>
 
       {/* Daily Briefing from Sophie Marchand (CGO) */}
       <Suspense fallback={<ChartSkeleton />}>
