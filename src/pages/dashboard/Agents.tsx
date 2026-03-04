@@ -19,6 +19,7 @@ import type { AgentType } from '@/lib/agents/types';
 import { AgentOrgChart } from '@/components/agents/AgentOrgChart';
 import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
 import { DepartmentHeadDashboard } from '@/components/agents/DepartmentHeadDashboard';
+import { AgentWorkflowPipeline } from '@/components/agents/AgentWorkflowPipeline';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
 // Agent personas with human names and avatars - 39 agents total
@@ -222,12 +223,14 @@ export default function Agents() {
           <TabsTrigger value="heads">{t("agentsPage.departmentHeads")}</TabsTrigger>
           <TabsTrigger value="departments">{t("agentsPage.teams")}</TabsTrigger>
           <TabsTrigger value="orgchart">{t("agentsPage.orgChart")}</TabsTrigger>
+          <TabsTrigger value="workflows">{t("agentsPage.workflows", "Workflows")}</TabsTrigger>
           <TabsTrigger value="activity">{t("agentsPage.recentActivity")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="heads" className="space-y-4"><DepartmentHeadDashboard /></TabsContent>
         <TabsContent value="departments" className="space-y-4"><AgentsByDepartment agentStats={agentStats} /></TabsContent>
         <TabsContent value="orgchart" className="space-y-4"><AgentOrgChart /></TabsContent>
+        <TabsContent value="workflows" className="space-y-4"><AgentWorkflowPipeline /></TabsContent>
 
         <TabsContent value="activity">
           <Card>
