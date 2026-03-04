@@ -3,3 +3,4 @@ export { KPISparkline } from './KPISparkline';
 export { GoalsProgress } from './GoalsProgress';
 export { MoMComparison } from './MoMComparison';
 export { KPIDashboard } from '../kpi/KPIDashboard';
+export { PredictiveAnalytics } from './PredictiveAnalytics';

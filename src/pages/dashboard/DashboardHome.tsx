@@ -45,6 +45,7 @@ const BusinessHealthScore = lazy(() => import("@/components/cockpit/BusinessHeal
 const ROITrackerWidget = lazy(() => import("@/components/cockpit/ROITrackerWidget").then(m => ({ default: m.ROITrackerWidget })));
 const RealtimeStatus = lazy(() => import("@/components/cockpit/RealtimeStatus").then(m => ({ default: m.RealtimeStatus })));
 const DailyBriefing = lazy(() => import("@/components/cockpit/DailyBriefing").then(m => ({ default: m.DailyBriefing })));
+const PredictiveAnalytics = lazy(() => import("@/components/dashboard/PredictiveAnalytics"));
 
 function ChartSkeleton() {
   return <Skeleton className="h-64 w-full rounded-lg" />;
@@ -394,6 +395,11 @@ export default function DashboardHome() {
         </CardContent>
       </Card>
     </div>
+
+      {/* Predictive Analytics - KPI Forecasting */}
+      <Suspense fallback={<ChartSkeleton />}>
+        <PredictiveAnalytics />
+      </Suspense>
 
       {/* MoM Comparison - KPI Trends with real data */}
       <MoMComparison 
