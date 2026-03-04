@@ -167,9 +167,14 @@ export function Hero() {
             </div>
           </div>
 
-          <p className="fade-in-up text-xs text-muted-foreground" style={{ animationDelay: "0.4s" }}>
-            {t("landing.hero.urlHint")}
-          </p>
+          <div className="fade-in-up flex items-center justify-center gap-3 text-xs text-muted-foreground" style={{ animationDelay: "0.4s" }}>
+            <span>{t("landing.hero.urlHint")}</span>
+            <span className="text-border">|</span>
+            <Link to="/demo" className="text-primary hover:underline font-medium flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              {t("landing.hero.tryDemo", "Explorer la démo")}
+            </Link>
+          </div>
 
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
             <p className="text-sm text-muted-foreground mb-6">

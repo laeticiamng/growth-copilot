@@ -9,6 +9,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 
 // Core providers
 import { AuthProvider } from "@/hooks/useAuth";
+import { DemoModeProvider } from "@/hooks/useDemoMode";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { SitesProvider } from "@/hooks/useSites";
 import { PermissionsProvider } from "@/hooks/usePermissions";
@@ -59,6 +60,8 @@ import { useLanguageSync } from "@/hooks/useLanguageSync";
 // Lazy-loaded global widgets (not critical for first paint)
 const CrispChat = lazy(() => import("@/components/CrispChat").then(m => ({ default: m.CrispChat })));
 const CookieConsent = lazy(() => import("@/components/CookieConsent").then(m => ({ default: m.CookieConsent })));
+const DemoModeBanner = lazy(() => import("@/components/demo/DemoModeBanner").then(m => ({ default: m.DemoModeBanner })));
+const DemoModeWatermark = lazy(() => import("@/components/demo/DemoModeBanner").then(m => ({ default: m.DemoModeWatermark })));
 
 // ─── Eagerly loaded pages (critical for first paint / SEO) ───
 import Index from "./pages/Index";
@@ -90,6 +93,7 @@ const PricingPage = lazy(() => import("./pages/PricingPage"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const UseCases = lazy(() => import("./pages/UseCases"));
 const ForAgencies = lazy(() => import("./pages/ForAgencies"));
+const Demo = lazy(() => import("./pages/Demo"));
 
 // ─── Lazy-loaded dashboard pages ───
 // Foundation
@@ -176,6 +180,7 @@ const queryClient = new QueryClient({
 
 // Core providers - Must be at the root, auth/workspace/permissions
 const CoreProviders = createProviderGroup('Core', [
+  DemoModeProvider,
   AuthProvider,
   WorkspaceProvider,
   SitesProvider,
@@ -279,6 +284,8 @@ function App() {
           <Sonner />
           <Suspense fallback={null}><CrispChat /></Suspense>
           <Suspense fallback={null}><CookieConsent /></Suspense>
+          <Suspense fallback={null}><DemoModeBanner /></Suspense>
+          <Suspense fallback={null}><DemoModeWatermark /></Suspense>
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
             <SentryRouteTracker />
             <LanguageSyncTracker />
@@ -298,6 +305,7 @@ function App() {
                 <Route path="/auth" element={<PublicOnlyRoute><Auth /></PublicOnlyRoute>} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 <Route path="/link/:slug" element={<SmartLink />} />
+                <Route path="/demo" element={<Demo />} />
 
                 {/* New public pages */}
                 <Route path="/agents" element={<AgentsCatalog />} />
