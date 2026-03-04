@@ -6231,6 +6231,53 @@ export type Database = {
           },
         ]
       }
+      notification_webhooks: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notify_alerts: boolean
+          notify_approvals: boolean
+          notify_briefings: boolean
+          updated_at: string
+          webhook_url: string
+          workspace_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notify_alerts?: boolean
+          notify_approvals?: boolean
+          notify_briefings?: boolean
+          updated_at?: string
+          webhook_url: string
+          workspace_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notify_alerts?: boolean
+          notify_approvals?: boolean
+          notify_briefings?: boolean
+          updated_at?: string
+          webhook_url?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_webhooks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           category: string | null

@@ -52,7 +52,9 @@ import {
   X,
   AlertTriangle,
   Unplug,
+  Bell,
 } from "lucide-react";
+import WebhookNotificationSettings from "@/components/notifications/WebhookNotificationSettings";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTeamInvitations } from "@/hooks/useTeamInvitations";
@@ -250,7 +252,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="company" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
           <TabsTrigger value="company" className="gap-2">
             <Building2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.company")}</span>
@@ -266,6 +268,10 @@ export default function Settings() {
           <TabsTrigger value="billing" className="gap-2">
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.billing")}</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Bell className="w-4 h-4" />
+            <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="danger" className="gap-2 text-destructive">
             <Trash2 className="w-4 h-4" />
@@ -517,6 +523,11 @@ export default function Settings() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications" className="mt-6">
+          <WebhookNotificationSettings />
         </TabsContent>
 
         {/* Danger Zone Tab */}
