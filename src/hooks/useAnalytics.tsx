@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "analytics_session_id";
 
@@ -20,6 +20,7 @@ export function useAnalytics() {
   const tracked = useRef(false);
 
   const track = useCallback(async (eventName: string, eventData?: Record<string, unknown>) => {
+    if (!isSupabaseConfigured) return;
     try {
       await supabase.from("analytics_events").insert([{
         event_name: eventName,

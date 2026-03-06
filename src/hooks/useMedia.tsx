@@ -89,12 +89,8 @@ export function MediaProvider({ children }: { children: ReactNode }) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching media assets:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load media assets',
-        variant: 'destructive',
-      });
+      console.warn('[useMedia] Error fetching media assets:', error.message);
+      // Don't show toast on public pages / placeholder Supabase
     } else {
       setAssets((data || []) as unknown as MediaAsset[]);
     }

@@ -112,7 +112,7 @@ export const fr = {
       urlValid: "URL valide — prêt pour l'analyse",
       urlHint: "Analyse SEO gratuite en 30 secondes",
       loading: "Analyse en cours...",
-      getStarted: "Analyser mon site gratuitement",
+      getStarted: "Commencer gratuitement",
       seePricing: "Voir les tarifs",
       premiumCompetence: "Growth OS en chiffres",
       urlAriaLabel: "Entrez l'URL de votre site web",
@@ -4318,6 +4318,10 @@ export const fr = {
     expiresAt: "Expire", noExpiry: "Pas d'expiration", failuresLabel: "échecs",
     tokenAudit: "Audit des tokens", noEvent: "Aucun événement",
     costBreakdown: "Répartition des coûts", renderCosts: "Coûts Render", aiCosts: "Coûts AI", total30d: "Total 30j",
+  },
+  demo: {
+    bannerMessage: "Mode Sandbox — Explorez le dashboard avec des données de démonstration",
+    createAccount: "Créer un compte gratuit",
   },
   cookies: {
     message: "Nous utilisons des cookies pour améliorer votre expérience et fournir le support client.",
