@@ -79,9 +79,13 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
-  // Fetch catalog (public, once)
+  // Fetch catalog (only when authenticated or has workspace)
   useEffect(() => {
     const fetchCatalog = async () => {
+      if (!user) {
+        setCatalogLoading(false);
+        return;
+      }
       setCatalogLoading(true);
       const { data, error } = await supabase
         .from('services_catalog')
@@ -89,7 +93,7 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
         .order('display_order');
       
       if (error) {
-        console.error('Error fetching services catalog:', error);
+        console.warn('[useServices] Catalog fetch error:', error.message);
       } else {
         setCatalog((data || []).map(s => ({
           ...s,
@@ -100,7 +104,7 @@ export function ServicesProvider({ children }: { children: ReactNode }) {
     };
     
     fetchCatalog();
-  }, []);
+  }, [user]);
 
   // Fetch workspace services
   const fetchWorkspaceServices = useCallback(async () => {

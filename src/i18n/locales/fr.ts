@@ -112,7 +112,7 @@ export const fr = {
       urlValid: "URL valide — prêt pour l'analyse",
       urlHint: "Analyse SEO gratuite en 30 secondes",
       loading: "Analyse en cours...",
-      getStarted: "Analyser mon site gratuitement",
+      getStarted: "Commencer gratuitement",
       seePricing: "Voir les tarifs",
       premiumCompetence: "Growth OS en chiffres",
       urlAriaLabel: "Entrez l'URL de votre site web",

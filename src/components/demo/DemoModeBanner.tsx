@@ -7,8 +7,7 @@ import { Link } from "react-router-dom";
 
 export function DemoModeBanner() {
   const { isDemoMode, deactivateDemo } = useDemoMode();
-  const { t, i18n } = useTranslation();
-  const isFr = i18n.language?.startsWith("fr");
+  const { t } = useTranslation();
 
   if (!isDemoMode) return null;
 
@@ -16,14 +15,12 @@ export function DemoModeBanner() {
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-chart-4 to-chart-5 text-white py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-3 shadow-lg">
       <TestTube2 className="w-4 h-4 shrink-0" />
       <span>
-        {isFr
-          ? "Mode Sandbox — Explorez le dashboard avec des données de démonstration"
-          : "Sandbox Mode — Explore the dashboard with demo data"}
+        {t("demo.bannerMessage", "Sandbox Mode — Explore the dashboard with demo data")}
       </span>
       <Link to="/auth">
         <Button size="sm" variant="secondary" className="h-7 gap-1 text-xs font-semibold">
           <Rocket className="w-3 h-3" />
-          {isFr ? "Créer un compte gratuit" : "Create free account"}
+          {t("demo.createAccount", "Create free account")}
         </Button>
       </Link>
       <button
