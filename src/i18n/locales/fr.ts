@@ -4319,6 +4319,10 @@ export const fr = {
     tokenAudit: "Audit des tokens", noEvent: "Aucun événement",
     costBreakdown: "Répartition des coûts", renderCosts: "Coûts Render", aiCosts: "Coûts AI", total30d: "Total 30j",
   },
+  demo: {
+    bannerMessage: "Mode Sandbox — Explorez le dashboard avec des données de démonstration",
+    createAccount: "Créer un compte gratuit",
+  },
   cookies: {
     message: "Nous utilisons des cookies pour améliorer votre expérience et fournir le support client.",
     learnMore: "En savoir plus",

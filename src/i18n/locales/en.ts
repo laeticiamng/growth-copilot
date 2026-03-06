@@ -4319,6 +4319,10 @@ export const en = {
     tokenAudit: "Token audit", noEvent: "No event",
     costBreakdown: "Cost breakdown", renderCosts: "Render costs", aiCosts: "AI costs", total30d: "Total 30d",
   },
+  demo: {
+    bannerMessage: "Sandbox Mode — Explore the dashboard with demo data",
+    createAccount: "Create free account",
+  },
   cookies: {
     message: "We use cookies to improve your experience and provide customer support.",
     learnMore: "Learn more",
