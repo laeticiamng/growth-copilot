@@ -20,6 +20,7 @@ export function useAnalytics() {
   const tracked = useRef(false);
 
   const track = useCallback(async (eventName: string, eventData?: Record<string, unknown>) => {
+    if (!isSupabaseConfigured) return;
     try {
       await supabase.from("analytics_events").insert([{
         event_name: eventName,
