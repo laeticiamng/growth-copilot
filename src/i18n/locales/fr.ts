@@ -94,6 +94,7 @@ export const fr = {
       faq: "FAQ",
       agents: "Agents",
       blog: "Blog",
+      geo: "GEO · Moteurs IA",
       help: "Aide",
       login: "Connexion",
       getStarted: "Commencer",
