@@ -1,29 +1,28 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useDemoMode } from "@/hooks/useDemoMode";
 import { LoadingState } from "@/components/ui/loading-state";
 
 /**
  * /demo route — Activates demo mode and redirects to dashboard
- * Uses two-step effect to avoid race condition:
- * 1. First effect activates demo mode
- * 2. Second effect waits for isDemoMode=true before navigating
+ * Uses declarative <Navigate> to avoid race condition:
+ * 1. Effect activates demo mode
+ * 2. Once isDemoMode is true (context propagated), renders <Navigate>
  */
 export default function Demo() {
   const { isDemoMode, activateDemo } = useDemoMode();
-  const navigate = useNavigate();
 
-  // Step 1: Activate demo mode on mount
+  // Activate demo mode on mount
   useEffect(() => {
-    activateDemo();
-  }, [activateDemo]);
-
-  // Step 2: Navigate only once isDemoMode is confirmed true
-  useEffect(() => {
-    if (isDemoMode) {
-      navigate("/dashboard", { replace: true });
+    if (!isDemoMode) {
+      activateDemo();
     }
-  }, [isDemoMode, navigate]);
+  }, [isDemoMode, activateDemo]);
+
+  // Declarative navigation — only renders when context has propagated isDemoMode=true
+  if (isDemoMode) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return <LoadingState message="Activation du mode démo..." />;
 }
