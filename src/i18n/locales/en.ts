@@ -94,6 +94,7 @@ export const en = {
       faq: "FAQ",
       agents: "Agents",
       blog: "Blog",
+      geo: "GEO · AI Engines",
       help: "Help",
       login: "Login",
       getStarted: "Get Started",
