@@ -1,25 +1,11 @@
 /**
  * Testimonials Section - Premium visual design with factual use cases
- * Compliant with Zero Fake Data policy
+ * Compliant with Zero Fake Data policy — no stars, no fake names
  */
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Quote, Building2, Rocket, Briefcase, Bot, LayoutGrid, Zap } from "lucide-react";
-
-const StarRating = ({ rating }: { rating: number }) => (
-  <div className="flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
-    {Array.from({ length: 5 }).map((_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${
-          i < rating ? "text-agent-idle fill-agent-idle" : "text-muted"
-        }`}
-        aria-hidden="true"
-      />
-    ))}
-  </div>
-);
+import { Quote, Building2, Rocket, Briefcase, Bot, LayoutGrid, Zap } from "lucide-react";
 
 const metrics = [
   { icon: Bot, key: "metric1" },
@@ -30,7 +16,6 @@ const metrics = [
 const testimonials = [
   {
     key: "t1",
-    rating: 5,
     Icon: Building2,
     resultKey: "result1",
     gradient: "from-primary/20 to-accent/20",
@@ -38,7 +23,6 @@ const testimonials = [
   },
   {
     key: "t2",
-    rating: 5,
     Icon: Rocket,
     resultKey: "result2",
     gradient: "from-chart-3/20 to-primary/20",
@@ -46,7 +30,6 @@ const testimonials = [
   },
   {
     key: "t3",
-    rating: 5,
     Icon: Briefcase,
     resultKey: "result3",
     gradient: "from-accent/20 to-chart-5/20",
@@ -90,19 +73,18 @@ export function Testimonials() {
 
         {/* Testimonial cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {testimonials.map(({ key, rating, Icon, resultKey, gradient, iconColor }) => (
+          {testimonials.map(({ key, Icon, resultKey, gradient, iconColor }) => (
             <Card
               key={key}
               variant="glass"
               className="relative hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
             >
               <CardContent className="p-6 flex flex-col h-full">
-                {/* Badge + Stars row */}
-                <div className="flex items-center justify-between mb-4">
+                {/* Badge */}
+                <div className="mb-4">
                   <Badge variant="outline" className="text-[10px] text-muted-foreground border-border/50">
                     {t("landing.testimonials.badge")}
                   </Badge>
-                  <StarRating rating={rating} />
                 </div>
 
                 {/* Quote */}
@@ -123,15 +105,15 @@ export function Testimonials() {
                   </p>
                 </div>
 
-                {/* Author */}
+                {/* Sector label (no personal names) */}
                 <div className="flex items-center gap-3 pt-3 border-t border-border/30">
                   <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
                     <Icon className={`w-5 h-5 ${iconColor}`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{t(`landing.testimonials.${key}.name`)}</p>
+                    <p className="font-medium text-sm truncate">{t(`landing.testimonials.${key}.sector`)}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {t(`landing.testimonials.${key}.role`)} · {t(`landing.testimonials.${key}.company`)}
+                      {t(`landing.testimonials.${key}.context`)}
                     </p>
                   </div>
                 </div>

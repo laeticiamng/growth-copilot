@@ -31,7 +31,7 @@ const HELP_ARTICLES: HelpArticle[] = [
   {
     id: "1", category: "getting-started",
     question: { fr: "Comment créer mon compte Growth OS ?", en: "How do I create my Growth OS account?" },
-    answer: { fr: "Rendez-vous sur /auth et cliquez sur 'Créer un compte'. Renseignez votre email et mot de passe, puis suivez le guide d'onboarding pour configurer votre workspace.", en: "Go to /auth and click 'Create account'. Enter your email and password, then follow the onboarding guide to set up your workspace." },
+    answer: { fr: "Rendez-vous sur la page de connexion et cliquez sur 'Créer un compte'. Renseignez votre email et mot de passe, puis suivez le guide d'onboarding pour configurer votre workspace.", en: "Go to the login page and click 'Create account'. Enter your email and password, then follow the onboarding guide to set up your workspace." },
   },
   {
     id: "2", category: "getting-started",
