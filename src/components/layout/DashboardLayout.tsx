@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemoMode } from "@/hooks/useDemoMode";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -211,6 +212,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslation();
   const { user, signOut, loading: authLoading } = useAuth();
+  const { isDemoMode, deactivateDemo } = useDemoMode();
   const { workspaces, currentWorkspace, setCurrentWorkspace, loading: wsLoading } = useWorkspace();
   const { isAtLeastRole, loading: permLoading } = usePermissions();
   const { hasService } = useServices();
@@ -287,22 +289,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isDemoMode) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, isDemoMode]);
 
   if (authLoading || wsLoading || permLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    if (isDemoMode) {
+      // Don't block rendering in demo mode while providers load
+    } else {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
+    }
   }
 
-  if (!user) return null;
+  if (!user && !isDemoMode) return null;
 
   const handleSignOut = async () => {
+    if (isDemoMode) {
+      deactivateDemo();
+      navigate("/");
+      return;
+    }
     await signOut();
     navigate("/");
   };
@@ -499,9 +510,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-medium text-sm mr-2">
-                    {user.email?.[0].toUpperCase()}
+                    {user?.email?.[0]?.toUpperCase() || 'D'}
                   </div>
-                  <span className="truncate text-sm">{user.email}</span>
+                  <span className="truncate text-sm">{user?.email || 'demo@growthOS.com'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">

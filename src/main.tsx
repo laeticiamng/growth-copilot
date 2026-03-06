@@ -14,7 +14,7 @@ import "./i18n";
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <App />
+      <><App /></>
     </HelmetProvider>
   </React.StrictMode>
 );

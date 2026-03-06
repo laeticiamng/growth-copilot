@@ -33,7 +33,8 @@ export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
     }
 
     if (!user) {
-      return <Navigate to={redirectTo} state={{ from: location }} replace />;
+      const loc = typeof window !== 'undefined' ? window.location.pathname : '/';
+      return <Navigate to={redirectTo} state={{ from: loc }} replace />;
     }
 
     return <div ref={ref}>{children}</div>;
