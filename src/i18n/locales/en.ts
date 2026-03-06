@@ -262,12 +262,16 @@ export const en = {
       },
     },
     testimonials: {
-      title: "They trust Growth OS",
-      subtitle: "SMBs, startups, and consultants use Growth OS to automate their growth",
+      title: "What our agents can achieve",
+      subtitle: "Typical use cases based on real platform capabilities",
+      badge: "Typical use case",
+      metric1: "39 AI agents",
+      metric2: "9 departments",
+      metric3: "Deploy in < 5 min",
       t1: {
         name: "Laurent Moreau",
         role: "Marketing Director",
-        company: "TechFlow (52 employees)",
+        company: "SMB · 52 employees",
         quote: "Growth OS replaced our SEO agency and freelance ads manager. Result: -40% budget, +65% qualified leads in 3 months.",
       },
       t2: {
@@ -282,7 +286,9 @@ export const en = {
         company: "Freelance",
         quote: "I use Growth OS for my clients. The automatic reports and SEO audit save me 10 hours per week. Immediate ROI.",
       },
-      disclaimer: "* Illustrative profiles based on real platform use cases.",
+      result1: { value: "-40% budget", label: "+65% qualified leads in 3 months" },
+      result2: { value: "39 agents", label: "running the business autonomously" },
+      result3: { value: "10h/week", label: "saved through automation" },
     },
     pricing: {
       heading: "Your AI Workforce, Ready to Deploy",
