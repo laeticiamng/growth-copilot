@@ -282,11 +282,11 @@ function App() {
         <InnerProviders>
           <Toaster />
           <Sonner />
-          <Suspense fallback={null}><CrispChat /></Suspense>
-          <Suspense fallback={null}><CookieConsent /></Suspense>
-          <Suspense fallback={null}><DemoModeBanner /></Suspense>
-          <Suspense fallback={null}><DemoModeWatermark /></Suspense>
           <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+            <Suspense fallback={null}><CrispChat /></Suspense>
+            <Suspense fallback={null}><CookieConsent /></Suspense>
+            <Suspense fallback={null}><DemoModeBanner /></Suspense>
+            <Suspense fallback={null}><DemoModeWatermark /></Suspense>
             <SentryRouteTracker />
             <LanguageSyncTracker />
             <Suspense fallback={<PageLoader />}>
