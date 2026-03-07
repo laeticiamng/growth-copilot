@@ -4385,13 +4385,5 @@ export const fr = {
       tips: "Recommandations GEO",
     },
   },
-
-  // Cookie consent
-  cookies: {
-    message: "Nous utilisons des cookies pour améliorer votre expérience et fournir un support client.",
-    learnMore: "En savoir plus",
-    accept: "Accepter",
-    decline: "Refuser",
-  },
 };
 
