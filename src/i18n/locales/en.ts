@@ -288,6 +288,26 @@ export const en = {
       result2: { value: "39 agents", label: "covering all business functions" },
       result3: { value: "10h/week", label: "estimated productivity gain" },
     },
+    productPreview: {
+      badge: "Interface Preview",
+      title: "Discover your future growth cockpit",
+      subtitle: "A centralized dashboard to manage your 39 AI agents, track KPIs, and automate business processes.",
+      cockpit: {
+        title: "Executive Cockpit",
+        description: "Real-time overview of your activity, KPIs, and priority actions.",
+        placeholder: "Cockpit screenshot coming soon",
+      },
+      agents: {
+        title: "AI Agent Chat",
+        description: "Chat with your agents, launch audits, and receive recommendations.",
+        placeholder: "Agent chat screenshot coming soon",
+      },
+      reports: {
+        title: "Automatic Reports",
+        description: "Auto-generated PDF reports with KPIs, trends, and recommendations.",
+        placeholder: "Report screenshot coming soon",
+      },
+    },
     pricing: {
       heading: "Your AI Workforce, Ready to Deploy",
       headingSubtitle: "{{total}} AI employees across {{depts}} departments. Premium expertise, instant deployment.",

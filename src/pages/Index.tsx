@@ -4,6 +4,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { TrustBar } from "@/components/landing/TrustBar";
 import { Features } from "@/components/landing/Features";
+import { ProductPreview } from "@/components/landing/ProductPreview";
 import { TeamOrgChart } from "@/components/landing/TeamOrgChart";
 import { Tools } from "@/components/landing/Tools";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -56,6 +57,7 @@ const Index = () => {
         <Hero />
         <TrustBar />
         <Features />
+        <ProductPreview />
         <TeamOrgChart />
         <Tools />
         <HowItWorks />
