@@ -1,54 +1,36 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { MessageCircle } from "lucide-react";
 
 // Tawk.to widget configuration
-// Free alternative to Crisp with similar features
-const TAWK_PROPERTY_ID = ""; // Will be configured when user provides it
+const TAWK_PROPERTY_ID = "";
 
 export function SupportChatWidget() {
-  useEffect(() => {
-    // Only load if property ID is configured
-    if (!TAWK_PROPERTY_ID) return;
+  const { t } = useTranslation();
 
-    // Create Tawk.to script
+  useEffect(() => {
+    if (!TAWK_PROPERTY_ID) return;
     const script = document.createElement("script");
     script.async = true;
     script.src = `https://embed.tawk.to/${TAWK_PROPERTY_ID}/default`;
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
-    
     document.body.appendChild(script);
-
     return () => {
-      // Cleanup on unmount
       document.body.removeChild(script);
-      // Remove Tawk widget
       const tawkWidget = document.getElementById("tawk-widget");
-      if (tawkWidget) {
-        tawkWidget.remove();
-      }
+      if (tawkWidget) tawkWidget.remove();
     };
   }, []);
 
-  // Fallback: floating support button that opens mailto
   return (
     <a
       href="mailto:contact@emotionscare.com?subject=Demande de support Growth OS"
       className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-primary text-primary-foreground shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 group"
-      title="Contactez le support"
+      title={t("support.contactSupport", "Contactez le support")}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-5 h-5"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-      <span className="hidden sm:inline text-sm font-medium">Aide</span>
+      <MessageCircle className="w-5 h-5" />
+      <span className="hidden sm:inline text-sm font-medium">{t("support.help", "Aide")}</span>
     </a>
   );
 }
