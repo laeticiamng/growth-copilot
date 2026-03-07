@@ -270,23 +270,43 @@ export const fr = {
       metric2: "11 départements",
       metric3: "Déploiement < 5 min",
       t1: {
-        quote: "Growth OS a remplacé notre agence SEO et notre freelance ads. Résultat : -40% de budget, +65% de leads qualifiés en 3 mois.",
-        sector: "PME Tech · 52 employés",
+        quote: "Une PME Tech d'environ 50 employés active les départements Marketing et Commercial pour remplacer son agence SEO et son freelance ads. Résultat type : réduction de 40 % du budget acquisition et hausse significative des leads qualifiés.",
+        sector: "PME Tech",
         context: "Équipe marketing réduite, objectif acquisition",
       },
       t2: {
-        quote: "En tant que fondatrice solo, je n'avais pas les moyens de recruter une équipe complète. Maintenant, 39 agents gèrent toute l'entreprise pendant que je développe le produit.",
+        quote: "Un fondateur solo déploie les 11 départements pour couvrir l'ensemble des fonctions business sans recruter. Les agents gèrent marketing, ventes, finance et support de manière autonome.",
         sector: "Startup SaaS B2B",
-        context: "Fondatrice solo, besoin de scale sans recruter",
+        context: "Fondateur solo, besoin de scale sans recruter",
       },
       t3: {
-        quote: "J'utilise Growth OS pour mes clients. Les rapports automatiques et l'audit SEO me font gagner 10h par semaine. ROI immédiat.",
+        quote: "Un consultant digital utilise Growth OS pour ses clients : audits SEO automatiques, rapports PDF, suivi des KPIs. Gain de productivité estimé : 10 heures par semaine.",
         sector: "Consultant Digital · Freelance",
         context: "Gestion multi-clients, productivité",
       },
-      result1: { value: "-40% budget", label: "+65% leads qualifiés en 3 mois" },
-      result2: { value: "39 agents", label: "gèrent l'entreprise en autonomie" },
-      result3: { value: "10h/semaine", label: "gagnées grâce à l'automatisation" },
+      result1: { value: "-40 % budget", label: "Réduction type du coût d'acquisition" },
+      result2: { value: "39 agents", label: "couvrent l'ensemble des fonctions" },
+      result3: { value: "10h/semaine", label: "gain de productivité estimé" },
+    },
+    productPreview: {
+      badge: "Aperçu de l'interface",
+      title: "Découvrez votre futur cockpit de croissance",
+      subtitle: "Un dashboard centralisé pour piloter vos 39 agents IA, suivre vos KPIs et automatiser vos processus métier.",
+      cockpit: {
+        title: "Cockpit Exécutif",
+        description: "Vue d'ensemble en temps réel de votre activité, KPIs et actions prioritaires.",
+        placeholder: "Capture du cockpit à venir",
+      },
+      agents: {
+        title: "Chat Agents IA",
+        description: "Conversez avec vos agents, lancez des audits et recevez des recommandations.",
+        placeholder: "Capture du chat agent à venir",
+      },
+      reports: {
+        title: "Rapports Automatiques",
+        description: "Rapports PDF générés automatiquement avec KPIs, tendances et recommandations.",
+        placeholder: "Capture d'un rapport à venir",
+      },
     },
     pricing: {
       heading: "Votre équipe IA, prête à déployer",
@@ -1301,7 +1321,7 @@ export const fr = {
     },
     page: {
       title: "Facturation",
-      subtitle: "Gérez vos services et votre abonnement Portable Company.",
+      subtitle: "Gérez vos services et votre abonnement Growth OS.",
       allServicesIncluded: "Tous les services sont inclus dans Full Company",
       serviceEnabled: "{{name}} activé",
       serviceDisabled: "{{name}} désactivé",
@@ -1338,7 +1358,7 @@ export const fr = {
   // Billing page
   billingPage: {
     title: "Facturation",
-    subtitle: "Gérez vos services et votre abonnement Portable Company.",
+    subtitle: "Gérez vos services et votre abonnement Growth OS.",
     upgradeToFull: "Passez à Full Company",
     aiEmployees: "employés IA",
     unlimitedRuns: "Runs illimités",
