@@ -450,7 +450,7 @@ export const fr = {
       privacy: "Confidentialité",
       rgpd: "RGPD",
       copyright: "© 2026 EmotionsCare SASU — Tous droits réservés.",
-      description: "Automatise ta croissance digitale avec l'IA",
+      description: "Automatisez votre croissance digitale avec l'IA",
       product: "Produit",
       resources: "Ressources",
       company: "Entreprise",
@@ -486,8 +486,8 @@ export const fr = {
       showLess: "Voir moins",
     },
     teamOrg: {
-      title: "Ton équipe entreprise IA",
-      subtitle: "Des agents spécialisés qui collaborent pour ta croissance",
+      title: "Votre équipe entreprise IA",
+      subtitle: "Des agents spécialisés qui collaborent pour votre croissance",
     },
     geo: {
       badge: "Alerte GEO 2026",
@@ -4384,6 +4384,14 @@ export const fr = {
       sources: "Sources citées",
       tips: "Recommandations GEO",
     },
+  },
+
+  // Cookie consent
+  cookies: {
+    message: "Nous utilisons des cookies pour améliorer votre expérience et fournir un support client.",
+    learnMore: "En savoir plus",
+    accept: "Accepter",
+    decline: "Refuser",
   },
 };
 

@@ -6,10 +6,13 @@ import { DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
 
 export function Footer() {
   const { t, i18n } = useTranslation();
-  const lang = (i18n.language.startsWith("fr") ? "fr" : "en") as "fr" | "en";
+  const lang = (i18n.language?.split("-")[0] === "fr" || i18n.language === "fr" ? "fr" : 
+                ["es","de","it","nl","pt"].includes(i18n.language?.split("-")[0]) ? "en" : "en") as "fr" | "en";
+  // Force FR for French users — fallback to EN for others
+  const resolvedLang = i18n.resolvedLanguage?.startsWith("fr") ? "fr" : (i18n.language?.startsWith("fr") ? "fr" : lang);
 
   const departmentLinks = DEPARTMENTS_CATALOG.slice(0, 6).map((dept) => ({
-    label: dept.name[lang],
+    label: dept.name[resolvedLang as "fr" | "en"] || dept.name["fr"],
     href: `/departments/${dept.slug}`,
   }));
 
