@@ -270,23 +270,23 @@ export const en = {
       metric2: "11 departments",
       metric3: "Deploy in < 5 min",
       t1: {
-        quote: "Growth OS replaced our SEO agency and freelance ads manager. Result: -40% budget, +65% qualified leads in 3 months.",
-        sector: "Tech SMB · 52 employees",
+        quote: "A tech SMB with around 50 employees activates the Marketing and Sales departments to replace its SEO agency and freelance ads manager. Typical result: 40% reduction in acquisition budget with a significant increase in qualified leads.",
+        sector: "Tech SMB",
         context: "Small marketing team, acquisition focus",
       },
       t2: {
-        quote: "As a solo founder, I couldn't afford a full team. Now, 39 agents handle the entire business while I focus on the product.",
+        quote: "A solo founder deploys all 11 departments to cover every business function without hiring. Agents handle marketing, sales, finance, and support autonomously.",
         sector: "B2B SaaS Startup",
         context: "Solo founder, need to scale without hiring",
       },
       t3: {
-        quote: "I use Growth OS for my clients. Automatic reports and SEO audit save me 10 hours per week. Immediate ROI.",
+        quote: "A digital consultant uses Growth OS for their clients: automated SEO audits, PDF reports, KPI tracking. Estimated productivity gain: 10 hours per week.",
         sector: "Digital Consultant · Freelance",
         context: "Multi-client management, productivity",
       },
-      result1: { value: "-40% budget", label: "+65% qualified leads in 3 months" },
-      result2: { value: "39 agents", label: "running the business autonomously" },
-      result3: { value: "10h/week", label: "saved through automation" },
+      result1: { value: "-40% budget", label: "Typical acquisition cost reduction" },
+      result2: { value: "39 agents", label: "covering all business functions" },
+      result3: { value: "10h/week", label: "estimated productivity gain" },
     },
     pricing: {
       heading: "Your AI Workforce, Ready to Deploy",
@@ -1301,7 +1301,7 @@ export const en = {
     },
     page: {
       title: "Billing",
-      subtitle: "Manage your services and Portable Company subscription.",
+      subtitle: "Manage your services and Growth OS subscription.",
       allServicesIncluded: "All services are included in Full Company",
       serviceEnabled: "{{name}} enabled",
       serviceDisabled: "{{name}} disabled",
@@ -1338,7 +1338,7 @@ export const en = {
   // Billing page
   billingPage: {
     title: "Billing",
-    subtitle: "Manage your Portable Company services and subscription.",
+    subtitle: "Manage your Growth OS services and subscription.",
     upgradeToFull: "Upgrade to Full Company",
     aiEmployees: "AI employees",
     unlimitedRuns: "Unlimited runs",

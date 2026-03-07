@@ -55,8 +55,8 @@ const HELP_ARTICLES: HelpArticle[] = [
   },
   {
     id: "6", category: "agents",
-    question: { fr: "Qu'est-ce que le scoring ICE ?", en: "What is ICE scoring?" },
-    answer: { fr: "ICE (Impact, Confidence, Ease) est un framework de priorisation. Chaque recommandation reçoit un score basé sur son impact potentiel, le niveau de confiance et la facilité d'exécution.", en: "ICE (Impact, Confidence, Ease) is a prioritization framework. Each recommendation receives a score based on potential impact, confidence level, and ease of execution." },
+    question: { fr: "Comment sont priorisées les recommandations ?", en: "How are recommendations prioritized?" },
+    answer: { fr: "Chaque recommandation est classée selon trois critères : son impact potentiel sur votre activité, le niveau de confiance dans le résultat attendu, et la facilité de mise en œuvre. Ce système de scoring permet de vous concentrer sur les actions les plus rentables en premier.", en: "Each recommendation is ranked based on three criteria: its potential impact on your business, the confidence level in the expected result, and the ease of implementation. This scoring system helps you focus on the most valuable actions first." },
   },
   {
     id: "7", category: "billing",
