@@ -288,6 +288,26 @@ export const fr = {
       result2: { value: "39 agents", label: "couvrent l'ensemble des fonctions" },
       result3: { value: "10h/semaine", label: "gain de productivité estimé" },
     },
+    productPreview: {
+      badge: "Aperçu de l'interface",
+      title: "Découvrez votre futur cockpit de croissance",
+      subtitle: "Un dashboard centralisé pour piloter vos 39 agents IA, suivre vos KPIs et automatiser vos processus métier.",
+      cockpit: {
+        title: "Cockpit Exécutif",
+        description: "Vue d'ensemble en temps réel de votre activité, KPIs et actions prioritaires.",
+        placeholder: "Capture du cockpit à venir",
+      },
+      agents: {
+        title: "Chat Agents IA",
+        description: "Conversez avec vos agents, lancez des audits et recevez des recommandations.",
+        placeholder: "Capture du chat agent à venir",
+      },
+      reports: {
+        title: "Rapports Automatiques",
+        description: "Rapports PDF générés automatiquement avec KPIs, tendances et recommandations.",
+        placeholder: "Capture d'un rapport à venir",
+      },
+    },
     pricing: {
       heading: "Votre équipe IA, prête à déployer",
       headingSubtitle: "{{total}} employés IA répartis dans {{depts}} départements. Expertise premium, déploiement instantané.",
