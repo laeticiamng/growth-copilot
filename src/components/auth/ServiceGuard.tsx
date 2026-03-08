@@ -20,6 +20,8 @@ const SERVICE_META: Record<string, {
   data: { name: 'Data', descriptionKey: 'serviceGuard.dataDesc', featuresKeys: ['serviceGuard.dataF1','serviceGuard.dataF2','serviceGuard.dataF3','serviceGuard.dataF4','serviceGuard.dataF5'], price: "39" },
   support: { name: 'Support', descriptionKey: 'serviceGuard.supportDesc', featuresKeys: ['serviceGuard.supportF1','serviceGuard.supportF2','serviceGuard.supportF3','serviceGuard.supportF4','serviceGuard.supportF5'], price: "19" },
   governance: { name: 'Governance', descriptionKey: 'serviceGuard.governanceDesc', featuresKeys: ['serviceGuard.governanceF1','serviceGuard.governanceF2','serviceGuard.governanceF3','serviceGuard.governanceF4','serviceGuard.governanceF5'], price: "49" },
+  hr: { name: 'Ressources Humaines', descriptionKey: 'serviceGuard.hrDesc', featuresKeys: ['serviceGuard.hrF1','serviceGuard.hrF2','serviceGuard.hrF3','serviceGuard.hrF4','serviceGuard.hrF5'], price: "29" },
+  legal: { name: 'Juridique', descriptionKey: 'serviceGuard.legalDesc', featuresKeys: ['serviceGuard.legalF1','serviceGuard.legalF2','serviceGuard.legalF3','serviceGuard.legalF4','serviceGuard.legalF5'], price: "29" },
 };
 
 interface ServiceGuardProps {
