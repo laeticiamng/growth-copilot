@@ -8889,36 +8889,39 @@ export type Database = {
       }
       v_integration_health: {
         Row: {
-          expires_at: string | null
-          health_status: string | null
+          created_at: string | null
           id: string | null
           last_auth_failure_at: string | null
           last_sync_at: string | null
           provider: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count: number | null
           status: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at: string | null
+          updated_at: string | null
           workspace_id: string | null
         }
         Insert: {
-          expires_at?: string | null
-          health_status?: never
+          created_at?: string | null
           id?: string | null
           last_auth_failure_at?: string | null
           last_sync_at?: string | null
           provider?: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count?: number | null
           status?: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
           workspace_id?: string | null
         }
         Update: {
-          expires_at?: string | null
-          health_status?: never
+          created_at?: string | null
           id?: string | null
           last_auth_failure_at?: string | null
           last_sync_at?: string | null
           provider?: Database["public"]["Enums"]["integration_provider"] | null
           refresh_failure_count?: number | null
           status?: Database["public"]["Enums"]["integration_status"] | null
+          token_expires_at?: string | null
+          updated_at?: string | null
           workspace_id?: string | null
         }
         Relationships: [
