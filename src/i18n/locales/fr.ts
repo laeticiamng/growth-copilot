@@ -488,6 +488,7 @@ export const fr = {
         departments: { label: "Départements couverts", growthOS: "11 simultanés", agency: "1-3 max", inHouse: "Selon budget" },
       },
     },
+    cta: {
       badge: "Prêt à automatiser ?",
       title: "Prêt à déployer votre",
       titleHighlight: "équipe IA",
