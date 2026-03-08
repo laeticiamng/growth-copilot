@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
       `${t('errorBoundaryEmail.describeIssue', 'Issue description:')}\n${t('errorBoundaryEmail.describePrompt', '[Describe what you were doing when the error occurred]')}\n\n` +
       t('errorBoundaryEmail.regards', 'Best regards')
     );
-    window.location.href = `mailto:contact@emotionscare.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:support@growthos.com?subject=${subject}&body=${body}`;
   };
 
   render() {
