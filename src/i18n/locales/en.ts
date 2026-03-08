@@ -2270,7 +2270,7 @@ export const en = {
     },
     about: {
       seoTitle: "About",
-      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents across 11 departments. Created missionssionTit,
+      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents across 11 departments.",
       missionTitleHighlight: "complete digital company",
       missionDescription: "Growth OS enables every entrepreneur to access the skills of a 39-expert team — marketing, sales, finance, support — without hiring, training, or managing.",
       storyTitle: "The story of Growth OS",
