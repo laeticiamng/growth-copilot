@@ -527,7 +527,7 @@ export const en = {
       salesTerms: "Sales Terms",
       privacy: "Privacy",
       rgpd: "RGPD",
-      copyright: "© 2026 Growth OS — All rights reserved.",
+      copyright: "© 2026 Growth OS rights reserved.",
       description: "Automate your digital growth with AI",
       product: "Product",
       resources: "Resources",
@@ -2270,8 +2270,7 @@ export const en = {
     },
     about: {
       seoTitle: "About",
-      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents across 11 departments. Created by EmotionsCare SASU.",
-      missionBadge: "Our mission",
+      seoDescription: "Discover Growth OS's mission: democratizing access to a complete digital company with 39 AI agents across 11 departments. Created missionBadge: "Our mission",
       missionTitle: "Democratize access to a ",
       missionTitleHighlight: "complete digital company",
       missionDescription: "Growth OS enables every entrepreneur to access the skills of a 39-expert team — marketing, sales, finance, support — without hiring, training, or managing.",
