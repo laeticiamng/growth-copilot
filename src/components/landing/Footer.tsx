@@ -99,7 +99,7 @@ export function Footer() {
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">{t("landing.footer.copyright")}</p>
           <nav className="flex items-center gap-4" aria-label={t("landing.accessibility.socialLinks")}>
-            <a href="mailto:contact@emotionscare.com" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.emailUs")}><Mail className="w-5 h-5" aria-hidden="true" /></a>
+            <a href="mailto:support@growthos.com" className="text-muted-foreground hover:text-foreground transition-colors" aria-label={t("landing.accessibility.emailUs")}><Mail className="w-5 h-5" aria-hidden="true" /></a>
           </nav>
         </div>
       </div>

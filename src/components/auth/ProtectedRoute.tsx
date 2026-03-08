@@ -19,6 +19,7 @@ export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
     const { t } = useTranslation();
     const { user, loading } = useAuth();
     const { isDemoMode } = useDemoMode();
+    const location = useLocation();
 
     // Synchronous localStorage fallback to avoid race condition with context propagation
     const isDemoFromStorage = typeof window !== 'undefined' && localStorage.getItem('growth_os_demo_mode') === 'true';
@@ -33,8 +34,7 @@ export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
     }
 
     if (!user) {
-      const loc = typeof window !== 'undefined' ? window.location.pathname : '/';
-      return <Navigate to={redirectTo} state={{ from: loc }} replace />;
+      return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
     }
 
     return <div ref={ref}>{children}</div>;

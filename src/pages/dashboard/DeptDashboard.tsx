@@ -470,7 +470,7 @@ export default function DeptDashboard() {
 
       {/* Footer */}
       <p className="text-center text-xs text-muted-foreground pb-4">
-        &copy; 2026 EmotionsCare SASU — {lang === "fr" ? "Tous droits réservés" : "All rights reserved"}
+        &copy; 2026 Growth OS — {lang === "fr" ? "Tous droits réservés" : "All rights reserved"}
       </p>
     </div>
   );
