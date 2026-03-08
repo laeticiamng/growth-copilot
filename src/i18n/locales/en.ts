@@ -4039,6 +4039,10 @@ export const en = {
     supportF1: "Automatic ticket triage", supportF2: "Google/Meta review management", supportF3: "AI knowledge base", supportF4: "Suggested responses", supportF5: "NPS/CSAT metrics",
     governanceDesc: "Centralize your business management with our governance hub.",
     governanceF1: "Multi-client management (Agency)", governanceF2: "Advanced automations", governanceF3: "Third-party integrations", governanceF4: "Granular roles and permissions", governanceF5: "Complete audit trail",
+    hrDesc: "Manage your teams with our HR module: employees, onboarding, time off and performance reviews.",
+    hrF1: "Employee directory", hrF2: "Automated onboarding", hrF3: "Time off management", hrF4: "Performance reviews", hrF5: "Interactive org chart",
+    legalDesc: "Secure your contracts and ensure legal compliance with our legal module.",
+    legalF1: "Contract management", legalF2: "Legal templates", legalF3: "Expiry alerts", legalF4: "GDPR compliance", legalF5: "Obligation tracking",
   },
 
   // Components
