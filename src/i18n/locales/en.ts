@@ -527,7 +527,7 @@ export const en = {
       salesTerms: "Sales Terms",
       privacy: "Privacy",
       rgpd: "RGPD",
-      copyright: "© 2026 EmotionsCare SASU — All rights reserved.",
+      copyright: "© 2026 Growth OS — All rights reserved.",
       description: "Automate your digital growth with AI",
       product: "Product",
       resources: "Resources",
