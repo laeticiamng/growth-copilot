@@ -2,11 +2,14 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Monitor, BarChart3, MessageSquare } from "lucide-react";
+import previewCockpit from "@/assets/preview-cockpit.jpg";
+import previewAgents from "@/assets/preview-agents.jpg";
+import previewReports from "@/assets/preview-reports.jpg";
 
 const previews = [
-  { key: "cockpit", icon: Monitor },
-  { key: "agents", icon: MessageSquare },
-  { key: "reports", icon: BarChart3 },
+  { key: "cockpit", icon: Monitor, image: previewCockpit },
+  { key: "agents", icon: MessageSquare, image: previewAgents },
+  { key: "reports", icon: BarChart3, image: previewReports },
 ] as const;
 
 export function ProductPreview() {
@@ -29,26 +32,26 @@ export function ProductPreview() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {previews.map(({ key, icon: Icon }) => (
+          {previews.map(({ key, icon: Icon, image }) => (
             <Card
               key={key}
               className="group relative overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-300"
             >
-              {/* Placeholder for real screenshot */}
-              <div className="aspect-video bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center">
-                <div className="text-center space-y-3">
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
-                    <Icon className="w-7 h-7 text-primary" />
-                  </div>
-                  <p className="text-xs text-muted-foreground font-medium px-4">
-                    {t(`landing.productPreview.${key}.placeholder`)}
-                  </p>
-                </div>
+              <div className="aspect-video bg-gradient-to-br from-muted/80 to-muted overflow-hidden">
+                <img
+                  src={image}
+                  alt={t(`landing.productPreview.${key}.title`)}
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-sm mb-1">
-                  {t(`landing.productPreview.${key}.title`)}
-                </h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold text-sm">
+                    {t(`landing.productPreview.${key}.title`)}
+                  </h3>
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {t(`landing.productPreview.${key}.description`)}
                 </p>

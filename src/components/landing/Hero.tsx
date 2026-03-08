@@ -167,13 +167,14 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="fade-in-up flex items-center justify-center gap-3 text-xs text-muted-foreground" style={{ animationDelay: "0.4s" }}>
-            <span>{t("landing.hero.urlHint")}</span>
-            <span className="text-border">|</span>
-            <Link to="/demo" className="text-primary hover:underline font-medium flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              {t("landing.hero.tryDemo", "Explorer la démo")}
+          <div className="fade-in-up flex flex-col sm:flex-row items-center justify-center gap-4 mt-2" style={{ animationDelay: "0.4s" }}>
+            <Link to="/demo">
+              <Button variant="outline" size="lg" className="gap-2">
+                <Sparkles className="w-4 h-4" />
+                {t("landing.hero.tryDemo", "Explorer la démo interactive")}
+              </Button>
             </Link>
+            <span className="text-xs text-muted-foreground">{t("landing.hero.urlHint")}</span>
           </div>
 
           <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
