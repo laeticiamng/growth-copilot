@@ -415,16 +415,9 @@ export function MetaProvider({ children }: { children: ReactNode }) {
     fetchMeta();
   }, [fetchMeta]);
 
-  // Auto-refresh OAuth status every 5 seconds to catch OAuth callback
-  useEffect(() => {
-    if (!currentWorkspace) return;
-    
-    const interval = setInterval(() => {
-      fetchOAuthIntegration();
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [currentWorkspace, fetchOAuthIntegration]);
+  // Polling is now opt-in: only poll when user navigates to a Meta-related page
+  // Components that need polling should call refetch() manually or use
+  // a local polling mechanism instead of this global 5-second interval.
 
   // ─────────────────────────────────────────────────────────────
   // Actions
