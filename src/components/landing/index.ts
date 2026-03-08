@@ -11,3 +11,6 @@ export { Pricing } from './Pricing';
 export { FAQ } from './FAQ';
 export { CTA } from './CTA';
 export { Footer } from './Footer';
+export { ProductPreview } from './ProductPreview';
+export { SecurityTrust } from './SecurityTrust';
+export { ComparisonTable } from './ComparisonTable';
