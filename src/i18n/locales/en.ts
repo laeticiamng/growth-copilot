@@ -429,8 +429,65 @@ export const en = {
         question: "Can I cancel anytime?",
         answer: "Yes, no commitment. You can cancel your subscription anytime from your dashboard. Your data remains accessible for 30 days after cancellation.",
       },
+      q8: {
+        question: "Why €490/month and not less?",
+        answer: "The Starter plan gives you access to 11 AI departments in lite mode. A single freelance SEO consultant costs on average €1,500-3,000/month. Growth OS potentially replaces a dozen service providers for a fraction of the cost.",
+      },
+      q9: {
+        question: "Is the Full Company plan at €9,000/month worth it?",
+        answer: "39 full-time AI employees would cost over €166,000/month in salaries. The Full Company plan represents over 95% savings. You get the equivalent of 11 complete departments, 24/7, with no vacations or turnover.",
+      },
+      q10: {
+        question: "Is there a free trial?",
+        answer: "Yes, we offer a 14-day free trial with full access to all agents and departments. No credit card required to get started.",
+      },
     },
-    cta: {
+    security: {
+      badge: "Security & Compliance",
+      title: "Built for enterprise trust",
+      subtitle: "Secure infrastructure, encrypted data, native GDPR compliance. Your security is our priority.",
+      encryption: {
+        title: "End-to-end encryption",
+        desc: "Your OAuth tokens and sensitive data are encrypted with AES-GCM 256-bit. No passwords are stored.",
+      },
+      rbac: {
+        title: "Granular access control",
+        desc: "Complete RBAC system with roles (owner, admin, manager, viewer) and per-site/department permissions.",
+      },
+      audit: {
+        title: "Immutable audit log",
+        desc: "Every action is recorded in an immutable audit trail. Full traceability of all operations.",
+      },
+      gdpr: {
+        title: "GDPR compliance",
+        desc: "Data export, deletion on request, automatic anonymization. Compliant with European regulations.",
+      },
+      hosting: {
+        title: "European hosting",
+        desc: "Infrastructure hosted in Europe with enterprise-grade security standards.",
+      },
+      approvals: {
+        title: "Mandatory human approval",
+        desc: "Any risky action goes through your validation. Nothing is executed automatically without your explicit agreement.",
+      },
+    },
+    comparison: {
+      badge: "Comparison",
+      title: "Growth OS vs traditional alternatives",
+      subtitle: "Compare the cost and performance of an AI team to an agency or in-house team.",
+      criteria: "Criteria",
+      agency: "Agency",
+      inHouse: "In-house team",
+      rows: {
+        availability: { label: "Availability", growthOS: "24/7", agency: "Business hours", inHouse: "Business hours" },
+        deployTime: { label: "Deployment time", growthOS: "5 minutes", agency: "2-4 weeks", inHouse: "3-6 months" },
+        monthlyCost: { label: "Monthly cost", growthOS: "From €490", agency: "€5,000-30,000", inHouse: "€15,000-166,500" },
+        scalability: { label: "Scalability", growthOS: "Instant", agency: "Limited", inHouse: "Slow" },
+        consistency: { label: "Consistency", growthOS: "100% reproducible", agency: "Variable", inHouse: "Depends on people" },
+        auditTrail: { label: "Audit trail", growthOS: "Complete audit log", agency: "Limited", inHouse: "Needs setup" },
+        departments: { label: "Departments covered", growthOS: "11 simultaneous", agency: "1-3 max", inHouse: "Budget-dependent" },
+      },
+    },
       badge: "Ready to automate?",
       title: "Ready to deploy your",
       titleHighlight: "AI team",

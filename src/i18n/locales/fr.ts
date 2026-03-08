@@ -429,8 +429,65 @@ export const fr = {
         question: "Puis-je annuler à tout moment ?",
         answer: "Oui, sans engagement. Vous pouvez annuler votre abonnement à tout moment depuis votre dashboard. Vos données restent accessibles pendant 30 jours après annulation.",
       },
+      q8: {
+        question: "Pourquoi 490€/mois et pas moins ?",
+        answer: "Le plan Starter vous donne accès à 11 départements IA en version allégée. Un seul consultant SEO freelance coûte en moyenne 1 500 à 3 000€/mois. Growth OS remplace potentiellement une dizaine de prestataires pour une fraction du coût.",
+      },
+      q9: {
+        question: "Le plan Full Company à 9 000€/mois est-il rentable ?",
+        answer: "39 employés IA à temps plein coûteraient plus de 166 000€/mois en salaires. Le plan Full Company représente une économie de plus de 95%. Vous obtenez l'équivalent de 11 départements complets, 24h/24, sans congés ni turnover.",
+      },
+      q10: {
+        question: "Y a-t-il un essai gratuit ?",
+        answer: "Oui, nous offrons un essai gratuit de 14 jours avec accès complet à tous les agents et départements. Aucune carte bancaire n'est requise pour démarrer.",
+      },
     },
-    cta: {
+    security: {
+      badge: "Sécurité & Conformité",
+      title: "Conçu pour la confiance des entreprises",
+      subtitle: "Infrastructure sécurisée, données chiffrées, conformité RGPD native. Votre sécurité est notre priorité.",
+      encryption: {
+        title: "Chiffrement bout-en-bout",
+        desc: "Vos tokens OAuth et données sensibles sont chiffrés avec AES-GCM 256 bits. Aucun mot de passe n'est stocké.",
+      },
+      rbac: {
+        title: "Contrôle d'accès granulaire",
+        desc: "Système RBAC complet avec rôles (owner, admin, manager, viewer) et permissions par site et département.",
+      },
+      audit: {
+        title: "Audit log immuable",
+        desc: "Chaque action est consignée dans un journal d'audit inaltérable. Traçabilité totale de toutes les opérations.",
+      },
+      gdpr: {
+        title: "Conformité RGPD",
+        desc: "Export de données, suppression sur demande, anonymisation automatique. Conforme aux réglementations européennes.",
+      },
+      hosting: {
+        title: "Hébergement européen",
+        desc: "Infrastructure hébergée en Europe avec des standards de sécurité conformes aux exigences entreprise.",
+      },
+      approvals: {
+        title: "Approbation humaine obligatoire",
+        desc: "Toute action à risque passe par votre validation. Rien n'est exécuté automatiquement sans votre accord explicite.",
+      },
+    },
+    comparison: {
+      badge: "Comparatif",
+      title: "Growth OS vs alternatives traditionnelles",
+      subtitle: "Comparez le coût et la performance d'une équipe IA à une agence ou une équipe interne.",
+      criteria: "Critère",
+      agency: "Agence",
+      inHouse: "Équipe interne",
+      rows: {
+        availability: { label: "Disponibilité", growthOS: "24/7", agency: "Heures bureau", inHouse: "Heures bureau" },
+        deployTime: { label: "Temps de déploiement", growthOS: "5 minutes", agency: "2-4 semaines", inHouse: "3-6 mois" },
+        monthlyCost: { label: "Coût mensuel", growthOS: "À partir de 490€", agency: "5 000 - 30 000€", inHouse: "15 000 - 166 500€" },
+        scalability: { label: "Scalabilité", growthOS: "Instantanée", agency: "Limitée", inHouse: "Lente" },
+        consistency: { label: "Consistance", growthOS: "100% reproductible", agency: "Variable", inHouse: "Dépend des personnes" },
+        auditTrail: { label: "Traçabilité", growthOS: "Audit log complet", agency: "Limitée", inHouse: "À mettre en place" },
+        departments: { label: "Départements couverts", growthOS: "11 simultanés", agency: "1-3 max", inHouse: "Selon budget" },
+      },
+    },
       badge: "Prêt à automatiser ?",
       title: "Prêt à déployer votre",
       titleHighlight: "équipe IA",
