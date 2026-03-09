@@ -67,6 +67,7 @@ const Index = () => {
         <Tools />
         <SecurityTrust />
         <GEOSection />
+        <EcoTransitionSection />
         <Pricing />
         <Testimonials />
         <FAQ />
