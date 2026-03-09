@@ -4428,6 +4428,9 @@ export const en = {
     accept: "Accept",
     decline: "Decline",
   },
+  commandPalette: {
+    search: "Search...",
+  },
   // GEO Module
   geo: {
     pageTitle: "GEO — Generative Engine Optimization",
