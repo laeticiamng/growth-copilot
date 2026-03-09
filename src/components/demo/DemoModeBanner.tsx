@@ -6,14 +6,14 @@ import { TestTube2, Rocket, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-export function DemoModeBanner() {
+export const DemoModeBanner = forwardRef<HTMLDivElement>(function DemoModeBanner(_props, ref) {
   const { isDemoMode, deactivateDemo } = useDemoMode();
   const { t } = useTranslation();
 
   if (!isDemoMode) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-chart-4 to-chart-5 text-white py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-3 shadow-lg">
+    <div ref={ref} className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-chart-4 to-chart-5 text-white py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-3 shadow-lg">
       <TestTube2 className="w-4 h-4 shrink-0" />
       <span>
         {t("demo.bannerMessage", "Sandbox Mode — Explore the dashboard with demo data")}
@@ -33,7 +33,7 @@ export function DemoModeBanner() {
       </button>
     </div>
   );
-}
+});
 
 export const DemoModeWatermark = forwardRef<HTMLDivElement>(function DemoModeWatermark(_props, ref) {
   const { isDemoMode } = useDemoMode();
