@@ -484,7 +484,7 @@ export const fr = {
       salesTerms: "CGV",
       privacy: "Confidentialité",
       rgpd: "RGPD",
-      copyright: "© 2026 Growth OS. Tous droits réservés.",
+      copyright: "© 2026 EMOTIONSCARE SASU — SIREN 944 505 445 — Amiens, France. Tous droits réservés.",
       description: "Automatisez votre croissance digitale avec l'IA",
       product: "Produit",
       resources: "Ressources",
