@@ -2290,7 +2290,7 @@ export const en = {
       value4Desc: "Data hosted in Europe, AES-256 encrypted. No engagement manipulation, platform compliance.",
       teamTitle: "The team",
       teamRole: "Creator of Growth OS",
-      teamDescription: "EmotionsCare develops technoloolutiongical solutions that augment human capabilities. Our vision: making expertise accessible to ever
+      teamDescription: "EmotionsCare develops technological solutions that augment human capabilities. Our vision: making expertise accessible to everyone.",
       contact: "Contact: ",
       schemaName: "About Growth OS",
       schemaDesc: "Mission, team and values of Growth OS",
