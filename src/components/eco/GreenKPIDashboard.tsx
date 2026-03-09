@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3, TestTube2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+import { format } from "date-fns";
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
