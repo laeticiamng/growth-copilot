@@ -547,6 +547,20 @@ export const fr = {
       cta: "Préparez votre site pour le GEO",
       ctaSub: "Les entreprises qui agissent maintenant auront 18 mois d'avance.",
     },
+    eco: {
+      badge: "Transition Écologique",
+      heading: "Automatisez votre transition écologique",
+      subheading: "Bilan carbone automatique, roadmap verte IA, rapports ESG conformes CSRD et matching de subventions — tout intégré dans Growth OS.",
+      feature: {
+        carbon: { title: "Bilan Carbone Automatique", desc: "Connectez votre comptabilité (Sage, QuickBooks, Pennylane) et calculez automatiquement vos émissions Scope 1, 2 et 3. Visualisation en diagramme de Sankey animé." },
+        roadmap: { title: "Roadmap Verte IA", desc: "L'IA analyse votre profil carbone et génère un plan d'action priorisé sur 3 ans : réduction CO₂, coût, subventions disponibles, ROI et difficulté." },
+        esg: { title: "Rapports ESG Automatiques", desc: "Rapports trimestriels et annuels ESG auto-générés à partir de vos données connectées. Export PDF conforme CSRD." },
+        subsidies: { title: "Matching Subventions", desc: "Pour chaque action de votre roadmap, découvrez les aides ADEME, France 2030, BPI et collectivités locales avec alertes de date limite." },
+        kpi: { title: "Dashboard KPI Verts", desc: "Suivi en temps réel : consommation énergétique, réduction des déchets, part d'énergie renouvelable, intensité carbone par euro de CA." },
+      },
+      cta: "Lancez votre transition écologique",
+      ctaSub: "Conforme CSRD. Financé par les subventions. Piloté par l'IA.",
+    },
   },
 
   // Dashboard

@@ -590,6 +590,20 @@ export const en = {
       cta: "Prepare your site for GEO",
       ctaSub: "Companies acting now will have an 18-month head start.",
     },
+    eco: {
+      badge: "Eco-Transition",
+      heading: "Automate your ecological transition",
+      subheading: "Automatic carbon footprint, AI-powered green roadmap, CSRD-compliant ESG reports and subsidy matching — all built into Growth OS.",
+      feature: {
+        carbon: { title: "Automatic Carbon Footprint", desc: "Connect your accounting software (Sage, QuickBooks, Pennylane) and automatically calculate Scope 1, 2 & 3 emissions. Animated Sankey diagram visualization." },
+        roadmap: { title: "AI Green Roadmap", desc: "AI analyzes your carbon profile and generates a prioritized 3-year action plan: CO₂ reduction, cost, available subsidies, ROI and difficulty." },
+        esg: { title: "Automatic ESG Reports", desc: "Quarterly and annual ESG reports auto-generated from connected data sources. CSRD-compliant PDF export." },
+        subsidies: { title: "Subsidy Matcher", desc: "For each action in your roadmap, discover grants from ADEME, France 2030, BPI and local authorities with deadline alerts." },
+        kpi: { title: "Green KPI Dashboard", desc: "Real-time tracking: energy consumption, waste reduction, renewable energy share, carbon intensity per revenue unit." },
+      },
+      cta: "Start your ecological transition",
+      ctaSub: "CSRD compliant. Funded by subsidies. Powered by AI.",
+    },
   },
 
   // Dashboard

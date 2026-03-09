@@ -11,6 +11,7 @@ import { Tools } from "@/components/landing/Tools";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { GEOSection } from "@/components/landing/GEOSection";
+import { EcoTransitionSection } from "@/components/landing/EcoTransitionSection";
 import { SecurityTrust } from "@/components/landing/SecurityTrust";
 
 import { Pricing } from "@/components/landing/Pricing";
@@ -66,6 +67,7 @@ const Index = () => {
         <Tools />
         <SecurityTrust />
         <GEOSection />
+        <EcoTransitionSection />
         <Pricing />
         <Testimonials />
         <FAQ />

@@ -14,3 +14,4 @@ export { Footer } from './Footer';
 export { ProductPreview } from './ProductPreview';
 export { SecurityTrust } from './SecurityTrust';
 export { ComparisonTable } from './ComparisonTable';
+export { EcoTransitionSection } from './EcoTransitionSection';
