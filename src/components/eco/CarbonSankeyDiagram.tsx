@@ -44,6 +44,7 @@ export function CarbonSankeyDiagram() {
   ];
 
   const handleConnector = () => {
+    const { toast } = require("@/hooks/use-toast");
     toast({ title: t("common.comingSoon"), description: t("eco.connectorComingSoon") });
   };
 
