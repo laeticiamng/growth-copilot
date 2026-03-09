@@ -38,7 +38,7 @@ export function SEOHead({
       <meta property="og:type" content="website" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:image" content={ogImage} />
-      <meta property="og:locale" content="fr_FR" />
+      <meta property="og:locale" content={typeof window !== 'undefined' ? (document.documentElement.lang || 'fr').replace('-', '_') : 'fr_FR'} />
       <meta property="og:site_name" content="Growth OS" />
 
       {/* Twitter */}
