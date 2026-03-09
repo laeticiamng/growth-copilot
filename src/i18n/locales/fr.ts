@@ -426,6 +426,51 @@ export const fr = {
         question: "Qu'est-ce que le GEO et pourquoi c'est important ?",
         answer: "Le GEO (Generative Engine Optimization) prépare votre site pour être cité par ChatGPT, Perplexity et Claude. 80% des sites web vont devenir invisibles pour les IA. Growth OS inclut un module GEO complet.",
       },
+      q7: {
+        question: "Puis-je résilier à tout moment ?",
+        answer: "Oui, sans engagement. Vous pouvez annuler votre abonnement à tout moment depuis votre tableau de bord. Vos données restent accessibles 30 jours après résiliation.",
+      },
+      q8: {
+        question: "Pourquoi 490€/mois et pas moins ?",
+        answer: "Le plan Starter vous donne accès aux 11 départements IA en mode allégé. Un seul consultant SEO freelance coûte en moyenne 1 500 à 3 000€/mois. Growth OS remplace potentiellement une dizaine de prestataires pour une fraction du coût.",
+      },
+      q9: {
+        question: "Le plan Full Company à 9 000€/mois est-il rentable ?",
+        answer: "39 employés à temps plein coûteraient plus de 166 000€/mois en salaires. Le plan Full Company représente plus de 95% d'économies. Vous obtenez l'équivalent de 11 départements complets, 24/7, sans vacances ni turnover.",
+      },
+      q10: {
+        question: "Y a-t-il un essai gratuit ?",
+        answer: "Oui, nous offrons un essai gratuit de 14 jours avec accès complet à tous les agents et départements. Aucune carte bancaire requise.",
+      },
+    },
+    security: {
+      badge: "Sécurité & Conformité",
+      title: "Vos données sont protégées",
+      subtitle: "Sécurité enterprise-grade intégrée à chaque niveau de la plateforme.",
+      encryption: {
+        title: "Chiffrement de bout en bout",
+        desc: "Vos tokens OAuth et données sensibles sont chiffrés en AES-GCM 256 bits. Aucun mot de passe n'est stocké.",
+      },
+      rbac: {
+        title: "Contrôle d'accès granulaire",
+        desc: "Système RBAC complet avec rôles (propriétaire, admin, manager, lecteur) et permissions par site/département.",
+      },
+      audit: {
+        title: "Journal d'audit immuable",
+        desc: "Chaque action est enregistrée dans un journal d'audit immuable. Traçabilité complète de toutes les opérations.",
+      },
+      gdpr: {
+        title: "Conformité RGPD",
+        desc: "Export de données, suppression sur demande, anonymisation automatique. Conforme aux réglementations européennes.",
+      },
+      hosting: {
+        title: "Hébergement européen",
+        desc: "Infrastructure hébergée en Europe avec des standards de sécurité enterprise-grade.",
+      },
+      approvals: {
+        title: "Validation humaine obligatoire",
+        desc: "Toute action à risque passe par votre validation. Rien n'est exécuté automatiquement sans votre accord explicite.",
+      },
     },
     comparison: {
       badge: "Comparaison",
