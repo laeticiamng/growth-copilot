@@ -679,9 +679,10 @@ export default function BlogArticlePage() {
       if (trimmed.startsWith("`") && trimmed.endsWith("`")) {
         return <code key={i} className="bg-secondary/50 px-2 py-1 rounded text-sm block my-2">{trimmed.slice(1, -1)}</code>;
       }
+      const parts = trimmed.split(/\*\*(.*?)\*\*/g);
       return (
         <p key={i} className="text-muted-foreground leading-relaxed mb-3">
-          <span dangerouslySetInnerHTML={{ __html: trimmed.replace(/\*\*(.*?)\*\*/g, "<strong class='text-foreground'>$1</strong>") }} />
+          {parts.map((part, j) => j % 2 === 1 ? <strong key={j} className="text-foreground">{part}</strong> : part)}
         </p>
       );
     });

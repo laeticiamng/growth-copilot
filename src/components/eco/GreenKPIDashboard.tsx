@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3 } from "lucide-react";
@@ -5,25 +6,17 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
 
-const energyData = MONTHS.map((m, i) => ({
-  month: m,
-  value: 4200 - i * 120 + Math.round(Math.random() * 200 - 100),
-}));
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
 
-const wasteData = MONTHS.map((m, i) => ({
-  month: m,
-  value: Math.min(100, 35 + i * 5 + Math.round(Math.random() * 5)),
-}));
-
-const renewableData = MONTHS.map((m, i) => ({
-  month: m,
-  value: Math.min(100, 12 + i * 6 + Math.round(Math.random() * 3)),
-}));
-
-const intensityData = MONTHS.map((m, i) => ({
-  month: m,
-  value: Math.max(5, 28 - i * 1.8 + Math.round(Math.random() * 2)),
-}));
+function generateData(baseFn: (i: number, rand: number) => number) {
+  return MONTHS.map((m, i) => ({
+    month: m,
+    value: baseFn(i, seededRandom(i * 17 + 42)),
+  }));
+}
 
 interface KPICardProps {
   title: string;
@@ -56,19 +49,19 @@ function KPICard({ title, value, trend, trendValue, positive, icon: Icon, data, 
       </CardHeader>
       <CardContent>
         <p className="text-2xl font-bold mb-3">{value}</p>
-        <div className="h-[80px]">
+        <div className="h-[80px]" role="img" aria-label={`${title}: ${value}, ${trendValue}`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
-                <linearGradient id={`gradient-${title}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`gradient-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={color} stopOpacity={0.3} />
                   <stop offset="100%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Area type="monotone" dataKey="value" stroke={color} fill={`url(#gradient-${title})`} strokeWidth={2} dot={false} />
+              <Area type="monotone" dataKey="value" stroke={color} fill={`url(#gradient-${title.replace(/\s/g, '')})`} strokeWidth={2} dot={false} />
               <Tooltip
-                contentStyle={{ background: "hsl(222 47% 8%)", border: "1px solid hsl(222 47% 16%)", borderRadius: "8px", fontSize: "12px" }}
-                labelStyle={{ color: "hsl(215 20% 55%)" }}
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px", color: "hsl(var(--foreground))" }}
+                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -80,6 +73,11 @@ function KPICard({ title, value, trend, trendValue, positive, icon: Icon, data, 
 
 export function GreenKPIDashboard() {
   const { t } = useTranslation();
+
+  const energyData = useMemo(() => generateData((i, r) => Math.round(4200 - i * 120 + r * 200 - 100)), []);
+  const wasteData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(35 + i * 5 + r * 5))), []);
+  const renewableData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(12 + i * 6 + r * 3))), []);
+  const intensityData = useMemo(() => generateData((i, r) => Math.max(5, Math.round(28 - i * 1.8 + r * 2))), []);
 
   return (
     <div className="space-y-6">

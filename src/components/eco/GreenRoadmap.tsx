@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Calendar, TrendingDown, Euro, Award } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
 
 interface RoadmapAction {
   id: string;
@@ -29,19 +30,17 @@ const DEMO_ACTIONS: RoadmapAction[] = [
   { id: "9", action: "Compensation carbone résiduelle", year: 3, co2Reduction: 50, cost: 25000, subsidies: [], roi: 100, difficulty: "easy" },
 ];
 
-const difficultyConfig = {
-  easy: { label: "Facile", className: "bg-emerald-500/20 text-emerald-400" },
-  medium: { label: "Moyen", className: "bg-amber-500/20 text-amber-400" },
-  hard: { label: "Complexe", className: "bg-red-500/20 text-red-400" },
-};
-
 export function GreenRoadmap() {
   const { t } = useTranslation();
-  const [generating, setGenerating] = useState(false);
+
+  const difficultyConfig = {
+    easy: { label: t("eco.difficultyEasy"), className: "bg-emerald-500/20 text-emerald-400" },
+    medium: { label: t("eco.difficultyMedium"), className: "bg-amber-500/20 text-amber-400" },
+    hard: { label: t("eco.difficultyHard"), className: "bg-red-500/20 text-red-400" },
+  };
 
   const handleGenerate = () => {
-    setGenerating(true);
-    setTimeout(() => setGenerating(false), 2000);
+    toast({ title: t("common.comingSoon"), description: t("eco.generateAIComingSoon") });
   };
 
   const renderActions = (year: 1 | 2 | 3) => {
@@ -97,17 +96,17 @@ export function GreenRoadmap() {
           <h3 className="text-lg font-semibold">{t("eco.roadmapTitle")}</h3>
           <p className="text-sm text-muted-foreground">{t("eco.roadmapDesc")}</p>
         </div>
-        <Button onClick={handleGenerate} disabled={generating} className="bg-emerald-600 hover:bg-emerald-700">
+        <Button onClick={handleGenerate} className="bg-emerald-600 hover:bg-emerald-700">
           <Sparkles className="h-4 w-4 mr-2" />
-          {generating ? t("common.loading") : t("eco.generateAI")}
+          {t("eco.generateAI")}
         </Button>
       </div>
 
       <Tabs defaultValue="year1">
         <TabsList>
-          <TabsTrigger value="year1"><Calendar className="h-3.5 w-3.5 mr-1.5" /> Année 1</TabsTrigger>
-          <TabsTrigger value="year2"><Calendar className="h-3.5 w-3.5 mr-1.5" /> Année 2</TabsTrigger>
-          <TabsTrigger value="year3"><Calendar className="h-3.5 w-3.5 mr-1.5" /> Année 3</TabsTrigger>
+          <TabsTrigger value="year1"><Calendar className="h-3.5 w-3.5 mr-1.5" /> {t("eco.year1")}</TabsTrigger>
+          <TabsTrigger value="year2"><Calendar className="h-3.5 w-3.5 mr-1.5" /> {t("eco.year2")}</TabsTrigger>
+          <TabsTrigger value="year3"><Calendar className="h-3.5 w-3.5 mr-1.5" /> {t("eco.year3")}</TabsTrigger>
         </TabsList>
         <TabsContent value="year1">{renderActions(1)}</TabsContent>
         <TabsContent value="year2">{renderActions(2)}</TabsContent>
