@@ -91,11 +91,16 @@ export function GreenRoadmap() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-lg font-semibold">{t("eco.roadmapTitle")}</h3>
           <p className="text-sm text-muted-foreground">{t("eco.roadmapDesc")}</p>
         </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+            <TestTube2 className="h-3 w-3" />
+            {t("common.demoData", "Demo data")}
+          </Badge>
         <Button onClick={handleGenerate} className="bg-emerald-600 hover:bg-emerald-700">
           <Sparkles className="h-4 w-4 mr-2" />
           {t("eco.generateAI")}
