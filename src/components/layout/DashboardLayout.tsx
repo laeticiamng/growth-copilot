@@ -47,8 +47,9 @@ import {
    History,
    BarChart3,
    UserCog,
-    ShieldCheck,
-    Search,
+     ShieldCheck,
+     Search,
+     Leaf,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -175,6 +176,16 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
       { path: "/dashboard/access-review", label: t("nav.accessReview"), icon: () => <span className="text-base">🔐</span> },
       { path: "/dashboard/diagnostics", label: t("nav.diagnostics"), icon: () => <span className="text-base">🔧</span> },
       { path: "/dashboard/agency", label: t("nav.agency"), icon: Building2, requiresRole: "admin" },
+    ],
+  },
+  {
+    id: "eco-transition",
+    label: t("eco.title"),
+    icon: Leaf,
+    color: "text-emerald-400",
+    description: t("eco.subtitle"),
+    items: [
+      { path: "/dashboard/eco", label: t("eco.carbonTab"), icon: () => <span className="text-base">🌿</span> },
     ],
   },
   {

@@ -155,6 +155,7 @@ const AgentChat = lazy(() => import("./pages/dashboard/AgentChat"));
 const AnalyzeUrl = lazy(() => import("./pages/dashboard/AnalyzeUrl"));
 const SetupWizard = lazy(() => import("./pages/dashboard/SetupWizard"));
 const GEO = lazy(() => import("./pages/dashboard/GEO"));
+const EcoTransition = lazy(() => import("./pages/dashboard/EcoTransition"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -383,6 +384,7 @@ function App() {
                 <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
                 <Route path="/dashboard/setup" element={<DashboardRoute><SetupWizard /></DashboardRoute>} />
                 <Route path="/dashboard/geo" element={<DashboardRoute service="marketing"><GEO /></DashboardRoute>} />
+                <Route path="/dashboard/eco" element={<DashboardRoute><EcoTransition /></DashboardRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
