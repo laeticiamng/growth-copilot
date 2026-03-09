@@ -47,8 +47,9 @@ import {
    History,
    BarChart3,
    UserCog,
-    ShieldCheck,
-    Search,
+     ShieldCheck,
+     Search,
+     Leaf,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
