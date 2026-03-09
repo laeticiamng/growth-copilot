@@ -1,13 +1,13 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Truck, ShoppingCart, Monitor, Trash2, Factory, Link2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface EmissionCategory {
   id: string;
-  label: string;
+  labelKey: string;
   scope: 1 | 2 | 3;
   value: number;
   percent: number;
@@ -16,36 +16,35 @@ interface EmissionCategory {
 }
 
 const DEMO_EMISSIONS: EmissionCategory[] = [
-  { id: "heating", label: "Chauffage & climatisation", scope: 1, value: 68, percent: 15, icon: Factory, color: "hsl(0 70% 55%)" },
-  { id: "fleet", label: "Flotte véhicules", scope: 1, value: 45, percent: 10, icon: Truck, color: "hsl(25 80% 55%)" },
-  { id: "electricity", label: "Électricité", scope: 2, value: 54, percent: 12, icon: Zap, color: "hsl(45 90% 50%)" },
-  { id: "transport", label: "Transport marchandises", scope: 3, value: 99, percent: 22, icon: Truck, color: "hsl(200 70% 50%)" },
-  { id: "purchases", label: "Achats & fournitures", scope: 3, value: 86, percent: 19, icon: ShoppingCart, color: "hsl(262 70% 60%)" },
-  { id: "digital", label: "Infrastructure digitale", scope: 3, value: 50, percent: 11, icon: Monitor, color: "hsl(187 85% 53%)" },
-  { id: "waste", label: "Déchets", scope: 3, value: 32, percent: 7, icon: Trash2, color: "hsl(142 60% 45%)" },
-  { id: "commute", label: "Déplacements employés", scope: 3, value: 18, percent: 4, icon: Truck, color: "hsl(330 60% 55%)" },
+  { id: "heating", labelKey: "eco.catHeating", scope: 1, value: 68, percent: 15, icon: Factory, color: "hsl(0 70% 55%)" },
+  { id: "fleet", labelKey: "eco.catFleet", scope: 1, value: 45, percent: 10, icon: Truck, color: "hsl(25 80% 55%)" },
+  { id: "electricity", labelKey: "eco.catElectricity", scope: 2, value: 54, percent: 12, icon: Zap, color: "hsl(45 90% 50%)" },
+  { id: "transport", labelKey: "eco.catTransport", scope: 3, value: 99, percent: 22, icon: Truck, color: "hsl(200 70% 50%)" },
+  { id: "purchases", labelKey: "eco.catPurchases", scope: 3, value: 86, percent: 19, icon: ShoppingCart, color: "hsl(262 70% 60%)" },
+  { id: "digital", labelKey: "eco.catDigital", scope: 3, value: 50, percent: 11, icon: Monitor, color: "hsl(187 85% 53%)" },
+  { id: "waste", labelKey: "eco.catWaste", scope: 3, value: 32, percent: 7, icon: Trash2, color: "hsl(142 60% 45%)" },
+  { id: "commute", labelKey: "eco.catCommute", scope: 3, value: 18, percent: 4, icon: Truck, color: "hsl(330 60% 55%)" },
 ];
 
 const TOTAL_EMISSIONS = DEMO_EMISSIONS.reduce((s, e) => s + e.value, 0);
 
 const CONNECTORS = [
-  { name: "Pennylane", connected: false },
-  { name: "Sage", connected: false },
-  { name: "QuickBooks", connected: false },
+  { name: "Pennylane" },
+  { name: "Sage" },
+  { name: "QuickBooks" },
 ];
 
 export function CarbonSankeyDiagram() {
   const { t } = useTranslation();
-  const [connectors, setConnectors] = useState(CONNECTORS);
 
   const scopeGroups = [
-    { scope: 1, label: "Scope 1 — Émissions directes", color: "hsl(0 70% 55%)" },
-    { scope: 2, label: "Scope 2 — Énergie indirecte", color: "hsl(45 90% 50%)" },
-    { scope: 3, label: "Scope 3 — Chaîne de valeur", color: "hsl(200 70% 50%)" },
+    { scope: 1, label: t("eco.scope1"), color: "hsl(0 70% 55%)" },
+    { scope: 2, label: t("eco.scope2"), color: "hsl(45 90% 50%)" },
+    { scope: 3, label: t("eco.scope3"), color: "hsl(200 70% 50%)" },
   ];
 
-  const toggleConnector = (idx: number) => {
-    setConnectors(prev => prev.map((c, i) => i === idx ? { ...c, connected: !c.connected } : c));
+  const handleConnector = () => {
+    toast({ title: t("common.comingSoon"), description: t("eco.connectorComingSoon") });
   };
 
   return (
@@ -60,16 +59,15 @@ export function CarbonSankeyDiagram() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            {connectors.map((c, i) => (
+            {CONNECTORS.map((c) => (
               <Button
                 key={c.name}
-                variant={c.connected ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                onClick={() => toggleConnector(i)}
-                className={c.connected ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""}
+                onClick={handleConnector}
               >
                 {c.name}
-                {c.connected && <Badge variant="success" className="ml-2 text-[10px]">Connecté</Badge>}
+                <Badge variant="outline" className="ml-2 text-[10px]">{t("common.comingSoon")}</Badge>
               </Button>
             ))}
           </div>
@@ -105,7 +103,7 @@ export function CarbonSankeyDiagram() {
                     <div key={item.id} className="group">
                       <div className="flex items-center gap-3 mb-1">
                         <Icon className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm flex-1">{item.label}</span>
+                        <span className="text-sm flex-1">{t(item.labelKey)}</span>
                         <span className="text-xs text-muted-foreground">{item.value} tCO₂e</span>
                         <Badge variant="outline" className="text-[10px] min-w-[40px] justify-center">{item.percent}%</Badge>
                       </div>

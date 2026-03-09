@@ -38,7 +38,7 @@ export function SEOHead({
       <meta property="og:type" content="website" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:image" content={ogImage} />
-      <meta property="og:locale" content="fr_FR" />
+      <meta property="og:locale" content={typeof window !== 'undefined' ? (document.documentElement.lang || 'fr').replace('-', '_') : 'fr_FR'} />
       <meta property="og:site_name" content="Growth OS" />
 
       {/* Twitter */}
@@ -47,18 +47,9 @@ export function SEOHead({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
 
-      {/* Hreflang */}
+      {/* Hreflang - same URL since app uses client-side language detection */}
       {canonicalUrl && (
-        <>
-          <link rel="alternate" hrefLang="fr" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="en" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="es" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="de" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="it" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="nl" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="pt" href={canonicalUrl} />
-          <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-        </>
+        <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
       )}
 
       {/* Structured Data */}

@@ -1,10 +1,11 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 interface ESGSection {
   code: string;
@@ -36,13 +37,11 @@ const statusIcons = {
 export function ESGReportGenerator() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState("q4-2025");
-  const [generating, setGenerating] = useState(false);
 
   const avgCompleteness = Math.round(ESG_SECTIONS.reduce((s, sec) => s + sec.completeness, 0) / ESG_SECTIONS.length);
 
   const handleExport = () => {
-    setGenerating(true);
-    setTimeout(() => setGenerating(false), 2000);
+    toast({ title: t("common.comingSoon"), description: t("eco.exportPDFComingSoon") });
   };
 
   return (
@@ -63,9 +62,9 @@ export function ESGReportGenerator() {
               <SelectItem value="annual-2025">Annuel 2025</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleExport} disabled={generating} className="bg-emerald-600 hover:bg-emerald-700">
+          <Button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700">
             <FileDown className="h-4 w-4 mr-2" />
-            {generating ? t("common.loading") : t("eco.exportPDF")}
+            {t("eco.exportPDF")}
           </Button>
         </div>
       </div>
