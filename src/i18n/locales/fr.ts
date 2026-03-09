@@ -521,7 +521,7 @@ export const fr = {
       changelog: "Changelog",
       apiDocs: "API Docs",
       help: "Aide",
-      status: "Statut",
+      status: "État du service",
       roadmap: "Feuille de route",
       about: "À propos",
       contact: "Contact",

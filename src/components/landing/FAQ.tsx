@@ -7,7 +7,7 @@ import {
 export function FAQ() {
   const { t } = useTranslation();
 
-  const faqKeys = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
+  const faqKeys = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"] as const;
 
   return (
     <section id="faq" className="py-24 relative">
