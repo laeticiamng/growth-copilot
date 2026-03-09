@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Webhook, Zap, Plus, Play, Pause, Trash2, ExternalLink, Clock, CheckCircle, XCircle, Activity, Bot, Bell, Mail, ArrowRight,
+  Webhook, Zap, Plus, Play, Pause, Trash2, ExternalLink, Clock, CheckCircle, XCircle, Activity, Bot, Bell, Mail, ArrowRight, Timer,
 } from "lucide-react";
 import { useWebhooks, WEBHOOK_EVENTS, type Webhook as WebhookType } from "@/hooks/useWebhooks";
 import { useAutomations, TRIGGER_TYPES, ACTION_TYPES, type AutomationRule } from "@/hooks/useAutomations";
+import { CronJobsTab } from "@/components/automations/CronJobsTab";
 import { formatDistanceToNow } from "date-fns";
 import { getDateLocale } from "@/lib/date-locale";
 
@@ -38,6 +39,10 @@ export default function Automations() {
             <Zap className="h-4 w-4" />
             Automations
           </TabsTrigger>
+          <TabsTrigger value="cron-jobs" className="gap-2">
+            <Timer className="h-4 w-4" />
+            Cron Jobs
+          </TabsTrigger>
           <TabsTrigger value="webhooks" className="gap-2">
             <Webhook className="h-4 w-4" />
             Webhooks
@@ -46,6 +51,9 @@ export default function Automations() {
 
         <TabsContent value="automations">
           <AutomationsTab />
+        </TabsContent>
+        <TabsContent value="cron-jobs">
+          <CronJobsTab />
         </TabsContent>
         <TabsContent value="webhooks">
           <WebhooksTab />
