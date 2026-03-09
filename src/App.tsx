@@ -384,6 +384,7 @@ function App() {
                 <Route path="/dashboard/analyze" element={<DashboardRoute><AnalyzeUrl /></DashboardRoute>} />
                 <Route path="/dashboard/setup" element={<DashboardRoute><SetupWizard /></DashboardRoute>} />
                 <Route path="/dashboard/geo" element={<DashboardRoute service="marketing"><GEO /></DashboardRoute>} />
+                <Route path="/dashboard/eco" element={<DashboardRoute><EcoTransition /></DashboardRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

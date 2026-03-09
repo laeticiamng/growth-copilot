@@ -178,6 +178,16 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     ],
   },
   {
+    id: "eco-transition",
+    label: t("eco.title"),
+    icon: Search,
+    color: "text-emerald-400",
+    description: t("eco.subtitle"),
+    items: [
+      { path: "/dashboard/eco", label: t("eco.carbonTab"), icon: () => <span className="text-base">🌿</span> },
+    ],
+  },
+  {
     id: "compliance",
     label: t("layout.compliance"),
     icon: ShieldCheck,
