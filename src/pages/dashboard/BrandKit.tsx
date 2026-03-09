@@ -97,7 +97,7 @@ const BrandKit = () => {
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-center gap-4 py-6">
             <AlertCircle className="w-6 h-6 text-destructive" />
-            <p dangerouslySetInnerHTML={{ __html: t("modules.brandKit.selectSiteFirst") }} />
+            <p>{t("modules.brandKit.selectSiteFirst")}</p>
           </CardContent>
         </Card>
       </div>
