@@ -11,8 +11,8 @@ function seededRandom(seed: number) {
   return x - Math.floor(x);
 }
 
-function generateData(baseFn: (i: number, rand: number) => number) {
-  return MONTHS.map((m, i) => ({
+function generateData(baseFn: (i: number, rand: number) => number, months: string[]) {
+  return months.map((m, i) => ({
     month: m,
     value: baseFn(i, seededRandom(i * 17 + 42)),
   }));

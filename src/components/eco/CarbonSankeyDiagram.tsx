@@ -36,6 +36,7 @@ const CONNECTORS = [
 
 export function CarbonSankeyDiagram() {
   const { t } = useTranslation();
+  const { TestTube2Icon } = { TestTube2Icon: require("lucide-react").TestTube2 };
 
   const scopeGroups = [
     { scope: 1, label: t("eco.scope1"), color: "hsl(0 70% 55%)" },
