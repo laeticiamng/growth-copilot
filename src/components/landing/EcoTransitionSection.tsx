@@ -64,6 +64,9 @@ export function EcoTransitionSection() {
             <Leaf className="w-3 h-3" />
             {t("landing.eco.badge")}
           </Badge>
+          <Badge variant="outline" className="mb-4 ml-2 text-xs border-amber-500/30 text-amber-500">
+            Beta
+          </Badge>
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             {t("landing.eco.heading")}
           </h2>

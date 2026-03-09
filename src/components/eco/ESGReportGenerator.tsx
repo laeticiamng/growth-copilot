@@ -47,10 +47,14 @@ export function ESGReportGenerator() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+            <TestTube2 className="h-3 w-3" />
+            {t("common.demoData", "Demo data")}
+          </Badge>
           <h3 className="text-lg font-semibold">{t("eco.esgTitle")}</h3>
-          <p className="text-sm text-muted-foreground">{t("eco.esgDesc")}</p>
         </div>
+        <p className="text-sm text-muted-foreground">{t("eco.esgDesc")}</p>
         <div className="flex items-center gap-3">
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-[160px]">

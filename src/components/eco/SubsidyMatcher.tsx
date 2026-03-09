@@ -66,9 +66,15 @@ export function SubsidyMatcher() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">{t("eco.subsidiesTitle")}</h3>
-        <p className="text-sm text-muted-foreground">{t("eco.subsidiesDesc")}</p>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 className="text-lg font-semibold">{t("eco.subsidiesTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("eco.subsidiesDesc")}</p>
+        </div>
+        <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+          <TestTube2 className="h-3 w-3" />
+          {t("common.demoData", "Demo data")}
+        </Badge>
       </div>
 
       <div className="grid grid-cols-1 gap-4">

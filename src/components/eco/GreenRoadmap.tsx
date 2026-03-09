@@ -105,6 +105,7 @@ export function GreenRoadmap() {
           <Sparkles className="h-4 w-4 mr-2" />
           {t("eco.generateAI")}
         </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="year1">

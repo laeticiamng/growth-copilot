@@ -49,7 +49,11 @@ export function CarbonSankeyDiagram() {
 
   return (
     <div className="space-y-6">
-      {/* Connector Panel */}
+      {/* Demo data indicator */}
+      <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+        <TestTube2 className="h-3 w-3" />
+        {t("common.demoData", "Demo data")}
+      </Badge>
       <Card className="border-border bg-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
