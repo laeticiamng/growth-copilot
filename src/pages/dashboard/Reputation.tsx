@@ -212,14 +212,18 @@ export default function Reputation() {
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="flex items-center gap-4 py-4">
             <AlertTriangle className="w-5 h-5 text-primary" />
-            <p className="text-sm">{t("modules.reputation.configureGBP")}</p</Card>
+            <p className="text-sm">{t("modules.reputation.configureGBP")}</p>
+          </CardContent>
+        </Card>
       )}
 
       {stats.pendingResponses > 0 && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-center gap-4 py-4">
             <AlertTriangle className="w-5 h-5 text-destructive" />
-            <p className="text-sm" dangerouslySetInnerHTML={{ __html:>{t("modules.reputation.pendingResponses", { count: stats.pendingResponses })}</p</Card>
+            <p className="text-sm">{t("modules.reputation.pendingResponses", { count: stats.pendingResponses })}</p>
+          </CardContent>
+        </Card>
       )}
 
       <Card variant="feature">
