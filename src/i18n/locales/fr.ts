@@ -609,6 +609,19 @@ export const fr = {
     },
   },
 
+  // Cookies
+  cookies: {
+    message: "Nous utilisons des cookies pour améliorer votre expérience et fournir un support client.",
+    learnMore: "En savoir plus",
+    accept: "Accepter",
+    decline: "Refuser",
+  },
+
+  // Command Palette
+  commandPalette: {
+    search: "Rechercher...",
+  },
+
   // Dashboard
   dashboard: {
     home: {
