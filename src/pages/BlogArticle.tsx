@@ -661,9 +661,10 @@ export default function BlogArticlePage() {
         );
       if (trimmed.startsWith("- ")) {
         const content = trimmed.replace("- ", "");
+        const parts = content.split(/\*\*(.*?)\*\*/g);
         return (
           <li key={i} className="text-muted-foreground ml-4 mb-1 list-disc">
-            <span dangerouslySetInnerHTML={{ __html: content.replace(/\*\*(.*?)\*\*/g, "<strong class='text-foreground'>$1</strong>") }} />
+            {parts.map((part, j) => j % 2 === 1 ? <strong key={j} className="text-foreground">{part}</strong> : part)}
           </li>
         );
       }
