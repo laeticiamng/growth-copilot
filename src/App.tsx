@@ -155,6 +155,7 @@ const AgentChat = lazy(() => import("./pages/dashboard/AgentChat"));
 const AnalyzeUrl = lazy(() => import("./pages/dashboard/AnalyzeUrl"));
 const SetupWizard = lazy(() => import("./pages/dashboard/SetupWizard"));
 const GEO = lazy(() => import("./pages/dashboard/GEO"));
+const EcoTransition = lazy(() => import("./pages/dashboard/EcoTransition"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
