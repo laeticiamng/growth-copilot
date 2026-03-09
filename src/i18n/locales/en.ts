@@ -2275,7 +2275,7 @@ export const en = {
       missionDescription: "Growth OS enables every entrepreneur to access the skills of a 39-expert team — marketing, sales, finance, support — without hiring, training, or managing.",
       storyTitle: "The story of Growth OS",
       storyBy: "By EmotionsCare SASU",
-      storyP1: "The Growth OS team was born from a simple observation: startups and SMBand SMBs need the same skills as large companies but don't have the resources to hire a complete team.",
+      storyP1: "The Growth OS team was born from a simple observation: startups and SMBs need the same skills as large companies but don't have the resources to hire a complete team.",
       storyP2: "We created a platform that provides 39 specialized AI agents, each an expert in their field: SEO, copywriting, advertising, data analysis, reputation management, and much more.",
       storyP3: "These agents work 24/7, coordinated by a central intelligence that optimizes every action to maximize your growth. All supervised by you through a simple, transparent interface.",
       valuesTitle: "Our values",
