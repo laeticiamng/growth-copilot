@@ -181,7 +181,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
   {
     id: "eco-transition",
     label: t("eco.title"),
-    icon: Search,
+    icon: Leaf,
     color: "text-emerald-400",
     description: t("eco.subtitle"),
     items: [
