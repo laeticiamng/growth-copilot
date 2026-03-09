@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Truck, ShoppingCart, Monitor, Trash2, Factory, Link2, TestTube2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 
 interface EmissionCategory {
   id: string;
