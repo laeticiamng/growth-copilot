@@ -110,3 +110,6 @@ verify_jwt = false
 
 [functions.site-analyze]
 verify_jwt = false
+
+[functions.cron-manager]
+verify_jwt = false
