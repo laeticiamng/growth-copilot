@@ -1,145 +1,122 @@
 
 
-# Audit Complet : Growth OS — Ce qui manque pour être unique et révolutionnaire
+# Audit Technique Complet — Growth OS Platform
 
-## Ce qui est deja excellent
+## 1. RÉSUMÉ EXÉCUTIF
 
-La plateforme est remarquablement ambitieuse : 39 agents IA, 11 departements, architecture multi-tenant avec RBAC, 44+ edge functions, i18n 7 langues, module GEO, voice assistant ElevenLabs, creative studio, evidence bundles, approval workflow, audit log immutable, et un modele de pricing structure par departement.
+**État global** : La plateforme est une vitrine SaaS ambitieuse avec ~60+ routes, ~50+ composants dashboard, un backend Supabase correctement architecturé (RBAC, RLS, edge functions). Cependant, la majorité des fonctionnalités dashboard sont des **maquettes UI avec données démo hardcodées** — les flux réels (sync API, AI generation, PDF export, Stripe checkout) ne sont pas confirmés comme opérationnels de bout en bout.
 
----
+**Niveau de préparation** : Prototype avancé / Pré-beta. Le frontend est bien structuré, mais l'écart entre ce qui est affiché et ce qui fonctionne réellement est significatif.
 
-## 1. EXPERIENCE UTILISATEUR — Manques critiques
+**Verdict go-live** : **NON EN L'ÉTAT** — Trop de fonctionnalités annoncées mais non branchées. Les pages publiques (landing, pricing, auth) sont prêtes. Le dashboard est un shell démonstratif.
 
-### 1.1 Pas de Dark/Light Mode Toggle visible
-Le theme semble fixe. Un toggle dark/light accessible depuis le header du dashboard et la landing page est attendu pour toute app SaaS moderne.
+### Top 5 P0
+1. **Fonctionnalités "Generate AI" / "Export PDF" sont des timeouts simulés** — GreenRoadmap, ESGReportGenerator, ROICalculator cliquent un bouton qui fait `setTimeout(() => setGenerating(false), 2000)` sans aucun appel backend
+2. **dangerouslySetInnerHTML sur contenu i18n** — BlogArticle.tsx et Reputation.tsx injectent du HTML non sanitisé (risque XSS si les clés i18n sont compromises ou modifiées)
+3. **Demo mode bypasse l'auth via localStorage** — `ProtectedRoute` vérifie `localStorage.getItem('growth_os_demo_mode')`, manipulation triviale par un utilisateur pour accéder au dashboard sans compte
+4. **Tous les edge functions ont verify_jwt = false** — 40+ edge functions sans vérification JWT au niveau gateway (la validation est faite en code, mais c'est un risque si mal implémenté dans une seule fonction)
+5. **Connectors Eco (Pennylane/Sage/QuickBooks) sont purement visuels** — le toggle "Connecté" est un `useState` local sans aucune persistance ni intégration réelle
 
-### 1.2 Pas de Dashboard personnalisable (Drag & Drop)
-Le cockpit est figé. Les dirigeants veulent reordonner, masquer ou ajouter des widgets. Un systeme de dashboard configurable avec grille drag-and-drop serait un differenciateur majeur.
-
-### 1.3 Pas de Guided Product Tour
-L'onboarding existe mais il n'y a pas de tour interactif in-app (tooltips step-by-step) qui guide les nouveaux utilisateurs dans le dashboard.
-
-### 1.4 Pas de Command Palette (Cmd+K)
-Pour une app avec 48+ pages dashboard, un raccourci clavier universel de recherche/navigation est indispensable. `cmdk` est deja installé mais semble non utilisé globalement.
-
----
-
-## 2. IA & AGENTS — Manques differenciants
-
-### 2.1 Pas de collaboration inter-agents visible
-Les agents travaillent en silo. Un workflow visible ou les agents se passent le relais (ex: Keyword Strategist → Content Builder → Social Manager) avec une timeline serait revolutionnaire.
-
-### 2.2 Pas de "Agent Memory" persistante
-Les conversations agent (AgentChat) ne semblent pas conserver le contexte entre sessions. Une memoire longue terme par agent (objectifs, preferences, decisions passees) serait un game-changer.
-
-### 2.3 Pas de marketplace d'agents custom
-Permettre aux utilisateurs de creer leurs propres agents avec des prompts personalises, puis de les partager, serait un avantage concurrentiel enorme.
-
-### 2.4 Pas de "Agent Autonomy Levels" progressifs
-Au-dela du toggle autopilot ON/OFF, un systeme de 5 niveaux de confiance par agent (Observer → Suggest → Draft → Act with Approval → Full Auto) que l'utilisateur ajuste au fil du temps.
+### Top 5 P1
+1. **Données hardcodées FR dans les composants Eco** — Labels "Chauffage & climatisation", "Année 1", "Facile", "Connecté", "Postuler" non traduits via i18n
+2. **GreenKPIDashboard génère des données aléatoires à chaque render** — `Math.random()` dans la déclaration de module signifie que les charts changent à chaque re-render parent
+3. **Hreflang pointe toutes les langues vers la même URL** — SEOHead génère `hrefLang="fr"`, `"en"`, `"es"` etc. pointant vers la même URL canonique sans distinction de path
+4. **24+ providers imbriqués** — Malgré `composeProviders`, chaque provider monte son propre état/effet au boot, impactant le TTFB
+5. **Eco route non service-gated** — `/dashboard/eco` n'a pas de `service` guard contrairement aux autres modules, n'importe quel utilisateur connecté y accède
 
 ---
 
-## 3. DONNEES & ANALYTICS — Manques
+## 2. TABLEAU D'AUDIT
 
-### 3.1 Pas de dashboards exportables en PDF/CSV depuis le cockpit
-CockpitPDFExport existe dans les components mais n'est pas integre dans DashboardHome.
-
-### 3.2 Pas de goal-setting avec OKR tracking
-Le module existe conceptuellement (GoalsProgress) mais pas de systeme complet de definition d'objectifs avec suivi automatise.
-
-### 3.3 Pas de predictive analytics
-Les KPIs montrent le passe. Une couche de prediction (forecast des clics, conversions, revenus sur 30/60/90 jours) basee sur les donnees historiques serait unique.
-
-### 3.4 Pas de benchmarking sectoriel
-Comparer ses KPIs avec des moyennes sectorielles (taux de conversion e-commerce vs SaaS vs lead gen) donnerait un contexte enorme.
-
----
-
-## 4. COLLABORATION & EQUIPE — Manques
-
-### 4.1 Pas de comments/annotations sur les rapports
-Permettre aux membres de l'equipe de commenter les rapports, KPIs, et actions des agents creerait une couche collaborative essentielle.
-
-### 4.2 Pas de @mentions dans les approbations
-Le workflow d'approbation n'a pas de systeme de mention pour solliciter un reviewer specifique.
-
-### 4.3 Pas de shared workspaces avec granularite fine
-Les roles existent (owner/admin/manager/viewer) mais il n'y a pas de permissions par module/departement specifique pour un utilisateur donne.
+| P | Domaine | Localisation | Problème | Risque | Recommandation | Faisable ? |
+|---|---------|-------------|----------|--------|---------------|-----------|
+| P0 | UX/Backend | GreenRoadmap, ESGReport | Boutons "Generate AI" / "Export PDF" = setTimeout fake | Fonctionnalité annoncée non opérationnelle | Ajouter toast explicite "Fonctionnalité en cours de développement" ou brancher sur ai-assistant | Oui |
+| P0 | Security | BlogArticle.tsx, Reputation.tsx | dangerouslySetInnerHTML sur contenu i18n avec regex replace | XSS si clés i18n modifiées | Utiliser DOMPurify ou supprimer l'injection HTML | Oui |
+| P0 | Auth | ProtectedRoute.tsx | localStorage bypass pour demo mode | Accès dashboard sans authentification | Ajouter validation côté serveur ou watermark clair | Oui (ajouter warning) |
+| P0 | Backend | config.toml | 40+ edge functions verify_jwt = false | Endpoints exposés si auth code manquant | Confirmer chaque fonction valide le JWT en code | Non confirmé |
+| P0 | UX | CarbonSankeyDiagram | Connectors Pennylane/Sage = useState local | Fausse promesse d'intégration | Labelliser clairement comme "Coming Soon" | Oui |
+| P1 | i18n | Eco components | Textes hardcodés FR : "Facile", "Connecté", "Postuler", "Année 1" | UX cassée en anglais | Migrer vers clés t() | Oui |
+| P1 | Performance | GreenKPIDashboard | Math.random() hors useMemo = re-génération à chaque render | Charts instables | Wrap dans useMemo ou useState init | Oui |
+| P1 | SEO | SEOHead.tsx | hreflang identique pour toutes langues | SEO multilingue incorrect | Différencier les URLs par langue ou retirer | Oui |
+| P1 | Frontend | SubsidyMatcher | URLs de subventions = "#" | Liens morts | Ajouter vrais liens ou disabled state | Oui |
+| P1 | Auth | EcoTransition route | Pas de service guard | Incohérence avec le pattern des autres modules | Ajouter `service="eco"` ou justifier | Oui |
+| P2 | Security | Auth.tsx | signup_data stocké en localStorage (email, nom, entreprise) | Fuite PII | Utiliser sessionStorage ou supprimer après consommation | Oui |
+| P2 | Performance | App.tsx | 24 context providers montés au boot | Temps de montage initial élevé | Lazy-load providers non critiques | Non trivial |
+| P2 | i18n | Eco composants | Labels de difficulté, scope labels, hardcodés en français | Pas de support multilingue | Ajouter clés i18n | Oui |
+| P2 | UX | ROICalculator | `// TODO: Call generate-report edge function` | Feature incomplète | Brancher ou masquer le bouton | Oui |
+| P2 | Frontend | competitive-intel-agent.ts | `// TODO: Implement real crawl` | Feature annoncée non implémentée | Documenter la limitation | Oui |
+| P3 | SEO | SEOHead | og:locale hardcodé "fr_FR" | Incorrect pour utilisateurs EN/ES/DE | Dynamiser selon i18n.language | Oui |
+| P3 | Accessibility | Eco components | Charts Recharts sans texte alternatif | Non accessible screen readers | Ajouter aria-label / sr-only descriptions | Oui |
+| P3 | UX | GreenKPIDashboard | Tooltip style hardcodé dark theme | Cassé en light mode | Utiliser les CSS variables du thème | Oui |
 
 ---
 
-## 5. INTEGRATIONS — Manques
+## 3. DÉTAIL PAR CATÉGORIE
 
-### 5.1 Pas d'integration CRM native
-Hubspot, Salesforce, Pipedrive. Pour une plateforme qui gere des leads et le lifecycle, c'est un manque majeur.
+### A. Frontend & Rendu
+- **Ce qui fonctionne** : Architecture solide (lazy loading, ErrorBoundary, Suspense fallback), routing cohérent, 404 page OK, composants UI bien structurés (shadcn/ui)
+- **Ce qui est douteux** : Les 5 composants Eco sont purement visuels avec données demo. Le pattern est le même dans ~20 autres modules dashboard (données hardcodées présentées comme réelles)
+- **Non confirmé** : Comportement en light mode des composants Eco (tooltip hardcodé dark)
 
-### 5.2 Pas d'integration Slack/Teams pour les notifications
-Les alertes restent dans l'app. Pousser les approbations, alertes critiques et briefings vers Slack/Teams serait essentiel pour l'adoption.
+### B. QA Fonctionnelle
+- **Flux auth** : Login/Signup/Reset password bien structurés avec validation Zod, gestion d'erreurs, i18n. Social login (Google/Apple) via lovable OAuth
+- **Flux dashboard** : Navigation fonctionne, workspace selector présent, sidebar responsive
+- **Cassé** : Boutons "Generate AI" et "Export PDF" dans Eco sont des simulations. Bouton "Postuler" dans SubsidyMatcher pointe vers "#"
 
-### 5.3 Pas de Zapier/Make webhook entrant
-Le module webhooks sortants existe mais pas de connecteur no-code entrant pour les outils tiers.
+### C. Auth & Autorisations
+- **Fonctionnel** : ProtectedRoute, PublicOnlyRoute, RBAC via user_roles table, session expiry monitoring, role-based nav filtering
+- **Risque** : Demo mode bypass via localStorage est manipulable. Ce n'est pas un risque de sécurité grave car le dashboard ne contient que des données demo en mode non-authentifié, mais c'est un pattern fragile
+- **Bien fait** : Rôles en table séparée, security definer functions avec search_path fixé
 
-### 5.4 Pas d'integration email marketing
-Mailchimp, Brevo, SendGrid pour le lifecycle management au-dela des emails transactionnels Resend.
+### D. APIs & Edge Functions
+- **Architecture solide** : Auth partagée (_shared/auth.ts), CORS centralisé, permissions server-side
+- **Risque** : Tous verify_jwt = false dans config.toml. La validation est faite en code — correct architecturalement mais nécessite vigilance
+- **Non confirmé** : Fonctionnement réel de la majorité des edge functions (les edge function logs sont vides)
 
----
+### E. Database & RLS
+- **Bien fait** : Functions SECURITY DEFINER avec search_path = public, rate limiting triggers, audit log immutable, RBAC multi-workspace
+- **Non confirmé** : Policies RLS effectives sur toutes les tables depuis l'interface
 
-## 6. MONETISATION & BUSINESS — Manques
+### F. Sécurité
+- **Risques identifiés** : dangerouslySetInnerHTML (P0), localStorage PII (P2), demo mode bypass (P0)
+- **Bien fait** : Token encryption AES-GCM, CORS whitelist, input validation Zod, rate limiting
 
-### 6.1 Pas de Free Trial fonctionnel
-Le plan Starter est a 490€/mois. Aucun plan gratuit explorable avec des donnees demo pre-remplies. Un "sandbox mode" avec donnees fictives permettrait de convertir beaucoup plus.
+### G. i18n
+- **Couverture** : FR/EN bien couverts (~2500+ clés), ES/DE/IT/NL/PT partiels
+- **Problème** : Composants Eco contiennent ~30 strings hardcodées en français non passées par t()
 
-### 6.2 Pas de ROI calculator sur la landing page
-Un calculateur interactif ("combien d'heures/euros economisez-vous") sur la page pricing serait un conversion booster puissant.
+### H. SEO
+- **Bien fait** : SEOHead avec structured data, meta tags, og tags, sitemap, robots.txt
+- **Problème** : hreflang pointe vers même URL toutes langues, og:locale hardcodé FR
 
-### 6.3 Pas de white-label pour les agences
-Le module agency existe mais pas de branding personnalisable (logo, couleurs, domaine) pour les clients des agences.
-
----
-
-## 7. MOBILE & PWA — Manques
-
-### 7.1 Pas d'experience mobile optimisee pour le cockpit
-Le dashboard est responsive mais pas pense "mobile-first" pour les dirigeants qui consultent leur briefing le matin sur mobile.
-
-### 7.2 Notifications push PWA non implementees
-Le service worker (sw.js) est present mais les push notifications ne sont pas configurees. Un briefing matinal push serait un usage killer.
-
----
-
-## 8. SECURITE & COMPLIANCE — Refinements
-
-### 8.1 Pas de 2FA/MFA
-L'authentification supporte email + Google OAuth mais pas de TOTP/2FA, requis pour les entreprises serieuses.
-
-### 8.2 Pas de SSO SAML/OIDC
-Pour le plan Enterprise, c'est un prerequis. L'infrastructure auth le supporte via le backend mais ce n'est pas expose.
-
-### 8.3 Pas de data retention policies configurables
-Les donnees sont gardees indefiniment. Permettre aux clients de definir des periodes de retention (30/90/365 jours) serait un argument RGPD.
+### I. Observabilité
+- **Bien fait** : Sentry intégré, ErrorBoundary capture, audit logs, health score function, diagnostics panel, monitoring-metrics edge function
 
 ---
 
-## Top 5 — Actions a plus fort impact pour etre "revolutionnaire"
+## 4. PLAN D'ACTION
 
-```text
-Impact × Faisabilite
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Command Palette (Cmd+K)          ████████████ Haut
-   → cmdk deja installe, 1-2 jours
-   
-2. Agent Collaboration Workflows    ████████████ Haut
-   → Pipeline visuel inter-agents, differenciateur #1
-   
-3. Predictive Analytics Layer       ██████████░░ Moyen
-   → Forecasting KPIs, wow-effect pour les dirigeants
-   
-4. Slack/Teams Notifications        ██████████░░ Moyen
-   → Push des briefings et approbations
-   
-5. Free Interactive Demo/Sandbox    █████████░░░ Moyen
-   → Donnees demo pre-remplies, conversion x3
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+### Corrections immédiates (P0) — à implémenter maintenant
+1. Remplacer les boutons fake "Generate AI" / "Export PDF" des composants Eco par des toasts informatifs "Coming soon" ou brancher sur l'edge function existante `ai-assistant`
+2. Sanitiser les dangerouslySetInnerHTML dans BlogArticle et Reputation (utiliser un simple text replace ou DOMPurify)
+3. Ajouter un badge visuel clair sur les connectors Eco indiquant "Coming Soon"
+4. Traduire les strings hardcodées critiques des composants Eco
+
+### Corrections rapides (P1)
+5. Fixer Math.random() dans GreenKPIDashboard avec useMemo
+6. Corriger les liens "#" dans SubsidyMatcher
+7. Fixer hreflang dans SEOHead (retirer si pas de routes localisées)
+8. Ajouter service guard sur la route Eco
+
+### Améliorations (P2-P3)
+9. Supprimer signup_data de localStorage après consommation
+10. Dynamiser og:locale selon la langue
+11. Ajouter aria-labels aux charts Recharts
+12. Fixer tooltip styles pour light mode
+
+### Hors scope immédiat (décisions produit requises)
+- Intégrations réelles Pennylane/Sage/QuickBooks (APIs tierces, secrets nécessaires)
+- Export PDF CSRD réel (librairie PDF côté client ou edge function)
+- Activation Stripe live (secret keys, webhook config)
+- Crawl réel des concurrents (infrastructure, coûts)
 
