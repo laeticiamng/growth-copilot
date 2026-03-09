@@ -94,7 +94,8 @@ export const en = {
       faq: "FAQ",
       agents: "Agents",
       blog: "Blog",
-      geo: "GEO · AI Engines",
+      geo: "AI Visibility",
+      eco: "Eco-Transition",
       help: "Help",
       login: "Login",
       getStarted: "Get Started",
@@ -106,9 +107,9 @@ export const en = {
       headline1: "39 AI agents to automate",
       headlineHighlight: "your growth",
       subheadline: "Marketing, Sales, Finance, Security — your AI departments work 24/7. You approve, they execute.",
-      benefitBriefs: "Auto-generated briefs",
-      benefitApprovals: "Approval-driven",
-      benefitEvidence: "Evidence-based",
+      benefitBriefs: "Reports delivered every morning",
+      benefitApprovals: "You approve, AI executes",
+      benefitEvidence: "Decisions based on your real data",
       urlPlaceholder: "yoursite.com",
       urlValid: "Valid URL — ready for analysis",
       urlHint: "Free SEO analysis in 30 seconds",
@@ -4426,6 +4427,9 @@ export const en = {
     learnMore: "Learn more",
     accept: "Accept",
     decline: "Decline",
+  },
+  commandPalette: {
+    search: "Search...",
   },
   // GEO Module
   geo: {

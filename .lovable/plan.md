@@ -1,108 +1,145 @@
 
-# AUDIT BÊTA-TESTEUR NON TECHNIQUE — Growth OS
+
+# Audit Complet : Growth OS — Ce qui manque pour être unique et révolutionnaire
+
+## Ce qui est deja excellent
+
+La plateforme est remarquablement ambitieuse : 39 agents IA, 11 departements, architecture multi-tenant avec RBAC, 44+ edge functions, i18n 7 langues, module GEO, voice assistant ElevenLabs, creative studio, evidence bundles, approval workflow, audit log immutable, et un modele de pricing structure par departement.
 
 ---
 
-## 1. RÉSUMÉ EXÉCUTIF
+## 1. EXPERIENCE UTILISATEUR — Manques critiques
 
-### Ce qu'un novice comprend en arrivant
-Le hero est efficace : "39 agents IA pour automatiser votre croissance" est immédiatement compréhensible. Le visiteur comprend que c'est un outil B2B d'automatisation par IA, avec des départements (Marketing, Finance, etc.). Le champ URL + CTA "Commencer gratuitement" est un bon mécanisme d'entrée.
+### 1.1 Pas de Dark/Light Mode Toggle visible
+Le theme semble fixe. Un toggle dark/light accessible depuis le header du dashboard et la landing page est attendu pour toute app SaaS moderne.
 
-### Ce qu'il ne comprend PAS
-- **"GEO · Moteurs IA"** dans le menu : incompréhensible pour un novice
-- **"Eco"** dans le menu : trop vague, on pense "économie" pas "écologie"
-- La section **Sécurité** est entièrement cassée (affiche des clés techniques brutes comme `landing.security.badge`)
-- La **bannière cookies est en anglais** sur un site français
-- 4 questions FAQ affichent des clés techniques brutes au lieu de texte
-- Le **dashboard mélange français et anglais** (sidebar FR, contenu EN)
-- Le **pricing** commence à 490€/mois sans contexte immédiat de valeur
+### 1.2 Pas de Dashboard personnalisable (Drag & Drop)
+Le cockpit est figé. Les dirigeants veulent reordonner, masquer ou ajouter des widgets. Un systeme de dashboard configurable avec grille drag-and-drop serait un differenciateur majeur.
 
-### 5 plus gros freins
-1. **Section Sécurité cassée** — affiche du code au lieu de texte, détruit la crédibilité instantanément
-2. **Bannière cookies en anglais** — premier élément visible, incohérence de langue immédiate
-3. **FAQ partiellement cassée** — les 4 dernières questions affichent des clés techniques
-4. **Barre de recherche dashboard non traduite** — `commandPalette.search` visible
-5. **Menu navbar trop technique** — "GEO · Moteurs IA" et "Eco" sont du jargon
+### 1.3 Pas de Guided Product Tour
+L'onboarding existe mais il n'y a pas de tour interactif in-app (tooltips step-by-step) qui guide les nouveaux utilisateurs dans le dashboard.
 
-### 5 priorités absolues
-1. Ajouter les traductions `landing.security.*` (section entièrement cassée)
-2. Ajouter les traductions `cookies.*` (bannière en anglais)
-3. Ajouter les FAQ q7-q10 dans le namespace `landing.faq` ou réduire à q1-q6
-4. Renommer les liens navbar pour un public non-technique
-5. Traduire la barre de recherche du dashboard
+### 1.4 Pas de Command Palette (Cmd+K)
+Pour une app avec 48+ pages dashboard, un raccourci clavier universel de recherche/navigation est indispensable. `cmdk` est deja installé mais semble non utilisé globalement.
 
 ---
 
-## 2. TABLEAU D'AUDIT COMPLET
+## 2. IA & AGENTS — Manques differenciants
 
-| Priorité | Page / Zone | Problème | Ce que ressent le novice | Impact | Recommandation | Immédiat? |
-|----------|------------|----------|------------------------|--------|---------------|-----------|
-| P0 | Landing / SecurityTrust | Affiche `landing.security.badge`, `landing.security.title`, etc. | "C'est quoi ce charabia technique ? C'est cassé." | Crédibilité DÉTRUITE — section trust qui fait l'inverse | Ajouter les clés i18n `landing.security.*` dans fr.ts et en.ts | OUI |
-| P0 | Global / Cookie banner | Texte en anglais ("We use cookies...") sur site FR | "Ce site est-il vraiment français ? C'est bâclé." | Première impression négative, incohérence langue | Ajouter clés `cookies.*` en français | OUI |
-| P0 | Landing / FAQ | q7-q10 affichent `landing.faq.q7.question` etc. | "Encore du code qui s'affiche, ce site est buggé" | Perte de confiance, impression de prototype | Soit ajouter q7-q10, soit limiter le rendu à q1-q6 | OUI |
-| P1 | Navbar | "GEO · Moteurs IA" | "C'est quoi GEO ? Moteurs IA ? Je comprends rien" | Friction de navigation, abandon | Renommer en "Visibilité IA" ou "IA & Référencement" | OUI |
-| P1 | Navbar | "Eco" | "Éco quoi ? Économique ? Écologique ?" | Confusion, label trop court | Renommer en "Éco-Transition" | OUI |
-| P1 | Dashboard | Barre recherche affiche `commandPalette.search` | "Texte bizarre dans la barre de recherche" | Impression de produit non fini | Ajouter traduction ou fallback "Rechercher..." | OUI |
-| P1 | Dashboard | Greeting en anglais "Good morning! Here's the status of..." | "Pourquoi c'est en anglais maintenant ?" | Incohérence de langue dans le produit | Traduire le contenu du cockpit | OUI |
-| P1 | Dashboard / sidebar | Labels "Active agents", "Departments", "Availability" en anglais | Mélange FR/EN confus | Produit pas fini | Vérifier les traductions dashboard | OUI |
-| P1 | Landing / Hero | "Briefs auto-générés", "Approbations intégrées", "Basé sur les données" — abstraits | "OK mais concrètement ça fait quoi pour MOI ?" | Benefits pas assez concrets pour un novice | Réécrire avec bénéfices tangibles | OUI |
-| P2 | Landing / Pricing | 490€-9 000€/mois, tarifs élevés sans preuve de valeur immédiate | "C'est très cher, pourquoi je paierais ça ?" | Conversion bloquée par le choc prix | Ajouter ROI concret avant le prix (ex: "vs 175 500€/an d'embauche") | OUI |
-| P2 | Landing / Cookie banner mobile | La bannière couvre le CTA principal | "Je peux pas cliquer sur Commencer" | Conversion mobile bloquée | Repositionner ou réduire la bannière | OUI |
-| P2 | Landing / EcoTransition | Badge "Beta" ajouté mais section promet des fonctionnalités non opérationnelles | "C'est pas encore prêt ?" | Attentes déçues, perte de confiance | Clarifier "Bientôt disponible" ou "Aperçu" | OUI |
-| P2 | Footer | Lien "Statut" — peu compréhensible pour un novice | "Statut de quoi ?" | Jargon technique | Renommer "État du service" | OUI |
-| P3 | Landing | Beaucoup de sections (Hero, Trust, Features, Preview, HowItWorks, Comparison, TeamOrg, Tools, Security, GEO, Eco, Pricing, Testimonials, FAQ, CTA) = très long | "C'est interminable" | Fatigue de scroll, abandon | Évaluer suppression/fusion de sections redondantes | NON (décision produit) |
-| P3 | Landing / Testimonials | Pas de vrais noms, juste "Secteur" — peu crédible | "C'est des faux témoignages" | Confiance réduite | Ajouter vrais témoignages quand disponibles | NON |
+### 2.1 Pas de collaboration inter-agents visible
+Les agents travaillent en silo. Un workflow visible ou les agents se passent le relais (ex: Keyword Strategist → Content Builder → Social Manager) avec une timeline serait revolutionnaire.
+
+### 2.2 Pas de "Agent Memory" persistante
+Les conversations agent (AgentChat) ne semblent pas conserver le contexte entre sessions. Une memoire longue terme par agent (objectifs, preferences, decisions passees) serait un game-changer.
+
+### 2.3 Pas de marketplace d'agents custom
+Permettre aux utilisateurs de creer leurs propres agents avec des prompts personalises, puis de les partager, serait un avantage concurrentiel enorme.
+
+### 2.4 Pas de "Agent Autonomy Levels" progressifs
+Au-dela du toggle autopilot ON/OFF, un systeme de 5 niveaux de confiance par agent (Observer → Suggest → Draft → Act with Approval → Full Auto) que l'utilisateur ajuste au fil du temps.
 
 ---
 
-## 3. AMÉLIORATIONS PRIORITAIRES À IMPLÉMENTER IMMÉDIATEMENT
+## 3. DONNEES & ANALYTICS — Manques
 
-### Traductions manquantes critiques (P0)
+### 3.1 Pas de dashboards exportables en PDF/CSV depuis le cockpit
+CockpitPDFExport existe dans les components mais n'est pas integre dans DashboardHome.
 
-**1. `landing.security.*`** — La section SecurityTrust est 100% cassée visuellement. Ajouter dans fr.ts ET en.ts :
-- `landing.security.badge` = "Sécurité & Conformité"
-- `landing.security.title` = "Vos données sont protégées"
-- `landing.security.subtitle` = "Sécurité enterprise-grade intégrée à chaque niveau"
-- 6 features : encryption, rbac, audit, gdpr, hosting, approvals (title + desc)
+### 3.2 Pas de goal-setting avec OKR tracking
+Le module existe conceptuellement (GoalsProgress) mais pas de systeme complet de definition d'objectifs avec suivi automatise.
 
-**2. `cookies.*`** — Bannière visible en premier, en anglais. Ajouter :
-- `cookies.message` = "Nous utilisons des cookies pour améliorer votre expérience et fournir un support client."
-- `cookies.learnMore` = "En savoir plus"
-- `cookies.decline` = "Refuser"
-- `cookies.accept` = "Accepter"
+### 3.3 Pas de predictive analytics
+Les KPIs montrent le passe. Une couche de prediction (forecast des clics, conversions, revenus sur 30/60/90 jours) basee sur les donnees historiques serait unique.
 
-**3. FAQ q7-q10** — Limiter le composant FAQ à q1-q6 (les seules clés qui existent dans `landing.faq`)
-
-### Copy / Labels (P1)
-
-**4. Navbar** :
-- "GEO · Moteurs IA" → "Visibilité IA"
-- "Eco" → "Éco-Transition"
-
-**5. Hero benefits** — Rendre plus concrets :
-- "Briefs auto-générés" → "Rapports livrés chaque matin"
-- "Approbations intégrées" → "Vous validez, l'IA exécute"
-- "Basé sur les données" → "Décisions basées sur vos données réelles"
-
-### Dashboard (P1)
-
-**6. `commandPalette.search`** — Ajouter la traduction manquante
+### 3.4 Pas de benchmarking sectoriel
+Comparer ses KPIs avec des moyennes sectorielles (taux de conversion e-commerce vs SaaS vs lead gen) donnerait un contexte enorme.
 
 ---
 
-## 4. PLAN D'IMPLÉMENTATION
+## 4. COLLABORATION & EQUIPE — Manques
 
-### Fichiers à modifier :
+### 4.1 Pas de comments/annotations sur les rapports
+Permettre aux membres de l'equipe de commenter les rapports, KPIs, et actions des agents creerait une couche collaborative essentielle.
 
-| Fichier | Modification |
-|---------|-------------|
-| `src/i18n/locales/fr.ts` | Ajouter `landing.security.*`, `cookies.*`, améliorer hero benefits labels, ajouter `commandPalette.search` |
-| `src/i18n/locales/en.ts` | Même chose en anglais |
-| `src/components/landing/FAQ.tsx` | Réduire `faqKeys` à `["q1", "q2", "q3", "q4", "q5", "q6"]` |
-| `src/components/landing/Navbar.tsx` | Pas de changement code, les labels viennent d'i18n — modifier les clés `landing.navbar.geo` et `landing.navbar.eco` dans les traductions |
+### 4.2 Pas de @mentions dans les approbations
+Le workflow d'approbation n'a pas de systeme de mention pour solliciter un reviewer specifique.
 
-### Ce qui NE peut PAS être fait immédiatement :
-- Vrais témoignages clients (décision business)
-- Restructuration pricing (décision produit)
-- Réduction du nombre de sections landing (décision produit)
-- Traduction complète du dashboard cockpit (trop de fichiers à auditer)
+### 4.3 Pas de shared workspaces avec granularite fine
+Les roles existent (owner/admin/manager/viewer) mais il n'y a pas de permissions par module/departement specifique pour un utilisateur donne.
+
+---
+
+## 5. INTEGRATIONS — Manques
+
+### 5.1 Pas d'integration CRM native
+Hubspot, Salesforce, Pipedrive. Pour une plateforme qui gere des leads et le lifecycle, c'est un manque majeur.
+
+### 5.2 Pas d'integration Slack/Teams pour les notifications
+Les alertes restent dans l'app. Pousser les approbations, alertes critiques et briefings vers Slack/Teams serait essentiel pour l'adoption.
+
+### 5.3 Pas de Zapier/Make webhook entrant
+Le module webhooks sortants existe mais pas de connecteur no-code entrant pour les outils tiers.
+
+### 5.4 Pas d'integration email marketing
+Mailchimp, Brevo, SendGrid pour le lifecycle management au-dela des emails transactionnels Resend.
+
+---
+
+## 6. MONETISATION & BUSINESS — Manques
+
+### 6.1 Pas de Free Trial fonctionnel
+Le plan Starter est a 490€/mois. Aucun plan gratuit explorable avec des donnees demo pre-remplies. Un "sandbox mode" avec donnees fictives permettrait de convertir beaucoup plus.
+
+### 6.2 Pas de ROI calculator sur la landing page
+Un calculateur interactif ("combien d'heures/euros economisez-vous") sur la page pricing serait un conversion booster puissant.
+
+### 6.3 Pas de white-label pour les agences
+Le module agency existe mais pas de branding personnalisable (logo, couleurs, domaine) pour les clients des agences.
+
+---
+
+## 7. MOBILE & PWA — Manques
+
+### 7.1 Pas d'experience mobile optimisee pour le cockpit
+Le dashboard est responsive mais pas pense "mobile-first" pour les dirigeants qui consultent leur briefing le matin sur mobile.
+
+### 7.2 Notifications push PWA non implementees
+Le service worker (sw.js) est present mais les push notifications ne sont pas configurees. Un briefing matinal push serait un usage killer.
+
+---
+
+## 8. SECURITE & COMPLIANCE — Refinements
+
+### 8.1 Pas de 2FA/MFA
+L'authentification supporte email + Google OAuth mais pas de TOTP/2FA, requis pour les entreprises serieuses.
+
+### 8.2 Pas de SSO SAML/OIDC
+Pour le plan Enterprise, c'est un prerequis. L'infrastructure auth le supporte via le backend mais ce n'est pas expose.
+
+### 8.3 Pas de data retention policies configurables
+Les donnees sont gardees indefiniment. Permettre aux clients de definir des periodes de retention (30/90/365 jours) serait un argument RGPD.
+
+---
+
+## Top 5 — Actions a plus fort impact pour etre "revolutionnaire"
+
+```text
+Impact × Faisabilite
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Command Palette (Cmd+K)          ████████████ Haut
+   → cmdk deja installe, 1-2 jours
+   
+2. Agent Collaboration Workflows    ████████████ Haut
+   → Pipeline visuel inter-agents, differenciateur #1
+   
+3. Predictive Analytics Layer       ██████████░░ Moyen
+   → Forecasting KPIs, wow-effect pour les dirigeants
+   
+4. Slack/Teams Notifications        ██████████░░ Moyen
+   → Push des briefings et approbations
+   
+5. Free Interactive Demo/Sandbox    █████████░░░ Moyen
+   → Donnees demo pre-remplies, conversion x3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
