@@ -1,18 +1,18 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3, TestTube2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+import { format } from "date-fns";
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
 
-function generateData(baseFn: (i: number, rand: number) => number) {
-  return MONTHS.map((m, i) => ({
+function generateData(baseFn: (i: number, rand: number) => number, months: string[]) {
+  return months.map((m, i) => ({
     month: m,
     value: baseFn(i, seededRandom(i * 17 + 42)),
   }));
@@ -74,16 +74,29 @@ function KPICard({ title, value, trend, trendValue, positive, icon: Icon, data, 
 export function GreenKPIDashboard() {
   const { t } = useTranslation();
 
-  const energyData = useMemo(() => generateData((i, r) => Math.round(4200 - i * 120 + r * 200 - 100)), []);
-  const wasteData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(35 + i * 5 + r * 5))), []);
-  const renewableData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(12 + i * 6 + r * 3))), []);
-  const intensityData = useMemo(() => generateData((i, r) => Math.max(5, Math.round(28 - i * 1.8 + r * 2))), []);
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const date = new Date(2025, i, 1);
+      return format(date, "MMM");
+    });
+  }, []);
+
+  const energyData = useMemo(() => generateData((i, r) => Math.round(4200 - i * 120 + r * 200 - 100), months), [months]);
+  const wasteData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(35 + i * 5 + r * 5)), months), [months]);
+  const renewableData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(12 + i * 6 + r * 3)), months), [months]);
+  const intensityData = useMemo(() => generateData((i, r) => Math.max(5, Math.round(28 - i * 1.8 + r * 2)), months), [months]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">{t("eco.greenKpiTitle")}</h3>
-        <p className="text-sm text-muted-foreground">{t("eco.greenKpiDesc")}</p>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 className="text-lg font-semibold">{t("eco.greenKpiTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("eco.greenKpiDesc")}</p>
+        </div>
+        <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+          <TestTube2 className="h-3 w-3" />
+          {t("common.demoData", "Demo data")}
+        </Badge>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

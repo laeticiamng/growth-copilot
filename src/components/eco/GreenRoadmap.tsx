@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Calendar, TrendingDown, Euro, Award } from "lucide-react";
+import { Sparkles, Calendar, TrendingDown, Euro, Award, TestTube2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 
@@ -91,15 +91,21 @@ export function GreenRoadmap() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-lg font-semibold">{t("eco.roadmapTitle")}</h3>
           <p className="text-sm text-muted-foreground">{t("eco.roadmapDesc")}</p>
         </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
+            <TestTube2 className="h-3 w-3" />
+            {t("common.demoData", "Demo data")}
+          </Badge>
         <Button onClick={handleGenerate} className="bg-emerald-600 hover:bg-emerald-700">
           <Sparkles className="h-4 w-4 mr-2" />
           {t("eco.generateAI")}
         </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="year1">

@@ -21,11 +21,8 @@ export const ProtectedRoute = forwardRef<HTMLDivElement, ProtectedRouteProps>(
     const { isDemoMode } = useDemoMode();
     const location = useLocation();
 
-    // Synchronous localStorage fallback to avoid race condition with context propagation
-    const isDemoFromStorage = typeof window !== 'undefined' && localStorage.getItem('growth_os_demo_mode') === 'true';
-
-    // Demo mode bypasses authentication (context OR localStorage)
-    if (isDemoMode || isDemoFromStorage) {
+    // Demo mode bypasses authentication (context only — no localStorage fallback for security)
+    if (isDemoMode) {
       return <div ref={ref}>{children}</div>;
     }
 
