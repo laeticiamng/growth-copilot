@@ -34,17 +34,17 @@ export function DemoModeBanner() {
   );
 }
 
-export function DemoModeWatermark() {
+export const DemoModeWatermark = forwardRef<HTMLDivElement>(function DemoModeWatermark(_props, ref) {
   const { isDemoMode } = useDemoMode();
 
   if (!isDemoMode) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
+    <div ref={ref} className="fixed bottom-4 right-4 z-40 pointer-events-none">
       <Badge variant="outline" className="bg-chart-4/20 text-chart-4 border-chart-4/50 text-lg px-4 py-2">
         <TestTube2 className="w-5 h-5 mr-2" />
         SANDBOX
       </Badge>
     </div>
   );
-}
+});
