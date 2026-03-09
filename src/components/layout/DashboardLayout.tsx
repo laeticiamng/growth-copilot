@@ -523,7 +523,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-medium text-sm mr-2">
                     {user?.email?.[0]?.toUpperCase() || 'D'}
                   </div>
-                  <span className="truncate text-sm">{user?.email || 'demo@growthOS.com'}</span>
+                  <span className="truncate text-sm">{user?.email || 'demo@emotionscare.com'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
