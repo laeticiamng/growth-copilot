@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Clock, Euro, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ExternalLink, Clock, Euro, CheckCircle2, AlertTriangle, TestTube2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Subsidy {
