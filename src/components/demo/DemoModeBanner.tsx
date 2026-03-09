@@ -6,7 +6,7 @@ import { TestTube2, Rocket, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-export function DemoModeBanner() {
+export const DemoModeBanner = forwardRef<HTMLDivElement>(function DemoModeBanner(_props, ref) {
   const { isDemoMode, deactivateDemo } = useDemoMode();
   const { t } = useTranslation();
 
