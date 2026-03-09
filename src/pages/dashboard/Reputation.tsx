@@ -212,7 +212,7 @@ export default function Reputation() {
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="flex items-center gap-4 py-4">
             <AlertTriangle className="w-5 h-5 text-primary" />
-            <p className="text-sm" dangerouslySetInnerHTML={{ __html: t("modules.reputation.configureGBP") }} />
+            <p className="text-sm">{t("modules.reputation.configureGBP")}</p>
           </CardContent>
         </Card>
       )}
