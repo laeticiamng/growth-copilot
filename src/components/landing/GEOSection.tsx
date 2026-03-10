@@ -46,7 +46,7 @@ export function GEOSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="geo" className="py-24 relative overflow-hidden scroll-mt-20">
+    <section id="geo" className="py-12 sm:py-16 md:py-24 relative overflow-hidden scroll-mt-20">
       {/* Background effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-destructive/5 via-transparent to-transparent" />
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-destructive/5 rounded-full blur-3xl" />
@@ -68,7 +68,7 @@ export function GEOSection() {
         </div>
 
         {/* Before / After comparison */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
           <Card className="border-destructive/30 bg-destructive/5">
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
@@ -109,7 +109,7 @@ export function GEOSection() {
         </div>
 
         {/* 4 GEO tools */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
           {GEO_FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (

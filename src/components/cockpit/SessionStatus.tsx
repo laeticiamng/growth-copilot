@@ -72,7 +72,7 @@ export function SessionStatus({ compact = false, showActions = true }: SessionSt
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-secondary/50">
+    <div className="flex items-center justify-between gap-3 sm:gap-4 p-3 rounded-lg bg-secondary/50">
       <div className="flex items-center gap-3">
         <div className="relative">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

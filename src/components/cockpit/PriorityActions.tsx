@@ -99,7 +99,7 @@ export function PriorityActions({ actions, loading, maxItems = 5 }: PriorityActi
               <div
                 key={action.id}
                 className={cn(
-                  "flex items-start gap-3 p-4 rounded-lg border transition-all hover:shadow-sm",
+                  "flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border transition-all hover:shadow-sm",
                   config.border,
                   config.bg
                 )}

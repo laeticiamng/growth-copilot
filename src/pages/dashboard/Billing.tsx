@@ -202,7 +202,7 @@ export default function Billing() {
 
   return (
     <PermissionGuard permission="manage_billing">
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
         <header>
           <h1 className="text-3xl font-bold tracking-tight">{t("billing.page.title")}</h1>
@@ -275,7 +275,7 @@ export default function Billing() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {paidServices.map(service => {
               const Icon = SERVICE_ICONS[service.slug] || Puzzle;
               const employees = DEPT_EMPLOYEES[service.slug] || 3;

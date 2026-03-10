@@ -88,7 +88,7 @@ export function WelcomeCard({
         </div>
         
         <div className="mt-4 pt-4 border-t border-border/50">
-          <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
             <QuickStat 
               icon={<Sparkles className="w-4 h-4 text-primary flex-shrink-0" />}
               label={t("cockpit.welcomeActiveAgents")}

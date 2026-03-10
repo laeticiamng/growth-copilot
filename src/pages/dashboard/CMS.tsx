@@ -376,7 +376,7 @@ function PageEditorDialog({ page, onClose, onSave, isSaving, t }: {
           <DialogDescription>{t("modules.cms.editPageDesc")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t("modules.cms.pageTitle")}</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("modules.cms.pageTitle")} />

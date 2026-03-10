@@ -20,7 +20,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 relative">
+    <section id="how-it-works" className="py-12 sm:py-16 md:py-24 relative">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -36,7 +36,7 @@ export function HowItWorks() {
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {steps.map((step, index) => (
             <Card
               key={step.number}
@@ -44,9 +44,9 @@ export function HowItWorks() {
               className="relative overflow-hidden fade-in-up"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
-              <CardContent className="p-8">
+              <CardContent className="p-5 sm:p-6 md:p-8">
                 {/* Step Number */}
-                <div className="absolute top-4 right-4 text-6xl font-bold text-primary/10">
+                <div className="absolute top-4 right-4 text-4xl sm:text-5xl md:text-6xl font-bold text-primary/10">
                   {step.number}
                 </div>
 

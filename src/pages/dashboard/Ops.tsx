@@ -89,16 +89,16 @@ export default function Ops() {
     }>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">{t("opsPage.title")}</h1>
-          <p className="text-muted-foreground">{t("opsPage.subtitle")}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("opsPage.title")}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">{t("opsPage.subtitle")}</p>
         </div>
 
         {/* Alert Banner */}
         {(criticalIncidents.length > 0 || failedTokens.length > 0 || expiringTokens.length > 0) && (
           <Card className="border-destructive bg-destructive/5">
             <CardContent className="py-4">
-              <div className="flex items-center gap-4">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <AlertTriangle className="h-6 w-6 text-destructive flex-shrink-0" />
                 <div className="flex-1">
                   {criticalIncidents.length > 0 && (
                     <p className="font-medium">{t("opsPage.criticalIncidents", { count: criticalIncidents.length })}</p>
@@ -119,7 +119,7 @@ export default function Ops() {
         )}
 
         {/* KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">{t("opsPage.successRate")}</CardTitle>

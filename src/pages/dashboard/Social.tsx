@@ -222,7 +222,7 @@ export default function Social() {
   // Empty state - no site selected
   if (!currentSite) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div>
           <h1 className="text-2xl font-bold">{t("modules.social.title")}</h1>
           <p className="text-muted-foreground">{t("modules.social.subtitle")}</p>
@@ -245,7 +245,7 @@ export default function Social() {
   const hasConnectedAccounts = accounts.some(a => a.connected);
   if (!hasConnectedAccounts && posts.length === 0) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div>
           <h1 className="text-2xl font-bold">{t("modules.social.title")}</h1>
           <p className="text-muted-foreground">{t("modules.social.subtitle")}</p>
@@ -269,7 +269,7 @@ export default function Social() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -292,7 +292,7 @@ export default function Social() {
       </div>
 
       {/* Connected accounts */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {accounts.map((account, i) => {
           const Icon = platformIcons[account.platform.toLowerCase()] || Instagram;
           return (

@@ -73,7 +73,7 @@ export default function Content() {
 
   if (!currentSite) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div>
           <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
           <p className="text-muted-foreground">{t("contentPage.subtitle")}</p>
@@ -86,7 +86,7 @@ export default function Content() {
   const hasData = keywords.length > 0 || briefs.length > 0 || clusters.length > 0;
   if (!hasData) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
@@ -106,7 +106,7 @@ export default function Content() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t("contentPage.title")}</h1>
@@ -182,7 +182,8 @@ export default function Content() {
               </div>
             </CardHeader>
             <CardContent>
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("contentPage.keyword")}</th>
@@ -207,12 +208,13 @@ export default function Content() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="clusters" className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {displayClusters.map((cluster, i) => (
               <Card key={i} variant="feature" className="hover:border-primary/50 cursor-pointer transition-colors">
                 <CardContent className="pt-6">

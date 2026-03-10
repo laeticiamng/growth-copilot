@@ -97,7 +97,7 @@ export function QuickLaunchers({
           <Skeleton className="h-6 w-40" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-24" />
             ))}
@@ -129,7 +129,7 @@ export function QuickLaunchers({
                 onClick={() => handleLaunch(launcher)}
                 disabled={isLaunching || launcher.disabled}
                 className={cn(
-                  "flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
+                  "flex items-start gap-3 p-4 rounded-lg border text-left transition-all min-h-[44px]",
                   launcher.disabled
                     ? "opacity-50 cursor-not-allowed bg-muted/30"
                     : "hover:border-primary/50 hover:bg-primary/5 cursor-pointer"

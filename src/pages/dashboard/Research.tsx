@@ -7,10 +7,10 @@ export default function Research() {
   return (
     <div className="space-y-6">
       {/* Header - Apple-like clarity */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <span className="text-3xl">🔍</span>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Intelligence</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Intelligence</h1>
           <p className="text-muted-foreground">
             Recherche IA en temps réel pour comprendre votre marché et vos concurrents
           </p>

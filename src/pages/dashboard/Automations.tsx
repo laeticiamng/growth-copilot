@@ -29,7 +29,7 @@ export default function Automations() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t("automationsPage.title")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("automationsPage.title")}</h1>
         <p className="text-muted-foreground mt-1">{t("automationsPage.subtitle")}</p>
       </div>
 
@@ -190,7 +190,7 @@ function CreateAutomationDialog({ onClose, onCreate }: { onClose: () => void; on
         </div>
         <div className="space-y-2">
           <Label>{t("automationsPage.actionsToExecute")}</Label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {ACTION_TYPES.map((action) => (
               <div key={action.value} className="flex items-center space-x-2 rounded-lg border p-3">
                 <Checkbox id={action.value} checked={selectedActions.includes(action.value)} onCheckedChange={(checked) => { if (checked) { setSelectedActions((prev) => [...prev, action.value]); } else { setSelectedActions((prev) => prev.filter((a) => a !== action.value)); } }} />
@@ -327,7 +327,7 @@ function CreateWebhookDialog({ onClose, onCreate }: { onClose: () => void; onCre
         </div>
         <div className="space-y-2">
           <Label>{t("automationsPage.eventsToSend")}</Label>
-          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
             {WEBHOOK_EVENTS.map((event) => (
               <div key={event.value} className="flex items-center space-x-2 rounded-lg border p-2">
                 <Checkbox id={event.value} checked={selectedEvents.includes(event.value)} onCheckedChange={(checked) => { if (checked) { setSelectedEvents((prev) => [...prev, event.value]); } else { setSelectedEvents((prev) => prev.filter((e) => e !== event.value)); } }} />

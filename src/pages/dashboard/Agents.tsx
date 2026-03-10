@@ -181,7 +181,7 @@ export default function Agents() {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t("agentsPage.running")}</CardTitle>

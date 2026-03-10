@@ -34,7 +34,7 @@ export function Tools() {
   const oauthIntegrations = integrations.filter(i => i.phase === "oauth");
 
   return (
-    <section id="tools" className="py-24 bg-secondary/30 relative scroll-mt-20">
+    <section id="tools" className="py-12 sm:py-16 md:py-24 bg-secondary/30 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">
@@ -45,7 +45,7 @@ export function Tools() {
         </div>
 
         {/* 3-step progressive journey */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
           {steps.map((step, index) => (
             <div key={index} className="relative">
               <Card variant="feature" className="group fade-in-up h-full" style={{ animationDelay: `${index * 0.15}s` }}>
@@ -74,7 +74,7 @@ export function Tools() {
             <h3 className="text-lg font-semibold">{t("landing.tools.instantTitle")}</h3>
             <Badge variant="success" className="text-xs">{t("landing.tools.noAccountNeeded")}</Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              {instantIntegrations.map((tool) => (
               <Card key={tool.nameKey} variant="feature" className="group">
                 <CardContent className="p-5 flex items-center gap-4">
@@ -101,7 +101,7 @@ export function Tools() {
             <h3 className="text-lg font-semibold">{t("landing.tools.oauthTitle")}</h3>
             <Badge variant="secondary" className="text-xs">{t("landing.tools.oneClick")}</Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
              {oauthIntegrations.map((tool) => (
               <Card key={tool.nameKey} variant="feature" className="group">
                 <CardContent className="p-5 flex items-center gap-4">

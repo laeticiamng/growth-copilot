@@ -183,7 +183,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
         <CardHeader>
           <Skeleton className="h-6 w-32" />
         </CardHeader>
-        <CardContent className="grid grid-cols-5 gap-2">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
           {[1, 2, 3, 4, 5].map(i => (
             <Skeleton key={i} className="h-24" />
           ))}
@@ -206,7 +206,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {departments.map((dept) => {
             const Icon = dept.icon;
             return (
@@ -214,7 +214,7 @@ export function DepartmentSemaphores({ className }: DepartmentSemaphoresProps) {
                 key={dept.id} 
                 to={dept.link}
                 className={cn(
-                  "p-3 rounded-lg border transition-all hover:shadow-sm flex flex-col items-center text-center gap-2",
+                  "p-3 rounded-lg border transition-all hover:shadow-sm flex flex-col items-center text-center gap-2 min-h-[44px]",
                   dept.status === "gray" 
                     ? "bg-muted/30 border-dashed" 
                     : "bg-secondary/30 border-border"

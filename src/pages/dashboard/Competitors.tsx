@@ -254,16 +254,16 @@ ${swotData.threats.map(item => `- ${item}`).join('\n') || `- ${t("modules.compet
           <p className="text-muted-foreground">{t("modules.competitors.subtitle")}</p>
           {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.competitors.selectSiteWarning")}</p>}
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleGenerateSWOT} disabled={generatingSWOT || competitors.length === 0}>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Button variant="outline" size="sm" onClick={handleGenerateSWOT} disabled={generatingSWOT || competitors.length === 0}>
             {generatingSWOT ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
             SWOT
           </Button>
-          <Button variant="outline" onClick={refetch}>
+          <Button variant="outline" size="sm" onClick={refetch}>
             <RefreshCw className="w-4 h-4 mr-2" />
             {t("modules.competitors.refresh")}
           </Button>
-          <Button variant="hero" onClick={() => setShowAddDialog(true)}>
+          <Button variant="hero" size="sm" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t("modules.competitors.addCompetitor")}
           </Button>
@@ -566,11 +566,11 @@ ${swotData.threats.map(item => `- ${item}`).join('\n') || `- ${t("modules.compet
       </Dialog>
 
       <Dialog open={showSWOTDialog} onOpenChange={setShowSWOTDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t("modules.competitors.swotTitle")}</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
             <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
               <h4 className="font-medium text-green-600 mb-2 flex items-center gap-2">
                 <ArrowUpRight className="w-4 h-4" /> {t("modules.competitors.strengths")}

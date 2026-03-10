@@ -155,7 +155,7 @@ export function RunsHistory({ maxItems = 5, showHeader = true }: RunsHistoryProp
       </Card>
 
       <Dialog open={!!selectedRun} onOpenChange={() => setSelectedRun(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <span className="text-2xl">

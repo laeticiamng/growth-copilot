@@ -62,7 +62,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+    <section className="relative min-h-[100dvh] flex items-center justify-center py-12 sm:py-16 md:py-20 pt-16 overflow-hidden">
       <div className="absolute inset-0 hero-grid opacity-50" />
       <div className="absolute inset-0 radial-overlay" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
@@ -77,7 +77,7 @@ export function Hero() {
             </Badge>
           </div>
 
-          <h1 className="fade-in-up text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-balance" style={{ animationDelay: "0.1s" }}>
+          <h1 className="fade-in-up text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-6 text-balance" style={{ animationDelay: "0.1s" }}>
             {t("landing.hero.headline1")}
             <br />
             <span className="gradient-text">
@@ -85,7 +85,7 @@ export function Hero() {
             </span>
           </h1>
 
-          <p className="fade-in-up text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6" style={{ animationDelay: "0.2s" }}>
+          <p className="fade-in-up text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6" style={{ animationDelay: "0.2s" }}>
             {t("landing.hero.subheadline")}
           </p>
 
@@ -134,7 +134,7 @@ export function Hero() {
               </div>
               <Button 
                 variant="hero" 
-                className="w-full sm:w-auto whitespace-nowrap h-14 px-8"
+                className="w-full sm:w-auto whitespace-nowrap h-14 min-h-[44px] px-8"
                 onClick={handleGetStarted}
                 disabled={isLoading}
               >
@@ -169,7 +169,7 @@ export function Hero() {
 
           <div className="fade-in-up flex flex-col sm:flex-row items-center justify-center gap-4 mt-2" style={{ animationDelay: "0.4s" }}>
             <Link to="/demo">
-              <Button variant="outline" size="lg" className="gap-2">
+              <Button variant="outline" size="lg" className="gap-2 min-h-[44px]">
                 <Sparkles className="w-4 h-4" />
                 {t("landing.hero.tryDemo", "Explorer la démo interactive")}
               </Button>
@@ -177,7 +177,7 @@ export function Hero() {
             <span className="text-xs text-muted-foreground">{t("landing.hero.urlHint")}</span>
           </div>
 
-          <div className="fade-in-up mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
+          <div className="fade-in-up mt-10 sm:mt-16 pt-8 border-t border-border/50" style={{ animationDelay: "0.5s" }}>
             <p className="text-sm text-muted-foreground mb-6">
               {t("landing.hero.premiumCompetence")}
             </p>

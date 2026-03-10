@@ -261,7 +261,7 @@ export default function SEOTech() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -335,7 +335,7 @@ export default function SEOTech() {
             </CardContent>
           </Card>
           
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             <Skeleton className="h-40" />
             <Skeleton className="h-40" />
             <Skeleton className="h-40" />
@@ -365,9 +365,9 @@ export default function SEOTech() {
           </div>
 
           {/* Score + Metrics */}
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
             {/* Score Card */}
-            <Card variant="gradient" className="md:row-span-2">
+            <Card variant="gradient" className="sm:col-span-2 md:col-span-1 md:row-span-2">
               <CardContent className="pt-6 text-center">
                 <div className="relative w-32 h-32 mx-auto mb-4">
                   <svg className="w-full h-full transform -rotate-90">

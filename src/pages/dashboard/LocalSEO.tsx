@@ -180,8 +180,8 @@ export default function LocalSEO() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-6">
-        <Card variant="gradient" className="lg:col-span-1">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+        <Card variant="gradient" className="sm:col-span-2 lg:col-span-1">
           <CardContent className="pt-6 text-center">
             <div className="relative w-24 h-24 mx-auto mb-4">
               <svg className="w-full h-full transform -rotate-90">

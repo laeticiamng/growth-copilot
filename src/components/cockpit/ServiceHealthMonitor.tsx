@@ -190,7 +190,7 @@ export function ServiceHealthMonitor() {
                         {getStatusIcon(service.status)}
                         <span className="font-medium text-sm">{service.name}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-2 sm:gap-4 text-xs flex-shrink-0">
                         {service.latency && (
                           <span className="text-muted-foreground">{service.latency}ms</span>
                         )}

@@ -78,7 +78,7 @@ export function Navbar() {
                   <Menu className="w-6 h-6" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[350px]">
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
@@ -87,26 +87,26 @@ export function Navbar() {
                     Growth OS
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col gap-4 mt-8">
+                <div className="flex flex-col gap-4 mt-8 overscroll-contain overflow-y-auto">
                   {navLinks.map((link) =>
                     link.isRoute ? (
                       <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}
-                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30">
+                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 min-h-[44px] flex items-center border-b border-border/30">
                         {link.label}
                       </Link>
                     ) : (
                       <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
-                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 border-b border-border/30">
+                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 min-h-[44px] flex items-center border-b border-border/30">
                         {link.label}
                       </a>
                     )
                   )}
                   <div className="flex flex-col gap-3 pt-4">
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">{t("landing.navbar.login")}</Button>
+                      <Button variant="ghost" className="w-full justify-start min-h-[44px]">{t("landing.navbar.login")}</Button>
                     </Link>
                     <Link to="/auth?tab=signup" onClick={() => setIsOpen(false)}>
-                      <Button variant="gradient" className="w-full">{t("landing.navbar.getStarted")}</Button>
+                      <Button variant="gradient" className="w-full min-h-[44px]">{t("landing.navbar.getStarted")}</Button>
                     </Link>
                   </div>
                 </div>
