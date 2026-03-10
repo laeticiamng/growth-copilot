@@ -344,13 +344,14 @@ export default function Lifecycle() {
                 </div>
               ) : (
                 leads.map((lead) => (
-                  <div key={lead.id} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-medium">
-                      {lead.name[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{lead.name}</p>
+                  <div key={lead.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-secondary/50">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-medium flex-shrink-0">
+                        {lead.name[0]?.toUpperCase() || '?'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium">{lead.name}</p>
                         <Badge
                           variant={
                             lead.status === "new"
@@ -365,9 +366,10 @@ export default function Lifecycle() {
                           {lead.status === "new" ? t("modules.lifecycle.statusNew") : lead.status === "qualified" ? t("modules.lifecycle.statusQualified") : lead.status === "converted" ? t("modules.lifecycle.statusConverted") : lead.status}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">{lead.company || lead.email} • {lead.source}</p>
+                        <p className="text-sm text-muted-foreground truncate">{lead.company || lead.email} • {lead.source}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pl-13 sm:pl-0">
                       <Button variant="ghost" size="sm" title="Email">
                         <Mail className="w-4 h-4" />
                       </Button>

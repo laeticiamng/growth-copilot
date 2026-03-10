@@ -303,7 +303,7 @@ export default function AppDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Agent Activity Feed */}
         <Card className="lg:col-span-1">
           <CardHeader className="pb-3">
@@ -315,7 +315,7 @@ export default function AppDashboard() {
               {lang === "fr" ? "Dernières actions en temps réel" : "Latest real-time actions"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="max-h-[500px] overflow-y-auto space-y-1 px-4">
+          <CardContent className="max-h-[500px] overflow-y-auto space-y-1 px-3 sm:px-4">
             {activityLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-16 w-full mb-2" />
@@ -370,9 +370,9 @@ export default function AppDashboard() {
           </CardHeader>
           <CardContent>
             {weeklyLoading ? (
-              <Skeleton className="h-[340px] w-full" />
+              <Skeleton className="h-[260px] sm:h-[340px] w-full" />
             ) : (
-              <div className="h-[340px]">
+              <div className="h-[260px] sm:h-[340px] overflow-x-auto">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -403,7 +403,7 @@ export default function AppDashboard() {
         <h2 className="text-lg font-bold mb-3">
           {lang === "fr" ? "Départements" : "Departments"}
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3">
           {DEPARTMENTS_CATALOG.map((dept) => {
             const DeptIcon = dept.icon;
             return (
@@ -452,7 +452,7 @@ export default function AppDashboard() {
             pendingApprovals.slice(0, 5).map((item) => (
               <div
                 key={item.id}
-                className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50"
+                className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-secondary/30 border border-border/50"
               >
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold flex-shrink-0">
                   <Bot className="w-5 h-5 text-primary" />
@@ -481,16 +481,16 @@ export default function AppDashboard() {
                     {formatTime(item.created_at || "")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-destructive hover:text-destructive"
+                    className="text-destructive hover:text-destructive min-h-[44px]"
                     onClick={() => handleReject(item.id)}
                   >
                     {lang === "fr" ? "Rejeter" : "Reject"}
                   </Button>
-                  <Button variant="default" size="sm" onClick={() => handleApprove(item.id)}>
+                  <Button variant="default" size="sm" className="min-h-[44px]" onClick={() => handleApprove(item.id)}>
                     {lang === "fr" ? "Approuver" : "Approve"}
                   </Button>
                 </div>

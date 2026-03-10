@@ -41,7 +41,7 @@ export function Testimonials() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 relative overflow-hidden" id="testimonials">
+    <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden" id="testimonials">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/50 to-background pointer-events-none" />
 
@@ -72,14 +72,14 @@ export function Testimonials() {
         </div>
 
         {/* Testimonial cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map(({ key, Icon, resultKey, gradient, iconColor }) => (
             <Card
               key={key}
               variant="glass"
               className="relative hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
             >
-              <CardContent className="p-6 flex flex-col h-full">
+              <CardContent className="p-4 sm:p-6 flex flex-col h-full">
                 {/* Badge */}
                 <div className="mb-4">
                   <Badge variant="outline" className="text-[10px] text-muted-foreground border-border/50">
@@ -107,7 +107,7 @@ export function Testimonials() {
 
                 {/* Sector label (no personal names) */}
                 <div className="flex items-center gap-3 pt-3 border-t border-border/30">
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
+                  <div className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0`}>
                     <Icon className={`w-5 h-5 ${iconColor}`} />
                   </div>
                   <div className="min-w-0">

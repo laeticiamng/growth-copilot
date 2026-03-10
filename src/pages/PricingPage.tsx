@@ -115,7 +115,7 @@ export default function PricingPage() {
         {/* Plans */}
         <section className="py-8">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
               {/* Starter */}
               <Card className="relative">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -282,8 +282,8 @@ export default function PricingPage() {
             <h2 className="text-3xl font-bold text-center mb-8">
               {t("pages.pricingPage.comparisonTitle")}
             </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full max-w-4xl mx-auto">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <table className="w-full max-w-4xl mx-auto min-w-[600px]">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 text-sm font-semibold">{t("pages.pricingPage.feature")}</th>
@@ -342,7 +342,7 @@ export default function PricingPage() {
             </div>
 
             <Card className="max-w-2xl mx-auto">
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-8">
                 <div className="mb-8">
                   <label className="text-sm font-medium mb-4 block">
                     {t("pages.pricingPage.teamSizeLabel", { count: teamSize[0] })}
@@ -361,7 +361,7 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
                   <div className="p-4 rounded-lg bg-red-500/5 border border-red-500/10">
                     <p className="text-xs text-muted-foreground mb-1">{t("pages.pricingPage.humanCost")}</p>
                     <p className="text-2xl font-bold text-red-500">{equivalentCost.toLocaleString()}€<span className="text-sm font-normal">/{t("landing.pricing.month")}</span></p>
@@ -394,7 +394,7 @@ export default function PricingPage() {
             <h2 className="text-3xl font-bold text-center mb-8">
               {t("pages.pricingPage.useCasesTitle")}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
               {useCases.map((uc, i) => (
                 <Card key={uc.key} className="animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
                   <CardContent className="p-6">

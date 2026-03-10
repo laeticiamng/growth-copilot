@@ -34,17 +34,17 @@ export function DataTablePagination({
   const { t } = useTranslation();
 
   return (
-    <div className={`flex items-center justify-between px-2 ${className}`}>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span>
-          {totalItems > 0 
-            ? `${startIndex}-${endIndex} ${t("components.pagination.of")} ${totalItems}` 
+    <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 px-2 ${className}`}>
+      <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
+        <span className="whitespace-nowrap">
+          {totalItems > 0
+            ? `${startIndex}-${endIndex} ${t("components.pagination.of")} ${totalItems}`
             : t("components.pagination.noResults")
           }
         </span>
-        
+
         {onPageSizeChange && (
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <span>{t("components.pagination.show")}</span>
             <Select
               value={String(pageSize)}
@@ -65,25 +65,25 @@ export function DataTablePagination({
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
           {t("components.pagination.page")} {currentPage} {t("components.pagination.of")} {totalPages}
         </span>
 
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(1)} disabled={!hasPreviousPage}>
+          <Button variant="outline" size="icon" className="h-9 w-9 sm:h-8 sm:w-8" onClick={() => onPageChange(1)} disabled={!hasPreviousPage}>
             <ChevronsLeft className="h-4 w-4" />
             <span className="sr-only">{t("components.pagination.firstPage")}</span>
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(currentPage - 1)} disabled={!hasPreviousPage}>
+          <Button variant="outline" size="icon" className="h-9 w-9 sm:h-8 sm:w-8" onClick={() => onPageChange(currentPage - 1)} disabled={!hasPreviousPage}>
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">{t("common.previous")}</span>
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(currentPage + 1)} disabled={!hasNextPage}>
+          <Button variant="outline" size="icon" className="h-9 w-9 sm:h-8 sm:w-8" onClick={() => onPageChange(currentPage + 1)} disabled={!hasNextPage}>
             <ChevronRight className="h-4 w-4" />
             <span className="sr-only">{t("common.next")}</span>
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(totalPages)} disabled={!hasNextPage}>
+          <Button variant="outline" size="icon" className="h-9 w-9 sm:h-8 sm:w-8" onClick={() => onPageChange(totalPages)} disabled={!hasNextPage}>
             <ChevronsRight className="h-4 w-4" />
             <span className="sr-only">{t("components.pagination.lastPage")}</span>
           </Button>

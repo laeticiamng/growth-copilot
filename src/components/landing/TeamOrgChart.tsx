@@ -125,7 +125,7 @@ export function TeamOrgChart() {
   const visibleDepartments = showAll ? otherDepartments : otherDepartments.slice(0, 4);
 
   return (
-    <section id="departments" className="py-20 px-4 bg-secondary/30">
+    <section id="departments" className="py-12 sm:py-16 md:py-20 px-4 bg-secondary/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4"><Bot className="w-3 h-3 mr-1" />{t("landing.orgChart.team")}</Badge>
@@ -191,7 +191,7 @@ export function TeamOrgChart() {
                   <div className="space-y-3">
                     {dept.employees.map((emp) => (
                       <div key={emp.name} className="flex items-start gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 text-xs font-bold text-muted-foreground">
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 text-xs font-bold text-muted-foreground">
                           {emp.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -220,7 +220,7 @@ export function TeamOrgChart() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto">
           {[
             { value: "24/7", label: t("landing.orgChart.availability") },
             { value: String(totalEmployees), label: t("landing.orgChart.aiEmployees") },

@@ -47,8 +47,8 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border bg-card/50" role="contentinfo" aria-label={t("landing.accessibility.footer")}>
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
+      <div className="container mx-auto px-4 py-10 sm:py-16">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 md:gap-8">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
@@ -69,7 +69,7 @@ export function Footer() {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h4 className="font-semibold mb-4 text-sm">{category}</h4>
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {links.map((link) => (
                   <li key={link.label}>
                     {link.href.includes('#') ? (
@@ -77,15 +77,15 @@ export function Footer() {
                         e.preventDefault();
                         const anchor = link.href.split('#').pop() || '';
                         document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                      }} className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer inline-flex items-center min-h-[36px]">
                         {link.label}
                       </a>
                     ) : link.href.startsWith('/') ? (
-                      <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                      <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center min-h-[36px]">
                         {link.label}
                       </Link>
                     ) : (
-                      <a href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                      <a href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center min-h-[36px]">
                         {link.label}
                       </a>
                     )}

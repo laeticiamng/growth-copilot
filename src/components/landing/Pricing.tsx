@@ -41,7 +41,7 @@ export function Pricing() {
   const { t } = useTranslation();
   const serviceModules = getServiceModules(t);
   return (
-    <section id="pricing" className="py-24 bg-secondary/30 relative scroll-mt-20">
+    <section id="pricing" className="py-12 sm:py-16 md:py-24 bg-secondary/30 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="agent" className="mb-4">{t("landing.navbar.pricing")}</Badge>
@@ -51,9 +51,9 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto mb-16">
           {/* Starter */}
-          <Card variant="feature" className="relative">
+          <Card variant="feature" className="relative p-4 sm:p-6">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
               <Badge variant="secondary" className="px-3 py-1 text-xs bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
                 {t("landing.pricing.trialBadge")}
@@ -88,12 +88,12 @@ export function Pricing() {
                   <li key={f} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-green-500 flex-shrink-0" /><span>{f}</span></li>
                 ))}
               </ul>
-              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.starterCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full min-h-[44px]" size="lg">{t("landing.pricing.starterCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
 
           {/* Full Company */}
-          <Card variant="gradient" className="relative border-2 border-primary/30 mt-4 lg:mt-0">
+          <Card variant="gradient" className="relative border-2 border-primary/30 mt-4 lg:mt-0 p-4 sm:p-6">
             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
               <Badge variant="gradient" className="px-3 py-1 whitespace-nowrap text-xs">
@@ -118,7 +118,7 @@ export function Pricing() {
               <p className="text-sm text-green-600 dark:text-green-400 mb-6">
                 {t("landing.pricing.fullCompanySavings", { amount: (TOTAL_SEPARATE_PRICE - 9000).toLocaleString() })}
               </p>
-              <div className="grid grid-cols-3 gap-2 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
                 {serviceModules.map((s) => {
                   const Icon = s.icon;
                   return (
@@ -143,12 +143,12 @@ export function Pricing() {
                   <li key={f} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-primary flex-shrink-0" /><span>{f}</span></li>
                 ))}
               </ul>
-              <Link to="/auth?tab=signup"><Button variant="hero" className="w-full" size="lg">{t("landing.pricing.fullCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="hero" className="w-full min-h-[44px]" size="lg">{t("landing.pricing.fullCTA")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
 
           {/* À la carte */}
-          <Card variant="feature" className="relative">
+          <Card variant="feature" className="relative p-4 sm:p-6">
             <CardHeader className="text-center pb-2">
               <div className="mx-auto p-3 rounded-xl bg-secondary w-fit mb-4"><Puzzle className="w-8 h-8 text-muted-foreground" /></div>
               <CardTitle className="text-2xl">À la carte</CardTitle>
@@ -186,7 +186,7 @@ export function Pricing() {
                   );
                 })}
               </div>
-              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full" size="lg">{t("landing.pricing.buildTeam")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+              <Link to="/auth?tab=signup"><Button variant="outline" className="w-full min-h-[44px]" size="lg">{t("landing.pricing.buildTeam")}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
             </CardContent>
           </Card>
         </div>

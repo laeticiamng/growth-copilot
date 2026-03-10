@@ -171,7 +171,7 @@ export default function Reports() {
 
   if (!currentSite) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div className="flex items-center gap-3">
           <span className="text-3xl">📊</span>
           <div>
@@ -185,7 +185,7 @@ export default function Reports() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-3xl">📊</span>
@@ -201,7 +201,7 @@ export default function Reports() {
       </div>
 
       {kpiTrend && (
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card variant="kpi">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -363,8 +363,8 @@ export default function Reports() {
             <CardContent>
               {kpiTrend ? (
                 <div className="space-y-6">
-                  <div className="grid sm:grid-cols-3 gap-6">
-                    <div className="p-4 rounded-lg bg-secondary/50">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="p-3 sm:p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm font-medium">{t("modules.reports.kpi.conversions")}</span>
                         <TrendIndicator change={kpiTrend.conversions.change} />

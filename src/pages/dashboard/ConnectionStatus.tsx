@@ -127,14 +127,14 @@ const ConnectionStatus = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Mes Accès</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Mes Accès</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Ressources que vous avez autorisées pour l'analyse et l'optimisation.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Badge variant={connectedCount > 0 ? "success" : "secondary"}>
             <Wifi className="w-3 h-3 mr-1" />
             {connectedCount} actives

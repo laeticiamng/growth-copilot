@@ -367,7 +367,7 @@ export default function ServiceCatalog() {
     <div className="space-y-8">
       {/* Header */}
       <header>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
           <Bot className="w-8 h-8 text-primary" />
           Catalogue des Services
         </h1>

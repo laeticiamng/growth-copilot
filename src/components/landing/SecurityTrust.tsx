@@ -16,7 +16,7 @@ export function SecurityTrust() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 relative" id="security">
+    <section className="py-12 sm:py-16 md:py-20 relative" id="security">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4">
@@ -33,7 +33,7 @@ export function SecurityTrust() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {features.map(({ key, icon: Icon }) => (
-            <Card key={key} className="p-6 border-border/50 hover:border-primary/20 transition-colors">
+            <Card key={key} className="p-4 sm:p-6 border-border/50 hover:border-primary/20 transition-colors">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Icon className="w-5 h-5 text-primary" />
               </div>

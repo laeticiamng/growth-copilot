@@ -36,15 +36,15 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className={cn("space-y-1", className)}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Icon or Emoji */}
           {emoji && <span className="text-2xl">{emoji}</span>}
           {icon && <div className="text-primary">{icon}</div>}
-          
+
           {/* Title & Badge */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{title}</h1>
             {badge && (
               <Badge variant={badgeVariant as any} className="text-xs">
                 {badge}

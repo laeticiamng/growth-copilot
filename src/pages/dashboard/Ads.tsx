@@ -178,7 +178,7 @@ export default function Ads() {
   // Empty state - no site selected
   if (!currentSite) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div>
           <h1 className="text-2xl font-bold">{t("modules.ads.title")}</h1>
           <p className="text-muted-foreground">{t("modules.ads.subtitle")}</p>
@@ -192,7 +192,7 @@ export default function Ads() {
   const hasData = campaigns.length > 0 || accounts.length > 0;
   if (!hasData) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             {t("modules.ads.title")}
@@ -219,7 +219,7 @@ export default function Ads() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -268,7 +268,7 @@ export default function Ads() {
       )}
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {adMetrics.map((metric, i) => {
           const Icon = metric.icon;
           return (
@@ -305,8 +305,8 @@ export default function Ads() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+                <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.ads.campaign")}</th>
@@ -385,8 +385,8 @@ export default function Ads() {
                   <p className="text-sm mt-1">{t("modules.ads.authorizeGoogleAds")}</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+                  <table className="w-full min-w-[500px]">
                     <thead>
                       <tr className="border-b border-border">
                         <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">{t("modules.ads.keyword")}</th>

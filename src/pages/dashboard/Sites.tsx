@@ -209,7 +209,7 @@ const Sites = () => {
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="sector">{t("sitesPage.sector")}</Label>
           <Select value={formData.sector} onValueChange={(v) => setFormData({ ...formData, sector: v })}>
@@ -238,7 +238,7 @@ const Sites = () => {
           </Select>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="geographic_zone">{t("sitesPage.geoZone")}</Label>
           <Input
@@ -269,10 +269,10 @@ const Sites = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t("dashboard.sites.title")}</h1>
-          <p className="text-muted-foreground">{t("dashboard.sites.addSite")}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("dashboard.sites.title")}</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">{t("dashboard.sites.addSite")}</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

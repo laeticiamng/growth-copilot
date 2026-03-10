@@ -161,7 +161,7 @@ export default function Features() {
         {/* Core Features Grid */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {CORE_FEATURES.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
@@ -204,7 +204,7 @@ export default function Features() {
                   : "Each department is autonomous with its dedicated AI agents."}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {DEPARTMENTS_CATALOG.filter(d => d.slug !== "direction").map((dept) => {
                 const DeptIcon = dept.icon;
                 return (

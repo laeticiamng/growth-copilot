@@ -16,7 +16,7 @@ export function ProductPreview() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 relative overflow-hidden" id="product-preview">
+    <section className="py-12 sm:py-16 md:py-20 relative overflow-hidden" id="product-preview">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background pointer-events-none" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
@@ -31,7 +31,7 @@ export function ProductPreview() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {previews.map(({ key, icon: Icon, image }) => (
             <Card
               key={key}

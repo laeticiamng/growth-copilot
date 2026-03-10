@@ -294,16 +294,16 @@ export default function Offers() {
         </TabsList>
 
         <TabsContent value="offers" className="space-y-6">
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayOffers.map((offer, index) => {
               const isPopular = offer.tier === "growth" || index === 1;
               const isDemo = offer.id.startsWith("demo-");
-              
+
               return (
                 <Card
                   key={offer.id}
                   variant={isPopular ? "gradient" : "feature"}
-                  className={`${isPopular ? "scale-105 z-10" : ""} ${!offer.is_active ? "opacity-60" : ""}`}
+                  className={`${isPopular ? "sm:scale-105 z-10" : ""} ${!offer.is_active ? "opacity-60" : ""}`}
                 >
                   {isPopular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -494,7 +494,7 @@ export default function Offers() {
             </div>
             <div>
               <label className="text-sm font-medium">Tier</label>
-              <div className="flex gap-2 mt-1">
+              <div className="flex flex-wrap gap-2 mt-1">
                 {["starter", "standard", "growth", "premium"].map((tier) => (
                   <Button
                     key={tier}

@@ -162,16 +162,16 @@ export function ROITrackerWidget({ className }: ROITrackerWidgetProps) {
       </CardHeader>
 
       <CardContent className="space-y-4 flex-1">
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10">
           <div>
             <p className="text-sm text-muted-foreground">{t("cockpit.netSavings")}</p>
-            <p className={cn("text-3xl font-bold", roiColor)}>
+            <p className={cn("text-2xl sm:text-3xl font-bold", roiColor)}>
               {(metrics?.netSavings || 0) > 0 ? '+' : ''}{metrics?.netSavings || 0}€
             </p>
           </div>
-          <div className="text-right">
+          <div className="sm:text-right">
             <p className="text-sm text-muted-foreground">{t("cockpit.timeSaved")}</p>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-xl sm:text-2xl font-bold text-primary">
               {metrics?.timeSavedHours || 0}h
             </p>
           </div>

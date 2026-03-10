@@ -253,12 +253,12 @@ export default function Diagnostics() {
             {t("modules.diagnostics.subtitle")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={runHealthCheck} disabled={isRunningHealthCheck}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={runHealthCheck} disabled={isRunningHealthCheck}>
             <RefreshCw className={`w-4 h-4 mr-2 ${isRunningHealthCheck ? 'animate-spin' : ''}`} />
             {t("modules.diagnostics.healthCheck")}
           </Button>
-          <Button variant="outline" onClick={exportDiagnostics}>
+          <Button variant="outline" size="sm" onClick={exportDiagnostics}>
             <Download className="w-4 h-4 mr-2" />
             {t("modules.diagnostics.exportReport")}
           </Button>
@@ -436,7 +436,7 @@ export default function Diagnostics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
             <div className="p-3 rounded-lg bg-secondary/30">
               <p className="text-xs text-muted-foreground mb-1">{t("modules.diagnostics.appVersion")}</p>
               <p className="text-sm font-medium">1.0.0</p>

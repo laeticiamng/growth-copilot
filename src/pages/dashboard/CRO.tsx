@@ -247,12 +247,12 @@ export default function CRO() {
           </h1>
           <p className="text-muted-foreground">{t("croPage.subtitle")}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Button variant="outline" size="sm" className="sm:size-default">
             <BarChart3 className="w-4 h-4 mr-2" />
             {t("croPage.croReport")}
           </Button>
-          <Button variant="hero" onClick={() => setShowExperimentDialog(true)}>
+          <Button variant="hero" size="sm" className="sm:size-default" onClick={() => setShowExperimentDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t("croPage.newTest")}
           </Button>
@@ -302,8 +302,8 @@ export default function CRO() {
                 <p className="text-center text-muted-foreground py-8">{t("croPage.noExperiments")}</p>
               ) : (
                 displayExperiments.map((exp) => (
-                  <div key={exp.id} className="p-4 rounded-lg bg-secondary/50">
-                    <div className="flex items-start justify-between mb-3">
+                  <div key={exp.id} className="p-3 sm:p-4 rounded-lg bg-secondary/50">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-0 mb-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{exp.name}</p>
@@ -331,7 +331,7 @@ export default function CRO() {
                       </div>
                     </div>
                     {exp.status !== "draft" && (
-                      <div className="grid grid-cols-5 gap-4 mt-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mt-4">
                         <div>
                           <p className="text-xs text-muted-foreground">{t("croPage.visitors")}</p>
                           <p className="font-medium">{exp.visitors.toLocaleString()}</p>
@@ -407,9 +407,9 @@ export default function CRO() {
                 <p className="text-center text-muted-foreground py-8">{t("croPage.noAudits")}</p>
               ) : (
                 pageAudits.map((audit, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-lg bg-secondary/50">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium">{audit.page}</p>
                         <Badge variant={audit.status === "optimized" ? "gradient" : audit.status === "in_progress" ? "secondary" : "destructive"}>
                           {audit.status === "optimized" ? t("croPage.optimized")
@@ -419,22 +419,24 @@ export default function CRO() {
                       </div>
                       <p className="text-sm text-muted-foreground">{audit.url}</p>
                     </div>
-                    <div className="text-center">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">{t("croPage.friction")}</span>
-                        <Progress value={100 - audit.frictionScore} className="w-20 h-2" />
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <div className="text-center">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs sm:text-sm text-muted-foreground">{t("croPage.friction")}</span>
+                          <Progress value={100 - audit.frictionScore} className="w-16 sm:w-20 h-2" />
+                        </div>
+                        <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-primary'}`}>{audit.frictionScore}/100</p>
                       </div>
-                      <p className={`text-sm font-medium ${audit.frictionScore > 50 ? 'text-destructive' : 'text-primary'}`}>{audit.frictionScore}/100</p>
+                      <div className="text-center">
+                        <p className="text-xs sm:text-sm text-muted-foreground">{t("croPage.issues")}</p>
+                        <p className="font-medium">{audit.issues}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs sm:text-sm text-muted-foreground">{t("croPage.opportunitiesLabel")}</p>
+                        <p className="font-medium text-primary">{audit.opportunities}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="min-h-[44px] min-w-[44px]"><ArrowRight className="w-4 h-4" /></Button>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">{t("croPage.issues")}</p>
-                      <p className="font-medium">{audit.issues}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">{t("croPage.opportunitiesLabel")}</p>
-                      <p className="font-medium text-primary">{audit.opportunities}</p>
-                    </div>
-                    <Button variant="ghost" size="sm"><ArrowRight className="w-4 h-4" /></Button>
                   </div>
                 ))
               )}
@@ -461,23 +463,25 @@ export default function CRO() {
                 <p className="text-center text-muted-foreground py-8">{t("croPage.noBacklog")}</p>
               ) : (
                 croBacklog.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/50">
-                    <div className="flex-shrink-0">
-                      {item.status === "testing" ? (
-                        <div className="w-3 h-3 rounded-full bg-primary agent-pulse" />
-                      ) : item.status === "in_progress" ? (
-                        <div className="w-3 h-3 rounded-full bg-warning" />
-                      ) : (
-                        <div className="w-3 h-3 rounded-full border-2 border-muted-foreground" />
-                      )}
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg bg-secondary/50">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0">
+                        {item.status === "testing" ? (
+                          <div className="w-3 h-3 rounded-full bg-primary agent-pulse" />
+                        ) : item.status === "in_progress" ? (
+                          <div className="w-3 h-3 rounded-full bg-warning" />
+                        ) : (
+                          <div className="w-3 h-3 rounded-full border-2 border-muted-foreground" />
+                        )}
+                      </div>
+                      <p className="font-medium text-sm sm:text-base">{item.task}</p>
                     </div>
-                    <div className="flex-1 min-w-0"><p className="font-medium">{item.task}</p></div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 pl-6 sm:pl-0">
                       <span className="text-xs text-muted-foreground">Impact</span>
                       <Progress value={item.impact} className="w-16 h-1.5" />
                       <span className="text-xs font-medium">{item.impact}</span>
+                      <Badge variant="outline" className="text-xs ml-1">{item.effort}</Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">{item.effort}</Badge>
                   </div>
                 ))
               )}

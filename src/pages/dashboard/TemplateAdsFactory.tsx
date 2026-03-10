@@ -73,9 +73,9 @@ const TemplateAdsFactory = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
             <Video className="h-8 w-8" />
             {t("modules.templateAds.title")}
           </h1>
@@ -99,7 +99,7 @@ const TemplateAdsFactory = () => {
                 <Label htmlFor="offer">{t("modules.templateAds.offer")}</Label>
                 <Textarea id="offer" placeholder={t("modules.templateAds.offerPlaceholder")} value={formData.offer} onChange={(e) => setFormData({ ...formData, offer: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>{t("modules.templateAds.objective")}</Label>
                   <Select value={formData.objective} onValueChange={(value) => setFormData({ ...formData, objective: value as typeof formData.objective })}>
@@ -123,7 +123,7 @@ const TemplateAdsFactory = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>{t("modules.templateAds.language")}</Label>
                   <Select value={formData.language} onValueChange={(value) => setFormData({ ...formData, language: value })}>

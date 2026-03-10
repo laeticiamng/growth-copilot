@@ -55,11 +55,11 @@ export default function ROIDashboard() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <Calculator className="w-8 h-8 text-primary" />
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
+          <Calculator className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0" />
           {t("roi.title")}
         </h1>
-        <p className="text-muted-foreground mt-1">{t("roi.subtitle")}</p>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">{t("roi.subtitle")}</p>
       </header>
 
       <Tabs defaultValue="roi" className="space-y-6">
@@ -69,7 +69,7 @@ export default function ROIDashboard() {
         </TabsList>
 
         <TabsContent value="roi" className="space-y-6">
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">

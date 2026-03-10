@@ -212,7 +212,7 @@ export default function HR() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="first_name">{t("hrPage.firstName")}</Label>
                   <Input
@@ -247,7 +247,7 @@ export default function HR() {
                   onChange={(e) => setNewEmployee({ ...newEmployee, job_title: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">{t("hrPage.department")}</Label>
                   <Input
@@ -506,7 +506,7 @@ export default function HR() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>{t("hrPage.periodStart")}</Label>
                           <Input
@@ -654,7 +654,7 @@ export default function HR() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>{t("hrPage.startDate")}</Label>
                           <Input

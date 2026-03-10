@@ -18,7 +18,7 @@ export function TrustBar() {
   return (
     <section className="py-6 border-b border-border/50 bg-card/30">
       <div className="container mx-auto px-4">
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3">
           {TRUST_ITEMS.map((item) => (
             <div
               key={item.labelKey}

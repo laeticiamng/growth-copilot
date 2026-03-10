@@ -74,13 +74,13 @@ export default function Contact() {
       <SEOHead title="Contact" description={t("pages.contact.seoDesc")} canonical="/contact"
         structuredData={{ "@context": "https://schema.org", "@type": "ContactPage", "name": "Contact Growth OS", "description": t("pages.contact.schemaDesc") }} />
       <Navbar />
-      <main className="container mx-auto px-4 py-24">
-        <div className="text-center max-w-2xl mx-auto mb-16">
+      <main className="container mx-auto px-4 py-16 sm:py-24">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("pages.contact.title")}</h1>
           <p className="text-lg text-muted-foreground">{t("pages.contact.subtitle")}</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mb-10 sm:mb-16">
           {contactCards.map((card) => {
             const Icon = card.icon;
             const cardContent = (
@@ -127,7 +127,7 @@ export default function Contact() {
               ) : (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField control={form.control} name="name" render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t("pages.contact.name")}</FormLabel>

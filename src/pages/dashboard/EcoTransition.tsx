@@ -12,12 +12,12 @@ export default function EcoTransition() {
       <SEOHead title={t("eco.pageTitle")} description={t("eco.pageDesc")} />
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 self-start">
             <Leaf className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{t("eco.title")}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{t("eco.title")}</h1>
             <p className="text-sm text-muted-foreground">{t("eco.subtitle")}</p>
           </div>
         </div>

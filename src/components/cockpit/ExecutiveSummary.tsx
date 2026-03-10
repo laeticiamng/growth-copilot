@@ -68,7 +68,7 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
           <Skeleton className="h-6 w-48" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-16" />
             ))}
@@ -85,9 +85,9 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
   return (
     <Card variant="gradient" className="border-2 border-primary/20">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <CardTitle className="text-lg">{t("cockpit.stateOf", { site: siteName })}</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {redCount > 0 && (
               <Badge variant="destructive" className="text-xs">
                 {t("cockpit.criticalCount", { count: redCount })}
@@ -107,7 +107,7 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
           {services.map((service) => {
             const config = statusConfig[service.status];
             const Icon = config.icon;
@@ -115,7 +115,7 @@ export function ExecutiveSummary({ siteName, services, loading }: ExecutiveSumma
               <div
                 key={service.slug}
                 className={cn(
-                  "flex items-center gap-2 p-3 rounded-lg border",
+                  "flex items-center gap-2 p-3 rounded-lg border min-h-[44px]",
                   config.bg,
                   config.border
                 )}

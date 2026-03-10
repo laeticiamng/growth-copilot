@@ -55,7 +55,7 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="py-24 relative scroll-mt-20">
+    <section id="features" className="py-12 sm:py-16 md:py-24 relative scroll-mt-20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -72,7 +72,7 @@ export function Features() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <Card
               key={feature.titleKey}
@@ -80,7 +80,7 @@ export function Features() {
               className="group fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className={`p-3 rounded-lg bg-secondary ${feature.color}`}>
                     <feature.icon className="w-6 h-6" />

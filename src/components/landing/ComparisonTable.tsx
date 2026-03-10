@@ -23,7 +23,7 @@ export function ComparisonTable() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-20 bg-secondary/30 relative" id="comparison">
+    <section className="py-12 sm:py-16 md:py-20 bg-secondary/30 relative" id="comparison">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4">
@@ -39,23 +39,23 @@ export function ComparisonTable() {
         </div>
 
         <Card className="max-w-4xl mx-auto overflow-hidden border-border/50">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left p-4 font-medium text-muted-foreground">
+                  <th className="text-left p-2 sm:p-3 md:p-4 font-medium text-muted-foreground">
                     {t("landing.comparison.criteria")}
                   </th>
-                  <th className="p-4 text-center font-semibold bg-primary/5 border-x border-primary/10">
+                  <th className="p-2 sm:p-3 md:p-4 text-center font-semibold bg-primary/5 border-x border-primary/10">
                     <div className="flex items-center justify-center gap-1">
                       <Zap className="w-4 h-4 text-primary" />
                       Growth OS
                     </div>
                   </th>
-                  <th className="p-4 text-center font-medium">
+                  <th className="p-2 sm:p-3 md:p-4 text-center font-medium">
                     {t("landing.comparison.agency")}
                   </th>
-                  <th className="p-4 text-center font-medium">
+                  <th className="p-2 sm:p-3 md:p-4 text-center font-medium">
                     {t("landing.comparison.inHouse")}
                   </th>
                 </tr>
@@ -63,14 +63,14 @@ export function ComparisonTable() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row} className="border-b border-border/50 last:border-0">
-                    <td className="p-4 font-medium">{t(`landing.comparison.rows.${row}.label`)}</td>
-                    <td className="p-4 text-center bg-primary/5 border-x border-primary/10 font-medium text-primary">
+                    <td className="p-2 sm:p-3 md:p-4 font-medium">{t(`landing.comparison.rows.${row}.label`)}</td>
+                    <td className="p-2 sm:p-3 md:p-4 text-center bg-primary/5 border-x border-primary/10 font-medium text-primary">
                       {t(`landing.comparison.rows.${row}.growthOS`)}
                     </td>
-                    <td className="p-4 text-center text-muted-foreground">
+                    <td className="p-2 sm:p-3 md:p-4 text-center text-muted-foreground">
                       {t(`landing.comparison.rows.${row}.agency`)}
                     </td>
-                    <td className="p-4 text-center text-muted-foreground">
+                    <td className="p-2 sm:p-3 md:p-4 text-center text-muted-foreground">
                       {t(`landing.comparison.rows.${row}.inHouse`)}
                     </td>
                   </tr>

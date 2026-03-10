@@ -51,7 +51,7 @@ export function EcoTransitionSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="eco" className="py-24 relative overflow-hidden scroll-mt-20">
+    <section id="eco" className="py-12 sm:py-16 md:py-24 relative overflow-hidden scroll-mt-20">
       {/* Background effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
       <div className="absolute top-20 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
@@ -76,7 +76,7 @@ export function EcoTransitionSection() {
         </div>
 
         {/* 5 feature cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
           {ECO_FEATURES.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -86,9 +86,9 @@ export function EcoTransitionSection() {
                 className={cn(
                   "group hover:border-emerald-500/30 transition-all duration-300",
                   index >= 3 && "lg:col-span-1",
-                  // Center the last 2 cards on large screens
-                  index === 3 && "lg:col-start-1",
-                  index === 4 && "lg:col-start-2"
+                  // Center the last 2 cards on large screens (offset into middle of 3-col grid)
+                  index === 3 && "sm:col-start-1 lg:col-start-1",
+                  index === 4 && "sm:col-start-2 lg:col-start-2"
                 )}
               >
                 <CardContent className="pt-6">

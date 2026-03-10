@@ -211,21 +211,21 @@ const Logs = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Logs & Activité</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Logs & Activité</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Audit trail complet : actions utilisateurs, runs agents et requêtes IA.
           </p>
         </div>
-        <Button variant="outline" onClick={fetchLogs} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
           <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Actualiser
         </Button>
       </div>
 
       {/* AI Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">

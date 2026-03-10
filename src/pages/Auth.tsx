@@ -315,7 +315,7 @@ export default function Auth() {
   // Password reset mode
   if (mode === "reset" && session) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <div className="min-h-screen bg-background flex items-center justify-center px-3 py-6 sm:p-4 relative">
         <div className="absolute inset-0 hero-grid opacity-30" />
         <div className="absolute inset-0 radial-overlay" />
         <div className="w-full max-w-md relative z-10">
@@ -373,7 +373,7 @@ export default function Auth() {
   // Forgot password view
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+      <div className="min-h-screen bg-background flex items-center justify-center px-3 py-6 sm:p-4 relative">
         <div className="absolute inset-0 hero-grid opacity-30" />
         <div className="absolute inset-0 radial-overlay" />
         <div className="w-full max-w-md relative z-10">
@@ -442,7 +442,7 @@ export default function Auth() {
 
   // Main auth view
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-background flex items-center justify-center px-3 py-6 sm:p-4 relative">
       <div className="absolute inset-0 hero-grid opacity-30" />
       <div className="absolute inset-0 radial-overlay" />
       <div className="w-full max-w-md relative z-10">

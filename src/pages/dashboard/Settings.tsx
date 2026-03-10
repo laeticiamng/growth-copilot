@@ -243,44 +243,44 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t("settings.title")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("settings.title")}</h1>
         <p className="text-muted-foreground">
           {t("settings.subtitle")}
         </p>
       </div>
 
       <Tabs defaultValue="company" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
-          <TabsTrigger value="company" className="gap-2">
+        <TabsList className="flex w-full max-w-3xl overflow-x-auto">
+          <TabsTrigger value="company" className="gap-2 min-h-[44px] flex-shrink-0">
             <Building2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.company")}</span>
           </TabsTrigger>
-          <TabsTrigger value="team" className="gap-2">
+          <TabsTrigger value="team" className="gap-2 min-h-[44px] flex-shrink-0">
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.team")}</span>
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="gap-2">
+          <TabsTrigger value="integrations" className="gap-2 min-h-[44px] flex-shrink-0">
             <Plug className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.integrations")}</span>
           </TabsTrigger>
-          <TabsTrigger value="billing" className="gap-2">
+          <TabsTrigger value="billing" className="gap-2 min-h-[44px] flex-shrink-0">
             <CreditCard className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.billing")}</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2">
+          <TabsTrigger value="notifications" className="gap-2 min-h-[44px] flex-shrink-0">
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="danger" className="gap-2 text-destructive">
+          <TabsTrigger value="danger" className="gap-2 min-h-[44px] flex-shrink-0 text-destructive">
             <Trash2 className="w-4 h-4" />
             <span className="hidden sm:inline">{t("settings.tabs.danger")}</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Company Tab */}
-        <TabsContent value="company" className="mt-6">
+        <TabsContent value="company" className="mt-4 sm:mt-6">
           <Card>
             <CardHeader>
               <CardTitle>{t("settings.company.title")}</CardTitle>
@@ -331,9 +331,9 @@ export default function Settings() {
         </TabsContent>
 
         {/* Team Tab */}
-        <TabsContent value="team" className="mt-6 space-y-6">
+        <TabsContent value="team" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <CardTitle>{t("settings.team.title")}</CardTitle>
                 <CardDescription>
@@ -443,7 +443,7 @@ export default function Settings() {
         </TabsContent>
 
         {/* Integrations Tab */}
-        <TabsContent value="integrations" className="mt-6">
+        <TabsContent value="integrations" className="mt-4 sm:mt-6">
           <Card>
             <CardHeader>
               <CardTitle>{t("settings.integrations.title")}</CardTitle>
@@ -494,7 +494,7 @@ export default function Settings() {
         </TabsContent>
 
         {/* Billing Tab */}
-        <TabsContent value="billing" className="mt-6">
+        <TabsContent value="billing" className="mt-4 sm:mt-6">
           <Card>
             <CardHeader>
               <CardTitle>{t("settings.billing.title")}</CardTitle>
@@ -526,12 +526,12 @@ export default function Settings() {
         </TabsContent>
 
         {/* Notifications Tab */}
-        <TabsContent value="notifications" className="mt-6">
+        <TabsContent value="notifications" className="mt-4 sm:mt-6">
           <WebhookNotificationSettings />
         </TabsContent>
 
         {/* Danger Zone Tab */}
-        <TabsContent value="danger" className="mt-6">
+        <TabsContent value="danger" className="mt-4 sm:mt-6">
           <Card className="border-destructive/50">
             <CardHeader>
               <CardTitle className="text-destructive flex items-center gap-2">

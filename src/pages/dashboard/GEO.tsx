@@ -386,7 +386,7 @@ export default function GEO() {
       <SEOHead title={t("geo.pageTitle")} description={t("geo.pageDesc")} />
 
       <div>
-        <h1 className="text-3xl font-bold">{t("geo.pageTitle")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("geo.pageTitle")}</h1>
         <p className="text-muted-foreground mt-1">{t("geo.pageDesc")}</p>
       </div>
 
