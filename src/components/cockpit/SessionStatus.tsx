@@ -100,7 +100,7 @@ export function SessionStatus({ compact = false, showActions = true }: SessionSt
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={refreshSession}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px]" onClick={refreshSession} aria-label={t("cockpit.sessionRenew")}>
                   <RefreshCw className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
@@ -111,7 +111,7 @@ export function SessionStatus({ compact = false, showActions = true }: SessionSt
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => signOut()}>
+                <Button variant="ghost" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive" onClick={() => signOut()} aria-label={t("cockpit.sessionLogout")}>
                   <LogOut className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>

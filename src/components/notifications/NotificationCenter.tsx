@@ -161,15 +161,16 @@ function NotificationItem({ notification, onRead, onDelete, dateLocale }: Notifi
       {/* Actions */}
       <div className="flex flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {!notification.is_read && (
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onRead}>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRead} aria-label="Mark as read">
             <Check className="h-3 w-3" />
           </Button>
         )}
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-destructive hover:text-destructive"
+          className="h-7 w-7 text-destructive hover:text-destructive"
           onClick={onDelete}
+          aria-label="Delete notification"
         >
           <Trash2 className="h-3 w-3" />
         </Button>

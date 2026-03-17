@@ -20,13 +20,20 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
       if (url.pathname === '/demo' || url.search.includes('demo=true')) {
         return true;
       }
-      return localStorage.getItem(DEMO_MODE_KEY) === 'true';
+      // Use sessionStorage (tab-scoped) to avoid cross-session auth bypass via localStorage
+      return sessionStorage.getItem(DEMO_MODE_KEY) === 'true';
     }
     return false;
   });
 
   useEffect(() => {
-    localStorage.setItem(DEMO_MODE_KEY, String(isDemoMode));
+    if (isDemoMode) {
+      sessionStorage.setItem(DEMO_MODE_KEY, 'true');
+    } else {
+      sessionStorage.removeItem(DEMO_MODE_KEY);
+    }
+    // Clean up any legacy localStorage entry
+    localStorage.removeItem(DEMO_MODE_KEY);
   }, [isDemoMode]);
 
   const toggleDemoMode = () => setIsDemoMode(prev => !prev);
@@ -35,7 +42,7 @@ export function DemoModeProvider({ children }: { children: ReactNode }) {
   const activateDemo = useCallback(() => setIsDemoMode(true), []);
   const deactivateDemo = useCallback(() => {
     setIsDemoMode(false);
-    localStorage.removeItem(DEMO_MODE_KEY);
+    sessionStorage.removeItem(DEMO_MODE_KEY);
   }, []);
 
   return (

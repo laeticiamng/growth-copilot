@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +18,7 @@ interface Message {
 }
 
 export function AIAssistant() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -132,12 +134,12 @@ export function AIAssistant() {
                 <Bot className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold">Assistant Growth OS</h3>
-                <p className="text-xs text-muted-foreground">Propulsé par IA</p>
+                <h3 className="font-semibold">{t("components.aiAssistant.title", "Assistant Growth OS")}</h3>
+                <p className="text-xs text-muted-foreground">{t("components.aiAssistant.poweredByAI", "Powered by AI")}</p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={startNewConversation} title="Nouvelle conversation">
+              <Button variant="ghost" size="icon" onClick={startNewConversation} title={t("components.aiAssistant.newConversation", "New conversation")} aria-label={t("components.aiAssistant.newConversation", "New conversation")}>
                 <MessageSquare className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
@@ -151,9 +153,9 @@ export function AIAssistant() {
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
                 <Sparkles className="mb-4 h-12 w-12 text-primary/40" />
-                <p className="text-sm font-medium">Comment puis-je vous aider ?</p>
+                <p className="text-sm font-medium">{t("components.aiAssistant.emptyTitle", "How can I help you?")}</p>
                 <p className="mt-1 text-xs">
-                  Posez des questions sur vos KPIs, la configuration des modules, ou la stratégie de croissance.
+                  {t("components.aiAssistant.emptySubtitle", "Ask questions about your KPIs, module configuration, or growth strategy.")}
                 </p>
               </div>
             ) : (
@@ -221,7 +223,7 @@ export function AIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Posez votre question..."
+                placeholder={t("components.aiAssistant.inputPlaceholder", "Ask your question...")}
                 disabled={loading}
                 className="flex-1"
               />

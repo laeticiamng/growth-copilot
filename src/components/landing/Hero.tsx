@@ -34,11 +34,11 @@ export function Hero() {
       setUrlValid(true);
       return true;
     } else {
-      setUrlError(result.error.errors[0]?.message || "URL invalide");
+      setUrlError(result.error.errors[0]?.message || t("landing.hero.urlInvalid", "URL invalide"));
       setUrlValid(false);
       return false;
     }
-  }, []);
+  }, [t]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -171,7 +171,7 @@ export function Hero() {
             <Link to="/demo">
               <Button variant="outline" size="lg" className="gap-2 min-h-[44px]">
                 <Sparkles className="w-4 h-4" />
-                {t("landing.hero.tryDemo", "Explorer la démo interactive")}
+                {t("landing.hero.tryDemo")}
               </Button>
             </Link>
             <span className="text-xs text-muted-foreground">{t("landing.hero.urlHint")}</span>

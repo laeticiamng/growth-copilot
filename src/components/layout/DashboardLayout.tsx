@@ -480,9 +480,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               
               return (
                 <Collapsible key={dept.id} open={isOpen} onOpenChange={() => toggleDepartment(dept.id)}>
-                  <CollapsibleTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/50 transition-colors">
-                    <DeptIcon className={cn("w-4 h-4", dept.color)} />
-                    <span className="flex-1 text-left">{dept.label}</span>
+                  <CollapsibleTrigger className="flex items-center gap-2 px-3 py-2 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary/50 transition-colors min-w-0">
+                    <DeptIcon className={cn("w-4 h-4 flex-shrink-0", dept.color)} />
+                    <span className="flex-1 text-left truncate">{dept.label}</span>
                     <span className="text-[10px] text-muted-foreground/60">{dept.items.length}</span>
                     <ChevronRight
                       className={cn(

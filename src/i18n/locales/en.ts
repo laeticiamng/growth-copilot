@@ -34,6 +34,9 @@ export const en = {
     days: "days",
     frenchOnly: "This document is available in French only",
     beta: "Beta",
+    demoData: "Demo data",
+    preview: "Preview",
+    connectAccount: "Connect your account",
   },
 
   demo: {
@@ -128,6 +131,8 @@ export const en = {
       statAutomation: "Automation",
       statAuditable: "Auditable",
       statAIEmployees: "AI Employees",
+      tryDemo: "Explore the interactive demo",
+      urlInvalid: "Invalid URL",
     },
     features: {
       title: "A complete AI team",
@@ -4099,6 +4104,27 @@ export const en = {
       promoteManager: "Promote to Manager",
       demoteViewer: "Demote to Viewer",
       removeFromTeam: "Remove from team",
+    },
+    moduleEmptyState: {
+      moduleReady: "Your {{module}} module is ready",
+      viewDocs: "View documentation",
+      siteRequired: "Site required",
+      siteRequiredDesc: "To use the {{module}} module, you must first configure a site. Add a site to start collecting data and enjoy all features.",
+      manageSites: "Manage my sites",
+      connectIntegration: "Connect {{name}}",
+      connectIntegrationDesc: "Authorize access to {{name}} to activate all features of the {{module}} module and see your real data.",
+      connectAction: "Connect {{name}}",
+      howItWorks: "How does it work?",
+      noDataDesc: "No data in the {{module}} module. Run your first action to start seeing results.",
+      runFirstAnalysis: "Run first analysis",
+    },
+    aiAssistant: {
+      title: "Growth OS Assistant",
+      poweredByAI: "Powered by AI",
+      newConversation: "New conversation",
+      emptyTitle: "How can I help you?",
+      emptySubtitle: "Ask questions about your KPIs, module configuration, or growth strategy.",
+      inputPlaceholder: "Ask your question...",
     },
   },
 

@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Search, Filter, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface AgentFilters {
   search: string;
@@ -29,6 +30,7 @@ export function AgentFiltersBar({
   categories,
   activeFiltersCount = 0,
 }: AgentFiltersBarProps) {
+  const { t } = useTranslation();
   const handleSearchChange = (value: string) => {
     onFiltersChange({ ...filters, search: value });
   };
@@ -53,7 +55,7 @@ export function AgentFiltersBar({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Rechercher un agent..."
+          placeholder={t("common.search")}
           value={filters.search}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-9"
@@ -63,10 +65,10 @@ export function AgentFiltersBar({
       {/* Category filter */}
       <Select value={filters.category} onValueChange={handleCategoryChange}>
         <SelectTrigger className="w-full sm:w-[180px]">
-          <SelectValue placeholder="Catégorie" />
+          <SelectValue placeholder={t("common.filter")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Toutes catégories</SelectItem>
+          <SelectItem value="all">{t("common.noData", "All")}</SelectItem>
           {categories.map((cat) => (
             <SelectItem key={cat} value={cat} className="capitalize">
               {cat}
@@ -78,13 +80,13 @@ export function AgentFiltersBar({
       {/* Status filter */}
       <Select value={filters.status} onValueChange={handleStatusChange}>
         <SelectTrigger className="w-full sm:w-[150px]">
-          <SelectValue placeholder="Statut" />
+          <SelectValue placeholder={t("status.title", "Status")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Tous statuts</SelectItem>
-          <SelectItem value="active">Actif</SelectItem>
-          <SelectItem value="idle">En attente</SelectItem>
-          <SelectItem value="error">Erreur</SelectItem>
+          <SelectItem value="all">{t("status.title", "All")}</SelectItem>
+          <SelectItem value="active">{t("status.active", "Active")}</SelectItem>
+          <SelectItem value="idle">{t("status.idle", "Idle")}</SelectItem>
+          <SelectItem value="error">{t("common.error")}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -92,7 +94,7 @@ export function AgentFiltersBar({
       {hasActiveFilters && (
         <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1">
           <X className="w-4 h-4" />
-          Effacer
+          {t("common.reset")}
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ml-1 text-xs">
               {activeFiltersCount}

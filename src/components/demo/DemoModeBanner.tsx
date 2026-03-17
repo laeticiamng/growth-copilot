@@ -16,12 +16,12 @@ export const DemoModeBanner = forwardRef<HTMLDivElement>(function DemoModeBanner
     <div ref={ref} className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-chart-4 to-chart-5 text-white py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-3 shadow-lg">
       <TestTube2 className="w-4 h-4 shrink-0" />
       <span>
-        {t("demo.bannerMessage", "Sandbox Mode — Explore the dashboard with demo data")}
+        {t("demo.bannerMessage")}
       </span>
       <Link to="/auth">
         <Button size="sm" variant="secondary" className="h-7 gap-1 text-xs font-semibold">
           <Rocket className="w-3 h-3" />
-          {t("demo.createAccount", "Create free account")}
+          {t("demo.createAccount")}
         </Button>
       </Link>
       <button

@@ -43,7 +43,7 @@ export function Navbar() {
             <span className="font-bold text-lg">Growth OS</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
             {navLinks.map((link) =>
               link.isRoute ? (
                 <Link key={link.href} to={link.href}
