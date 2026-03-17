@@ -50,6 +50,7 @@ import {
      ShieldCheck,
      Search,
      Leaf,
+     Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -94,6 +95,18 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
 
 // Advanced items organized by department - uses i18n keys
 const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => [
+  {
+    id: "launch-os",
+    label: "Launch OS",
+    icon: Rocket,
+    color: "text-primary",
+    description: "Orchestrate your launches",
+    items: [
+      { path: "/dashboard/launch-os", label: "Cockpit", icon: Rocket },
+      { path: "/dashboard/launch-os/new", label: "New Launch", icon: () => <span className="text-base">+</span> },
+      { path: "/dashboard/launch-os/decisions", label: "Decision Center", icon: () => <span className="text-base">🧠</span> },
+    ],
+  },
   {
     id: "operations",
     label: t("layout.operations"),

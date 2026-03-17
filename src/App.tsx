@@ -35,6 +35,9 @@ import { MetaProvider } from "@/hooks/useMeta";
 import { CreativesProvider } from "@/hooks/useCreatives";
 import { ExperimentsProvider } from "@/hooks/useExperiments";
 
+// Launch OS provider
+import { LaunchOSProvider } from "@/hooks/useLaunchOS";
+
 // Utility providers
 import { PoliciesProvider } from "@/hooks/usePolicies";
 import { AuditLogProvider } from "@/hooks/useAuditLog";
@@ -157,6 +160,12 @@ const SetupWizard = lazy(() => import("./pages/dashboard/SetupWizard"));
 const GEO = lazy(() => import("./pages/dashboard/GEO"));
 const EcoTransition = lazy(() => import("./pages/dashboard/EcoTransition"));
 
+// Launch OS Pages
+const LaunchOSHome = lazy(() => import("./pages/dashboard/launch-os/LaunchOSHome"));
+const LaunchTypeSelector = lazy(() => import("./pages/dashboard/launch-os/LaunchTypeSelector"));
+const LaunchProject = lazy(() => import("./pages/dashboard/launch-os/LaunchProject"));
+const DecisionCenter = lazy(() => import("./pages/dashboard/launch-os/DecisionCenter"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -211,6 +220,7 @@ const AIProviders = createProviderGroup('AI', [
   MetaProvider,
   CreativesProvider,
   ExperimentsProvider,
+  LaunchOSProvider,
 ]);
 
 // Utility providers - Policies, logging, ops
@@ -376,6 +386,12 @@ function App() {
                 <Route path="/dashboard/services" element={<DashboardRoute><ServiceCatalog /></DashboardRoute>} />
                 <Route path="/dashboard/ai-costs" element={<DashboardRoute><AICostDashboard /></DashboardRoute>} />
                 <Route path="/dashboard/settings" element={<DashboardRoute><Settings /></DashboardRoute>} />
+
+                {/* Dashboard - Launch OS */}
+                <Route path="/dashboard/launch-os" element={<DashboardRoute><LaunchOSHome /></DashboardRoute>} />
+                <Route path="/dashboard/launch-os/new" element={<DashboardRoute><LaunchTypeSelector /></DashboardRoute>} />
+                <Route path="/dashboard/launch-os/project" element={<DashboardRoute><LaunchProject /></DashboardRoute>} />
+                <Route path="/dashboard/launch-os/decisions" element={<DashboardRoute><DecisionCenter /></DashboardRoute>} />
 
                 {/* Dashboard - Growth OS App Pages */}
                 <Route path="/dashboard/app" element={<DashboardRoute><AppDashboard /></DashboardRoute>} />
