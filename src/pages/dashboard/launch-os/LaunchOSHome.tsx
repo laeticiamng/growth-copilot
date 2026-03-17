@@ -14,22 +14,23 @@ import { format } from "date-fns";
 import { getLaunchCategory } from "@/lib/launch-os/types";
 import type { LaunchProject, LaunchStatus } from "@/lib/launch-os/types";
 
-const statusConfig: Record<LaunchStatus, { label: string; color: string; icon: typeof Clock }> = {
-  draft: { label: 'Draft', color: 'bg-slate-500', icon: Clock },
-  readiness_check: { label: 'Readiness Check', color: 'bg-amber-500', icon: AlertTriangle },
-  ready_to_launch: { label: 'Ready', color: 'bg-green-500', icon: CheckCircle2 },
-  pre_launch: { label: 'Pre-Launch', color: 'bg-blue-500', icon: Rocket },
-  launching: { label: 'Launching', color: 'bg-purple-500', icon: Zap },
-  post_launch: { label: 'Post-Launch', color: 'bg-indigo-500', icon: BarChart3 },
-  completed: { label: 'Completed', color: 'bg-emerald-500', icon: CheckCircle2 },
-  paused: { label: 'Paused', color: 'bg-orange-500', icon: Pause },
-  cancelled: { label: 'Cancelled', color: 'bg-red-500', icon: AlertTriangle },
-};
+const getStatusConfig = (t: (key: string, fallback: string) => string): Record<LaunchStatus, { label: string; color: string; icon: typeof Clock }> => ({
+  draft: { label: t('launchOS.status.draft', 'Brouillon'), color: 'bg-slate-500', icon: Clock },
+  readiness_check: { label: t('launchOS.status.readinessCheck', 'Vérification'), color: 'bg-amber-500', icon: AlertTriangle },
+  ready_to_launch: { label: t('launchOS.status.ready', 'Prêt'), color: 'bg-green-500', icon: CheckCircle2 },
+  pre_launch: { label: t('launchOS.status.preLaunch', 'Pré-lancement'), color: 'bg-blue-500', icon: Rocket },
+  launching: { label: t('launchOS.status.launching', 'En cours'), color: 'bg-purple-500', icon: Zap },
+  post_launch: { label: t('launchOS.status.postLaunch', 'Post-lancement'), color: 'bg-indigo-500', icon: BarChart3 },
+  completed: { label: t('launchOS.status.completed', 'Terminé'), color: 'bg-emerald-500', icon: CheckCircle2 },
+  paused: { label: t('launchOS.status.paused', 'En pause'), color: 'bg-orange-500', icon: Pause },
+  cancelled: { label: t('launchOS.status.cancelled', 'Annulé'), color: 'bg-red-500', icon: AlertTriangle },
+});
 
 export default function LaunchOSHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { projects, setCurrentProject, decisionActions, campaignMemories, loading } = useLaunchOS();
+  const statusConfig = getStatusConfig(t);
 
   const activeProjects = projects.filter(p => !['completed', 'cancelled'].includes(p.status));
   const completedProjects = projects.filter(p => p.status === 'completed');
