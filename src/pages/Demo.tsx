@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useDemoMode } from "@/hooks/useDemoMode";
 import { LoadingState } from "@/components/ui/loading-state";
 
@@ -11,6 +12,7 @@ import { LoadingState } from "@/components/ui/loading-state";
  */
 export default function Demo() {
   const { isDemoMode, activateDemo } = useDemoMode();
+  const { t } = useTranslation();
 
   // Activate demo mode on mount
   useEffect(() => {
@@ -24,5 +26,5 @@ export default function Demo() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <LoadingState message="Activation du mode démo..." />;
+  return <LoadingState message={t("demo.activating", "Activation du mode démo...")} />;
 }

@@ -33,6 +33,11 @@ export const en = {
     contactAdmin: "Contact an administrator to get access",
     days: "days",
     frenchOnly: "This document is available in French only",
+    beta: "Beta",
+  },
+
+  demo: {
+    activating: "Activating demo mode...",
   },
 
   // Navigation
@@ -82,6 +87,7 @@ export const en = {
     guide: "Guide",
     setupWizard: "Setup Wizard",
     analyzeUrl: "Analyze URL",
+    geo: "AI Visibility",
   },
 
   // Landing Page
@@ -973,6 +979,11 @@ export const en = {
     newWorkspace: "+ New workspace",
     select: "Select",
     serviceNotActive: "Service not activated",
+    launchOS: "Launch OS",
+    launchOSDesc: "Orchestrate your launches",
+    launchOSCockpit: "Cockpit",
+    launchOSNew: "New Launch",
+    launchOSDecisions: "Decision Center",
   },
 
   // Cockpit

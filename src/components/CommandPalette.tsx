@@ -162,16 +162,16 @@ export function CommandPalette() {
     { path: "/dashboard/ai-costs", label: t("nav.aiCosts"), icon: Bot, group: "compliance", keywords: ["ai", "costs", "coûts", "tokens"] },
 
     // ── Public Pages ──
-    { path: "/", label: "Accueil", icon: LayoutDashboard, group: "pages", keywords: ["home", "landing", "accueil"] },
-    { path: "/pricing", label: "Pricing", icon: TrendingUp, group: "pages", keywords: ["pricing", "tarifs", "prix"] },
-    { path: "/agents", label: "Agents Catalog", icon: Bot, group: "pages", keywords: ["catalog", "catalogue", "agents"] },
-    { path: "/features", label: "Features", icon: Zap, group: "pages", keywords: ["features", "fonctionnalites"] },
-    { path: "/use-cases", label: "Use Cases", icon: Target, group: "pages", keywords: ["use cases", "cas d'usage"] },
-    { path: "/for-agencies", label: "For Agencies", icon: Building2, group: "pages", keywords: ["agencies", "agences"] },
+    { path: "/", label: lang === "fr" ? "Accueil" : "Home", icon: LayoutDashboard, group: "pages", keywords: ["home", "landing", "accueil"] },
+    { path: "/pricing", label: lang === "fr" ? "Tarifs" : "Pricing", icon: TrendingUp, group: "pages", keywords: ["pricing", "tarifs", "prix"] },
+    { path: "/agents", label: lang === "fr" ? "Catalogue Agents" : "Agents Catalog", icon: Bot, group: "pages", keywords: ["catalog", "catalogue", "agents"] },
+    { path: "/features", label: lang === "fr" ? "Fonctionnalités" : "Features", icon: Zap, group: "pages", keywords: ["features", "fonctionnalites"] },
+    { path: "/use-cases", label: lang === "fr" ? "Cas d'usage" : "Use Cases", icon: Target, group: "pages", keywords: ["use cases", "cas d'usage"] },
+    { path: "/for-agencies", label: lang === "fr" ? "Pour les agences" : "For Agencies", icon: Building2, group: "pages", keywords: ["agencies", "agences"] },
     { path: "/contact", label: "Contact", icon: Users, group: "pages", keywords: ["contact", "support"] },
     { path: "/blog", label: "Blog", icon: FileText, group: "pages", keywords: ["blog", "articles"] },
-    { path: "/changelog", label: "Changelog", icon: History, group: "pages", keywords: ["changelog", "updates"] },
-    { path: "/help", label: "Help", icon: MessageSquare, group: "pages", keywords: ["help", "aide", "faq"] },
+    { path: "/changelog", label: lang === "fr" ? "Journal des mises à jour" : "Changelog", icon: History, group: "pages", keywords: ["changelog", "updates", "mises à jour"] },
+    { path: "/help", label: lang === "fr" ? "Aide" : "Help", icon: MessageSquare, group: "pages", keywords: ["help", "aide", "faq"] },
   ], [t, lang]);
 
   const groupLabels: Record<string, string> = {

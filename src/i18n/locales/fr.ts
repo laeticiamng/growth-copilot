@@ -33,18 +33,23 @@ export const fr = {
     contactAdmin: "Contactez un administrateur pour obtenir l'accès",
     days: "jours",
     frenchOnly: "Ce document est disponible en français uniquement",
+    beta: "Bêta",
+  },
+
+  demo: {
+    activating: "Activation du mode démo...",
   },
 
   // Navigation
   nav: {
-    dashboard: "Dashboard",
+    dashboard: "Tableau de bord",
     sites: "Sites",
     content: "Contenu",
     seo: "SEO Technique",
-    localSeo: "Local SEO",
-    ads: "Ads",
-    social: "Social",
-    lifecycle: "Lifecycle",
+    localSeo: "SEO Local",
+    ads: "Publicités",
+    social: "Réseaux sociaux",
+    lifecycle: "Cycle de vie",
     cro: "CRO",
     creatives: "Créatives",
     media: "Médias",
@@ -55,7 +60,7 @@ export const fr = {
     automations: "Automations",
     reports: "Rapports",
     approvals: "Approbations",
-    brandKit: "Brand Kit",
+    brandKit: "Kit de marque",
     billing: "Facturation",
     agency: "Agence",
     logs: "Logs",
@@ -68,13 +73,13 @@ export const fr = {
     deptView: "Vue département",
     cms: "CMS",
     creativesStudio: "Studio Créatif",
-    adsFactory: "Ads Factory",
+    adsFactory: "Usine à pubs",
     hr: "RH",
     legal: "Juridique",
     auditLog: "Journal d'audit",
     accessReview: "Revue des accès",
     statusPage: "Page de statut",
-    roiDashboard: "Dashboard ROI",
+    roiDashboard: "Tableau ROI",
     aiCosts: "Coûts IA",
     api: "API",
     access: "Accès",
@@ -82,6 +87,7 @@ export const fr = {
     guide: "Guide",
     setupWizard: "Assistant de configuration",
     analyzeUrl: "Analyser URL",
+    geo: "Visibilité IA",
   },
 
   // Landing Page
@@ -988,6 +994,11 @@ export const fr = {
     newWorkspace: "+ Nouveau workspace",
     select: "Sélectionner",
     serviceNotActive: "Service non activé",
+    launchOS: "Launch OS",
+    launchOSDesc: "Orchestrez vos lancements",
+    launchOSCockpit: "Cockpit",
+    launchOSNew: "Nouveau lancement",
+    launchOSDecisions: "Centre de décisions",
   },
 
   // Cockpit

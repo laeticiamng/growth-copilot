@@ -65,7 +65,7 @@ export function EcoTransitionSection() {
             {t("landing.eco.badge")}
           </Badge>
           <Badge variant="outline" className="mb-4 ml-2 text-xs border-amber-500/30 text-amber-500">
-            Beta
+            {t("common.beta", "Beta")}
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             {t("landing.eco.heading")}

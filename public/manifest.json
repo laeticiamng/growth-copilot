@@ -45,14 +45,14 @@
   "dir": "ltr",
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
+      "name": "Tableau de bord",
+      "short_name": "Cockpit",
       "url": "/dashboard",
       "description": "Accéder au tableau de bord principal"
     },
     {
       "name": "Approbations",
-      "short_name": "Approvals",
+      "short_name": "Approbations",
       "url": "/dashboard/approvals",
       "description": "Voir les actions en attente d'approbation"
     }

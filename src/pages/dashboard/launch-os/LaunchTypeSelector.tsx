@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useLaunchOS } from "@/hooks/useLaunchOS";
 import { LaunchTypeEngine } from "@/lib/launch-os/launch-type-engine";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const iconMap: Record<string, typeof Music> = {
 
 export default function LaunchTypeSelector() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { createProject, setCurrentProject } = useLaunchOS();
   const [selectedType, setSelectedType] = useState<LaunchType | null>(null);
   const [projectName, setProjectName] = useState('');
@@ -45,9 +47,9 @@ export default function LaunchTypeSelector() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">New Launch</h1>
+        <h1 className="text-3xl font-bold">{t("launchOS.newLaunch", "Nouveau lancement")}</h1>
         <p className="text-muted-foreground mt-1">
-          Choose your launch type to load the right playbook
+          {t("launchOS.chooseType", "Choisissez votre type de lancement pour charger le bon playbook")}
         </p>
       </div>
 
@@ -56,10 +58,10 @@ export default function LaunchTypeSelector() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Link2 className="w-4 h-4" />
-            Paste your link (optional)
+            {t("launchOS.pasteLink", "Collez votre lien (optionnel)")}
           </CardTitle>
           <CardDescription>
-            A music link, website URL, app store link, or landing page
+            {t("launchOS.pasteLinkDesc", "Un lien musical, URL de site, lien app store ou landing page")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,11 +79,11 @@ export default function LaunchTypeSelector() {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="music" className="gap-2">
             <Music className="w-4 h-4" />
-            Music
+            {t("launchOS.music", "Musique")}
           </TabsTrigger>
           <TabsTrigger value="platform" className="gap-2">
             <Globe className="w-4 h-4" />
-            Platform / Product
+            {t("launchOS.platform", "Plateforme / Produit")}
           </TabsTrigger>
         </TabsList>
 
@@ -116,11 +118,11 @@ export default function LaunchTypeSelector() {
       {selectedType && (
         <Card className="border-primary/30">
           <CardHeader>
-            <CardTitle className="text-base">Name your launch</CardTitle>
+            <CardTitle className="text-base">{t("launchOS.nameYourLaunch", "Nommez votre lancement")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
-              placeholder="e.g., Summer Single Release, SaaS Beta Launch..."
+              placeholder={t("launchOS.namePlaceholder", "ex. Sortie single été, Lancement SaaS Beta...")}
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               className="text-base"
@@ -139,11 +141,11 @@ export default function LaunchTypeSelector() {
                 {creating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Creating...
+                    {t("launchOS.creating", "Création...")}
                   </>
                 ) : (
                   <>
-                    Create Launch
+                    {t("launchOS.createLaunch", "Créer le lancement")}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
