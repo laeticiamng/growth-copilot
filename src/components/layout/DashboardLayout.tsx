@@ -97,14 +97,14 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
 const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => [
   {
     id: "launch-os",
-    label: "Launch OS",
+    label: t("layout.launchOS"),
     icon: Rocket,
     color: "text-primary",
-    description: "Orchestrate your launches",
+    description: t("layout.launchOSDesc"),
     items: [
-      { path: "/dashboard/launch-os", label: "Cockpit", icon: Rocket },
-      { path: "/dashboard/launch-os/new", label: "New Launch", icon: () => <span className="text-base">+</span> },
-      { path: "/dashboard/launch-os/decisions", label: "Decision Center", icon: () => <span className="text-base">🧠</span> },
+      { path: "/dashboard/launch-os", label: t("layout.launchOSCockpit"), icon: Rocket },
+      { path: "/dashboard/launch-os/new", label: t("layout.launchOSNew"), icon: () => <span className="text-base">+</span> },
+      { path: "/dashboard/launch-os/decisions", label: t("layout.launchOSDecisions"), icon: () => <span className="text-base">🧠</span> },
     ],
   },
   {
@@ -129,7 +129,7 @@ const getAdvancedDepartments = (t: (key: string) => string): NavDepartment[] => 
     items: [
       { path: "/dashboard/dept/marketing", label: t("nav.deptView"), icon: () => <span className="text-base">📋</span> },
       { path: "/dashboard/seo", label: t("nav.seo"), icon: () => <span className="text-base">🔍</span> },
-      { path: "/dashboard/geo", label: "GEO", icon: () => <span className="text-base">🤖</span> },
+      { path: "/dashboard/geo", label: t("nav.geo", "GEO"), icon: () => <span className="text-base">🤖</span> },
       { path: "/dashboard/content", label: t("nav.content"), icon: () => <span className="text-base">📝</span> },
       { path: "/dashboard/local", label: t("nav.localSeo"), icon: () => <span className="text-base">📍</span> },
       { path: "/dashboard/ads", label: t("nav.ads"), icon: () => <span className="text-base">📣</span> },

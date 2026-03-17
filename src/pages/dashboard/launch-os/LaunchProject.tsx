@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useLaunchOS } from "@/hooks/useLaunchOS";
 import { LaunchTypeEngine } from "@/lib/launch-os/launch-type-engine";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { useState } from "react";
 
 export default function LaunchProject() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     currentProject, scoreReadiness, generateCreatives, generateVideoConcepts,
     evaluateDecisions, readinessScores, creativeVariants, videoConcepts,
@@ -27,8 +29,8 @@ export default function LaunchProject() {
   if (!currentProject) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
-        <p className="text-muted-foreground mb-4">No project selected</p>
-        <Button onClick={() => navigate('/dashboard/launch-os')}>Back to Launch OS</Button>
+        <p className="text-muted-foreground mb-4">{t("launchOS.noProjectSelected", "Aucun projet sélectionné")}</p>
+        <Button onClick={() => navigate('/dashboard/launch-os')}>{t("launchOS.backToLaunchOS", "Retour à Launch OS")}</Button>
       </div>
     );
   }
@@ -69,7 +71,7 @@ export default function LaunchProject() {
             <Badge>{currentProject.status.replace(/_/g, ' ')}</Badge>
             {currentProject.readiness_score != null && (
               <Badge variant={currentProject.readiness_score >= 60 ? 'default' : 'destructive'}>
-                Score: {currentProject.readiness_score}/100
+                {t("launchOS.score", "Score")} : {currentProject.readiness_score}/100
               </Badge>
             )}
           </div>
@@ -81,7 +83,7 @@ export default function LaunchProject() {
             onClick={() => updateProject(currentProject.id, { status: 'pre_launch' })}
           >
             <Play className="w-4 h-4" />
-            Start Launch
+            {t("launchOS.startLaunch", "Lancer")}
           </Button>
         )}
       </div>
@@ -89,12 +91,12 @@ export default function LaunchProject() {
       {/* Tabs */}
       <Tabs defaultValue="overview">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="readiness">Readiness</TabsTrigger>
-          <TabsTrigger value="creatives">Creatives ({creativeVariants.length})</TabsTrigger>
-          <TabsTrigger value="videos">Videos ({videoConcepts.length})</TabsTrigger>
-          <TabsTrigger value="distribution">Distribution</TabsTrigger>
-          <TabsTrigger value="signals">Signals</TabsTrigger>
+          <TabsTrigger value="overview">{t("launchOS.tabs.overview", "Vue d'ensemble")}</TabsTrigger>
+          <TabsTrigger value="readiness">{t("launchOS.tabs.readiness", "Préparation")}</TabsTrigger>
+          <TabsTrigger value="creatives">{t("launchOS.tabs.creatives", "Créatifs")} ({creativeVariants.length})</TabsTrigger>
+          <TabsTrigger value="videos">{t("launchOS.tabs.videos", "Vidéos")} ({videoConcepts.length})</TabsTrigger>
+          <TabsTrigger value="distribution">{t("launchOS.tabs.distribution", "Distribution")}</TabsTrigger>
+          <TabsTrigger value="signals">{t("launchOS.tabs.signals", "Signaux")}</TabsTrigger>
         </TabsList>
 
         {/* Overview */}
@@ -103,32 +105,32 @@ export default function LaunchProject() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <ActionCard
               icon={Target}
-              label="Score Readiness"
-              description="Evaluate launch preparation"
+              label={t("launchOS.action.scoreReadiness", "Score de préparation")}
+              description={t("launchOS.action.scoreReadinessDesc", "Évaluer la préparation au lancement")}
               loading={scoringLoading}
               onClick={handleScore}
               color="text-green-500"
             />
             <ActionCard
               icon={Zap}
-              label="Generate Creatives"
-              description="AI-powered creative variants"
+              label={t("launchOS.action.generateCreatives", "Générer les créatifs")}
+              description={t("launchOS.action.generateCreativesDesc", "Variantes créatives par IA")}
               loading={creativesLoading}
               onClick={handleGenerateCreatives}
               color="text-purple-500"
             />
             <ActionCard
               icon={Video}
-              label="Video Concepts"
-              description="Short-form storyboards"
+              label={t("launchOS.action.videoConcepts", "Concepts vidéo")}
+              description={t("launchOS.action.videoConceptsDesc", "Storyboards court format")}
               loading={videosLoading}
               onClick={handleGenerateVideos}
               color="text-pink-500"
             />
             <ActionCard
               icon={Brain}
-              label="Evaluate Decisions"
-              description="Run decision engine"
+              label={t("launchOS.action.evaluateDecisions", "Évaluer les décisions")}
+              description={t("launchOS.action.evaluateDecisionsDesc", "Lancer le moteur de décision")}
               loading={false}
               onClick={() => evaluateDecisions(currentProject.id)}
               color="text-amber-500"
@@ -140,7 +142,7 @@ export default function LaunchProject() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Launch Phases
+                {t("launchOS.launchPhases", "Phases de lancement")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -149,7 +151,7 @@ export default function LaunchProject() {
                   <div key={phase.key} className={`p-4 rounded-lg border ${i === 1 ? 'border-primary bg-primary/5' : ''}`}>
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant={i === 1 ? 'default' : 'secondary'}>{phase.name}</Badge>
-                      <span className="text-xs text-muted-foreground">{phase.durationDays}d</span>
+                      <span className="text-xs text-muted-foreground">{phase.durationDays}{t("launchOS.days", "j")}</span>
                     </div>
                     <ul className="space-y-1.5">
                       {phase.defaultTasks.slice(0, 4).map((task, j) => (
@@ -159,7 +161,7 @@ export default function LaunchProject() {
                         </li>
                       ))}
                       {phase.defaultTasks.length > 4 && (
-                        <li className="text-xs text-muted-foreground/60">+{phase.defaultTasks.length - 4} more</li>
+                        <li className="text-xs text-muted-foreground/60">+{phase.defaultTasks.length - 4} {t("launchOS.more", "de plus")}</li>
                       )}
                     </ul>
                   </div>
@@ -173,9 +175,11 @@ export default function LaunchProject() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
-                Target KPIs
+                {t("launchOS.targetKPIs", "KPIs cibles")}
               </CardTitle>
-              <CardDescription>Key metrics for this {isMusic ? 'music' : 'platform'} launch</CardDescription>
+              <CardDescription>
+                {t("launchOS.keyMetricsFor", "Métriques clés pour ce lancement")} {isMusic ? t("launchOS.musicType", "musical") : t("launchOS.platformType", "plateforme")}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -212,7 +216,7 @@ export default function LaunchProject() {
                     </div>
                     <Button variant="outline" onClick={handleScore} disabled={scoringLoading}>
                       <RefreshCw className={`w-4 h-4 mr-2 ${scoringLoading ? 'animate-spin' : ''}`} />
-                      Re-score
+                      {t("launchOS.rescore", "Réévaluer")}
                     </Button>
                   </div>
                 </CardContent>
@@ -245,7 +249,7 @@ export default function LaunchProject() {
               {latestScore.blockers.length > 0 && (
                 <Card className="border-red-500/30">
                   <CardHeader>
-                    <CardTitle className="text-base text-red-500">Blockers</CardTitle>
+                    <CardTitle className="text-base text-red-500">{t("launchOS.blockers", "Blocages")}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {latestScore.blockers.map((b: { dimension: string; message: string; fix_hint: string }, i: number) => (
@@ -262,7 +266,7 @@ export default function LaunchProject() {
               {latestScore.recommendations.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Recommendations</CardTitle>
+                    <CardTitle className="text-base">{t("launchOS.recommendations", "Recommandations")}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {latestScore.recommendations.map((r: { title: string; description: string; impact: string }, i: number) => (
@@ -282,13 +286,13 @@ export default function LaunchProject() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Target className="w-12 h-12 text-primary/30 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Score Your Readiness</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("launchOS.scoreYourReadiness", "Évaluez votre préparation")}</h3>
                 <p className="text-muted-foreground text-center max-w-md mb-6">
-                  Run a readiness check to evaluate your launch preparation across multiple dimensions.
+                  {t("launchOS.scoreYourReadinessDesc", "Lancez une vérification de préparation pour évaluer votre lancement sur plusieurs dimensions.")}
                 </p>
                 <Button onClick={handleScore} disabled={scoringLoading} className="gap-2">
                   {scoringLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Target className="w-4 h-4" />}
-                  Run Readiness Check
+                  {t("launchOS.runReadinessCheck", "Lancer la vérification")}
                 </Button>
               </CardContent>
             </Card>
@@ -323,13 +327,13 @@ export default function LaunchProject() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Zap className="w-12 h-12 text-purple-500/30 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Generate Creative Variants</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("launchOS.generateCreativeVariants", "Générer des variantes créatives")}</h3>
                 <p className="text-muted-foreground text-center max-w-md mb-6">
-                  AI will generate hooks, scripts, ad copy, and more — all tailored to your launch type.
+                  {t("launchOS.generateCreativeVariantsDesc", "L'IA générera des accroches, scripts, textes publicitaires et plus — adaptés à votre type de lancement.")}
                 </p>
                 <Button onClick={handleGenerateCreatives} disabled={creativesLoading} className="gap-2">
                   {creativesLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  Generate Creatives
+                  {t("launchOS.generateCreativesBtn", "Générer les créatifs")}
                 </Button>
               </CardContent>
             </Card>
@@ -356,7 +360,7 @@ export default function LaunchProject() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Hook (first 3s)</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("launchOS.hookFirst3s", "Accroche (3 premières sec.)")}</p>
                         <p className="text-sm font-medium mt-1">{concept.hook_text}</p>
                       </div>
                       {concept.scenes.map((scene: { order: number; duration_seconds: number; visual_description: string; text_overlay: string | null; voiceover: string | null }, i: number) => (
@@ -366,14 +370,14 @@ export default function LaunchProject() {
                           </div>
                           <div className="flex-1 text-sm">
                             <p>{scene.visual_description}</p>
-                            {scene.text_overlay && <p className="text-xs text-primary mt-1">Text: {scene.text_overlay}</p>}
-                            {scene.voiceover && <p className="text-xs text-muted-foreground mt-1 italic">VO: {scene.voiceover}</p>}
+                            {scene.text_overlay && <p className="text-xs text-primary mt-1">{t("launchOS.textOverlay", "Texte")} : {scene.text_overlay}</p>}
+                            {scene.voiceover && <p className="text-xs text-muted-foreground mt-1 italic">{t("launchOS.voiceover", "Voix off")} : {scene.voiceover}</p>}
                           </div>
                         </div>
                       ))}
                       {concept.cta && (
                         <div className="p-2 rounded bg-accent/10 text-sm">
-                          <span className="text-xs text-muted-foreground">CTA:</span> {concept.cta}
+                          <span className="text-xs text-muted-foreground">CTA :</span> {concept.cta}
                         </div>
                       )}
                     </div>
@@ -385,13 +389,13 @@ export default function LaunchProject() {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Video className="w-12 h-12 text-pink-500/30 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Create Video Concepts</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("launchOS.createVideoConcepts", "Créer des concepts vidéo")}</h3>
                 <p className="text-muted-foreground text-center max-w-md mb-6">
-                  Generate production-ready storyboards with scene-by-scene breakdowns.
+                  {t("launchOS.createVideoConceptsDesc", "Générez des storyboards prêts à produire avec un découpage scène par scène.")}
                 </p>
                 <Button onClick={handleGenerateVideos} disabled={videosLoading} className="gap-2">
                   {videosLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                  Generate Video Concepts
+                  {t("launchOS.generateVideoConceptsBtn", "Générer les concepts vidéo")}
                 </Button>
               </CardContent>
             </Card>
@@ -404,10 +408,10 @@ export default function LaunchProject() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Distribution Plan
+                {t("launchOS.distributionPlan", "Plan de distribution")}
               </CardTitle>
               <CardDescription>
-                Active channels: {config.defaultChannels.map(c => c.replace(/_/g, ' ')).join(', ')}
+                {t("launchOS.activeChannels", "Canaux actifs")} : {config.defaultChannels.map(c => c.replace(/_/g, ' ')).join(', ')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -417,7 +421,9 @@ export default function LaunchProject() {
                     <div key={run.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div>
                         <p className="text-sm font-medium">{run.channel.replace(/_/g, ' ')}</p>
-                        <p className="text-xs text-muted-foreground">Budget: ${run.budget_allocated} / Spent: ${run.budget_spent}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("launchOS.budget", "Budget")} : {run.budget_allocated}€ / {t("launchOS.spent", "Dépensé")} : {run.budget_spent}€
+                        </p>
                       </div>
                       <Badge>{run.status}</Badge>
                     </div>
@@ -425,7 +431,7 @@ export default function LaunchProject() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  Distribution will activate when the launch enters pre-launch phase.
+                  {t("launchOS.distributionWillActivate", "La distribution s'activera quand le lancement entrera en phase de pré-lancement.")}
                 </p>
               )}
             </CardContent>
@@ -438,9 +444,11 @@ export default function LaunchProject() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
-                Signal Feed
+                {t("launchOS.signalFeed", "Flux de signaux")}
               </CardTitle>
-              <CardDescription>{signalEvents.length} events tracked</CardDescription>
+              <CardDescription>
+                {t("launchOS.eventsTracked", "{{count}} événements suivis", { count: signalEvents.length })}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {signalEvents.length > 0 ? (
@@ -450,7 +458,7 @@ export default function LaunchProject() {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">{event.event_type}</Badge>
                         <span className="text-muted-foreground">{event.source}</span>
-                        {event.channel && <span className="text-xs text-muted-foreground">via {event.channel}</span>}
+                        {event.channel && <span className="text-xs text-muted-foreground">{t("launchOS.via", "via")} {event.channel}</span>}
                       </div>
                       <span className="text-xs text-muted-foreground">
                         {new Date(event.created_at).toLocaleString()}
@@ -460,7 +468,7 @@ export default function LaunchProject() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No signals yet. Events will appear as your launch generates traffic.
+                  {t("launchOS.noSignalsYet", "Aucun signal pour le moment. Les événements apparaîtront quand votre lancement générera du trafic.")}
                 </p>
               )}
             </CardContent>
