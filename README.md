@@ -126,6 +126,25 @@ Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
 
 > **Documentation complète** : [docs/AI_AGENTS.md](./docs/AI_AGENTS.md)
 
+## ♻️ Module Éco — données réelles (nouveau)
+
+Le module `/dashboard/eco-transition` n'utilise plus de seed locale pour les vues carbone, roadmap, subventions, KPI et snapshots ESG. Il repose désormais sur un backend dédié avec stockage par workspace/site et politiques RLS.
+
+### Tables ajoutées côté backend
+
+- `eco_emission_sources` — cartographie réelle des postes Scope 1/2/3
+- `eco_roadmap_actions` — portefeuille d'actions de décarbonation triées par impact
+- `eco_subsidy_projects` — pipeline réel des aides et subventions
+- `eco_monthly_metrics` — séries mensuelles énergie / recyclage / intensité carbone
+- `eco_reporting_snapshots` — snapshots ESG / CSRD exportables
+
+### Expérience utilisateur
+
+- cockpit visuel premium 2026 avec cartes “glass / depth”
+- formulaires intégrés dans chaque onglet pour éviter les allers-retours
+- états vides réels orientés action au lieu de données mockées
+- export JSON des snapshots ESG pour audit, finance ou conseil
+
 ### Agents Clés
 
 | Agent | Rôle | Responsabilités |
@@ -221,7 +240,7 @@ docs/
 ```bash
 # Cloner le repo
 git clone <YOUR_GIT_URL>
-cd growth-os
+cd growth-copilot
 
 # Installer les dépendances
 npm install
@@ -229,6 +248,19 @@ npm install
 # Lancer en développement
 npm run dev
 ```
+
+### Base de données Supabase
+
+Appliquez les migrations Supabase avant d'utiliser le module Éco réel :
+
+```bash
+# Exemple en local / self-hosted
+supabase db reset
+# ou
+supabase migration up
+```
+
+La migration `20260319120000_eco_transition_real_data.sql` crée les tables Éco, les index, la RLS et le trigger de fraîcheur des sources carbone.
 
 ### Variables d'Environnement
 
@@ -246,6 +278,12 @@ Configurés dans Lovable Cloud Secrets :
 - `OAUTH_STATE_SECRET`
 - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
 - `LOVABLE_API_KEY` (auto-généré)
+
+### Politique anti-mock
+
+- aucune donnée démo n'est injectée automatiquement dans le workspace utilisateur
+- les modules affichent désormais soit des données réelles, soit un état vide actionnable
+- le mode démo front reste un état d'interface, mais n'hydrate plus le dashboard avec de faux enregistrements
 
 ---
 
@@ -294,7 +332,8 @@ npm run test src/test/smoke.test.ts
 | Document | Description |
 |----------|-------------|
 | [PLATFORM_AUDIT.md](./docs/PLATFORM_AUDIT.md) | Statut complet et roadmap |
- | [AUDIT_PLATEFORME_2026-02-05.md](./docs/AUDIT_PLATEFORME_2026-02-05.md) | Audit final 100/100 |
+| [AUDIT_PLATEFORME_2026-02-05.md](./docs/AUDIT_PLATEFORME_2026-02-05.md) | Audit final 100/100 |
+| [SELF_HOSTING.md](./docs/SELF_HOSTING.md) | Guide Supabase / exécution locale |
 | [AI_AGENTS.md](./docs/AI_AGENTS.md) | Documentation des agents IA |
 | [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture technique |
 | [Lovable Docs](https://docs.lovable.dev) | Documentation Lovable |

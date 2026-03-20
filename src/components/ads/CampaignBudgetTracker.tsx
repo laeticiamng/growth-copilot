@@ -34,43 +34,8 @@ interface CampaignBudgetTrackerProps {
   onViewDetails?: (campaignId: string) => void;
 }
 
-const DEMO_CAMPAIGNS: Campaign[] = [
-  {
-    id: "1",
-    name: "Acquisition - Search Brand",
-    platform: "google",
-    budgetMonthly: 3000,
-    spent: 1850,
-    conversions: 45,
-    cpa: 41.11,
-    targetCpa: 50,
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Retargeting - Abandons panier",
-    platform: "meta",
-    budgetMonthly: 1500,
-    spent: 1420,
-    conversions: 28,
-    cpa: 50.71,
-    targetCpa: 45,
-    status: "limited",
-  },
-  {
-    id: "3",
-    name: "Notoriété - Vidéo branding",
-    platform: "meta",
-    budgetMonthly: 2000,
-    spent: 2150,
-    conversions: 12,
-    cpa: 179.17,
-    status: "overspend",
-  },
-];
-
 export function CampaignBudgetTracker({ 
-  campaigns = DEMO_CAMPAIGNS, 
+  campaigns = [], 
   currency = "€",
   onViewDetails,
 }: CampaignBudgetTrackerProps) {
@@ -162,7 +127,7 @@ export function CampaignBudgetTracker({
             <p className="text-sm text-muted-foreground">Dépensé</p>
             <p className="text-xl font-bold">{totalSpent.toLocaleString()}{currency}</p>
             <p className="text-xs text-muted-foreground">
-              {Math.round((totalSpent / totalBudget) * 100)}% du budget
+              {totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0}% du budget
             </p>
           </div>
           <div>

@@ -1,115 +1,210 @@
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Clock, Euro, CheckCircle2, AlertTriangle, TestTube2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Award, ExternalLink, Plus, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import type { EcoSubsidyProject } from "@/hooks/useEco";
 
-interface Subsidy {
-  id: string;
-  name: string;
-  provider: string;
-  maxAmount: string;
-  deadline: string;
-  daysLeft: number;
-  eligibility: number;
-  matchedActions: string[];
-  url: string;
+interface SubsidyMatcherProps {
+  projects: EcoSubsidyProject[];
+  onCreateProject: (payload: {
+    program_name: string;
+    provider: string;
+    amount_eur: number | null;
+    deadline: string | null;
+    eligibility_score: number | null;
+    status: "identified" | "drafting" | "submitted" | "won" | "rejected";
+    source_url: string | null;
+    tags: string[] | null;
+  }) => Promise<unknown>;
+  isSaving?: boolean;
 }
 
-const DEMO_SUBSIDIES: Subsidy[] = [
-  {
-    id: "1", name: "Tremplin pour la transition écologique des PME", provider: "ADEME",
-    maxAmount: "200 000 €", deadline: "2026-06-30", daysLeft: 113,
-    eligibility: 92, matchedActions: ["Panneaux solaires", "LED", "Achats responsables"],
-    url: "https://agirpourlatransition.ademe.fr/entreprises/aides-financieres/2024/tremplin-transition-ecologique-pme",
-  },
-  {
-    id: "2", name: "France 2030 — Industrie verte", provider: "France 2030",
-    maxAmount: "500 000 €", deadline: "2026-09-15", daysLeft: 190,
-    eligibility: 78, matchedActions: ["Optimisation logistique", "Green IT"],
-    url: "https://www.gouvernement.fr/france-2030",
-  },
-  {
-    id: "3", name: "Prêt vert BPI", provider: "BPI France",
-    maxAmount: "1 000 000 €", deadline: "Permanent", daysLeft: 999,
-    eligibility: 85, matchedActions: ["Flotte électrique", "Panneaux solaires"],
-    url: "https://www.bpifrance.fr/catalogue-offres/transition-ecologique-et-energetique/pret-vert",
-  },
-  {
-    id: "4", name: "Fonds chaleur renouvelable", provider: "ADEME",
-    maxAmount: "100 000 €", deadline: "2026-04-30", daysLeft: 52,
-    eligibility: 60, matchedActions: ["Chauffage"],
-    url: "https://agirpourlatransition.ademe.fr/entreprises/aides-financieres/fonds-chaleur",
-  },
-  {
-    id: "5", name: "Aide régionale transition énergétique", provider: "Région Île-de-France",
-    maxAmount: "50 000 €", deadline: "2026-05-15", daysLeft: 67,
-    eligibility: 70, matchedActions: ["LED", "Panneaux solaires"],
-    url: "https://www.iledefrance.fr/aides-et-appels-a-projets",
-  },
-];
+const STATUS_STYLE = {
+  identified: "border-slate-500/20 bg-slate-500/10 text-slate-300",
+  drafting: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+  submitted: "border-cyan-500/20 bg-cyan-500/10 text-cyan-300",
+  won: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  rejected: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+};
 
-function getDeadlineBadge(daysLeft: number, t: (key: string) => string) {
-  if (daysLeft > 180) return <Badge variant="success" className="text-[10px]"><Clock className="h-2.5 w-2.5 mr-1" />{t("eco.permanent")}</Badge>;
-  if (daysLeft > 90) return <Badge variant="outline" className="text-[10px] border-emerald-500/30 text-emerald-400"><Clock className="h-2.5 w-2.5 mr-1" />{daysLeft}j</Badge>;
-  if (daysLeft > 30) return <Badge variant="warning" className="text-[10px]"><AlertTriangle className="h-2.5 w-2.5 mr-1" />{daysLeft}j</Badge>;
-  return <Badge variant="error" className="text-[10px]"><AlertTriangle className="h-2.5 w-2.5 mr-1" />{daysLeft}j — {t("eco.urgent")}</Badge>;
-}
+export function SubsidyMatcher({ projects, onCreateProject, isSaving = false }: SubsidyMatcherProps) {
+  const { i18n } = useTranslation();
+  const [form, setForm] = useState({
+    program_name: "",
+    provider: "",
+    amount_eur: "",
+    deadline: "",
+    eligibility_score: "",
+    status: "identified",
+    source_url: "",
+    tags: "",
+  });
 
-export function SubsidyMatcher() {
-  const { t } = useTranslation();
+  const copy = useMemo(() => {
+    const fr = i18n.language.startsWith("fr");
+    return {
+      title: fr ? "Pipeline de subventions" : "Subsidy pipeline",
+      desc: fr ? "Remplacez les listes statiques par vos vrais dossiers, échéances et statuts." : "Replace static lists with your real funding opportunities, deadlines and statuses.",
+      add: fr ? "Ajouter une opportunité" : "Add opportunity",
+      emptyTitle: fr ? "Aucun dossier de financement" : "No funding opportunity yet",
+      emptyDesc: fr ? "Ajoutez les aides réellement détectées pour prioriser les dossiers à soumettre." : "Add the real funding opportunities you identified to prioritize submissions.",
+      statuses: {
+        identified: fr ? "Identifiée" : "Identified",
+        drafting: fr ? "Montage" : "Drafting",
+        submitted: fr ? "Soumise" : "Submitted",
+        won: fr ? "Obtenue" : "Won",
+        rejected: fr ? "Refusée" : "Rejected",
+      },
+      saved: fr ? "Opportunité enregistrée" : "Opportunity saved",
+      error: fr ? "Impossible d’enregistrer l’opportunité" : "Unable to save opportunity",
+      moneyTracked: fr ? "Montant suivi" : "Tracked budget",
+      ready: fr ? "Échéances actives" : "Active deadlines",
+    };
+  }, [i18n.language]);
 
-  const handleApply = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
+  const totalTracked = projects.reduce((sum, item) => sum + Number(item.amount_eur || 0), 0);
+  const activeDeadlines = projects.filter((item) => item.deadline && ["identified", "drafting", "submitted"].includes(item.status)).length;
+
+  const handleSubmit = async () => {
+    if (!form.program_name || !form.provider) {
+      toast.error(copy.error);
+      return;
+    }
+
+    try {
+      await onCreateProject({
+        program_name: form.program_name,
+        provider: form.provider,
+        amount_eur: form.amount_eur ? Number(form.amount_eur) : null,
+        deadline: form.deadline || null,
+        eligibility_score: form.eligibility_score ? Number(form.eligibility_score) : null,
+        status: form.status as "identified" | "drafting" | "submitted" | "won" | "rejected",
+        source_url: form.source_url || null,
+        tags: form.tags ? form.tags.split(",").map((item) => item.trim()).filter(Boolean) : null,
+      });
+      setForm({ program_name: "", provider: "", amount_eur: "", deadline: "", eligibility_score: "", status: "identified", source_url: "", tags: "" });
+      toast.success(copy.saved);
+    } catch (error) {
+      console.error(error);
+      toast.error(copy.error);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h3 className="text-lg font-semibold">{t("eco.subsidiesTitle")}</h3>
-          <p className="text-sm text-muted-foreground">{t("eco.subsidiesDesc")}</p>
-        </div>
-        <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
-          <TestTube2 className="h-3 w-3" />
-          {t("common.demoData", "Demo data")}
-        </Badge>
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-background to-yellow-500/5 shadow-[0_25px_90px_-50px_rgba(234,179,8,0.45)]">
+          <CardHeader>
+            <Badge variant="outline" className="mb-3 w-fit border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> live funding matcher
+            </Badge>
+            <CardTitle>{copy.title}</CardTitle>
+            <p className="text-sm text-muted-foreground">{copy.desc}</p>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-background/60 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{copy.moneyTracked}</p>
+              <p className="mt-2 text-2xl font-semibold text-emerald-300">{totalTracked.toLocaleString(i18n.language)} €</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-background/60 p-4 backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{copy.ready}</p>
+              <p className="mt-2 text-2xl font-semibold">{activeDeadlines}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/10 bg-background/80 backdrop-blur">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg"><Plus className="h-4 w-4 text-emerald-400" /> {copy.add}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2 md:col-span-2">
+                <Label>Programme</Label>
+                <Input value={form.program_name} onChange={(e) => setForm((prev) => ({ ...prev, program_name: e.target.value }))} placeholder="ADEME Tremplin, BPI, Région..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Organisme</Label>
+                <Input value={form.provider} onChange={(e) => setForm((prev) => ({ ...prev, provider: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Statut</Label>
+                <Select value={form.status} onValueChange={(value) => setForm((prev) => ({ ...prev, status: value }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(copy.statuses).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Montant €</Label>
+                <Input type="number" min="0" step="0.01" value={form.amount_eur} onChange={(e) => setForm((prev) => ({ ...prev, amount_eur: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Score d’éligibilité</Label>
+                <Input type="number" min="0" max="100" value={form.eligibility_score} onChange={(e) => setForm((prev) => ({ ...prev, eligibility_score: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Deadline</Label>
+                <Input type="date" value={form.deadline} onChange={(e) => setForm((prev) => ({ ...prev, deadline: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>URL source</Label>
+                <Input type="url" value={form.source_url} onChange={(e) => setForm((prev) => ({ ...prev, source_url: e.target.value }))} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Tags</Label>
+                <Input value={form.tags} onChange={(e) => setForm((prev) => ({ ...prev, tags: e.target.value }))} placeholder="énergie, mobilité, immobilier..." />
+              </div>
+            </div>
+            <Button onClick={handleSubmit} disabled={isSaving} className="w-full"><Plus className="mr-2 h-4 w-4" /> {copy.add}</Button>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {DEMO_SUBSIDIES.map(sub => (
-          <Card key={sub.id} className="border-border bg-card hover:border-emerald-500/30 transition-colors">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="text-[10px] font-semibold">{sub.provider}</Badge>
-                    {getDeadlineBadge(sub.daysLeft, t)}
+      {projects.length === 0 ? (
+        <EmptyState icon={Award} title={copy.emptyTitle} description={copy.emptyDesc} compact />
+      ) : (
+        <div className="grid gap-3">
+          {projects.map((project) => (
+            <Card key={project.id} className="border-white/10 bg-background/70 transition-transform hover:-translate-y-0.5 hover:border-emerald-400/30">
+              <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <Badge className={STATUS_STYLE[project.status]} variant="outline">{copy.statuses[project.status]}</Badge>
+                    <Badge variant="secondary">{project.provider}</Badge>
+                    {project.deadline && <Badge variant="outline">{new Date(project.deadline).toLocaleDateString(i18n.language)}</Badge>}
                   </div>
-                  <h4 className="font-medium text-sm mt-2">{sub.name}</h4>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="flex items-center gap-1 text-sm font-semibold text-emerald-400">
-                      <Euro className="h-3.5 w-3.5" /> {sub.maxAmount}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-3 w-3" /> {t("eco.eligibility")} {sub.eligibility}%
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {sub.matchedActions.map(a => (
-                      <Badge key={a} variant="secondary" className="text-[10px]">{a}</Badge>
-                    ))}
-                  </div>
+                  <h4 className="font-medium">{project.program_name}</h4>
+                  {!!project.tags?.length && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {project.tags.map((tag) => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                    </div>
+                  )}
                 </div>
-                <Button variant="outline" size="sm" className="shrink-0" onClick={() => handleApply(sub.url)}>
-                  <ExternalLink className="h-3.5 w-3.5 mr-1" /> {t("eco.apply")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold text-emerald-300">{Number(project.amount_eur || 0).toLocaleString(i18n.language)} €</p>
+                  {project.eligibility_score !== null && project.eligibility_score !== undefined && (
+                    <p className="text-xs text-muted-foreground">Score {project.eligibility_score}%</p>
+                  )}
+                  {project.source_url && (
+                    <Button variant="outline" size="sm" className="mt-3" onClick={() => window.open(project.source_url || "", "_blank", "noopener,noreferrer")}>
+                      <ExternalLink className="mr-2 h-3.5 w-3.5" /> Ouvrir
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

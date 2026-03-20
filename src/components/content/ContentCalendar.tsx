@@ -47,42 +47,8 @@ interface ContentCalendarProps {
   onEditContent?: (contentId: string) => void;
 }
 
-const DEMO_CONTENT: ContentItem[] = [
-  {
-    id: "1",
-    title: "Guide SEO 2026",
-    type: "article",
-    date: new Date(),
-    status: "scheduled",
-    platform: "Blog",
-  },
-  {
-    id: "2",
-    title: "Webinaire automation",
-    type: "video",
-    date: addDays(new Date(), 2),
-    status: "draft",
-    platform: "YouTube",
-  },
-  {
-    id: "3",
-    title: "Newsletter mensuelle",
-    type: "email",
-    date: addDays(new Date(), 5),
-    status: "review",
-  },
-  {
-    id: "4",
-    title: "Post LinkedIn",
-    type: "social",
-    date: addDays(new Date(), 1),
-    status: "scheduled",
-    platform: "LinkedIn",
-  },
-];
-
 export function ContentCalendar({ 
-  content = DEMO_CONTENT, 
+  content = [], 
   onAddContent, 
   onEditContent 
 }: ContentCalendarProps) {

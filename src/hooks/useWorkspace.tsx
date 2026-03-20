@@ -2,7 +2,6 @@ import { useState, useEffect, createContext, useContext, ReactNode, useCallback 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useDemoMode } from './useDemoMode';
-import { DEMO_WORKSPACE } from '@/data/demo-data';
 
 interface Workspace {
   id: string;
@@ -34,14 +33,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchWorkspaces = useCallback(async () => {
-    // Demo mode: return fake workspace
-    if (isDemoMode) {
-      setWorkspaces([DEMO_WORKSPACE as Workspace]);
-      setCurrentWorkspace(DEMO_WORKSPACE as Workspace);
-      setLoading(false);
-      return;
-    }
-
     if (!user) {
       setWorkspaces([]);
       setCurrentWorkspace(null);
@@ -69,7 +60,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     });
     
     setLoading(false);
-  }, [user, isDemoMode]);
+  }, [user]);
 
   useEffect(() => {
     fetchWorkspaces();
