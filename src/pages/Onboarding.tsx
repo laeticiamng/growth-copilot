@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteAnalysisPreview, type SiteAnalysis } from "@/components/onboarding/SiteAnalysisPreview";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 
 type OnboardingStep = "url" | "plan" | "services" | "objectives" | "payment" | "summary";
 type PlanType = "starter" | "full" | "alacarte";
@@ -60,6 +61,7 @@ const generateSlug = (name: string): string => {
 
 export default function Onboarding() {
   const { t } = useTranslation();
+  useExperienceScene({ sceneId: "activation-journey", mode: "immersive", intensity: 2, mood: "anticipation" });
   const { user, loading: authLoading } = useAuth();
   const { workspaces } = useWorkspace();
   const navigate = useNavigate();
@@ -316,7 +318,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col experience-stage">
       <header className="p-6">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg gradient-bg">
@@ -338,7 +340,7 @@ export default function Onboarding() {
         <div className="w-full max-w-2xl">
           
           {step === "url" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Globe className="w-8 h-8 text-primary" />
@@ -411,7 +413,7 @@ export default function Onboarding() {
           )}
 
           {step === "plan" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Crown className="w-8 h-8 text-primary" />
@@ -494,7 +496,7 @@ export default function Onboarding() {
           )}
 
           {step === "services" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Puzzle className="w-8 h-8 text-primary" />
@@ -542,7 +544,7 @@ export default function Onboarding() {
           )}
 
           {step === "objectives" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <Target className="w-8 h-8 text-primary" />
@@ -588,7 +590,7 @@ export default function Onboarding() {
           )}
 
           {step === "payment" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
                   <CreditCard className="w-8 h-8 text-primary" />
@@ -708,7 +710,7 @@ export default function Onboarding() {
           )}
 
           {step === "summary" && (
-            <Card variant="gradient" className="border-2">
+            <Card variant="gradient" className="border-2 experience-panel">
               <CardHeader className="text-center pb-2">
                 <div className="mx-auto p-3 rounded-full bg-chart-3/20 w-fit mb-4">
                   <CheckCircle2 className="w-8 h-8 text-chart-3" />

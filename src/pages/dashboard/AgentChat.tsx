@@ -19,11 +19,17 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getAgentBySlug, getDepartmentBySlug } from "@/data/agents-catalog";
+import {
+  getAgentBySlug,
+  getDepartmentBySlug,
+  type AgentCatalogItem,
+  type DepartmentCatalogItem,
+} from "@/data/agents-catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 
 interface ChatMessage {
   id: string;
@@ -39,7 +45,7 @@ function buildGreeting(agentName: string, role: string, deptName: string, lang: 
   return `Hello! I'm ${agentName}, ${role} in the ${deptName} department. How can I help you today?`;
 }
 
-function buildSystemPrompt(agent: any, department: any, lang: string): string {
+function buildSystemPrompt(agent: AgentCatalogItem, department: DepartmentCatalogItem, lang: string): string {
   return `You are ${agent.persona.name}, an AI agent with the role "${agent.role.en}" in the ${department.name.en} department of a Growth OS platform.
 
 Your capabilities include: ${agent.capabilities.join(", ")}.
@@ -52,6 +58,7 @@ Keep responses concise but informative. Use markdown formatting when helpful.`;
 }
 
 export default function AgentChat() {
+  useExperienceScene({ sceneId: "agent-presence", mode: "ambient", intensity: 2, mood: "focused" });
   const { slug } = useParams<{ slug: string }>();
   const { i18n } = useTranslation();
   const lang = i18n.language.startsWith("fr") ? "fr" : "en";
@@ -138,7 +145,7 @@ export default function AgentChat() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, agentMessage]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("AgentChat error:", err);
       // Fallback message
       const fallback: ChatMessage = {
@@ -150,7 +157,7 @@ export default function AgentChat() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, fallback]);
-      toast.error(err.message || "Error");
+      toast.error(err instanceof Error ? err.message : "Error");
     } finally {
       setIsTyping(false);
     }
@@ -158,7 +165,7 @@ export default function AgentChat() {
 
   if (!agent || !department) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center experience-stage">
         <Bot className="w-16 h-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-bold mb-2">
           {lang === "fr" ? "Agent introuvable" : "Agent not found"}
@@ -186,7 +193,7 @@ export default function AgentChat() {
       ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-8rem)] experience-stage">
       {/* Agent Header */}
       <div className="flex items-center gap-4 pb-4 border-b border-border">
         <Link to={`/dashboard/dept/${agent.departmentSlug}`}>
@@ -228,7 +235,7 @@ export default function AgentChat() {
       </div>
 
       {/* Agent Info Bar */}
-      <div className="flex items-center gap-3 py-3 px-4 bg-secondary/30 rounded-lg my-3">
+      <div className="flex items-center gap-3 py-3 px-4 bg-secondary/30 rounded-lg my-3 experience-panel">
         <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         <p className="text-xs text-muted-foreground">
           {lang === "fr"

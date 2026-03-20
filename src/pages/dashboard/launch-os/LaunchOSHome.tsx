@@ -11,6 +11,7 @@ import {
   Music, Globe, AlertTriangle, CheckCircle2, Clock, Pause, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 import { getLaunchCategory } from "@/lib/launch-os/types";
 import type { LaunchProject, LaunchStatus } from "@/lib/launch-os/types";
 
@@ -27,6 +28,7 @@ const getStatusConfig = (t: (key: string, fallback: string) => string): Record<L
 });
 
 export default function LaunchOSHome() {
+  useExperienceScene({ sceneId: "launch-orbit", mode: "ambient", intensity: 2, mood: "focused" });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { projects, setCurrentProject, decisionActions, campaignMemories, loading } = useLaunchOS();
@@ -50,7 +52,7 @@ export default function LaunchOSHome() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 experience-stage">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -72,7 +74,7 @@ export default function LaunchOSHome() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="experience-panel">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -83,7 +85,7 @@ export default function LaunchOSHome() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="experience-panel">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -94,7 +96,7 @@ export default function LaunchOSHome() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="experience-panel">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -105,7 +107,7 @@ export default function LaunchOSHome() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="experience-panel">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -120,7 +122,7 @@ export default function LaunchOSHome() {
 
       {/* Pending Actions Alert */}
       {pendingActions.length > 0 && (
-        <Card className="border-amber-500/50 bg-amber-500/5">
+        <Card className="border-amber-500/50 bg-amber-500/5 experience-panel">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -160,7 +162,7 @@ export default function LaunchOSHome() {
           </div>
         </div>
       ) : (
-        <Card className="border-dashed">
+        <Card className="border-dashed experience-panel">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <Rocket className="w-10 h-10 text-primary" />

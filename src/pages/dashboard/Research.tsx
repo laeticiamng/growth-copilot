@@ -2,10 +2,12 @@ import { SmartResearchHub } from "@/components/research/SmartResearchHub";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Zap, Globe, TrendingUp } from "lucide-react";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 
 export default function Research() {
+  useExperienceScene({ sceneId: "intelligence-presence", mode: "ambient", intensity: 2, mood: "focused" });
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 experience-stage">
       {/* Header - Apple-like clarity */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <span className="text-3xl">🔍</span>
@@ -19,7 +21,7 @@ export default function Research() {
       
       {/* Quick Info Cards */}
       <div className="grid sm:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-200 dark:border-blue-800">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-200 dark:border-blue-800 experience-panel">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-500/20">
@@ -33,7 +35,7 @@ export default function Research() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-200 dark:border-emerald-800">
+        <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-200 dark:border-emerald-800 experience-panel">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-emerald-500/20">
@@ -47,7 +49,7 @@ export default function Research() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-violet-200 dark:border-violet-800">
+        <Card className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-violet-200 dark:border-violet-800 experience-panel">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-500/20">

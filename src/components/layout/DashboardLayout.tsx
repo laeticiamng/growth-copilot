@@ -387,11 +387,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background/70 relative">
       <OfflineBanner />
       
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-b border-border h-14 sm:h-16 flex items-center justify-between px-3 sm:px-4 safe-bottom" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card/88 backdrop-blur-xl border-b border-border h-14 sm:h-16 flex items-center justify-between px-3 sm:px-4 safe-bottom experience-panel" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -415,7 +415,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-[100dvh] w-[280px] sm:w-64 bg-card border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden",
+          "fixed top-0 left-0 z-40 h-[100dvh] w-[280px] sm:w-64 bg-card/88 backdrop-blur-xl border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden experience-panel",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -575,9 +575,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Main content */}
-      <main className="lg:ml-64 pt-14 sm:pt-16 lg:pt-0 min-h-[100dvh]">
+      <main className="lg:ml-64 pt-14 sm:pt-16 lg:pt-0 min-h-[100dvh] relative z-[1]">
         {/* Desktop notification bar */}
-        <div className="hidden lg:flex h-14 items-center justify-end gap-2 px-6 border-b border-border bg-card/50">
+        <div className="hidden lg:flex h-14 items-center justify-end gap-2 px-6 border-b border-border bg-card/55 backdrop-blur-lg">
           <button
             onClick={() => triggerCommandPalette()}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary rounded-lg hover:bg-secondary/80 transition-colors mr-auto"
@@ -590,7 +590,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <LanguageToggle />
           <NotificationCenter />
         </div>
-        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 experience-stage">
           <ErrorBoundary>{children}</ErrorBoundary>
         </div>
       </main>

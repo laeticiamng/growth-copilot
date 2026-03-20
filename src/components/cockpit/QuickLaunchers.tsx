@@ -92,7 +92,7 @@ export function QuickLaunchers({
 
   if (loading) {
     return (
-      <Card>
+      <Card className="experience-panel">
         <CardHeader>
           <Skeleton className="h-6 w-40" />
         </CardHeader>
@@ -108,7 +108,7 @@ export function QuickLaunchers({
   }
 
   return (
-    <Card>
+    <Card className="experience-panel">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{t("cockpit.launchAction")}</CardTitle>
@@ -129,7 +129,7 @@ export function QuickLaunchers({
                 onClick={() => handleLaunch(launcher)}
                 disabled={isLaunching || launcher.disabled}
                 className={cn(
-                  "flex items-start gap-3 p-4 rounded-lg border text-left transition-all min-h-[44px]",
+                  "flex items-start gap-3 p-4 rounded-lg border text-left transition-all min-h-[44px] depth-surface",
                   launcher.disabled
                     ? "opacity-50 cursor-not-allowed bg-muted/30"
                     : "hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
