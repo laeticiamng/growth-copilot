@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
@@ -23,6 +24,7 @@ import { SEOHead } from "@/components/SEOHead";
 const Index = () => {
   const { t } = useTranslation();
   useAnalytics(); // Track landing page views
+  useExperienceScene({ sceneId: "landing-hero", mode: "ambient", intensity: 2, mood: "calm" });
 
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -45,7 +47,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background experience-stage">
       <SEOHead
         title={t("pages.index.title")}
         description={t("pages.index.description")}

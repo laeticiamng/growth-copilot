@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 import {
   Globe, Plug, Bot, CheckCircle2, ArrowRight, ArrowLeft,
   Rocket, Loader2, ExternalLink, Sparkles,
@@ -328,6 +329,7 @@ function StepAgentRun({
 
 /* ─── Main Wizard ─── */
 export default function SetupWizard() {
+  useExperienceScene({ sceneId: "setup-activation", mode: "immersive", intensity: 2, mood: "anticipation" });
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
@@ -373,7 +375,7 @@ export default function SetupWizard() {
   }, [sites, currentStep]);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 experience-stage">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
@@ -437,7 +439,7 @@ export default function SetupWizard() {
       </div>
 
       {/* Step content */}
-      <Card>
+      <Card className="experience-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {(() => {

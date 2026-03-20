@@ -1,9 +1,9 @@
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingState } from "@/components/ui/loading-state";
 
@@ -52,13 +52,14 @@ import { composeProviders, createProviderGroup } from "@/lib/compose-providers";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth/ProtectedRoute";
 import { ServiceGuard } from "@/components/auth/ServiceGuard";
-import { EnvGuard } from "@/components/EnvGuard";
 
 // Sentry routing hook
 import { useSentryRouting } from "@/hooks/useSentryRouting";
 
 // Dynamic html lang sync
 import { useLanguageSync } from "@/hooks/useLanguageSync";
+import { ExperienceProvider, useExperience } from "@/experience/runtime/ExperienceProvider";
+import { AmbientLayer } from "@/experience/ambient/AmbientLayer";
 
 // Lazy-loaded global widgets (not critical for first paint)
 const CrispChat = lazy(() => import("@/components/CrispChat").then(m => ({ default: m.CrispChat })));
@@ -285,23 +286,32 @@ function LanguageSyncTracker() {
   return null;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-function App() {
+function ExperienceRouteTracker() {
+  const location = useLocation();
+  const { setPath } = useExperience();
+
+
+  React.useEffect(() => {
+    setPath(location.pathname);
+  }, [location.pathname, setPath]);
+
+  return null;
+}
+
+function AppRoutes() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <InnerProviders>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-            <Suspense fallback={null}><CrispChat /></Suspense>
-            <Suspense fallback={null}><CookieConsent /></Suspense>
-            <Suspense fallback={null}><DemoModeBanner /></Suspense>
-            <Suspense fallback={null}><DemoModeWatermark /></Suspense>
-            <SentryRouteTracker />
-            <LanguageSyncTracker />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
+    <>
+      <AmbientLayer />
+      <div className="experience-app-shell relative isolate min-h-screen">
+        <Suspense fallback={null}><CrispChat /></Suspense>
+        <Suspense fallback={null}><CookieConsent /></Suspense>
+        <Suspense fallback={null}><DemoModeBanner /></Suspense>
+        <Suspense fallback={null}><DemoModeWatermark /></Suspense>
+        <SentryRouteTracker />
+        <LanguageSyncTracker />
+        <ExperienceRouteTracker />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/privacy" element={<Privacy />} />
@@ -403,9 +413,25 @@ function App() {
                 <Route path="/dashboard/eco" element={<DashboardRoute service="sustainability"><EcoTransition /></DashboardRoute>} />
 
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
+          </Routes>
+        </Suspense>
+      </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <InnerProviders>
+          <ExperienceProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+              <AppRoutes />
+            </BrowserRouter>
+          </ExperienceProvider>
         </InnerProviders>
       </QueryClientProvider>
     </ErrorBoundary>

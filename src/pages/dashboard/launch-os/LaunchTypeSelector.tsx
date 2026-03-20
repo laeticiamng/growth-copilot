@@ -13,6 +13,7 @@ import {
   Disc, Library, Video, Repeat, Cloud, Smartphone, Layout, Package, Award
 } from "lucide-react";
 import type { LaunchType, LaunchTypeConfig } from "@/lib/launch-os/types";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 
 const iconMap: Record<string, typeof Music> = {
   music: Music, disc: Disc, library: Library, video: Video, repeat: Repeat,
@@ -20,6 +21,7 @@ const iconMap: Record<string, typeof Music> = {
 };
 
 export default function LaunchTypeSelector() {
+  useExperienceScene({ sceneId: "launch-signature", mode: "immersive", intensity: 3, mood: "anticipation" });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { createProject, setCurrentProject } = useLaunchOS();
@@ -44,17 +46,17 @@ export default function LaunchTypeSelector() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 experience-stage">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">{t("launchOS.newLaunch", "Nouveau lancement")}</h1>
+        <h1 className="text-3xl font-bold experience-title">{t("launchOS.newLaunch", "Nouveau lancement")}</h1>
         <p className="text-muted-foreground mt-1">
           {t("launchOS.chooseType", "Choisissez votre type de lancement pour charger le bon playbook")}
         </p>
       </div>
 
       {/* Step 1: URL Input */}
-      <Card>
+      <Card className="experience-panel">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Link2 className="w-4 h-4" />
@@ -75,7 +77,7 @@ export default function LaunchTypeSelector() {
       </Card>
 
       {/* Step 2: Type Selection */}
-      <Tabs defaultValue="music">
+      <Tabs defaultValue="music" className="experience-panel rounded-2xl p-4">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="music" className="gap-2">
             <Music className="w-4 h-4" />
@@ -116,7 +118,7 @@ export default function LaunchTypeSelector() {
 
       {/* Step 3: Name & Create */}
       {selectedType && (
-        <Card className="border-primary/30">
+        <Card className="border-primary/30 experience-panel">
           <CardHeader>
             <CardTitle className="text-base">{t("launchOS.nameYourLaunch", "Nommez votre lancement")}</CardTitle>
           </CardHeader>
@@ -163,7 +165,7 @@ function TypeCard({ config, selected, onClick }: { config: LaunchTypeConfig; sel
 
   return (
     <Card
-      className={`cursor-pointer transition-all hover:shadow-sm ${
+      className={`cursor-pointer transition-all hover:shadow-sm experience-panel depth-surface ${
         selected ? 'border-primary ring-2 ring-primary/20' : 'hover:border-primary/30'
       }`}
       onClick={onClick}

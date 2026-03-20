@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useExperienceScene } from "@/experience/runtime/ExperienceProvider";
 
 // Eagerly loaded cockpit widgets (lightweight)
 import {
@@ -59,6 +60,7 @@ const CGO_PERSONA = {
 };
 
 export default function DashboardHome() {
+  useExperienceScene({ sceneId: "cockpit-ambient", mode: "ambient", intensity: 1, mood: "focused" });
   const { t, i18n } = useTranslation();
   const { currentWorkspace, loading: wsLoading } = useWorkspace();
   const { currentSite, loading: sitesLoading } = useSites();
@@ -233,7 +235,7 @@ export default function DashboardHome() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 experience-stage">
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-32 w-full" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -263,7 +265,7 @@ export default function DashboardHome() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 experience-stage">
       {/* Welcome Card + PDF Export */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1">
