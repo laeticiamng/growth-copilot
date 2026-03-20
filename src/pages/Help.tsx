@@ -46,7 +46,7 @@ const HELP_ARTICLES: HelpArticle[] = [
   {
     id: "4", category: "agents",
     question: { fr: "Combien d'agents IA sont disponibles ?", en: "How many AI agents are available?" },
-    answer: { fr: "Growth OS dispose de 39 agents IA répartis dans 11 départements : Direction, Marketing, Commercial, Finance, Sécurité, Produit, Ingénierie, Data, Support, Gouvernance, RH et Juridique.", en: "Growth OS has 39 AI agents across 11 departments: Leadership, Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, Governance, HR and Legal." },
+    answer: { fr: "Growth OS dispose de des modules growth connectés couvrant Marketing, Commercial, Finance, Sécurité et plus.", en: "Growth OS has connected growth modules covering Marketing, Sales, Finance, Security and more." },
   },
   {
     id: "5", category: "agents",
@@ -61,7 +61,7 @@ const HELP_ARTICLES: HelpArticle[] = [
   {
     id: "7", category: "billing",
     question: { fr: "Quels sont les plans disponibles ?", en: "What plans are available?" },
-    answer: { fr: "3 plans : Starter à 490€/mois (11 agents lite), À la carte à 1 900€/département/mois, et Full Company à 9 000€/mois (39 agents, 11 départements).", en: "3 plans: Starter at €490/month (11 lite agents), À la carte at €1,900/department/month, and Full Company at €9,000/month (39 agents, 11 departments)." },
+    answer: { fr: "3 plans : Solo à 490€/mois (1 workspace, signaux connectés), À la carte à 1 900€/département/mois, et Scale sur devis (gouvernance avancée, monitoring cross-canal).", en: "3 plans: Solo at €490/month (1 workspace, connected signals), À la carte at €1,900/department/month, and Scale on request (advanced governance, cross-channel monitoring)." },
   },
   {
     id: "8", category: "billing",

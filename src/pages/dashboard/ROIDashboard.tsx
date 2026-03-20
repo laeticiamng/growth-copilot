@@ -167,7 +167,7 @@ export default function ROIDashboard() {
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="w-5 h-5 text-primary" />
                   Growth OS
-                  {isFullCompany && <Badge variant="gradient">Full Company</Badge>}
+                  {isFullCompany && <Badge variant="gradient">Scale</Badge>}
                 </CardTitle>
                 <CardDescription>
                   {isFullCompany

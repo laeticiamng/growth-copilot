@@ -1,7 +1,7 @@
 {
-  "name": "Growth OS - Autopilot Marketing IA",
+  "name": "Growth OS — Cockpit growth connecté",
   "short_name": "Growth OS",
-  "description": "Plateforme IA d'entreprise tout-en-un avec 39 agents spécialisés dans 11 départements",
+  "description": "Cockpit growth connecté : données unifiées, anomalies, actions priorisées, approbations et suivi d'impact",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -97,7 +97,7 @@ interface AgentActionV2 {
 
 ---
 
-## 👥 Roster des Agents (38 Employés IA)
+## 👥 Roster des Growth Modules
 
 ### Direction (3) — Couche de supervision transverse
 | Agent | Rôle | Purpose | Modèle |

@@ -71,8 +71,8 @@ export function useSubscriptionStatus() {
   const getPlanDisplayName = () => {
     if (!subscription || subscription.plan === "free") return "Gratuit";
     if (subscription.plan === "founder") return "Fondatrice";
-    if (subscription.is_full_company) return "Full Company";
-    if (subscription.is_starter) return "Starter";
+    if (subscription.is_full_company) return "Scale";
+    if (subscription.is_starter) return "Solo";
     if (subscription.enabled_departments && subscription.enabled_departments.length > 0) {
       return `${subscription.enabled_departments.length} département(s)`;
     }

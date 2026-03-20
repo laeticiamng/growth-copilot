@@ -14,10 +14,10 @@ import {
 const CORE_FEATURES = [
   {
     icon: Bot,
-    titleFr: "39 Agents IA Spécialisés",
-    titleEn: "39 Specialized AI Agents",
-    descFr: "Chaque agent a un rôle précis, des compétences uniques et travaille 24/7 pour votre entreprise.",
-    descEn: "Each agent has a precise role, unique skills, and works 24/7 for your business.",
+    titleFr: "Modules Growth Spécialisés",
+    titleEn: "Specialized Growth Modules",
+    descFr: "Chaque module alimente le cockpit avec des signaux, anomalies et recommandations actionnables.",
+    descEn: "Each module feeds the cockpit with signals, anomalies and actionable recommendations.",
     color: "#6366f1",
   },
   {
@@ -119,8 +119,8 @@ export default function Features() {
     "@type": "WebPage",
     name: lang === "fr" ? "Fonctionnalités - Growth OS" : "Features - Growth OS",
     description: lang === "fr"
-      ? "Découvrez toutes les fonctionnalités de Growth OS : 39 agents IA, 11 départements, scoring ICE et plus."
-      : "Discover all Growth OS features: 39 AI agents, 11 departments, ICE scoring and more.",
+      ? "Cockpit growth connecté : détection d'anomalies, actions priorisées, gouvernance et preuves."
+      : "Connected growth cockpit: anomaly detection, prioritized actions, governance and evidence.",
   };
 
   return (
@@ -152,8 +152,8 @@ export default function Features() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {lang === "fr"
-                ? "39 agents IA, 11 départements, intégrations natives et sécurité enterprise. Growth OS automatise votre croissance de A à Z."
-                : "39 AI agents, 11 departments, native integrations and enterprise security. Growth OS automates your growth from A to Z."}
+                ? "Cockpit growth connecté : détection d'anomalies, actions priorisées, gouvernance et preuves. Growth OS automatise votre croissance de A à Z."
+                : "Connected growth cockpit: anomaly detection, prioritized actions, governance and evidence. Growth OS automates your growth from A to Z."}
             </p>
           </div>
         </section>
@@ -263,7 +263,7 @@ export default function Features() {
               </Link>
               <Link to="/agents">
                 <Button variant="outline" size="lg">
-                  {lang === "fr" ? "Voir les 39 agents" : "See all 39 agents"}
+                  {lang === "fr" ? "Voir les modules" : "See all modules"}
                 </Button>
               </Link>
             </div>

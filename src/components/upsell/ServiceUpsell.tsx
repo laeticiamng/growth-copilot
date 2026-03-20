@@ -104,7 +104,7 @@ export function ServiceUpsell({
             <Link to="/dashboard/billing">
               <Button variant="outline" className="w-full">
                 <Crown className="w-4 h-4 mr-2" />
-                Passer à Full Company
+                Passer à Scale
                 <Badge variant="gradient" className="ml-2 text-xs">-20%</Badge>
               </Button>
             </Link>

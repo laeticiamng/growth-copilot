@@ -45,7 +45,7 @@ export interface AgentProfile {
   tools: string[];
 }
 
-// Complete profiles for all 39 agents
+// Complete profiles for all growth modules
 const AGENT_PROFILES: Record<string, AgentProfile> = {
   // Direction
   cgo: {

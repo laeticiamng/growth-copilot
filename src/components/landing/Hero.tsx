@@ -183,10 +183,10 @@ export function Hero() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
               {[
-                { value: "11", key: "landing.hero.statDepartments" },
+                { value: "4", key: "landing.hero.statDepartments" },
                 { value: "24/7", key: "landing.hero.statAutomation" },
                 { value: "100%", key: "landing.hero.statAuditable" },
-                { value: "39", key: "landing.hero.statAIEmployees" },
+                { value: "10+", key: "landing.hero.statAIEmployees" },
               ].map((stat) => (
                 <div key={stat.key} className="text-center">
                   <p className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</p>

@@ -1,399 +1,270 @@
-# Growth OS - Your Portable Company
+# Growth OS — Connected Growth Cockpit
 
-> La première entreprise digitale complète en abonnement. Abonnez-vous à la Full Company ou sélectionnez uniquement les départements dont vous avez besoin.
+> Cockpit growth connecte aux donnees, oriente detection d'anomalies, priorisation d'actions, gouvernance, preuve et suivi d'impact.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
- [![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
- [![Audit](https://img.shields.io/badge/Audit-100%2F100-brightgreen)](./docs/AUDIT_PLATEFORME_2026-02-05.md)
-[![Languages](https://img.shields.io/badge/i18n-FR%20%7C%20EN%20%7C%20ES%20%7C%20DE-blue)](./src/i18n)
+[![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
+[![Audit](https://img.shields.io/badge/Audit-100%2F100-brightgreen)](./docs/AUDIT_PLATEFORME_2026-02-05.md)
+[![Languages](https://img.shields.io/badge/i18n-7%20languages-blue)](./src/i18n)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
 
 ---
 
-## 🚀 Démo Live
+## What is Growth OS?
 
-**👉 [agent-growth-automator.lovable.app](https://agent-growth-automator.lovable.app)**
+Growth OS is a **connected growth cockpit** for operators, agencies and brands. It replaces dashboard sprawl and manual reporting with a single governed workspace where teams can:
 
----
+1. **Connect growth data** — Unify GA4, Search Console, Meta, CRM and site data inside one workspace-aware model
+2. **Detect anomalies** — Surface drops, channel drift and conversion friction with evidence-backed context
+3. **Prioritize actions** — Rank decisions by expected impact, risk level, owner and next step
+4. **Route approvals** — Gate sensitive actions through human validation with audit trail
+5. **Track outcomes** — Measure the real impact of every approved action over time
 
-## 🏢 Vision
-
-Growth OS est un **système d'exploitation d'entreprise portable** qui remplace les équipes traditionnelles par des **employés IA premium**. Chaque département (Marketing, Commercial, Finance, Sécurité, etc.) est composé d'agents IA spécialisés qui travaillent 24/7 avec un standard de compétence premium.
-
-**Philosophie** : Compétence premium, livrée simplement. Zéro jargon technique.
-
----
-
-## 📸 Captures d'Écran
-
-### Landing Page
-![Landing Page](./docs/screenshots/landing-hero.png)
-*Page d'accueil avec présentation des départements*
-
-### Cockpit Exécutif
-![Executive Cockpit](./docs/screenshots/cockpit.png)
-*Tableau de bord exécutif avec semaphores RAG, actions prioritaires et approbations*
-
-### Module RH
-![HR Module](./docs/screenshots/hr.png)
-*Gestion des employés, onboarding et performance*
-
-### Module Juridique
-![Legal Module](./docs/screenshots/legal.png)
-*Contrats, conformité RGPD et alertes légales*
-
-> **Note** : Les captures d'écran sont dans `docs/screenshots/`. Pour les générer, exécutez l'application et prenez des captures des pages principales.
+Marketing execution (SEO, Ads, Content, Social) remains available as a downstream capability — not the headline promise.
 
 ---
 
-## 💼 Modèle Tarifaire
+## Who is it for?
 
-| Formule | Prix | Inclus |
-|---------|------|--------|
-| **Full Company** | 9 000€/mois | 39 employés IA, 11 départements, Core OS |
-| **À la carte** | 1 900€/dept/mois | 2-5 employés IA par département + Core OS |
-| **Core OS** | Gratuit | Workspace, RBAC, Approbations, Audit Log, Scheduler |
-
-> **Comparaison** : Une équipe de 39 employés traditionnels coûte ~175 500€/mois (salaire moyen 4 500€).  
-> **Économie : 166 500€/mois**.
+| Audience | Use case |
+|----------|----------|
+| **Solo operators** | One cockpit for acquisition, retention and revenue signals |
+| **Agency teams** | Multi-workspace client operations with shared governance |
+| **Brand growth teams** | Cross-channel anomaly monitoring with RBAC and enterprise support |
 
 ---
 
-## 🏛️ Départements (11)
+## Pricing
 
-| Département | Employés IA | Rôles clés | Status |
-|-------------|-------------|------------|--------|
-| **Direction** | 2 | CGO (Sophie Marchand), QCO (Jean-Michel Fournier) | ✅ Complet |
-| **Marketing** | 5 | SEO Strategist, Content Manager, Ads Optimizer, Social Media | ✅ Complet |
-| **Commercial** | 4 | Lead Qualifier, Sales Closer, Account Manager, Pipeline Analyst | ✅ Complet |
-| **Finance** | 3 | DAF IA, Comptable Analytique, Contrôleur de Gestion | ✅ Complet |
-| **Sécurité** | 3 | RSSI IA, Compliance Officer, Auditeur Sécurité | ✅ Complet |
-| **Produit** | 4 | CPO IA, Product Manager, UX Researcher, Product Analyst | ✅ Complet |
-| **Ingénierie** | 5 | CTO IA, Lead Developer, DevOps, QA Specialist, Tech Writer | ✅ Complet |
-| **Data** | 4 | CDO IA, Data Engineer, Data Analyst, ML Engineer | ✅ Complet |
-| **Support** | 3 | Head of Support IA, Customer Success, Technical Support | ✅ Complet |
-| **Governance** | 3 | Chief of Staff IA, Project Manager, Operations Analyst | ✅ Complet |
-| **RH** | 2 | DRH IA, Talent Manager | ✅ Complet |
-| **Juridique** | 1 | Directeur Juridique IA | ✅ Complet |
+| Plan | Price | Includes |
+|------|-------|----------|
+| **Solo** | 490 EUR/month | 1 workspace, connected signals, evidence-backed recommendations, approval gate |
+| **Agency** | 1,900 EUR/month | Multi-workspace operations, shared approvals, prioritized action queues |
+| **Scale** | Custom | Advanced RBAC, cross-channel monitoring, enterprise integrations, dedicated support |
 
-**Total : 39 employés IA** (2 Direction + 37 dans 11 départements).
+All plans include Core OS: Workspace, RBAC, Approval Gate, Audit Log, Scheduler, Evidence Bundles, Integrations Hub.
+
+14-day free trial. No credit card required.
 
 ---
 
-## ✨ Core OS (Toujours inclus)
+## Core OS (always included)
 
 | Feature | Description |
 |---------|-------------|
-| **Workspace** | Isolation multi-tenant complète |
-| **RBAC** | 5 niveaux de permissions (Owner → Viewer) |
-| **Approval Gate** | Validation humaine des actions critiques |
-| **Audit Log** | Traçabilité immuable de toutes les actions |
-| **Scheduler** | Planification des tâches (pg_cron) |
-| **Evidence Bundles** | Transparence IA avec sources de données |
-| **Integrations Hub** | Connecteurs Google, Meta, Stripe |
-| **Voice Commands** | Commandes vocales via ElevenLabs |
-| **i18n** | 4 langues (FR, EN, ES, DE) |
+| **Workspace** | Multi-tenant isolation with workspace-level data separation |
+| **RBAC** | 5 permission levels (Owner, Admin, Manager, Editor, Viewer) |
+| **Approval Gate** | Human validation for sensitive actions with risk-level routing |
+| **Audit Log** | Immutable, append-only trail of every action |
+| **Scheduler** | Planned execution via pg_cron |
+| **Evidence Bundles** | Data snapshots that justify each recommendation |
+| **Integrations Hub** | Connectors for Google, Meta, Stripe |
+| **i18n** | 7 languages (FR, EN, ES, DE, IT, NL, PT) |
 
 ---
 
-## 🤖 Agents IA
+## Growth Modules
 
-### Architecture
+| Module | Capabilities |
+|--------|-------------|
+| **Marketing** | SEO, Content, Ads, Social Media, CRO |
+| **Sales** | Pipeline, Outreach, CRM, Lead Scoring |
+| **Finance** | ROI Tracking, Budget Alerts, Reporting |
+| **Security** | Access Review, Compliance, Audit Logs |
+| **Product** | Roadmap, OKRs, Prioritization |
+| **Engineering** | Release Gates, QA, Delivery Health |
+| **Data** | Analytics, Funnels, Cohorts |
+| **Support** | Tickets, Knowledge Base, Reviews |
+| **Governance** | Policies, IT Hygiene, Access Control |
+| **HR** | Onboarding, Team Management, Talent |
+| **Legal** | Contracts, GDPR, Compliance |
 
-L'AI Gateway centralise tous les appels IA avec :
-- **Validation stricte** : Schema JSON standardisé pour tous les agents
-- **Retry automatique** : Réparation des réponses malformées
-- **Traçabilité** : Logging complet dans `ai_requests` et `agent_runs`
-- **Rate limiting** : Quotas par plan (Free → Agency)
-
-### Modèles Utilisés
-
-| Purpose | Modèle | Cas d'usage |
-|---------|--------|-------------|
-| `cgo_plan` | google/gemini-3-pro-preview | Orchestration stratégique niveau McKinsey |
-| `qa_review` | google/gemini-3-pro-preview | Validation compliance & éthique Big Four |
-| `seo_audit` | google/gemini-3-flash-preview | Analyse SEO bulk niveau Botify/Ahrefs |
-| `copywriting` | google/gemini-3-flash-preview | Création de contenu niveau agence premium |
-| `analysis` | google/gemini-3-flash-preview | Analyses data-driven niveau FAANG |
-
-### Standard d'Excellence
-
-Chaque agent IA est formé avec un **cadre d'excellence Grandes Écoles** :
-- **Rigueur analytique** (Polytechnique/CentraleSupélec) : Approche scientifique, data-driven
-- **Vision stratégique** (HEC/ESSEC/INSEAD) : Pensée systémique, création de valeur
-- **Culture générale** (Sciences Po/ENS) : Contexte macro-économique, sociologique
-- **Excellence opérationnelle** (McKinsey/BCG mindset) : Frameworks éprouvés, livrables conseil
-
-> **Documentation complète** : [docs/AI_AGENTS.md](./docs/AI_AGENTS.md)
-
-## ♻️ Module Éco — données réelles (nouveau)
-
-Le module `/dashboard/eco-transition` n'utilise plus de seed locale pour les vues carbone, roadmap, subventions, KPI et snapshots ESG. Il repose désormais sur un backend dédié avec stockage par workspace/site et politiques RLS.
-
-### Tables ajoutées côté backend
-
-- `eco_emission_sources` — cartographie réelle des postes Scope 1/2/3
-- `eco_roadmap_actions` — portefeuille d'actions de décarbonation triées par impact
-- `eco_subsidy_projects` — pipeline réel des aides et subventions
-- `eco_monthly_metrics` — séries mensuelles énergie / recyclage / intensité carbone
-- `eco_reporting_snapshots` — snapshots ESG / CSRD exportables
-
-### Expérience utilisateur
-
-- cockpit visuel premium 2026 avec cartes “glass / depth”
-- formulaires intégrés dans chaque onglet pour éviter les allers-retours
-- états vides réels orientés action au lieu de données mockées
-- export JSON des snapshots ESG pour audit, finance ou conseil
-
-### Agents Clés
-
-| Agent | Rôle | Responsabilités |
-|-------|------|-----------------|
-| **Sophie Marchand** | Chief Growth Officer (CGO) | Orchestration, priorisation ICE, coordination |
-| **Jean-Michel Fournier** | Quality & Compliance Officer (QCO) | Validation éthique, anti-spam, anti-plagiat |
-| **Marie Dupont** | SEO Tech Auditor | Audit technique, indexation, performance |
-| **Thomas Laurent** | Content Strategist | Stratégie contenu, briefs, clusters |
+Each module feeds the cockpit with signals and actionable recommendations.
 
 ---
 
-## 🛠️ Stack Technique
+## Eco-Transition Module
+
+The `/dashboard/eco-transition` module provides real backend-driven data for carbon accounting, green roadmaps, ESG snapshots and subsidy matching:
+
+- `eco_emission_sources` — Scope 1/2/3 emission mapping
+- `eco_roadmap_actions` — Decarbonation actions ranked by impact
+- `eco_subsidy_projects` — Subsidy and grant pipeline
+- `eco_monthly_metrics` — Monthly energy/recycling/carbon intensity series
+- `eco_reporting_snapshots` — ESG/CSRD exportable snapshots
+
+---
+
+## Tech Stack
 
 ### Frontend
 - **React 18** + TypeScript
-- **Vite** - Build ultra-rapide
-- **Tailwind CSS** + **shadcn/ui** - Design system moderne (50+ composants)
-- **TanStack Query** - State management serveur
-- **React Router** - Navigation SPA
-- **i18next** - Internationalisation (4 langues, 551 clés chacune)
+- **Vite** — Fast build tooling
+- **Tailwind CSS** + **shadcn/ui** — Modern design system (50+ components)
+- **TanStack Query** — Server state management
+- **React Router** — SPA navigation
+- **i18next** — 7 languages, 551 keys each
 
 ### Backend (Lovable Cloud)
-- **Supabase** - PostgreSQL avec 131 tables
- - **Edge Functions** (Deno) - 38 fonctions serverless déployées
- - **Row Level Security** - 325+ policies pour isolation multi-tenant
-- **pg_cron** - Exécutions planifiées
+- **Supabase** — PostgreSQL with 131 tables
+- **Edge Functions** (Deno) — 51 serverless functions
+- **Row Level Security** — 325+ policies for multi-tenant isolation
+- **pg_cron** — Scheduled execution
 
-### Intégrations
-- **Google APIs** : Analytics, Search Console, Ads, YouTube, Business Profile
-- **Meta APIs** : Marketing API, Instagram, Conversions API
-- **Stripe** : Checkout, Webhooks, Customer Portal
-- **Lovable AI Gateway** : Gemini 3 Pro, Gemini 3 Flash, Gemini 2.5 Pro
-
-> **Documentation architecture** : [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+### Integrations
+- **Google APIs**: Analytics, Search Console, Ads, YouTube, Business Profile
+- **Meta APIs**: Marketing API, Instagram, Conversions API
+- **Stripe**: Checkout, Webhooks, Customer Portal
+- **AI Gateway**: Gemini 3 Pro, Gemini 3 Flash
 
 ---
 
-## 📁 Structure du Projet
+## Project Structure
 
 ```
 src/
-├── components/          # 50+ composants UI réutilisables
-│   ├── ai/             # AIAssistant, VoiceAssistant
-│   ├── auth/           # Guards, ProtectedRoute, ServiceGuard
-│   ├── cockpit/        # ExecutiveSummary, PriorityActions, QuickLaunchers
+├── components/          # 220+ React components
+│   ├── cockpit/        # ExecutiveSummary, PriorityActions, ApprovalsWidget
 │   ├── evidence/       # EvidenceBundleCard, EvidenceBundleViewer
+│   ├── landing/        # Hero, Pricing, Features, Services
 │   └── ui/             # shadcn/ui components
-├── hooks/              # 40+ custom hooks (useWorkspace, useServices, etc.)
-├── lib/agents/         # Définitions des agents IA
-├── pages/dashboard/    # 41 pages dashboard
-└── i18n/locales/       # Traductions (FR, EN, ES, DE, NL, IT, PT)
+├── hooks/              # 67+ custom hooks (useWorkspace, useApprovals, etc.)
+├── lib/agents/         # AI module definitions & orchestration
+├── pages/dashboard/    # 41+ dashboard pages
+└── i18n/locales/       # Translations (FR, EN, ES, DE, IT, NL, PT)
 
 supabase/
-├── functions/          # 38 Edge Functions
-│   ├── ai-gateway/     # Proxy IA centralisé
-│   ├── run-executor/   # Orchestrateur des runs
-│   ├── oauth-*/        # OAuth sécurisé
-│   └── stripe-*/       # Intégration Stripe
-└── migrations/         # Migrations SQL
+├── functions/          # 51 Edge Functions
+│   ├── ai-gateway/     # Centralized AI proxy
+│   ├── approval-engine/ # Approval gate logic
+│   ├── signal-ingest/  # Signal ingestion
+│   ├── stripe-*/       # Stripe integration
+│   └── oauth-*/        # Secure OAuth
+└── migrations/         # SQL migrations
 
 docs/
-├── PLATFORM_AUDIT.md   # Statut et roadmap
-├── AI_AGENTS.md        # Documentation IA
-└── ARCHITECTURE.md     # Architecture technique
+├── PLATFORM_AUDIT.md   # Status and roadmap
+├── AI_AGENTS.md        # Module documentation
+├── ARCHITECTURE.md     # Technical architecture
+└── SELF_HOSTING.md     # Self-hosting guide
 ```
 
 ---
 
-## 🔐 Sécurité
+## Security
 
 | Feature | Implementation |
 |---------|----------------|
-| **RLS** | 131 tables avec 310+ Row Level Security policies (v7) |
- | **RLS** | 131 tables avec 325+ Row Level Security policies |
-| **Encryption** | AES-GCM 256-bit pour tokens OAuth |
-| **HMAC** | Protection anti-rejeu des états OAuth avec nonces |
-| **Validation** | Zod schemas + sanitization XSS + input length limits |
-| **Audit Trail** | Trigger immuable sur audit_log (anti-modification) |
-| **Rate Limiting** | 100 req/min par workspace + quotas mensuels |
-| **SECURITY DEFINER** | 8 fonctions avec search_path fixe |
-| **Role-Based Access** | Permissions granulaires (manage_team, approve_actions, view_audit) |
+| **RLS** | 131 tables with 325+ Row Level Security policies |
+| **Encryption** | AES-GCM 256-bit for OAuth tokens |
+| **HMAC** | Anti-replay protection for OAuth states with nonces |
+| **Validation** | Zod schemas + XSS sanitization + input length limits |
+| **Audit Trail** | Immutable trigger on audit_log (anti-modification) |
+| **Rate Limiting** | 100 req/min per workspace + monthly quotas |
+| **RBAC** | Granular permissions (manage_team, approve_actions, view_audit) |
 
 ---
 
-## 🚀 Démarrage Rapide
+## Quick Start
 
-### Prérequis
+### Prerequisites
 - Node.js 18+
-- npm ou bun
+- npm or bun
 
 ### Installation
 
 ```bash
-# Cloner le repo
 git clone <YOUR_GIT_URL>
 cd growth-copilot
-
-# Installer les dépendances
 npm install
-
-# Lancer en développement
 npm run dev
 ```
 
-### Base de données Supabase
+### Supabase Database
 
-Appliquez les migrations Supabase avant d'utiliser le module Éco réel :
+Apply migrations before using backend-driven modules:
 
 ```bash
-# Exemple en local / self-hosted
 supabase db reset
-# ou
+# or
 supabase migration up
 ```
 
-La migration `20260319120000_eco_transition_real_data.sql` crée les tables Éco, les index, la RLS et le trigger de fraîcheur des sources carbone.
+### Environment Variables
 
-### Variables d'Environnement
-
-Les variables sont gérées automatiquement par Lovable Cloud :
+Managed automatically by Lovable Cloud:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 - `VITE_SUPABASE_PROJECT_ID`
 
 ### Secrets (Backend)
 
-Configurés dans Lovable Cloud Secrets :
+Configured in Lovable Cloud Secrets:
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
 - `META_APP_ID` / `META_APP_SECRET`
-- `TOKEN_ENCRYPTION_KEY` (64 caractères hex)
+- `TOKEN_ENCRYPTION_KEY` (64 hex characters)
 - `OAUTH_STATE_SECRET`
 - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
-- `LOVABLE_API_KEY` (auto-généré)
+- `LOVABLE_API_KEY` (auto-generated)
 
-### Politique anti-mock
+### Anti-mock Policy
 
-- aucune donnée démo n'est injectée automatiquement dans le workspace utilisateur
-- les modules affichent désormais soit des données réelles, soit un état vide actionnable
-- le mode démo front reste un état d'interface, mais n'hydrate plus le dashboard avec de faux enregistrements
+- No demo data is injected automatically into user workspaces
+- Modules show either real data or an actionable empty state
+- Frontend demo mode is a UI-only state — it does not hydrate the dashboard with fake records
 
 ---
 
-## 📊 Tests
+## Tests
 
 ```bash
-# Tests unitaires
 npm run test
-
-# Tests avec couverture
 npm run test -- --coverage
-
-# Smoke tests
 npm run test src/test/smoke.test.ts
 ```
 
-**Suite de tests** : 290+ tests couvrant :
-- ✅ Auth et permissions (RBAC 5 niveaux)
-- ✅ RLS et sécurité (260+ policies)
-- ✅ Hooks et composants (40+ hooks)
-- ✅ Agents IA (39 agents)
-- ✅ Edge Functions (38 fonctions)
-- ✅ Workflows critiques (E2E)
-- ✅ Validation de formulaires (Zod)
-- ✅ Smoke tests complets (25 scénarios)
+**Test suite**: 290+ tests covering auth, RLS, hooks, components, edge functions, workflows and smoke scenarios.
 
 ---
 
-## 🌐 Déploiement
+## Deployment
 
 ### Via Lovable
 
-1. Ouvrir [Lovable](https://lovable.dev)
-2. Cliquer sur **Share → Publish**
-3. (Optionnel) Configurer un domaine personnalisé dans **Settings → Domains**
-
-### URLs
-
-- **Production** : https://agent-growth-automator.lovable.app
-- **Preview** : https://id-preview--c548a033-0937-4830-bc84-bb2548968cd3.lovable.app
+1. Open [Lovable](https://lovable.dev)
+2. Click **Share > Publish**
+3. (Optional) Configure a custom domain in **Settings > Domains**
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [PLATFORM_AUDIT.md](./docs/PLATFORM_AUDIT.md) | Statut complet et roadmap |
-| [AUDIT_PLATEFORME_2026-02-05.md](./docs/AUDIT_PLATEFORME_2026-02-05.md) | Audit final 100/100 |
-| [SELF_HOSTING.md](./docs/SELF_HOSTING.md) | Guide Supabase / exécution locale |
-| [AI_AGENTS.md](./docs/AI_AGENTS.md) | Documentation des agents IA |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture technique |
-| [Lovable Docs](https://docs.lovable.dev) | Documentation Lovable |
-| [Supabase Docs](https://supabase.com/docs) | Documentation Supabase |
+| [PLATFORM_AUDIT.md](./docs/PLATFORM_AUDIT.md) | Platform status and roadmap |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Technical architecture |
+| [AI_AGENTS.md](./docs/AI_AGENTS.md) | Module documentation |
+| [SELF_HOSTING.md](./docs/SELF_HOSTING.md) | Self-hosting guide |
+| [THREAT_MODEL.md](./docs/THREAT_MODEL.md) | Security threat model |
 
 ---
 
-## 🏗️ Diagramme d'Architecture
+## License
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         FRONTEND                                 │
-│  React 18 + Vite + Tailwind CSS + shadcn/ui                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Landing  │  │ Cockpit  │  │ 41 Pages │  │ AI Assistant     │ │
-│  │ Page     │  │ Exécutif │  │ Dashboard│  │ Voice Commands   │ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │ Supabase Client
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    LOVABLE CLOUD                                 │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 38 EDGE FUNCTIONS                          │  │
-│  │  ai-gateway │ run-executor │ oauth-* │ stripe-* │ sync-*  │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                 POSTGRESQL (131 tables)                    │  │
- │  │  workspaces │ user_roles │ agent_runs │ audit_log          │  │
- │  │  + RLS (325+ policies) + pg_cron (Scheduler)               │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │
-┌─────────────────────────────▼───────────────────────────────────┐
-│                    EXTERNAL SERVICES                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Google   │  │ Meta     │  │ Stripe   │  │ Lovable AI       │ │
-│  │ APIs     │  │ APIs     │  │ Payments │  │ Gemini 3 Pro+Flash│ │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
+**Proprietary** — (c) 2026 EmotionsCare Sasu — All rights reserved
+
+This software is proprietary and may not be copied, modified or redistributed without explicit written authorization.
+
+**Contact**: contact@emotionscare.com
 
 ---
 
-## 📄 Licence
+## Support
 
-**Propriétaire** - © 2026 EmotionsCare Sasu - Tous droits réservés
-
-Ce logiciel est propriétaire et ne peut être copié, modifié ou redistribué sans autorisation écrite explicite.
-
-**Contact** : contact@emotionscare.com
+- **Email**: contact@emotionscare.com
+- **Documentation**: [docs/](./docs/)
+- **Issues**: Via the GitHub repository
 
 ---
 
-## 🤝 Support
-
-- **Email** : contact@emotionscare.com
-- **Documentation** : [docs/](./docs/)
-- **Issues** : Via le dépôt GitHub
-
----
-
-**Construit avec ❤️ sur [Lovable](https://lovable.dev)**
+**Built with Lovable** — [lovable.dev](https://lovable.dev)

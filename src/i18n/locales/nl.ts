@@ -233,7 +233,7 @@ export const nl = {
     currentPlan: "Huidig plan",
     starter: "Starter",
     growth: "Growth",
-    fullCompany: "Full Company",
+    fullCompany: "Scale",
     perMonth: "/maand",
     upgrade: "Upgraden",
     manageBilling: "Facturering beheren",

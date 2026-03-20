@@ -63,7 +63,7 @@ const STARTER_LIMITS = {
   sites: 1,
   users: 2,
   employeesPerDept: 1,
-  totalEmployees: 11, // 1 per department (11 departments)
+  totalEmployees: 11, // 1 per module
 };
 
 // Employees per department (Full version)
@@ -214,7 +214,7 @@ export default function Billing() {
         {/* Billing Overview Component */}
         <BillingOverview />
 
-        {/* Full Company Upgrade Card - only show if not full company and not founder */}
+        {/* Scale Upgrade Card - only show if not full company and not founder */}
         {!isFullCompany && !isFounder && !isPaid && (
           <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
             <CardContent className="pt-6">

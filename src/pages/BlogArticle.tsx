@@ -35,12 +35,12 @@ const ARTICLES: BlogArticle[] = [
   {
     slug: "how-39-ai-agents-replace-company-team",
     title: {
-      fr: "Comment 39 agents IA remplacent une équipe entreprise entière",
-      en: "How 39 AI Agents Replace an Entire Company Team",
+      fr: "Comment un cockpit growth connecté transforme les opérations",
+      en: "How a Connected Growth Cockpit Transforms Operations",
     },
     excerpt: {
-      fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches d'une entreprise B2B.",
-      en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's tasks.",
+      fr: "Découvrez comment un cockpit growth connecté peut automatiser 90% des tâches d'une entreprise B2B.",
+      en: "Discover how a connected growth cockpit can automate 90% of a B2B company's tasks.",
     },
     category: "growth",
     author: "Sophie Marchand",
@@ -53,9 +53,9 @@ const ARTICLES: BlogArticle[] = [
 
 Les entreprises B2B modernes sont confrontées à un paradoxe : plus d'outils que jamais, mais toujours pas assez de temps. Entre l'audit SEO, la stratégie commerciale, la finance, la sécurité, le support et le reporting, une équipe complète passe 60% de son temps sur des tâches répétitives.
 
-## La solution : 39 agents IA spécialisés
+## La solution : un cockpit growth connecté
 
-Growth OS propose une approche radicalement différente. Au lieu de remplacer une équipe par un seul outil généraliste, nous avons créé **39 agents IA spécialisés**, chacun expert dans son domaine, répartis dans **11 départements**.
+Growth OS propose une approche radicalement différente. Au lieu de multiplier les dashboards et outils, nous avons créé un **cockpit growth connecté** qui unifie vos signaux, détecte les anomalies, priorise les actions avec preuves et suit l'impact de chaque décision.
 
 ### Le département Marketing (4 agents)
 
@@ -85,9 +85,9 @@ L'avenir de l'entreprise B2B n'est pas dans l'embauche de plus de personnes, mai
 
 Modern B2B companies face a paradox: more tools than ever, but still not enough time. Between SEO, sales strategy, finance, security, support, and reporting, a full team spends 60% of their time on repetitive tasks.
 
-## The Solution: 39 Specialized AI Agents
+## The Solution: A Connected Growth Cockpit
 
-Growth OS offers a radically different approach. Instead of replacing a team with a single generalist tool, we've created **39 specialized AI agents**, each expert in their domain, distributed across **11 departments**.
+Growth OS offers a radically different approach. Instead of multiplying dashboards and tools, we've created a **connected growth cockpit** that unifies your signals, detects anomalies, prioritizes actions with evidence, and tracks the impact of every decision.
 
 ### The Marketing Department (4 agents)
 
@@ -453,8 +453,8 @@ Every action is tracked in the audit log. You know exactly what each agent did, 
   {
     slug: "11-departments-explained",
     title: {
-      fr: "Les 11 départements de Growth OS expliqués",
-      en: "Growth OS's 11 Departments Explained",
+      fr: "Les modules Growth OS expliqués",
+      en: "Growth OS Modules Explained",
     },
     excerpt: {
       fr: "Présentation détaillée de chaque département, ses agents, et comment ils travaillent ensemble pour votre croissance.",
@@ -469,7 +469,7 @@ Every action is tracked in the audit log. You know exactly what each agent did, 
     body: {
       fr: `## Une entreprise IA complète à votre service
 
-Growth OS reproduit la structure d'une entreprise performante avec 11 départements spécialisés et 39 agents IA. Voici le guide complet.
+Growth OS propose un cockpit growth connecté avec des modules spécialisés. Voici le guide complet.
 
 ## Marketing (4 agents)
 Piloté par Emma Lefebvre (SEO), Thomas Duval (Mots-clés), Léa Fontaine (Contenu) et Marc Rousseau (Social).
@@ -539,7 +539,7 @@ Margaux Picard (Contrats), Élodie Renard (PI) et Xavier Morin (Réglementation)
 L'orchestrateur CGO coordonne tous les départements via le scoring ICE. Chaque tâche est priorisée selon son Impact, sa Confiance et sa Facilité d'exécution. Les résultats d'un département alimentent les autres automatiquement.`,
       en: `## A Complete AI Company at Your Service
 
-Growth OS replicates the structure of a high-performing company with 11 specialized departments and 39 AI agents. Here's the complete guide.
+Growth OS offers a connected growth cockpit with specialized modules. Here's the complete guide.
 
 ## Marketing (4 agents)
 Led by Emma Lefebvre (SEO), Thomas Duval (Keywords), Léa Fontaine (Content), and Marc Rousseau (Social).

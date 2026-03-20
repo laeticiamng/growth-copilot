@@ -274,8 +274,8 @@ export default function AppDashboard() {
         </h1>
         <p className="text-muted-foreground">
           {lang === "fr"
-            ? "Vue d'ensemble de l'activité de vos 39 agents IA"
-            : "Overview of your 39 AI agents' activity"}
+            ? "Vue d'ensemble de l'activité de vos modules growth"
+            : "Overview of your growth modules' activity"}
         </p>
       </div>
 
