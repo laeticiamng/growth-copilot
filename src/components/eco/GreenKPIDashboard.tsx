@@ -1,145 +1,174 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/ui/badge";
-import { TrendingDown, TrendingUp, Zap, Trash2, Sun, BarChart3, TestTube2 } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { BarChart3, Plus, Sparkles, Sun, Trash2, Zap } from "lucide-react";
+import { toast } from "sonner";
+import type { EcoMonthlyMetric } from "@/hooks/useEco";
 
-function seededRandom(seed: number) {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
+interface GreenKPIDashboardProps {
+  metrics: EcoMonthlyMetric[];
+  onCreateMetric: (payload: {
+    month: string;
+    energy_kwh: number | null;
+    waste_recycled_pct: number | null;
+    renewable_energy_pct: number | null;
+    carbon_intensity_g_per_eur: number | null;
+  }) => Promise<unknown>;
+  isSaving?: boolean;
 }
 
-function generateData(baseFn: (i: number, rand: number) => number, months: string[]) {
-  return months.map((m, i) => ({
-    month: m,
-    value: baseFn(i, seededRandom(i * 17 + 42)),
-  }));
-}
-
-interface KPICardProps {
-  title: string;
-  value: string;
-  trend: "up" | "down";
-  trendValue: string;
-  positive: boolean;
-  icon: React.ElementType;
-  data: { month: string; value: number }[];
-  color: string;
-}
-
-function KPICard({ title, value, trend, trendValue, positive, icon: Icon, data, color }: KPICardProps) {
-  const TrendIcon = trend === "up" ? TrendingUp : TrendingDown;
+function MetricCard({ title, value, suffix, color, icon: Icon }: { title: string; value: number; suffix: string; color: string; icon: React.ElementType }) {
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="pb-2">
+    <Card className="border-white/10 bg-background/70">
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg" style={{ background: `${color}20` }}>
-              <Icon className="h-4 w-4" style={{ color }} />
-            </div>
-            <CardTitle className="text-sm">{title}</CardTitle>
+          <div>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="mt-2 text-2xl font-semibold" style={{ color }}>{value.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">{suffix}</p>
           </div>
-          <div className={`flex items-center gap-1 text-xs font-medium ${positive ? "text-emerald-400" : "text-red-400"}`}>
-            <TrendIcon className="h-3 w-3" />
-            {trendValue}
+          <div className="rounded-2xl border border-white/10 bg-background/60 p-3">
+            <Icon className="h-4 w-4" style={{ color }} />
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold mb-3">{value}</p>
-        <div className="h-[80px]" role="img" aria-label={`${title}: ${value}, ${trendValue}`}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id={`gradient-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-                  <stop offset="100%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="value" stroke={color} fill={`url(#gradient-${title.replace(/\s/g, '')})`} strokeWidth={2} dot={false} />
-              <Tooltip
-                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px", color: "hsl(var(--foreground))" }}
-                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function GreenKPIDashboard() {
-  const { t } = useTranslation();
+export function GreenKPIDashboard({ metrics, onCreateMetric, isSaving = false }: GreenKPIDashboardProps) {
+  const { i18n } = useTranslation();
+  const [form, setForm] = useState({ month: "", energy_kwh: "", waste_recycled_pct: "", renewable_energy_pct: "", carbon_intensity_g_per_eur: "" });
 
-  const months = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => {
-      const date = new Date(2025, i, 1);
-      return format(date, "MMM");
-    });
-  }, []);
+  const copy = useMemo(() => {
+    const fr = i18n.language.startsWith("fr");
+    return {
+      title: fr ? "KPIs environnementaux" : "Environmental KPIs",
+      desc: fr ? "Courbes réelles, sans seed artificiel : importez vos valeurs mensuelles." : "Real charts with no seeded data: log your monthly values.",
+      add: fr ? "Ajouter un mois" : "Add month",
+      emptyTitle: fr ? "Aucune métrique mensuelle" : "No monthly metric yet",
+      emptyDesc: fr ? "Enregistrez vos données énergie, recyclage et intensité carbone pour débloquer les tendances." : "Store your energy, recycling and carbon intensity data to unlock trend views.",
+      saved: fr ? "Métrique mensuelle enregistrée" : "Monthly metric saved",
+      error: fr ? "Impossible d’enregistrer la métrique" : "Unable to save metric",
+    };
+  }, [i18n.language]);
 
-  const energyData = useMemo(() => generateData((i, r) => Math.round(4200 - i * 120 + r * 200 - 100), months), [months]);
-  const wasteData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(35 + i * 5 + r * 5)), months), [months]);
-  const renewableData = useMemo(() => generateData((i, r) => Math.min(100, Math.round(12 + i * 6 + r * 3)), months), [months]);
-  const intensityData = useMemo(() => generateData((i, r) => Math.max(5, Math.round(28 - i * 1.8 + r * 2)), months), [months]);
+  const sortedMetrics = useMemo(() => [...metrics].sort((a, b) => a.month.localeCompare(b.month)), [metrics]);
+  const latest = sortedMetrics[sortedMetrics.length - 1];
+
+  const chartData = sortedMetrics.map((item) => ({
+    month: new Date(item.month).toLocaleDateString(i18n.language, { month: "short", year: "2-digit" }),
+    energy: Number(item.energy_kwh || 0),
+    waste: Number(item.waste_recycled_pct || 0),
+    renewable: Number(item.renewable_energy_pct || 0),
+    intensity: Number(item.carbon_intensity_g_per_eur || 0),
+  }));
+
+  const handleSubmit = async () => {
+    if (!form.month) {
+      toast.error(copy.error);
+      return;
+    }
+
+    try {
+      await onCreateMetric({
+        month: form.month,
+        energy_kwh: form.energy_kwh ? Number(form.energy_kwh) : null,
+        waste_recycled_pct: form.waste_recycled_pct ? Number(form.waste_recycled_pct) : null,
+        renewable_energy_pct: form.renewable_energy_pct ? Number(form.renewable_energy_pct) : null,
+        carbon_intensity_g_per_eur: form.carbon_intensity_g_per_eur ? Number(form.carbon_intensity_g_per_eur) : null,
+      });
+      setForm({ month: "", energy_kwh: "", waste_recycled_pct: "", renewable_energy_pct: "", carbon_intensity_g_per_eur: "" });
+      toast.success(copy.saved);
+    } catch (error) {
+      console.error(error);
+      toast.error(copy.error);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h3 className="text-lg font-semibold">{t("eco.greenKpiTitle")}</h3>
-          <p className="text-sm text-muted-foreground">{t("eco.greenKpiDesc")}</p>
-        </div>
-        <Badge variant="outline" className="gap-1 text-xs border-amber-500/30 text-amber-500">
-          <TestTube2 className="h-3 w-3" />
-          {t("common.demoData", "Demo data")}
-        </Badge>
-      </div>
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card className="border-emerald-500/20 bg-gradient-to-br from-cyan-500/10 via-background to-emerald-500/10 shadow-[0_25px_90px_-55px_rgba(34,211,238,0.55)]">
+          <CardHeader>
+            <Badge variant="outline" className="mb-3 w-fit border-cyan-500/30 bg-cyan-500/10 text-cyan-300">
+              <Sparkles className="mr-1 h-3.5 w-3.5" /> live KPI stream
+            </Badge>
+            <CardTitle>{copy.title}</CardTitle>
+            <p className="text-sm text-muted-foreground">{copy.desc}</p>
+          </CardHeader>
+          <CardContent>
+            {chartData.length === 0 ? (
+              <EmptyState icon={BarChart3} title={copy.emptyTitle} description={copy.emptyDesc} compact />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <MetricCard title="Énergie" value={Number(latest?.energy_kwh || 0)} suffix="kWh" color="hsl(45 93% 58%)" icon={Zap} />
+                  <MetricCard title="Recyclage" value={Number(latest?.waste_recycled_pct || 0)} suffix="%" color="hsl(142 76% 45%)" icon={Trash2} />
+                  <MetricCard title="Renouvelable" value={Number(latest?.renewable_energy_pct || 0)} suffix="%" color="hsl(187 85% 53%)" icon={Sun} />
+                  <MetricCard title="Intensité carbone" value={Number(latest?.carbon_intensity_g_per_eur || 0)} suffix="gCO₂/€" color="hsl(262 83% 65%)" icon={BarChart3} />
+                </div>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Card className="border-white/10 bg-background/55">
+                    <CardHeader><CardTitle className="text-base">Énergie & intensité</CardTitle></CardHeader>
+                    <CardContent className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                          <YAxis stroke="hsl(var(--muted-foreground))" />
+                          <Tooltip />
+                          <Area type="monotone" dataKey="energy" stroke="hsl(45 93% 58%)" fill="hsl(45 93% 58% / 0.16)" strokeWidth={2} />
+                          <Area type="monotone" dataKey="intensity" stroke="hsl(262 83% 65%)" fill="hsl(262 83% 65% / 0.16)" strokeWidth={2} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-white/10 bg-background/55">
+                    <CardHeader><CardTitle className="text-base">Recyclage & renouvelable</CardTitle></CardHeader>
+                    <CardContent className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                          <YAxis stroke="hsl(var(--muted-foreground))" />
+                          <Tooltip />
+                          <Area type="monotone" dataKey="waste" stroke="hsl(142 76% 45%)" fill="hsl(142 76% 45% / 0.16)" strokeWidth={2} />
+                          <Area type="monotone" dataKey="renewable" stroke="hsl(187 85% 53%)" fill="hsl(187 85% 53% / 0.16)" strokeWidth={2} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <KPICard
-          title={t("eco.energyConsumption")}
-          value="2 840 kWh"
-          trend="down"
-          trendValue="-18%"
-          positive={true}
-          icon={Zap}
-          data={energyData}
-          color="hsl(45, 93%, 58%)"
-        />
-        <KPICard
-          title={t("eco.wasteReduction")}
-          value="78%"
-          trend="up"
-          trendValue="+12%"
-          positive={true}
-          icon={Trash2}
-          data={wasteData}
-          color="hsl(142, 76%, 45%)"
-        />
-        <KPICard
-          title={t("eco.renewableEnergy")}
-          value="72%"
-          trend="up"
-          trendValue="+25%"
-          positive={true}
-          icon={Sun}
-          data={renewableData}
-          color="hsl(187, 85%, 53%)"
-        />
-        <KPICard
-          title={t("eco.carbonIntensity")}
-          value="8.2 gCO₂/€"
-          trend="down"
-          trendValue="-32%"
-          positive={true}
-          icon={BarChart3}
-          data={intensityData}
-          color="hsl(262, 83%, 65%)"
-        />
+        <Card className="border-white/10 bg-background/80 backdrop-blur">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg"><Plus className="h-4 w-4 text-cyan-400" /> {copy.add}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Mois</Label>
+              <Input type="month" value={form.month} onChange={(e) => setForm((prev) => ({ ...prev, month: `${e.target.value}-01` }))} />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2"><Label>Énergie kWh</Label><Input type="number" min="0" step="0.01" value={form.energy_kwh} onChange={(e) => setForm((prev) => ({ ...prev, energy_kwh: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Recyclage %</Label><Input type="number" min="0" max="100" step="0.01" value={form.waste_recycled_pct} onChange={(e) => setForm((prev) => ({ ...prev, waste_recycled_pct: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Énergie renouvelable %</Label><Input type="number" min="0" max="100" step="0.01" value={form.renewable_energy_pct} onChange={(e) => setForm((prev) => ({ ...prev, renewable_energy_pct: e.target.value }))} /></div>
+              <div className="space-y-2"><Label>Intensité carbone gCO₂/€</Label><Input type="number" min="0" step="0.01" value={form.carbon_intensity_g_per_eur} onChange={(e) => setForm((prev) => ({ ...prev, carbon_intensity_g_per_eur: e.target.value }))} /></div>
+            </div>
+            <Button onClick={handleSubmit} disabled={isSaving} className="w-full"><Plus className="mr-2 h-4 w-4" /> {copy.add}</Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

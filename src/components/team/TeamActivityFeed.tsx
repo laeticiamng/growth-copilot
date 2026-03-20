@@ -37,58 +37,8 @@ interface TeamActivityFeedProps {
   compact?: boolean;
 }
 
-const DEMO_ACTIVITIES: ActivityItem[] = [
-  {
-    id: "1",
-    actorType: "agent",
-    actorName: "Sophie Marchand",
-    action: "a généré un plan de croissance",
-    target: "Q1 2026",
-    result: "success",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
-  },
-  {
-    id: "2",
-    actorType: "user",
-    actorName: "Jean Dupont",
-    action: "a approuvé",
-    target: "Campagne Meta Ads",
-    targetType: "approval",
-    result: "success",
-    timestamp: new Date(Date.now() - 45 * 60 * 1000),
-  },
-  {
-    id: "3",
-    actorType: "agent",
-    actorName: "Emma Lefebvre",
-    action: "a terminé l'audit SEO",
-    target: "exemple.fr",
-    result: "warning",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    metadata: { issues: 12 },
-  },
-  {
-    id: "4",
-    actorType: "system",
-    actorName: "Système",
-    action: "a synchronisé",
-    target: "Google Search Console",
-    result: "success",
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-  },
-  {
-    id: "5",
-    actorType: "agent",
-    actorName: "Thomas Duval",
-    action: "a échoué à publier",
-    target: "Article blog",
-    result: "error",
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-  },
-];
-
 export function TeamActivityFeed({ 
-  activities = DEMO_ACTIVITIES, 
+  activities = [], 
   maxItems = 10,
   showHeader = true,
   compact = false,
