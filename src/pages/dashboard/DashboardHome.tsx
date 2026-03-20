@@ -1,430 +1,202 @@
-import { useCallback, lazy, Suspense, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useWorkspace } from "@/hooks/useWorkspace";
-import { useSites } from "@/hooks/useSites";
-import { useApprovals } from "@/hooks/useApprovals";
-import { useServices } from "@/hooks/useServices";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { captureException, addBreadcrumb } from "@/lib/sentry";
-import { useDashboardRealtime } from "@/hooks/useDashboardRealtime";
-import { AGENTS_CATALOG, DEPARTMENTS_CATALOG } from "@/data/agents-catalog";
-import {
-  ArrowRight,
-  Bot,
-  Calendar,
-  FileText,
-  Rocket,
-  Download,
-} from "lucide-react";
+import { ArrowRight, BarChart3, CheckCircle2, Shield, Sparkles, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
-
-// Eagerly loaded cockpit widgets (lightweight)
-import {
-  ExecutiveSummary,
-  PriorityActionsEnhanced,
-  QuickLaunchers,
-  ApprovalsWidget,
-  WelcomeCard,
-  DepartmentSemaphores,
-} from "@/components/cockpit";
-import { MoMComparison } from "@/components/dashboard/MoMComparison";
-import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
-
-// Lazy-loaded heavy components (recharts, @elevenlabs, date-fns locales)
-const AgentPerformanceChart = lazy(() => import("@/components/agents/AgentPerformanceChart").then(m => ({ default: m.AgentPerformanceChart })));
-const VoiceAssistant = lazy(() => import("@/components/ai/VoiceAssistant").then(m => ({ default: m.VoiceAssistant })));
-const SmartAlertsPanel = lazy(() => import("@/components/notifications/SmartAlertsPanel").then(m => ({ default: m.SmartAlertsPanel })));
-const RunsHistory = lazy(() => import("@/components/cockpit/RunsHistory").then(m => ({ default: m.RunsHistory })));
-const BusinessHealthScore = lazy(() => import("@/components/cockpit/BusinessHealthScore").then(m => ({ default: m.BusinessHealthScore })));
-const ROITrackerWidget = lazy(() => import("@/components/cockpit/ROITrackerWidget").then(m => ({ default: m.ROITrackerWidget })));
-const RealtimeStatus = lazy(() => import("@/components/cockpit/RealtimeStatus").then(m => ({ default: m.RealtimeStatus })));
-const DailyBriefing = lazy(() => import("@/components/cockpit/DailyBriefing").then(m => ({ default: m.DailyBriefing })));
-const PredictiveAnalytics = lazy(() => import("@/components/dashboard/PredictiveAnalytics"));
-
-function ChartSkeleton() {
-  return <Skeleton className="h-64 w-full rounded-lg" />;
-}
-
-// CGO Agent Persona - translated in component
-const CGO_PERSONA = {
-  name: "Sophie Marchand",
-  avatarFr: "👩‍💼",
-  avatarEn: "👩‍💼",
-};
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useApprovals } from "@/hooks/useApprovals";
+import { useAuditLog } from "@/hooks/useAuditLog";
+import { useEvidenceBundles } from "@/hooks/useEvidenceBundles";
+import { useScheduledRuns } from "@/hooks/useScheduledRuns";
+import { useSites } from "@/hooks/useSites";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function DashboardHome() {
-  const { t, i18n } = useTranslation();
-  const { currentWorkspace, loading: wsLoading } = useWorkspace();
-  const { currentSite, loading: sitesLoading } = useSites();
-  const { pendingApprovals, approveAction, rejectAction } = useApprovals();
-  const { enabledServices, servicesLoading, hasService } = useServices();
+  const { currentWorkspace } = useWorkspace();
+  const { currentSite } = useSites();
+  const { pendingApprovals } = useApprovals();
+  const { entries } = useAuditLog();
+  const { bundles } = useEvidenceBundles();
+  const { scheduledRuns } = useScheduledRuns();
 
-  // Real-time subscriptions for instant dashboard updates
-  useDashboardRealtime();
-
-  // Get translated persona role
-  const getCGORole = () => t("cockpit.welcomeCgoRole");
-
-  // Fetch real KPI data - current period (last 30 days)
-  const { data: kpiData, isLoading: kpiLoading } = useQuery({
-    queryKey: ['dashboard-kpis-current', currentSite?.id],
+  const { data: snapshot, isLoading } = useQuery({
+    queryKey: ["dashboard-home-snapshot", currentWorkspace?.id, currentSite?.id],
     queryFn: async () => {
-      if (!currentSite?.id) return null;
-      
-      const today = new Date();
+      if (!currentWorkspace?.id) return null;
       const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(today.getDate() - 30);
-      
-      const { data: kpis } = await supabase
-        .from('kpis_daily')
-        .select('organic_clicks, organic_impressions, total_conversions, avg_position')
-        .eq('site_id', currentSite.id)
-        .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
-        .lte('date', today.toISOString().split('T')[0])
-        .order('date', { ascending: false });
-      
-      if (!kpis || kpis.length === 0) return null;
-      
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const [integrationRes, kpiRes] = await Promise.all([
+        supabase
+          .from("integrations")
+          .select("id", { count: "exact", head: true })
+          .eq("workspace_id", currentWorkspace.id)
+          .eq("status", "active"),
+        currentSite?.id
+          ? supabase
+              .from("kpis_daily")
+              .select("organic_clicks, total_conversions")
+              .eq("site_id", currentSite.id)
+              .gte("date", thirtyDaysAgo.toISOString().split("T")[0])
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
       return {
-        organicClicks: kpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0),
-        conversions: kpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0),
-        avgPosition: kpis.filter(k => k.avg_position).length > 0
-          ? (kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.filter(k => k.avg_position).length)
-          : null,
-        daysTracked: kpis.length,
+        connectedSources: integrationRes.count ?? 0,
+        clicks: (kpiRes.data ?? []).reduce((sum, row) => sum + (row.organic_clicks ?? 0), 0),
+        conversions: (kpiRes.data ?? []).reduce((sum, row) => sum + (row.total_conversions ?? 0), 0),
       };
     },
-    enabled: !!currentSite?.id,
+    enabled: !!currentWorkspace?.id,
   });
 
-  // Fetch previous period KPI data (J-60 to J-30)
-  const { data: previousKpiData } = useQuery({
-    queryKey: ['dashboard-kpis-previous', currentSite?.id],
-    queryFn: async () => {
-      if (!currentSite?.id) return null;
-      
-      const today = new Date();
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(today.getDate() - 30);
-      const sixtyDaysAgo = new Date();
-      sixtyDaysAgo.setDate(today.getDate() - 60);
-      
-      const { data: kpis } = await supabase
-        .from('kpis_daily')
-        .select('organic_clicks, organic_impressions, total_conversions, avg_position')
-        .eq('site_id', currentSite.id)
-        .gte('date', sixtyDaysAgo.toISOString().split('T')[0])
-        .lt('date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('date', { ascending: false });
-      
-      if (!kpis || kpis.length === 0) return null;
-      
-      return {
-        organicClicks: kpis.reduce((sum, k) => sum + (k.organic_clicks || 0), 0),
-        conversions: kpis.reduce((sum, k) => sum + (k.total_conversions || 0), 0),
-        avgPosition: kpis.filter(k => k.avg_position).length > 0
-          ? (kpis.reduce((sum, k) => sum + Number(k.avg_position || 0), 0) / kpis.filter(k => k.avg_position).length)
-          : null,
-        daysTracked: kpis.length,
-      };
-    },
-    enabled: !!currentSite?.id,
-  });
-
-  // Build service health status
-  const serviceHealth = enabledServices.map((service) => ({
-    slug: service.slug,
-    name: service.name,
-    status: "green" as const, // Will be dynamic based on integration status
-    message: service.is_core ? "Core" : undefined,
-  }));
-
-  // Quick launchers based on enabled services
-  const quickLaunchers = [
+  const summaryCards = useMemo(() => [
     {
-      id: "weekly-plan",
-      labelKey: "cockpit.weeklyPlan",
-      descriptionKey: "cockpit.weeklyPlanDesc",
-      icon: Calendar,
-      runType: "MARKETING_WEEK_PLAN",
-      service: "marketing",
-      disabled: !hasService("marketing"),
+      title: "Connected sources",
+      value: snapshot?.connectedSources ?? 0,
+      helper: "Google, Meta and workspace-level feeds contributing to signal detection.",
+      icon: BarChart3,
     },
     {
-      id: "exec-brief",
-      labelKey: "cockpit.execBrief",
-      descriptionKey: "cockpit.execBriefDesc",
-      icon: FileText,
-      runType: "DAILY_EXECUTIVE_BRIEF",
-      service: "core-os",
-      disabled: false,
+      title: "Pending approvals",
+      value: pendingApprovals.length,
+      helper: "Sensitive actions waiting for review before execution.",
+      icon: Shield,
     },
-  ];
-
-  // Handle run launch
-  const handleLaunchRun = useCallback(async (runType: string) => {
-    if (!currentWorkspace?.id) {
-      toast.error(t("cockpit.noWorkspace"));
-      return;
-    }
-
-    // Add breadcrumb for run launch
-    addBreadcrumb({
-      category: 'agent',
-      message: `Launching run: ${runType}`,
-      level: 'info',
-      data: { runType, workspaceId: currentWorkspace.id, siteId: currentSite?.id },
-    });
-
-    try {
-      const { data, error } = await supabase.functions.invoke("run-executor", {
-        body: {
-          run_type: runType,
-          workspace_id: currentWorkspace.id,
-          site_id: currentSite?.id,
-        },
-      });
-
-      if (error) {
-        // Capture edge function errors to Sentry
-        captureException(error, {
-          action: 'launchRun',
-          runType,
-          workspaceId: currentWorkspace.id,
-          siteId: currentSite?.id,
-        });
-        throw error;
-      }
-      toast.success(t("cockpit.runSuccess"));
-    } catch (error) {
-      console.error("Run launch error:", error);
-      toast.error(t("cockpit.runError"));
-    }
-  }, [currentWorkspace?.id, currentSite?.id, t]);
-
-  // Handle approvals
-  const handleApprove = async (id: string) => {
-    await approveAction(id);
-    toast.success(t("cockpit.approved"));
-  };
-
-  const handleReject = async (id: string) => {
-    await rejectAction(id, "Rejected by user");
-    toast.success(t("cockpit.rejected"));
-  };
-
-  // Transform pending approvals for widget
-  const approvalsForWidget = pendingApprovals.map((a) => ({
-    id: a.id,
-    title: a.action_type.replace(/_/g, " "),
-    description: t("cockpit.welcomeByAgent", { agent: a.agent_type }),
-    actionType: a.action_type,
-    riskLevel: a.risk_level as "low" | "medium" | "high",
-    createdAt: a.created_at || "",
-  }));
-
-  const isLoading = wsLoading || sitesLoading || servicesLoading;
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
-        </div>
-      </div>
-    );
-  }
+    {
+      title: "Evidence bundles",
+      value: bundles.length,
+      helper: "Proof artifacts available to justify recommendations and report impact.",
+      icon: Sparkles,
+    },
+    {
+      title: "Tracked outcomes",
+      value: snapshot?.conversions ?? 0,
+      helper: "Recent conversions currently visible in the connected KPI layer.",
+      icon: CheckCircle2,
+    },
+  ], [bundles.length, pendingApprovals.length, snapshot?.connectedSources, snapshot?.conversions]);
 
   if (!currentWorkspace) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <Bot className="w-16 h-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold mb-2">{t("cockpit.welcome")}</h2>
-        <p className="text-muted-foreground mb-6">
-          {t("cockpit.createFirst")}
-        </p>
-        <Link to="/dashboard/setup">
-          <Button size="lg">
-            <Rocket className="w-5 h-5 mr-2" />
-            {t("cockpit.start")}
-          </Button>
-        </Link>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="max-w-xl w-full">
+          <CardHeader>
+            <CardTitle>Create your first cockpit</CardTitle>
+            <CardDescription>Start with a workspace, connect a site, then let the product organize signals, priorities and governance.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/onboarding">
+              <Button>Start onboarding</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Card + PDF Export */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1">
-          <WelcomeCard
-            agentName={CGO_PERSONA.name}
-            agentRole={getCGORole()}
-            agentAvatar={CGO_PERSONA.avatarFr}
-            siteName={currentSite?.name || currentWorkspace.name}
-            pendingCount={pendingApprovals.length}
-            onExport={() => {}}
-          />
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <Badge variant="agent" className="mb-3">Default dashboard</Badge>
+          <h1 className="text-3xl md:text-4xl font-bold">Signals first. Decisions second. Outcomes always visible.</h1>
+          <p className="text-muted-foreground mt-2 max-w-3xl">
+            This workspace is now positioned as a connected growth cockpit, not a bundle of imaginary employees. Review anomalies, prioritize actions, validate sensitive moves and measure what changed.
+          </p>
         </div>
-        <CockpitPDFExport workspaceName={currentWorkspace.name} />
+        <div className="flex flex-wrap gap-3">
+          <Link to="/dashboard/signals"><Button variant="hero">Open Growth Signals</Button></Link>
+          <Link to="/dashboard/actions"><Button variant="outline">View action queue</Button></Link>
+        </div>
       </div>
 
-      {/* Daily Briefing from Sophie Marchand (CGO) */}
-      <Suspense fallback={<ChartSkeleton />}>
-        <DailyBriefing />
-      </Suspense>
-
-      {/* Department Semaphores - Health Overview */}
-      <DepartmentSemaphores />
-
-      {/* Service Health Summary */}
-      {serviceHealth.length > 0 && (
-        <ExecutiveSummary
-          siteName={currentSite?.name || currentWorkspace.name}
-          services={serviceHealth}
-          loading={servicesLoading}
-        />
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 items-start">
-        {/* Priority Actions - Enhanced with Approve/Reject */}
-        <PriorityActionsEnhanced maxItems={5} />
-
-        {/* Business Health Score */}
-        <Suspense fallback={<ChartSkeleton />}>
-          <BusinessHealthScore className="h-full" />
-        </Suspense>
-
-        {/* ROI Tracker Widget */}
-        <Suspense fallback={<ChartSkeleton />}>
-          <ROITrackerWidget className="h-full" />
-        </Suspense>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {(isLoading ? [1, 2, 3, 4] : summaryCards).map((card, index) => {
+          if (typeof card === "number") {
+            return <Skeleton key={card} className="h-44" />;
+          }
+          const Icon = card.icon;
+          return (
+            <Card key={card.title} className="border-border/60">
+              <CardHeader>
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <CardTitle className="text-base text-muted-foreground">{card.title}</CardTitle>
+                <p className="text-3xl font-bold">{card.value}</p>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-6">{card.helper}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Approvals Widget */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        <ApprovalsWidget
-          approvals={approvalsForWidget}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
-        
-        {/* Agent Performance Chart */}
-        <Suspense fallback={<ChartSkeleton />}>
-          <AgentPerformanceChart />
-        </Suspense>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* Quick Launchers */}
-        <QuickLaunchers launchers={quickLaunchers} onLaunch={handleLaunchRun} />
-
-        {/* Runs History */}
-        <Suspense fallback={<ChartSkeleton />}>
-          <RunsHistory maxItems={4} />
-        </Suspense>
-      </div>
-
-      {/* Voice Assistant & Real-Time Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* Voice-First AI */}
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              🎙️ {t("cockpit.voiceAssistant")}
-            </CardTitle>
-            <CardDescription>
-              {t("cockpit.voiceAssistantDesc")}
-            </CardDescription>
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Workflow className="w-5 h-5 text-primary" /> Decision workflow</CardTitle>
+            <CardDescription>The new front-door value proposition follows a clear operating loop.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Suspense fallback={<ChartSkeleton />}>
-              <VoiceAssistant />
-            </Suspense>
+          <CardContent className="grid gap-3 md:grid-cols-2">
+            {[
+              ["Growth Signals", "Detect anomalies and opportunities from connected data."],
+              ["Prioritized Actions", "Rank the next best moves with evidence and expected impact."],
+              ["Approvals", "Route sensitive recommendations through human validation and policy."],
+              ["Outcome Tracking", "Measure what improved and keep the proof layer accessible."],
+            ].map(([title, description]) => (
+              <div key={title} className="rounded-xl border border-border/60 p-4">
+                <p className="font-medium mb-2">{title}</p>
+                <p className="text-sm text-muted-foreground leading-6">{description}</p>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        {/* Smart Alerts */}
-        <Suspense fallback={<ChartSkeleton />}>
-          <SmartAlertsPanel />
-        </Suspense>
+        <Card>
+          <CardHeader>
+            <CardTitle>Operational snapshot</CardTitle>
+            <CardDescription>Helpful proof points from the existing stack.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <div className="rounded-xl bg-secondary/40 p-4">
+              <p className="font-medium text-foreground">Recent traffic volume</p>
+              <p className="text-2xl font-bold mt-1">{snapshot?.clicks?.toLocaleString() ?? 0}</p>
+              <p>Last 30 days of tracked clicks for the current site.</p>
+            </div>
+            <div className="rounded-xl border border-border/60 p-4">
+              <p><span className="font-medium text-foreground">Audit entries:</span> {entries.length}</p>
+              <p><span className="font-medium text-foreground">Scheduled runs:</span> {scheduledRuns.length}</p>
+              <p><span className="font-medium text-foreground">Workspace:</span> {currentWorkspace.name}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-    {/* Realtime Status - Connections Monitor */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-      <Suspense fallback={<ChartSkeleton />}>
-        <RealtimeStatus />
-      </Suspense>
-      <Card className="md:col-span-2">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            🤖 {t("cockpit.aiTeamAvailable")}
-            <Badge variant="secondary" className="ml-auto">{AGENTS_CATALOG.length} {t("cockpit.agents")}</Badge>
-          </CardTitle>
-          <CardDescription>
-            {t("cockpit.welcomeAiTeamDesc")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
-                {DEPARTMENTS_CATALOG.length} {t("cockpit.departments")} • {t("cockpit.directionMarketing")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("cockpit.readyToExecute")}
-              </p>
-            </div>
-            <Link to="/dashboard/agents">
-              <Button variant="outline" size="sm">
-                {t("cockpit.viewTeam")}
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-      {/* Predictive Analytics - KPI Forecasting */}
-      <Suspense fallback={<ChartSkeleton />}>
-        <PredictiveAnalytics />
-      </Suspense>
-
-      {/* MoM Comparison - KPI Trends with real data */}
-      <MoMComparison 
-        hasData={!!kpiData}
-        kpis={[
-          { 
-            label: t("dashboard.home.organicClicks"), 
-            currentValue: kpiData?.organicClicks ?? null, 
-            previousValue: previousKpiData?.organicClicks ?? null,
-            format: "number" 
-          },
-          { 
-            label: t("dashboard.home.conversions"), 
-            currentValue: kpiData?.conversions ?? null, 
-            previousValue: previousKpiData?.conversions ?? null,
-            format: "number" 
-          },
-          { 
-            label: t("dashboard.home.avgPosition"), 
-            currentValue: kpiData?.avgPosition ?? null, 
-            previousValue: previousKpiData?.avgPosition ?? null,
-            format: "number" 
-          },
-        ]}
-      />
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          ["/dashboard/signals", "Growth Signals", "Start with what changed and why it matters now."],
+          ["/dashboard/actions", "Prioritized Actions", "Translate anomalies into a ranked queue with proof."],
+          ["/dashboard/outcomes", "Outcome Tracking", "Keep impact visible beyond task completion."],
+        ].map(([href, title, description]) => (
+          <Link key={href} to={href}>
+            <Card className="h-full border-border/60 hover:border-primary/40 transition-colors">
+              <CardContent className="p-6 flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold mb-2">{title}</p>
+                  <p className="text-sm text-muted-foreground leading-6">{description}</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-muted-foreground shrink-0" />
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

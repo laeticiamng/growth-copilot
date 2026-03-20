@@ -51,6 +51,7 @@ import {
      Search,
      Leaf,
      Rocket,
+     Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -88,9 +89,10 @@ interface NavDepartment {
 // Main navigation - CEO-level (always visible) - uses i18n keys
 const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { path: "/dashboard", label: t("layout.cockpit"), icon: LayoutDashboard },
-  { path: "/dashboard/app", label: t("nav.dashboard"), icon: BarChart3 },
-  { path: "/dashboard/agents", label: t("layout.myTeam"), icon: Bot },
-  { path: "/dashboard/analyze", label: t("nav.analyzeUrl"), icon: Target },
+  { path: "/dashboard/signals", label: "Growth Signals", icon: BarChart3 },
+  { path: "/dashboard/actions", label: "Prioritized Actions", icon: Workflow },
+  { path: "/dashboard/approvals", label: t("nav.approvals"), icon: FileCheck },
+  { path: "/dashboard/outcomes", label: "Outcome Tracking", icon: ShieldCheck },
 ];
 
 // Advanced items organized by department - uses i18n keys

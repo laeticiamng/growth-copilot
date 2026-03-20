@@ -1,33 +1,66 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/useAuth";
-import { useWorkspace } from "@/hooks/useWorkspace";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Loader2, Globe, Target, Rocket, CheckCircle2, ArrowRight, Sparkles, 
-  Building2, Crown, Puzzle, Briefcase, TrendingUp, Shield, Code, 
-  BarChart3, HeadphonesIcon, Settings, ArrowLeft, CreditCard, Gift,
-  Users, Scale
-} from "lucide-react";
+import { Building2, CheckCircle2, Globe, Loader2, Rocket, Shield, Target, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
 import { SiteAnalysisPreview, type SiteAnalysis } from "@/components/onboarding/SiteAnalysisPreview";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 
-type OnboardingStep = "url" | "plan" | "services" | "objectives" | "payment" | "summary";
-type PlanType = "starter" | "full" | "alacarte";
+const profiles = [
+  {
+    id: "consultant",
+    title: "Consultant",
+    description: "One cockpit to review client signals, explain anomalies and turn insight into next actions.",
+    icon: Target,
+  },
+  {
+    id: "agency",
+    title: "Agency",
+    description: "Multi-client delivery with governance, approval workflows and impact reporting.",
+    icon: Users,
+  },
+  {
+    id: "brand",
+    title: "Brand",
+    description: "Connected internal growth workspace for decisions, validations and measurable outcomes.",
+    icon: Building2,
+  },
+] as const;
 
-const PRICING = {
-  starter: 490,
-  full: 9000,
-  department: 1900,
-};
+const plans = [
+  {
+    id: "solo",
+    title: "Solo",
+    price: "€490 / month",
+    description: "Best for one operator or small consulting workflow.",
+    stripePlanType: "department",
+  },
+  {
+    id: "agency",
+    title: "Agency",
+    price: "€1,900 / month",
+    description: "Best for client-facing teams that need governance and repeatability.",
+    stripePlanType: "department",
+  },
+  {
+    id: "scale",
+    title: "Scale",
+    price: "Custom / month",
+    description: "Best for brands that need broader governance and packaging support.",
+    stripePlanType: "full_company",
+  },
+] as const;
+
+type ProfileId = (typeof profiles)[number]["id"];
+type PlanId = (typeof plans)[number]["id"];
 
 const isValidUrl = (url: string): boolean => {
   try {
@@ -50,260 +83,159 @@ const extractDomainName = (url: string): string => {
   }
 };
 
-const generateSlug = (name: string): string => {
-  return name
+const generateSlug = (name: string): string =>
+  name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 50);
-};
 
 export default function Onboarding() {
-  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { workspaces } = useWorkspace();
-  const navigate = useNavigate();
 
-  const SERVICE_CATALOG = [
-    { id: "marketing", name: t("onboardingFlow.marketing"), icon: TrendingUp, description: t("onboardingFlow.marketingDesc"), color: "text-blue-500" },
-    { id: "sales", name: t("onboardingFlow.sales"), icon: Briefcase, description: t("onboardingFlow.salesDesc"), color: "text-green-500" },
-    { id: "finance", name: t("onboardingFlow.finance"), icon: BarChart3, description: t("onboardingFlow.financeDesc"), color: "text-yellow-500" },
-    { id: "security", name: t("onboardingFlow.security"), icon: Shield, description: t("onboardingFlow.securityDesc"), color: "text-red-500" },
-    { id: "product", name: t("onboardingFlow.product"), icon: Puzzle, description: t("onboardingFlow.productDesc"), color: "text-purple-500" },
-    { id: "engineering", name: t("onboardingFlow.engineering"), icon: Code, description: t("onboardingFlow.engineeringDesc"), color: "text-orange-500" },
-    { id: "data", name: t("onboardingFlow.data"), icon: BarChart3, description: t("onboardingFlow.dataDesc"), color: "text-cyan-500" },
-    { id: "support", name: t("onboardingFlow.support"), icon: HeadphonesIcon, description: t("onboardingFlow.supportDesc"), color: "text-pink-500" },
-    { id: "governance", name: t("onboardingFlow.governance"), icon: Settings, description: t("onboardingFlow.governanceDesc"), color: "text-gray-500" },
-    { id: "hr", name: t("onboardingFlow.hr"), icon: Users, description: t("onboardingFlow.hrDesc"), color: "text-emerald-500" },
-    { id: "legal", name: t("onboardingFlow.legal"), icon: Scale, description: t("onboardingFlow.legalDesc"), color: "text-indigo-500" },
-  ];
-
-  const OBJECTIVES = [
-    { id: "traffic", label: t("onboardingFlow.traffic"), icon: "📈" },
-    { id: "leads", label: t("onboardingFlow.leads"), icon: "🎯" },
-    { id: "brand", label: t("onboardingFlow.brand"), icon: "⭐" },
-    { id: "local", label: t("onboardingFlow.local"), icon: "📍" },
-    { id: "ecommerce", label: t("onboardingFlow.ecommerce"), icon: "🛒" },
-    { id: "content", label: t("onboardingFlow.content"), icon: "✍️" },
-  ];
-
-  const [step, setStep] = useState<OnboardingStep>("url");
   const [siteUrl, setSiteUrl] = useState("");
   const [siteName, setSiteName] = useState("");
-  const [planType, setPlanType] = useState<PlanType>("starter");
-  const [selectedServices, setSelectedServices] = useState<string[]>(SERVICE_CATALOG.map(s => s.id));
-  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [urlTouched, setUrlTouched] = useState(false);
-  const [detectedInfo, setDetectedInfo] = useState<{ name: string } | null>(null);
-  const [useTrial, setUseTrial] = useState(false);
+  const [profile, setProfile] = useState<ProfileId>("agency");
+  const [plan, setPlan] = useState<PlanId>("agency");
+  const [notes, setNotes] = useState("");
   const [siteAnalysis, setSiteAnalysis] = useState<SiteAnalysis | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisTriggered, setAnalysisTriggered] = useState(false);
-  const [isCreatingFree, setIsCreatingFree] = useState(false);
-
-  const triggerSiteAnalysis = useCallback(async (url: string) => {
-    if (isAnalyzing || analysisTriggered) return;
-    setIsAnalyzing(true);
-    setAnalysisTriggered(true);
-    try {
-      const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
-      const { data, error } = await supabase.functions.invoke("site-analyze", {
-        body: { url: formattedUrl },
-      });
-      if (!error && data?.success && data?.analysis) {
-        setSiteAnalysis(data.analysis);
-        // Auto-fill site name from page title if available
-        if (data.analysis.title && !siteName) {
-          const cleanTitle = data.analysis.title.split(/[|\-–—]/)[0].trim();
-          if (cleanTitle.length > 2 && cleanTitle.length < 60) {
-            setSiteName(cleanTitle);
-          }
-        }
-      }
-    } catch (e) {
-      console.error("Site analysis failed:", e);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [isAnalyzing, analysisTriggered, siteName]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const checkoutStatus = params.get("checkout");
-    
-    if (checkoutStatus === "success") {
-      setStep("summary");
-      toast.success(t("onboardingFlow.paymentConfirmed"));
-      window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(() => navigate("/dashboard"), 3000);
-    } else if (checkoutStatus === "cancelled") {
-      toast.error(t("onboardingFlow.paymentCancelled"));
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, [navigate, t]);
-
-  useEffect(() => {
-    if (isValidUrl(siteUrl) && siteUrl.length > 5) {
-      const name = extractDomainName(siteUrl);
-      setDetectedInfo({ name });
-      if (!siteName) setSiteName(name);
-      // Auto-trigger analysis after 1s debounce
-      if (!analysisTriggered) {
-        const timer = setTimeout(() => triggerSiteAnalysis(siteUrl), 1000);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      setDetectedInfo(null);
-      setSiteAnalysis(null);
-      setAnalysisTriggered(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siteUrl]);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     }
-  }, [user, authLoading, navigate]);
+  }, [authLoading, navigate, user]);
 
-  const getProgress = () => {
-    switch (step) {
-      case "url": return 16;
-      case "plan": return 33;
-      case "services": return 50;
-      case "objectives": return 66;
-      case "payment": return 83;
-      case "summary": return 100;
-      default: return 0;
+  useEffect(() => {
+    if (isValidUrl(siteUrl) && !siteName) {
+      setSiteName(extractDomainName(siteUrl));
     }
-  };
+  }, [siteName, siteUrl]);
 
-  const getTotalPrice = () => {
-    if (planType === "starter") return PRICING.starter;
-    if (planType === "full") return PRICING.full;
-    return selectedServices.length * PRICING.department;
-  };
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkoutStatus = params.get("checkout");
+    if (checkoutStatus === "success") {
+      toast.success("Subscription confirmed. Your workspace is ready.");
+      window.history.replaceState({}, "", window.location.pathname);
+      navigate("/dashboard");
+    }
+    if (checkoutStatus === "cancelled") {
+      toast.error("Checkout cancelled. Your onboarding draft is still here.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [navigate]);
 
-  const toggleService = (id: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
+  const progress = useMemo(() => {
+    let completed = 0;
+    if (siteUrl) completed += 25;
+    if (profile) completed += 25;
+    if (plan) completed += 25;
+    if (notes.length > 10) completed += 25;
+    return completed;
+  }, [notes.length, plan, profile, siteUrl]);
 
-  const toggleObjective = (id: string) => {
-    setSelectedObjectives((prev) =>
-      prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]
-    );
-  };
-
-  const handleUrlNext = () => {
+  const analyzeSite = async () => {
     if (!isValidUrl(siteUrl)) {
-      toast.error(t("onboardingFlow.enterValidUrl"));
+      toast.error("Enter a valid website first.");
       return;
     }
-    setStep("plan");
-  };
-
-  const handlePlanNext = () => {
-    if (planType === "starter") {
-      setSelectedServices(["marketing"]);
-      setStep("objectives");
-    } else if (planType === "full") {
-      setSelectedServices(SERVICE_CATALOG.map(s => s.id));
-      setStep("objectives");
-    } else {
-      setStep("services");
-    }
-  };
-
-  const handleServicesNext = () => {
-    if (selectedServices.length === 0) {
-      toast.error(t("onboardingFlow.selectService"));
-      return;
-    }
-    setStep("objectives");
-  };
-
-  const handleObjectivesNext = () => {
-    setStep("payment");
-  };
-
-  const handleFreePlan = async () => {
-    if (!user) return;
-    setIsCreatingFree(true);
-
+    setAnalysisLoading(true);
     try {
-      const workspaceName = siteName || detectedInfo?.name || "Mon Workspace";
+      const formattedUrl = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
+      const { data, error } = await supabase.functions.invoke("site-analyze", {
+        body: { url: formattedUrl },
+      });
+      if (error) throw error;
+      if (data?.analysis) {
+        setSiteAnalysis(data.analysis);
+        if (data.analysis.title && !siteName) {
+          setSiteName(data.analysis.title.split(/[|\-–—]/)[0].trim());
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Unable to analyze the site right now.");
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
+
+  const createWorkspaceDirectly = async () => {
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      const workspaceName = siteName || extractDomainName(siteUrl) || "Growth Workspace";
       const formattedUrl = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
       const slug = generateSlug(workspaceName);
 
-      // Create workspace directly (triggers auto_enable_core_services + handle_new_workspace)
-      const { data: workspace, error: wsError } = await supabase
-        .from('workspaces')
+      const { data: workspace, error: workspaceError } = await supabase
+        .from("workspaces")
         .insert({ name: workspaceName, slug, owner_id: user.id })
         .select()
         .single();
+      if (workspaceError) throw workspaceError;
 
-      if (wsError) throw wsError;
-
-      // Create associated site
-      const { error: siteError } = await supabase
-        .from('sites')
-        .insert({
-          workspace_id: workspace.id,
-          url: formattedUrl,
-          name: workspaceName,
-        });
-
+      const { error: siteError } = await supabase.from("sites").insert({
+        workspace_id: workspace.id,
+        url: formattedUrl,
+        name: workspaceName,
+      });
       if (siteError) {
-        console.error("Site creation error (non-blocking):", siteError);
+        console.error("Non blocking site creation error", siteError);
       }
 
-      toast.success(t("onboardingFlow.freeWorkspaceCreated"));
+      toast.success("Workspace created. You can now review signals and priorities.");
       navigate("/dashboard");
     } catch (error) {
-      console.error("Free plan error:", error);
-      toast.error(error instanceof Error ? error.message : t("onboardingFlow.freeWorkspaceError"));
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Unable to create the workspace.");
     } finally {
-      setIsCreatingFree(false);
+      setSubmitting(false);
     }
   };
 
-  const handlePayment = async () => {
+  const launchCheckout = async () => {
     if (!user) return;
-    setIsSubmitting(true);
-
+    if (!isValidUrl(siteUrl)) {
+      toast.error("Enter a valid website first.");
+      return;
+    }
+    setSubmitting(true);
     try {
-      const workspaceName = siteName || detectedInfo?.name || "Mon Workspace";
+      const selectedPlan = plans.find((item) => item.id === plan) ?? plans[1];
+      const workspaceName = siteName || extractDomainName(siteUrl) || "Growth Workspace";
       const formattedUrl = siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`;
       const slug = generateSlug(workspaceName);
 
       const { data, error } = await supabase.functions.invoke("stripe-checkout", {
         body: {
-          plan_type: planType === "full" ? "full_company" : "department",
-          departments: planType === "alacarte" ? selectedServices : [],
-          use_trial: useTrial,
+          plan_type: selectedPlan.stripePlanType,
+          departments: profile === "consultant" ? ["marketing"] : ["marketing", "governance"],
+          use_trial: plan === "solo",
           onboarding_data: {
             site_url: formattedUrl,
             site_name: workspaceName,
             workspace_slug: slug,
-            objectives: selectedObjectives,
-            plan_type: planType,
-            selected_services: selectedServices,
+            operating_model: profile,
+            notes,
+            plan_type: plan,
           },
         },
       });
 
       if (error) throw error;
-      if (!data?.url) throw new Error(t("onboardingFlow.paymentError"));
-
+      if (!data?.url) throw new Error("Missing checkout URL.");
       window.location.href = data.url;
     } catch (error) {
-      console.error("Payment error:", error);
-      toast.error(error instanceof Error ? error.message : t("onboardingFlow.paymentError"));
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Unable to start checkout.");
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -316,7 +248,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <header className="p-6">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg gradient-bg">
@@ -326,405 +258,150 @@ export default function Onboarding() {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto w-full px-6 mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">{t("onboardingFlow.configuration")}</span>
-          <span className="text-sm font-medium">{getProgress()}%</span>
-        </div>
-        <Progress value={getProgress()} className="h-2" />
-      </div>
-
-      <div className="flex-1 flex items-start justify-center px-6 pb-12">
-        <div className="w-full max-w-2xl">
-          
-          {step === "url" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
-                  <Globe className="w-8 h-8 text-primary" />
+      <div className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
+          <Card className="border-primary/20 bg-background/90 backdrop-blur">
+            <CardHeader>
+              <Badge variant="agent" className="w-fit mb-3">Onboarding</Badge>
+              <CardTitle className="text-3xl">Set up your 2026 growth cockpit</CardTitle>
+              <CardDescription className="text-base leading-7">
+                Define the operating model, connect the primary website and launch a workspace focused on signals, actions, approvals and measurable outcomes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div>
+                <div className="flex items-center justify-between mb-2 text-sm">
+                  <span className="text-muted-foreground">Setup progress</span>
+                  <span className="font-medium">{progress}%</span>
                 </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.whatIsYourSite")}</CardTitle>
-                <CardDescription className="text-base">{t("onboardingFlow.enterUrl")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="url" className="text-base">{t("onboardingFlow.siteUrl")}</Label>
+                <Progress value={progress} className="h-2" />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="site-url">Primary website</Label>
+                <div className="flex gap-3">
                   <Input
-                    id="url"
-                    type="url"
+                    id="site-url"
                     placeholder="example.com"
                     value={siteUrl}
-                    onChange={(e) => setSiteUrl(e.target.value)}
-                    onBlur={() => setUrlTouched(true)}
-                    className="h-12 text-lg"
-                    autoFocus
+                    onChange={(event) => setSiteUrl(event.target.value)}
+                    className="h-12"
                   />
-                  {urlTouched && siteUrl && !isValidUrl(siteUrl) && (
-                    <p className="text-sm text-destructive">{t("onboardingFlow.enterValidUrl")}</p>
-                  )}
+                  <Button variant="outline" className="h-12" onClick={analyzeSite} disabled={analysisLoading || !siteUrl}>
+                    {analysisLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+                    <span className="ml-2 hidden sm:inline">Analyze</span>
+                  </Button>
                 </div>
-
-                {detectedInfo && (
-                  <div className="p-4 rounded-lg bg-chart-3/10 border border-chart-3/30 space-y-3">
-                    <div className="flex items-center gap-2 text-chart-3">
-                      <Sparkles className="w-4 h-4" />
-                      <span className="text-sm font-medium">{t("onboardingFlow.autoDetect")}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{t("onboardingFlow.name")}</span>
-                      <Input
-                        value={siteName}
-                        onChange={(e) => setSiteName(e.target.value)}
-                        className="h-8 flex-1"
-                        placeholder={detectedInfo.name}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <SiteAnalysisPreview 
-                  analysis={siteAnalysis} 
-                  isLoading={isAnalyzing} 
-                  url={siteUrl} 
+                <Input
+                  placeholder="Workspace name"
+                  value={siteName}
+                  onChange={(event) => setSiteName(event.target.value)}
+                  className="h-11"
                 />
+              </div>
 
-                <Button 
-                  onClick={handleUrlNext} 
-                  className="w-full h-12 text-base"
-                  disabled={!isValidUrl(siteUrl)}
-                >
-                  {t("onboardingFlow.continue")}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-
-                {workspaces && workspaces.length > 0 && (
-                  <p className="text-center text-sm text-muted-foreground">
-                    {t("onboardingFlow.existingWorkspaces", { count: workspaces.length })}{" "}
-                    <button onClick={() => navigate("/dashboard")} className="text-primary hover:underline">
-                      {t("onboardingFlow.goToDashboard")}
-                    </button>
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "plan" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
-                  <Crown className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.choosePlan")}</CardTitle>
-                <CardDescription className="text-base">
-                  <strong>{t("onboardingFlow.allPlansInclude")}</strong>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4">
-                  <button
-                    onClick={() => setPlanType("starter")}
-                    className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                      planType === "starter" ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="p-3 rounded-lg bg-chart-3/20">
-                      <Gift className="w-6 h-6 text-chart-3" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{t("onboardingFlow.starter")}</span>
-                        <Badge variant="outline" className="text-chart-3 border-chart-3">{t("onboardingFlow.freeTrial")}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.starterDesc")}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.starter.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perMonth")}</span></p>
-                    </div>
-                    {planType === "starter" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
-                  </button>
-
-                  <button
-                    onClick={() => setPlanType("full")}
-                    className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                      planType === "full" ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="p-3 rounded-lg bg-gradient-to-br from-primary to-accent">
-                      <Crown className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{t("onboardingFlow.fullCompany")}</span>
-                        <Badge variant="gradient">{t("onboardingFlow.recommended")}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.fullDesc")}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.full.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perMonth")}</span></p>
-                    </div>
-                    {planType === "full" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
-                  </button>
-
-                  <button
-                    onClick={() => setPlanType("alacarte")}
-                    className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all ${
-                      planType === "alacarte" ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="p-3 rounded-lg bg-secondary">
-                      <Puzzle className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="font-bold text-lg">{t("onboardingFlow.alacarte")}</span>
-                      <p className="text-sm text-muted-foreground mt-1">{t("onboardingFlow.alacarteDesc")}</p>
-                      <p className="text-lg font-bold mt-2">{PRICING.department.toLocaleString()} €<span className="text-sm font-normal text-muted-foreground">{t("onboardingFlow.perDeptMonth")}</span></p>
-                    </div>
-                    {planType === "alacarte" && <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />}
-                  </button>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep("url")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
-                  </Button>
-                  <Button onClick={handlePlanNext} className="flex-1 h-12">
-                    {t("onboardingFlow.continue")}<ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "services" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
-                  <Puzzle className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.chooseServices")}</CardTitle>
-                <CardDescription className="text-base">{t("onboardingFlow.activateDepts")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {SERVICE_CATALOG.map((service) => {
-                    const Icon = service.icon;
-                    const isSelected = selectedServices.includes(service.id);
+              <div className="space-y-4">
+                <Label>Who is this workspace for?</Label>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {profiles.map((item) => {
+                    const Icon = item.icon;
+                    const active = profile === item.id;
                     return (
                       <button
-                        key={service.id}
-                        onClick={() => toggleService(service.id)}
-                        className={`flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${
-                          isSelected ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
-                        }`}
+                        key={item.id}
+                        type="button"
+                        onClick={() => setProfile(item.id)}
+                        className={`rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 ring-2 ring-primary/20" : "border-border hover:border-primary/40"}`}
                       >
-                        <div className={`p-2 rounded-lg ${isSelected ? "bg-primary/20" : "bg-muted"}`}>
-                          <Icon className={`w-5 h-5 ${isSelected ? "text-primary" : service.color}`} />
+                        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary mb-3">
+                          <Icon className="w-5 h-5" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{service.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{service.description}</p>
-                        </div>
-                        {isSelected && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
+                        <p className="font-semibold mb-1">{item.title}</p>
+                        <p className="text-sm text-muted-foreground leading-6">{item.description}</p>
                       </button>
                     );
                   })}
                 </div>
+              </div>
 
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep("plan")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
-                  </Button>
-                  <Button onClick={handleServicesNext} className="flex-1 h-12" disabled={selectedServices.length === 0}>
-                    {t("onboardingFlow.continue")} ({selectedServices.length} {t("onboardingFlow.selected")}{selectedServices.length > 1 ? "s" : ""})
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "objectives" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
-                  <Target className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.objectives")}</CardTitle>
-                <CardDescription className="text-base">{t("onboardingFlow.selectPriorities")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {OBJECTIVES.map((obj) => (
-                    <button
-                      key={obj.id}
-                      onClick={() => toggleObjective(obj.id)}
-                      className={`flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedObjectives.includes(obj.id)
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <span className="text-2xl">{obj.icon}</span>
-                      <span className="font-medium text-sm">{obj.label}</span>
-                      {selectedObjectives.includes(obj.id) && (
-                        <CheckCircle2 className="w-5 h-5 text-primary ml-auto" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline"
-                    onClick={() => setStep(planType === "full" ? "plan" : "services")} 
-                    className="flex-1 h-12"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
-                  </Button>
-                  <Button onClick={handleObjectivesNext} className="flex-1 h-12">
-                    {t("onboardingFlow.continue")}<ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {step === "payment" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-primary/10 w-fit mb-4">
-                  <CreditCard className="w-8 h-8 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.summaryPayment")}</CardTitle>
-                <CardDescription className="text-base">{t("onboardingFlow.verifyOrder")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-4 rounded-lg bg-muted/50 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Building2 className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">{siteName || detectedInfo?.name || "Workspace"}</span>
-                    </div>
-                    <Badge variant="secondary">{siteUrl}</Badge>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-2">
-                    {planType === "full" ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Crown className="w-4 h-4 text-primary" />
-                          <span>{t("onboardingFlow.fullCompany")}</span>
+              <div className="space-y-4">
+                <Label>Choose packaging</Label>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {plans.map((item) => {
+                    const active = plan === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setPlan(item.id)}
+                        className={`rounded-2xl border p-4 text-left transition-all ${active ? "border-primary bg-primary/10 ring-2 ring-primary/20" : "border-border hover:border-primary/40"}`}
+                      >
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <p className="font-semibold">{item.title}</p>
+                          {active && <CheckCircle2 className="w-5 h-5 text-primary" />}
                         </div>
-                        <span className="font-bold">{PRICING.full.toLocaleString()} €{t("onboardingFlow.perMonth")}</span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="text-sm text-muted-foreground mb-2">
-                          {selectedServices.length} {selectedServices.length > 1 ? t("onboardingFlow.deptsSelected") : t("onboardingFlow.deptSelected")}
-                        </div>
-                        {selectedServices.map(serviceId => {
-                          const service = SERVICE_CATALOG.find(s => s.id === serviceId);
-                          return service ? (
-                            <div key={serviceId} className="flex items-center justify-between text-sm">
-                              <span>{service.name}</span>
-                              <span>{PRICING.department.toLocaleString()} €</span>
-                            </div>
-                          ) : null;
-                        })}
-                      </>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between text-lg font-bold">
-                    <span>{t("onboardingFlow.monthlyTotal")}</span>
-                    <span className="text-primary">{getTotalPrice().toLocaleString()} €{t("onboardingFlow.perMonth")}</span>
-                  </div>
+                        <p className="text-xl font-bold mb-2">{item.price}</p>
+                        <p className="text-sm text-muted-foreground leading-6">{item.description}</p>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                <button
-                  onClick={() => setUseTrial(!useTrial)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all ${
-                    useTrial ? "border-chart-3 bg-chart-3/10" : "border-border hover:border-chart-3/50"
-                  }`}
-                >
-                  <div className={`p-2 rounded-lg ${useTrial ? "bg-chart-3/20" : "bg-muted"}`}>
-                    <Gift className={`w-5 h-5 ${useTrial ? "text-chart-3" : "text-muted-foreground"}`} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{t("onboardingFlow.freeTrialOption")}</span>
-                      {useTrial && <Badge variant="secondary" className="bg-chart-3/20 text-chart-3">{t("onboardingFlow.activated")}</Badge>}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{t("onboardingFlow.trialDesc")}</p>
-                  </div>
-                  {useTrial && <CheckCircle2 className="w-5 h-5 text-chart-3 flex-shrink-0" />}
-                </button>
+              <div className="space-y-3">
+                <Label htmlFor="notes">Primary objective or context</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Example: Detect performance drops faster, standardize approvals, and prove impact for each client/workspace."
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={5}
+                />
+              </div>
 
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep("objectives")} className="flex-1 h-12">
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t("onboardingFlow.back")}
-                  </Button>
-                  <Button 
-                    onClick={handlePayment} 
-                    className="flex-1 h-12" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("onboardingFlow.redirecting")}</>
-                    ) : useTrial ? (
-                      <><Gift className="w-4 h-4 mr-2" />{t("onboardingFlow.startFreeTrial")}</>
-                    ) : (
-                      <><CreditCard className="w-4 h-4 mr-2" />{t("onboardingFlow.payAndActivate")}</>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><Separator /></div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">{t("onboardingFlow.orFree")}</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={handleFreePlan}
-                  className="w-full h-12 border-chart-3/50 hover:bg-chart-3/10"
-                  disabled={isCreatingFree || isSubmitting}
-                >
-                  {isCreatingFree ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("onboardingFlow.creatingFreeWorkspace")}</>
-                  ) : (
-                    <><Sparkles className="w-4 h-4 mr-2 text-chart-3" />{t("onboardingFlow.startFree")}</>
-                  )}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button variant="outline" size="lg" onClick={createWorkspaceDirectly} disabled={submitting || !isValidUrl(siteUrl)}>
+                  {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Create workspace now
                 </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  {t("onboardingFlow.freePlanDesc")}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+                <Button variant="hero" size="lg" onClick={launchCheckout} disabled={submitting || !isValidUrl(siteUrl)}>
+                  {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Continue to checkout
+                </Button>
+              </div>
 
-          {step === "summary" && (
-            <Card variant="gradient" className="border-2">
-              <CardHeader className="text-center pb-2">
-                <div className="mx-auto p-3 rounded-full bg-chart-3/20 w-fit mb-4">
-                  <CheckCircle2 className="w-8 h-8 text-chart-3" />
-                </div>
-                <CardTitle className="text-2xl">{t("onboardingFlow.perfect")}</CardTitle>
-                <CardDescription className="text-base">{t("onboardingFlow.creatingWorkspace")}</CardDescription>
+              {workspaces && workspaces.length > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  You already have {workspaces.length} workspace(s). <button onClick={() => navigate("/dashboard")} className="text-primary hover:underline">Go straight to the cockpit</button>.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="space-y-6">
+            <Card className="border-border/60 bg-background/90 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-xl">What gets activated</CardTitle>
+                <CardDescription>Existing product foundations are kept intact while the front-door positioning changes.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 text-center">
-                <Badge variant="gradient" className="text-sm">
-                  {planType === "full" ? t("onboardingFlow.fullCompany") : `${selectedServices.length} ${t("onboardingFlow.servicesActivated")}`}
-                </Badge>
-                <p className="text-muted-foreground">{t("onboardingFlow.redirectingToDashboard")}</p>
-                <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+              <CardContent className="space-y-4 text-sm text-muted-foreground">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-4 h-4 text-primary mt-0.5" />
+                  <span>Approval gate, audit log and RBAC stay part of the workflow for sensitive actions.</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Target className="w-4 h-4 text-primary mt-0.5" />
+                  <span>Recommendations can be justified through evidence bundles before execution.</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Rocket className="w-4 h-4 text-primary mt-0.5" />
+                  <span>Scheduler and integrations are ready to refresh signals, briefs and outcome tracking.</span>
+                </div>
               </CardContent>
             </Card>
-          )}
+
+            <SiteAnalysisPreview analysis={siteAnalysis} isLoading={analysisLoading} url={siteUrl} />
+          </div>
         </div>
       </div>
     </div>
