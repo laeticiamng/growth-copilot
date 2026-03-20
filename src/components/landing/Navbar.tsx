@@ -1,39 +1,24 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { Zap, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Menu, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 
 export function Navbar() {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { href: "/features", label: t("landing.navbar.features"), isRoute: true },
-    { href: "/agents", label: t("landing.navbar.agents"), isRoute: true },
-    { href: "/#geo", label: t("landing.navbar.geo", "GEO"), isRoute: false },
-    { href: "/#eco", label: t("landing.navbar.eco", "Eco"), isRoute: false },
-    { href: "/pricing", label: t("landing.navbar.pricing"), isRoute: true },
-    { href: "/blog", label: t("landing.navbar.blog"), isRoute: true },
-    { href: "/help", label: t("landing.navbar.help", "Help"), isRoute: true },
+    { href: "/features", label: "Platform" },
+    { href: "/use-cases", label: "Use cases" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/help", label: "Help" },
   ];
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const targetId = href.split('#').pop() || '';
-    const element = document.getElementById(targetId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    setIsOpen(false);
-  };
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/50" aria-label={t("landing.accessibility.mainNav")}>
+    <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-border/50" aria-label="Primary navigation">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
@@ -44,28 +29,20 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) =>
-              link.isRoute ? (
-                <Link key={link.href} to={link.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  {link.label}
-                </Link>
-              ) : (
-                <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  {link.label}
-                </a>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link key={link.href} to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           <div className="hidden md:flex items-center gap-2">
             <LanguageToggle />
             <Link to="/auth">
-              <Button variant="ghost" size="sm">{t("landing.navbar.login")}</Button>
+              <Button variant="ghost" size="sm">Log in</Button>
             </Link>
             <Link to="/auth?tab=signup">
-              <Button variant="gradient" size="sm">{t("landing.navbar.getStarted")}</Button>
+              <Button variant="gradient" size="sm">Book a workspace</Button>
             </Link>
           </div>
 
@@ -73,8 +50,7 @@ export function Navbar() {
             <LanguageToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <button className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                  aria-label={isOpen ? t("landing.navbar.ariaMenuClose") : t("landing.navbar.ariaMenuOpen")}>
+                <button className="p-2 hover:bg-secondary rounded-lg transition-colors" aria-label="Open menu">
                   <Menu className="w-6 h-6" />
                 </button>
               </SheetTrigger>
@@ -88,25 +64,17 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8 overscroll-contain overflow-y-auto">
-                  {navLinks.map((link) =>
-                    link.isRoute ? (
-                      <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)}
-                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 min-h-[44px] flex items-center border-b border-border/30">
-                        {link.label}
-                      </Link>
-                    ) : (
-                      <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, link.href)}
-                        className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 min-h-[44px] flex items-center border-b border-border/30">
-                        {link.label}
-                      </a>
-                    )
-                  )}
+                  {navLinks.map((link) => (
+                    <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)} className="text-base text-muted-foreground hover:text-foreground transition-colors py-3 min-h-[44px] flex items-center border-b border-border/30">
+                      {link.label}
+                    </Link>
+                  ))}
                   <div className="flex flex-col gap-3 pt-4">
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start min-h-[44px]">{t("landing.navbar.login")}</Button>
+                      <Button variant="ghost" className="w-full justify-start min-h-[44px]">Log in</Button>
                     </Link>
                     <Link to="/auth?tab=signup" onClick={() => setIsOpen(false)}>
-                      <Button variant="gradient" className="w-full min-h-[44px]">{t("landing.navbar.getStarted")}</Button>
+                      <Button variant="gradient" className="w-full min-h-[44px]">Book a workspace</Button>
                     </Link>
                   </div>
                 </div>

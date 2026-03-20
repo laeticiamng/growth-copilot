@@ -36,10 +36,6 @@ export const en = {
     beta: "Beta",
   },
 
-  demo: {
-    activating: "Activating demo mode...",
-  },
-
   // Navigation
   nav: {
     dashboard: "Dashboard",
@@ -4551,6 +4547,7 @@ export const en = {
     costBreakdown: "Cost breakdown", renderCosts: "Render costs", aiCosts: "AI costs", total30d: "Total 30d",
   },
   demo: {
+    activating: "Activating demo mode...",
     bannerMessage: "Sandbox Mode — Explore the dashboard with demo data",
     createAccount: "Create free account",
   },

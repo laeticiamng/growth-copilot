@@ -122,6 +122,9 @@ const Reports = lazy(() => import("./pages/dashboard/Reports"));
 
 // Advanced
 const Approvals = lazy(() => import("./pages/dashboard/Approvals"));
+const GrowthSignals = lazy(() => import("./pages/dashboard/GrowthSignals"));
+const PrioritizedActions = lazy(() => import("./pages/dashboard/PrioritizedActions"));
+const OutcomeTracking = lazy(() => import("./pages/dashboard/OutcomeTracking"));
 const Competitors = lazy(() => import("./pages/dashboard/Competitors"));
 const Agency = lazy(() => import("./pages/dashboard/Agency"));
 const OnboardingGuide = lazy(() => import("./pages/dashboard/Onboarding"));
@@ -285,7 +288,6 @@ function LanguageSyncTracker() {
   return null;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 function App() {
   return (
     <ErrorBoundary>
@@ -355,7 +357,10 @@ function App() {
                 <Route path="/dashboard/reports" element={<DashboardRoute service="finance"><Reports /></DashboardRoute>} />
 
                 {/* Dashboard - Advanced (Service-Gated) */}
+                <Route path="/dashboard/signals" element={<DashboardRoute><GrowthSignals /></DashboardRoute>} />
+                <Route path="/dashboard/actions" element={<DashboardRoute><PrioritizedActions /></DashboardRoute>} />
                 <Route path="/dashboard/approvals" element={<DashboardRoute><Approvals /></DashboardRoute>} />
+                <Route path="/dashboard/outcomes" element={<DashboardRoute><OutcomeTracking /></DashboardRoute>} />
                 <Route path="/dashboard/competitors" element={<DashboardRoute service="marketing"><Competitors /></DashboardRoute>} />
                 <Route path="/dashboard/agency" element={<DashboardRoute service="governance"><Agency /></DashboardRoute>} />
                 <Route path="/dashboard/guide" element={<DashboardRoute><OnboardingGuide /></DashboardRoute>} />
