@@ -95,8 +95,7 @@ export default function SalesTerms() {
                 fonctionnalités essentielles
               </li>
               <li>
-                <strong>Full Company</strong> : 9 000 € HT/mois — Accès à l'intégralité des 39 agents IA
-                répartis dans les 11 départements, fonctionnalités complètes, support prioritaire
+                <strong>Scale</strong> : sur devis — Gouvernance avancée, monitoring cross-canal, intégrations entreprise, support dédié
               </li>
               <li>
                 <strong>À la carte</strong> : 1 900 € HT/département/mois — Sélection des départements
@@ -260,7 +259,7 @@ export default function SalesTerms() {
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Starter</strong> : Support par email, délai de réponse sous 48h ouvrées</li>
               <li><strong>À la carte</strong> : Support par email et chat, délai de réponse sous 24h ouvrées</li>
-              <li><strong>Full Company</strong> : Support prioritaire (email, chat, visioconférence), délai de réponse sous 4h ouvrées</li>
+              <li><strong>Scale</strong> : Support prioritaire (email, chat, visioconférence), délai de réponse sous 4h ouvrées</li>
             </ul>
           </section>
 

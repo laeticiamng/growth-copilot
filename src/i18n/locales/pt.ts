@@ -233,7 +233,7 @@ export const pt = {
     currentPlan: "Plano atual",
     starter: "Starter",
     growth: "Growth",
-    fullCompany: "Full Company",
+    fullCompany: "Scale",
     perMonth: "/mês",
     upgrade: "Atualizar",
     manageBilling: "Gerenciar faturamento",

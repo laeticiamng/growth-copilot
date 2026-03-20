@@ -80,8 +80,8 @@ const CHANGELOG: ChangelogEntry[] = [
     type: "major",
     title: { fr: "Page Agents & Départements", en: "Agents & Departments Page" },
     changes: [
-      { type: "feature", text: { fr: "Page /agents avec grille interactive des 39 agents IA", en: "/agents page with interactive grid of all 39 AI agents" } },
-      { type: "feature", text: { fr: "Pages /departments/[slug] pour les 11 départements", en: "/departments/[slug] pages for all 11 departments" } },
+      { type: "feature", text: { fr: "Page /agents avec grille interactive des modules growth", en: "/agents page with interactive grid of all growth modules" } },
+      { type: "feature", text: { fr: "Pages /departments/[slug] pour les modules", en: "/departments/[slug] pages for all modules" } },
       { type: "feature", text: { fr: "Filtrage par département et recherche par nom", en: "Department filtering and name search" } },
       { type: "improvement", text: { fr: "Animations d'entrée stagger sur la grille d'agents", en: "Stagger entry animations on the agent grid" } },
     ],
@@ -105,7 +105,7 @@ const CHANGELOG: ChangelogEntry[] = [
     type: "minor",
     title: { fr: "Intégration Stripe & Facturation", en: "Stripe Integration & Billing" },
     changes: [
-      { type: "feature", text: { fr: "Intégration Stripe pour les 3 plans (Starter, À la carte, Full Company)", en: "Stripe integration for 3 plans (Starter, À la carte, Full Company)" } },
+      { type: "feature", text: { fr: "Intégration Stripe pour les 3 plans (Starter, À la carte, Scale)", en: "Stripe integration for 3 plans (Starter, À la carte, Scale)" } },
       { type: "feature", text: { fr: "Catalogue de services avec activation/désactivation", en: "Service catalog with enable/disable" } },
       { type: "security", text: { fr: "Webhook Stripe sécurisé avec validation de signature", en: "Secured Stripe webhook with signature validation" } },
     ],
@@ -125,9 +125,9 @@ const CHANGELOG: ChangelogEntry[] = [
     version: "2.0.0",
     date: "2025-10-15",
     type: "major",
-    title: { fr: "Growth OS v2 — 39 Agents IA", en: "Growth OS v2 — 39 AI Agents" },
+    title: { fr: "Growth OS v2 — Connected Growth Cockpit", en: "Growth OS v2 — Connected Growth Cockpit" },
     changes: [
-      { type: "feature", text: { fr: "39 agents IA répartis dans 11 départements", en: "39 AI agents across 11 departments" } },
+      { type: "feature", text: { fr: "Cockpit growth connecté avec modules spécialisés", en: "Connected growth cockpit with specialized modules" } },
       { type: "feature", text: { fr: "Orchestrateur CGO avec scoring ICE", en: "CGO Orchestrator with ICE scoring" } },
       { type: "feature", text: { fr: "PWA avec support offline et notifications push", en: "PWA with offline support and push notifications" } },
       { type: "feature", text: { fr: "Multilingue : FR, EN, ES, DE", en: "Multilingual: FR, EN, ES, DE" } },

@@ -22,7 +22,7 @@ const STATUS_CONFIG = {
 
 const SERVICES: ServiceStatus[] = [
   { name: "Web Application", status: "operational", uptime: "99.98%", icon: Globe, description: { fr: "Application web principale (dashboard, landing)", en: "Main web application (dashboard, landing)" } },
-  { name: "AI Agents Engine", status: "operational", uptime: "99.95%", icon: Bot, description: { fr: "Moteur d'exécution des 39 agents IA", en: "Execution engine for all 39 AI agents" } },
+  { name: "AI Agents Engine", status: "operational", uptime: "99.95%", icon: Bot, description: { fr: "Moteur d'exécution des modules growth", en: "Execution engine for all growth modules" } },
   { name: "Database (Supabase)", status: "operational", uptime: "99.99%", icon: Database, description: { fr: "Base de données PostgreSQL et temps réel", en: "PostgreSQL database and real-time" } },
   { name: "Authentication", status: "operational", uptime: "99.99%", icon: Shield, description: { fr: "Système d'authentification et sessions", en: "Authentication system and sessions" } },
   { name: "Edge Functions", status: "operational", uptime: "99.97%", icon: Activity, description: { fr: "Fonctions serverless (OAuth, webhooks, agents)", en: "Serverless functions (OAuth, webhooks, agents)" } },

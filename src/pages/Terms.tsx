@@ -87,7 +87,7 @@ export default function Terms() {
               dans la gestion et l'optimisation de leurs activités. Le service comprend notamment :
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>39 agents IA spécialisés répartis en 11 départements (Marketing, Sales, Finance, RH, etc.)</li>
+              <li>Modules growth connectés couvrant Marketing, Commercial, Finance, RH et plus</li>
               <li>Intégrations avec Google (Analytics, Search Console, Ads, Business Profile)</li>
               <li>Intégrations avec Meta (Facebook Ads, Instagram)</li>
               <li>Outils d'audit SEO, de génération de contenu et de reporting automatisé</li>
@@ -145,7 +145,7 @@ export default function Terms() {
             <h3 className="text-lg font-medium mt-4">5.1 Modèle tarifaire</h3>
             <p>Growth OS propose les formules suivantes :</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Full Company</strong> : 9 000 € HT/mois – Accès à tous les départements et agents</li>
+              <li><strong>Scale</strong> : sur devis – Gouvernance avancée, monitoring cross-canal, support dédié</li>
               <li><strong>Départements à la carte</strong> : 1 900 € HT/département/mois</li>
               <li><strong>Essai gratuit</strong> : 14 jours d'accès complet sans engagement</li>
             </ul>

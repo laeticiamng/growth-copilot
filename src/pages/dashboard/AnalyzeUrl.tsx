@@ -353,7 +353,7 @@ export default function AnalyzeUrl() {
                 {lang === "fr" ? "Prêt à corriger ces problèmes automatiquement ?" : "Ready to fix these issues automatically?"}
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {lang === "fr" ? "Nos 39 agents IA peuvent exécuter ces recommandations pour vous." : "Our 39 AI agents can execute these recommendations for you."}
+                {lang === "fr" ? "Les recommandations peuvent être exécutées, approuvées et suivies dans le cockpit." : "Recommendations can be executed, approved and tracked in the cockpit."}
               </p>
               <Button>
                 <Zap className="w-4 h-4 mr-2" />

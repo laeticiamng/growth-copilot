@@ -99,7 +99,7 @@ function welcomeTemplate(data: WelcomeData): string {
       Bonjour ${userName},
     </p>
     <p style="color: ${COLORS.text}; margin: 0 0 15px 0;">
-      Votre entreprise digitale est prête. <strong>39 agents IA</strong> travaillent désormais pour vous, 24h/24.
+      Votre cockpit growth est prêt. Connectez vos données et commencez à voir signaux, priorités et résultats.
     </p>
     <p style="color: ${COLORS.text}; margin: 0 0 25px 0;">
       Votre prochaine étape : connectez vos outils (Google Search Console, Analytics) pour débloquer tout le potentiel de ${BRAND.name}.
@@ -109,7 +109,7 @@ function welcomeTemplate(data: WelcomeData): string {
       Si vous avez des questions, notre équipe est disponible à <a href="mailto:${BRAND.supportEmail}" style="color: ${COLORS.primary}; text-decoration: none;">${BRAND.supportEmail}</a>
     </p>
   `;
-  return baseLayout(content, `Bienvenue sur ${BRAND.name} ! Votre entreprise digitale est prête.`);
+  return baseLayout(content, `Bienvenue sur ${BRAND.name} ! Votre cockpit growth est prêt.`);
 }
 
 interface PaymentConfirmationData {

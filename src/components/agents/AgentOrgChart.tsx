@@ -134,7 +134,7 @@ interface AgentData {
   isLeader?: boolean;
 }
 
-// Full team of 39 AI agents
+// Growth modules
 const AI_TEAM: AgentData[] = [
   // Direction (2)
   { id: "cgo", name: "Sophie Marchand", role: "Directrice de la Croissance", department: "direction", specialty: "Orchestration & Stratégie", icon: Brain, isLeader: true },
@@ -450,7 +450,7 @@ export function AgentOrgChart() {
                 Organigramme IA
               </CardTitle>
               <CardDescription>
-                {AI_TEAM.length} agents • Direction + 11 départements • Cliquez sur un agent pour voir son profil complet
+                Modules growth • Cliquez sur un module pour voir son profil complet
               </CardDescription>
             </div>
             

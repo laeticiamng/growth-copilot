@@ -58,7 +58,7 @@ export default function OnboardingGuide() {
         </div>
         <div className="flex items-center gap-2">
           {isFullCompany && (
-            <Badge variant="gradient" className="px-3 py-1"><Crown className="w-4 h-4 mr-1" />Full Company</Badge>
+            <Badge variant="gradient" className="px-3 py-1"><Crown className="w-4 h-4 mr-1" />Scale</Badge>
           )}
           <Badge variant="secondary" className="px-3 py-1">
             <Rocket className="w-4 h-4 mr-1" />

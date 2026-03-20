@@ -42,22 +42,22 @@ export default function AgentsCatalog() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: lang === "fr" ? "39 Agents IA - Growth OS" : "39 AI Agents - Growth OS",
+    name: lang === "fr" ? "Growth Modules - Growth OS" : "Growth Modules - Growth OS",
     description:
       lang === "fr"
-        ? "Découvrez les 39 agents IA de Growth OS répartis dans 11 départements pour automatiser votre croissance."
-        : "Discover Growth OS's 39 AI agents across 11 departments to automate your growth.",
+        ? "Découvrez les modules growth de Growth OS connectés au cockpit pour automatiser votre croissance."
+        : "Discover Growth OS's growth modules connected to the cockpit to automate your growth.",
     numberOfItems: 39,
   };
 
   return (
     <>
       <SEOHead
-        title={lang === "fr" ? "39 Agents IA" : "39 AI Agents"}
+        title={lang === "fr" ? "Growth Modules" : "Growth Modules"}
         description={
           lang === "fr"
-            ? "Découvrez les 39 agents IA de Growth OS répartis dans 11 départements."
-            : "Discover Growth OS's 39 AI agents across 11 departments."
+            ? "Découvrez les modules growth de Growth OS connectés au cockpit."
+            : "Discover Growth OS's growth modules connected to the cockpit."
         }
         canonical="/agents"
         structuredData={structuredData}
@@ -71,7 +71,7 @@ export default function AgentsCatalog() {
             <div className="text-center max-w-3xl mx-auto">
               <Badge variant="agent" className="mb-4">
                 <Bot className="w-3 h-3 mr-1" />
-                {lang === "fr" ? "39 Agents IA" : "39 AI Agents"}
+                {lang === "fr" ? "Growth Modules" : "Growth Modules"}
               </Badge>
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
                 {lang === "fr" ? "Votre équipe IA " : "Your AI team "}
@@ -81,8 +81,8 @@ export default function AgentsCatalog() {
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
                 {lang === "fr"
-                  ? "39 agents spécialisés répartis dans 11 départements. Chaque agent a un rôle précis, des cas d'usage concrets et travaille 24/7."
-                  : "39 specialized agents across 11 departments. Each agent has a precise role, concrete use cases, and works 24/7."}
+                  ? "Modules growth spécialisés. Chaque module alimente le cockpit avec des signaux, anomalies et recommandations actionnables."
+                  : "Specialized growth modules. Each module feeds the cockpit with signals, anomalies and actionable recommendations."}
               </p>
             </div>
           </div>

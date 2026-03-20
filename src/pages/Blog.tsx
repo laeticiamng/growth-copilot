@@ -26,8 +26,8 @@ interface BlogPost {
 const BLOG_POSTS: BlogPost[] = [
   {
     slug: "how-39-ai-agents-replace-company-team",
-    title: { fr: "Comment 39 agents IA remplacent une équipe entreprise entière", en: "How 39 AI Agents Replace an Entire Company Team" },
-    excerpt: { fr: "Découvrez comment une équipe de 39 agents IA spécialisés peut automatiser 90% des tâches d'une entreprise B2B.", en: "Discover how a team of 39 specialized AI agents can automate 90% of a B2B company's tasks." },
+    title: { fr: "Comment un cockpit growth connecté transforme les opérations", en: "How a Connected Growth Cockpit Transforms Operations" },
+    excerpt: { fr: "Découvrez comment un cockpit growth connecté peut automatiser 90% des tâches d'une entreprise B2B.", en: "Discover how a connected growth cockpit can automate 90% of a B2B company's tasks." },
     category: "growth",
     author: "Équipe Growth OS",
     date: "2026-01-15",
@@ -67,7 +67,7 @@ const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "11-departments-explained",
-    title: { fr: "Les 11 départements de Growth OS expliqués", en: "Growth OS's 11 Departments Explained" },
+    title: { fr: "Les modules Growth OS expliqués", en: "Growth OS Modules Explained" },
     excerpt: { fr: "Présentation détaillée de chaque département, ses agents, et comment ils travaillent ensemble pour votre croissance.", en: "Detailed presentation of each department, its agents, and how they work together for your growth." },
     category: "growth",
     author: "Équipe Growth OS",

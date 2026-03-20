@@ -1,6 +1,6 @@
 # Growth OS - Architecture Technique
 
-> Documentation complète de l'architecture de la plateforme "Portable Company OS".
+> Documentation complète de l'architecture du cockpit growth connecté.
 
 ---
 

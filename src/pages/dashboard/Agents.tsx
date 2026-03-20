@@ -22,7 +22,7 @@ import { DepartmentHeadDashboard } from '@/components/agents/DepartmentHeadDashb
 import { AgentWorkflowPipeline } from '@/components/agents/AgentWorkflowPipeline';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 
-// Agent personas with human names and avatars - 39 agents total
+// Agent personas with human names and avatars - growth modules
 const AGENT_PERSONAS: Record<string, {
   name: string;
   avatar?: string;

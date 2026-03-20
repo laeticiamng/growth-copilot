@@ -214,7 +214,7 @@ export default function ForAgencies() {
                 <Badge variant="gradient" className="mb-4">
                   {t("pages.forAgencies.recommendedPlan")}
                 </Badge>
-                <h3 className="text-2xl font-bold mb-2">Full Company</h3>
+                <h3 className="text-2xl font-bold mb-2">Agency</h3>
                 <p className="text-muted-foreground mb-4">
                   {t("pages.forAgencies.fullCompanyDesc")}
                 </p>

@@ -1,6 +1,6 @@
 # Growth OS - Audit Plateforme & Roadmap
 
-> Transformation complète en "Portable Company OS" - Toutes les recommandations implémentées.
+> Connected Growth Cockpit — anomaly detection, action prioritization, governance, evidence and outcome tracking.
 > Date : 2026-02-04 (Version Finale - 100% COMPLETE - AUDIT FINAL VALIDÉ ✅)
 > Dernier Audit : 2026-02-04 18:20 UTC
 > Dernières Améliorations : Widget Business Health Score, Audit Enrichissement
@@ -31,9 +31,9 @@
 | 2026-02-04 14:48 | Hardening ExecutiveSummary trends + Agents pulse animation |
 | 2026-02-04 15:00 | Hardening RLS: role_permissions, platform_policies, safe_zone_configs, employees, leads |
 
-### Équipe IA Complète
+### Modules Growth OS
 
-| Département | Employés IA | Status |
+| Capacité | Modules | Status |
 |-------------|-------------|--------|
 | Direction | 2 (CGO + QCO) | ✅ |
 | Marketing | 5 | ✅ |
@@ -47,7 +47,7 @@
 | Gouvernance | 3 | ✅ |
 | RH | 2 | ✅ |
 | Juridique | 1 | ✅ |
-| **TOTAL** | **39 employés IA** | ✅ |
+| **TOTAL** | **growth modules** | ✅ |
 
 ---
 
@@ -64,7 +64,7 @@
 | Cockpit Exécutif | ✅ Complet | 100% |
 | **Facturation Stripe** | ✅ Complet | 100% |
 | Collecte de Données (KPIs) | ✅ Complet | 100% |
-| Départements RH/Juridique | ✅ Complet | 100% |
+| Capacités RH/Juridique | ✅ Complet | 100% |
 | Evidence Bundles IA | ✅ Complet | 100% |
 | Module Revue Accès | ✅ Complet | 100% |
 | Automatisation KPI (pg_cron) | ✅ Complet | 100% |
@@ -126,7 +126,7 @@
 ### 3. Gestion des Abonnements & Facturation (100%)
 
 **Tables :**
-- `services_catalog` - 11 services (1 Core + 10 départements + Direction)
+- `services_catalog` - 11 services (1 Core + modular capabilities)
 - `workspace_services` - Activation par workspace
 - `workspace_subscriptions` - Plan + Stripe IDs
 - `workspace_quotas` - Limites (requests/minute, tokens/mois)
@@ -138,7 +138,7 @@
 
 **Hook :** `useServices()` avec `enableService()`, `disableService()`
 
-**Onboarding :** Parcours 5 étapes avec choix Full Company vs À la carte
+**Onboarding :** Parcours 5 étapes avec choix Scale vs À la carte
 
 ---
 
@@ -306,7 +306,7 @@
 
 > Ce warning est documenté et accepté car il n'impacte pas la sécurité des données utilisateur.
 
-## ✅ Checklist "Portable Company OS" - COMPLETE
+## ✅ Checklist "Connected Growth Cockpit" - COMPLETE
 
 - [x] Multi-tenant avec isolation workspace
 - [x] RBAC avec 5 niveaux (owner, admin, editor, contributor, viewer)
@@ -330,13 +330,13 @@
 
 ## 🚀 Plateforme 100% Prête pour Production
 
-La plateforme Growth OS est maintenant un **"Portable Company OS"** complet avec :
+La plateforme Growth OS est maintenant un **cockpit growth connecté** complet avec :
 
 1. **Core OS** - Multi-tenant, RBAC 5 niveaux, Audit immuable, Permissions granulaires
 2. **Run Engine** - Exécutions structurées, Evidence Bundles, Traçabilité IA
 3. **Approval System** - Workflow de validation, SLA, Approbations partielles
-4. **Service Catalog** - 11 départements modulaires (Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, Governance, HR, Legal)
-5. **Billing** - Stripe intégré, Plans Full Company / À la carte
+4. **Service Catalog** - Modular capabilities (Marketing, Sales, Finance, Security, Product, Engineering, Data, Support, Governance, HR, Legal)
+5. **Billing** - Stripe intégré, Plans Scale / À la carte
 6. **HR & Legal** - Employés, Contrats, Conformité, RGPD
 7. **KPI Automation** - Agrégation pg_cron, Syncs automatiques, Snapshots
 8. **Observability** - Métriques P95/P99, Alerting Slack/Email/Webhook, Dashboard SRE
@@ -351,7 +351,7 @@ La plateforme Growth OS est maintenant un **"Portable Company OS"** complet avec
 | Absence de multi-tenance | ✅ Tables workspaces, user_roles, services_catalog, RLS stricte |
 | Pas de scheduler/autopilote | ✅ pg_cron, scheduled_runs, mode autopilot avec approbations |
 | Dashboard présidentiel absent | ✅ Cockpit exécutif avec semaphores RAG, QuickLaunchers, Approvals |
-| Couverture fonctionnelle hétérogène | ✅ 10 départements avec modules complets (HR, Legal, Finance...) |
+| Couverture fonctionnelle hétérogène | ✅ Modular capabilities complets (HR, Legal, Finance...) |
 | Tests limités | ✅ 64+ tests couvrant auth, RLS, permissions, workflows |
 | Transparence IA | ✅ Evidence Bundles avec sources, métriques, raisonnement |
 | Support multilingue | ✅ FR, EN, ES, DE (551 clés par langue) |

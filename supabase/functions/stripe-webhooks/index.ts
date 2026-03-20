@@ -147,7 +147,7 @@ async function handleCheckoutCompleted(
   // Check if this is from onboarding flow
   if (metadata?.source === "onboarding" && metadata?.user_id) {
     workspaceId = await createWorkspaceFromOnboarding(supabase, metadata, customerId, subscriptionId, eventId) ?? undefined;
-    planName = metadata?.onboarding_plan_type === "full" ? "Full Company" : "Départements à la carte";
+    planName = metadata?.onboarding_plan_type === "full" ? "Scale" : "Agency";
   } else if (metadata?.user_id) {
     // Existing billing flow - update workspace by client_reference_id or find by user
     workspaceId = session.client_reference_id as string;
@@ -161,7 +161,7 @@ async function handleCheckoutCompleted(
 
   // Send payment confirmation email
   if (customerEmail) {
-    const amount = amountTotal ? `${(amountTotal / 100).toLocaleString('fr-FR')} €` : planName === "Full Company" ? "9 000 €" : "1 900 €";
+    const amount = amountTotal ? `${(amountTotal / 100).toLocaleString('fr-FR')} €` : planName === "Scale" ? "9 000 €" : "1 900 €";
     
     await sendEmail(
       "payment_confirmation",

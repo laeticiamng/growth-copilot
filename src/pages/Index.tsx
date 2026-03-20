@@ -81,7 +81,7 @@ export default function Index() {
                 Prioritized decisions with proof.
               </h1>
               <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-                Growth OS is not a “portable company”. It is a premium operating cockpit that unifies signals, surfaces anomalies, prioritizes actions, routes approvals and tracks measurable outcomes.
+                A premium operating cockpit that unifies signals, surfaces anomalies, prioritizes actions, routes approvals and tracks measurable outcomes.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
                 <Link to="/auth?tab=signup">
