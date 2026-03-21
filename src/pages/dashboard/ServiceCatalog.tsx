@@ -1,348 +1,18 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useServices } from "@/hooks/useServices";
 import { Link } from "react-router-dom";
-import { 
+import {
   Bot, ArrowRight, CheckCircle2, Clock,
-  TrendingUp, Briefcase, BarChart3, Shield, 
+  TrendingUp, Briefcase, BarChart3, Shield,
   Puzzle, Code, HeadphonesIcon, Settings, Users, Scale,
   Zap, Target, FileText, Search, BarChart, Globe,
   Mail, Camera, MessageSquare, LineChart, AlertTriangle
 } from "lucide-react";
-
-// Employee data per department
-const DEPARTMENT_DATA: Record<string, {
-  employees: {
-    name: string;
-    role: string;
-    specialty: string;
-    icon: React.ElementType;
-  }[];
-  inputs: string[];
-  outputs: string[];
-  examples: { action: string; result: string }[];
-  limits: string[];
-}> = {
-  marketing: {
-    employees: [
-      { name: "Sophie Marchand", role: "Chief Growth Officer", specialty: "Orchestration & prioritization", icon: Target },
-      { name: "Lucas Bernard", role: "SEO Tech Auditor", specialty: "Core Web Vitals, Schema markup", icon: Search },
-      { name: "Emma Dubois", role: "Content Strategist", specialty: "Editorial calendar, briefs", icon: FileText },
-      { name: "Thomas Martin", role: "Ads Optimizer", specialty: "Google Ads, Meta Ads", icon: BarChart },
-      { name: "Julie Petit", role: "Social Manager", specialty: "Multi-platform distribution", icon: MessageSquare },
-    ],
-    inputs: [
-      "Google Analytics 4 data",
-      "Google Search Console keywords",
-      "Meta Ads campaigns",
-      "Competitor analysis",
-      "Brand kit (colors, tone, claims)"
-    ],
-    outputs: [
-      "SEO audit reports with priorities",
-      "Content briefs and calendar",
-      "Ad optimization recommendations",
-      "Social posting schedule",
-      "Monthly performance reports"
-    ],
-    examples: [
-      { action: "Run SEO audit on example.com", result: "87 issues found, 12 critical (Core Web Vitals), action plan generated" },
-      { action: "Generate content brief for 'AI marketing'", result: "3,500 word brief with H2 structure, keyword mapping, competitor analysis" },
-      { action: "Optimize Meta Ads campaign", result: "Reduced CPA by 23%, paused 4 fatigued audiences, suggested 2 new creatives" },
-    ],
-    limits: [
-      "Cannot execute paid media changes without approval",
-      "Content generation limited to briefs (not full articles)",
-      "SEO crawl limited to 1,000 pages per audit",
-      "Social posting requires account authorization"
-    ]
-  },
-  sales: {
-    employees: [
-      { name: "Alexandre Leroy", role: "Sales Director", specialty: "Pipeline management", icon: Target },
-      { name: "Marie Moreau", role: "Lead Qualifier", specialty: "Scoring & qualification", icon: Users },
-      { name: "Pierre Durand", role: "Account Manager", specialty: "Client relationships", icon: Briefcase },
-      { name: "Camille Roux", role: "Proposal Writer", specialty: "Quotes & contracts", icon: FileText },
-    ],
-    inputs: [
-      "Inbound leads (forms, emails)",
-      "CRM data (if connected)",
-      "Website visitor behavior",
-      "Company information (via enrichment)"
-    ],
-    outputs: [
-      "Qualified lead reports",
-      "Pipeline health dashboard",
-      "Proposal drafts",
-      "Follow-up recommendations"
-    ],
-    examples: [
-      { action: "Score new lead from contact form", result: "Lead scored 78/100 (Budget: confirmed, Timeline: 30 days, Authority: decision maker)" },
-      { action: "Generate proposal for SaaS client", result: "3-page proposal with pricing, timeline, ROI projections" },
-    ],
-    limits: [
-      "Cannot send emails without approval",
-      "Lead enrichment limited to public data",
-      "No direct CRM write access (suggestions only)"
-    ]
-  },
-  finance: {
-    employees: [
-      { name: "Françoise Garnier", role: "DAF IA", specialty: "Financial analysis", icon: BarChart3 },
-      { name: "Nicolas Blanc", role: "Reporting Manager", specialty: "Monthly reports", icon: FileText },
-      { name: "Isabelle Faure", role: "Budget Controller", specialty: "Cost tracking", icon: LineChart },
-    ],
-    inputs: [
-      "Stripe transactions",
-      "Ad spend data (Google, Meta)",
-      "Agent execution costs",
-      "Subscription data"
-    ],
-    outputs: [
-      "Monthly financial reports",
-      "ROI calculations",
-      "Budget forecasts",
-      "Cost optimization recommendations"
-    ],
-    examples: [
-      { action: "Generate monthly report for January", result: "PDF report with revenue, costs, ROAS, MoM comparison" },
-      { action: "Analyze ad spend efficiency", result: "Identified 3 underperforming campaigns, savings potential: €2,400/month" },
-    ],
-    limits: [
-      "Cannot execute financial transactions",
-      "Read-only access to payment data",
-      "Reports require manager approval for sharing"
-    ]
-  },
-  security: {
-    employees: [
-      { name: "Antoine Lambert", role: "CISO IA", specialty: "Security oversight", icon: Shield },
-      { name: "Claire Dupont", role: "Access Reviewer", specialty: "Permission audits", icon: Users },
-      { name: "Maxime Girard", role: "Compliance Officer", specialty: "GDPR, policies", icon: FileText },
-    ],
-    inputs: [
-      "User activity logs",
-      "OAuth token status",
-      "Permission assignments",
-      "Integration health checks"
-    ],
-    outputs: [
-      "Access review reports",
-      "Security recommendations",
-      "Compliance dashboards",
-      "Alert notifications"
-    ],
-    examples: [
-      { action: "Run access review", result: "15 users audited, 2 flagged as high-risk (inactive 90+ days), 1 token expiring" },
-      { action: "Check GDPR compliance", result: "Compliance score: 94%, 2 items need attention (data retention policy update)" },
-    ],
-    limits: [
-      "Cannot revoke access without owner approval",
-      "Alert thresholds configurable by admin only",
-      "Penetration testing not included"
-    ]
-  },
-  product: {
-    employees: [
-      { name: "Rémi Fontaine", role: "Product Manager", specialty: "Feature prioritization", icon: Puzzle },
-      { name: "Lucie Chevalier", role: "UX Researcher", specialty: "User insights", icon: Search },
-      { name: "Julien Mercier", role: "Feature Analyst", specialty: "Usage analytics", icon: BarChart },
-      { name: "Élise Simon", role: "Roadmap Planner", specialty: "OKRs & planning", icon: Target },
-    ],
-    inputs: [
-      "Feature usage data",
-      "User feedback",
-      "Competitor features",
-      "Market research"
-    ],
-    outputs: [
-      "Feature prioritization (ICE scores)",
-      "User research summaries",
-      "Roadmap recommendations",
-      "A/B test designs"
-    ],
-    examples: [
-      { action: "Prioritize Q2 features", result: "Ranked 12 features by ICE score, top 3: Dashboard redesign (85), API v2 (78), Mobile app (72)" },
-      { action: "Analyze feature adoption", result: "New onboarding flow: 67% completion (+23%), identified 2 drop-off points" },
-    ],
-    limits: [
-      "Roadmap suggestions only (not decisions)",
-      "Research limited to available data sources",
-      "Cannot deploy features"
-    ]
-  },
-  engineering: {
-    employees: [
-      { name: "Olivier Rousseau", role: "CTO IA", specialty: "Technical architecture", icon: Code },
-      { name: "Élodie Morel", role: "DevOps Engineer", specialty: "Infrastructure", icon: Settings },
-      { name: "Damien Lefebvre", role: "API Developer", specialty: "Integrations", icon: Globe },
-      { name: "Pauline Guérin", role: "QA Engineer", specialty: "Testing", icon: CheckCircle2 },
-      { name: "Benoît André", role: "Tech Lead", specialty: "Code review", icon: FileText },
-    ],
-    inputs: [
-      "Error logs",
-      "Performance metrics",
-      "API documentation",
-      "Deployment status"
-    ],
-    outputs: [
-      "Technical recommendations",
-      "Performance reports",
-      "Integration status",
-      "Code quality metrics"
-    ],
-    examples: [
-      { action: "Analyze error logs", result: "3 critical errors identified, root cause: API timeout in payment flow" },
-      { action: "Review deployment health", result: "All 30 Edge Functions healthy, P95 latency: 234ms" },
-    ],
-    limits: [
-      "Cannot deploy code changes",
-      "Read-only access to infrastructure",
-      "Recommendations require dev approval"
-    ]
-  },
-  data: {
-    employees: [
-      { name: "Vincent Fournier", role: "Chief Data Officer", specialty: "Data strategy", icon: BarChart3 },
-      { name: "Nathalie Perrin", role: "Analytics Guardian", specialty: "GA4, GSC sync", icon: LineChart },
-      { name: "Guillaume Robert", role: "ETL Developer", specialty: "Data pipelines", icon: Settings },
-      { name: "Mathilde Laurent", role: "Dashboard Builder", specialty: "Visualizations", icon: BarChart },
-    ],
-    inputs: [
-      "Google Analytics 4",
-      "Google Search Console",
-      "Meta Insights",
-      "Internal databases"
-    ],
-    outputs: [
-      "Aggregated KPI dashboards",
-      "Trend analysis",
-      "Data quality reports",
-      "Custom exports"
-    ],
-    examples: [
-      { action: "Sync GA4 data for March", result: "12,456 sessions imported, 3 anomalies detected (traffic spike March 15)" },
-      { action: "Build executive dashboard", result: "5 KPI cards configured: Sessions, Leads, Revenue, ROAS, CAC" },
-    ],
-    limits: [
-      "Data sync frequency: daily maximum",
-      "Historical data limited to 24 months",
-      "Custom queries require approval"
-    ]
-  },
-  support: {
-    employees: [
-      { name: "Caroline Michel", role: "Support Director", specialty: "Customer success", icon: HeadphonesIcon },
-      { name: "Florian Dupuis", role: "Reputation Manager", specialty: "Reviews & responses", icon: MessageSquare },
-      { name: "Anaïs Martin", role: "Knowledge Manager", specialty: "Documentation", icon: FileText },
-    ],
-    inputs: [
-      "Google reviews",
-      "Meta reviews",
-      "Support tickets",
-      "User feedback"
-    ],
-    outputs: [
-      "Review response drafts",
-      "Sentiment analysis",
-      "FAQ updates",
-      "Escalation alerts"
-    ],
-    examples: [
-      { action: "Draft response to negative review", result: "Empathetic response draft, acknowledging issue, offering solution" },
-      { action: "Analyze review sentiment", result: "87% positive, 3 recurring themes: speed, support, pricing" },
-    ],
-    limits: [
-      "Cannot publish review responses without approval",
-      "Ticket responses are suggestions only",
-      "No direct customer communication"
-    ]
-  },
-  governance: {
-    employees: [
-      { name: "Philippe Bonnet", role: "Governance Director", specialty: "Policy management", icon: Settings },
-      { name: "Stéphanie Renard", role: "Automation Specialist", specialty: "Workflow design", icon: Zap },
-      { name: "Laurent Morin", role: "Webhook Manager", specialty: "Integrations", icon: Globe },
-    ],
-    inputs: [
-      "Policy configurations",
-      "Automation rules",
-      "Webhook endpoints",
-      "Third-party systems"
-    ],
-    outputs: [
-      "Policy enforcement reports",
-      "Automation execution logs",
-      "Integration status",
-      "Compliance alerts"
-    ],
-    examples: [
-      { action: "Configure approval workflow for ads", result: "Rule created: All ad changes > €500 require owner approval" },
-      { action: "Set up Slack notification webhook", result: "Webhook configured for critical approvals, tested successfully" },
-    ],
-    limits: [
-      "Policy changes require owner approval",
-      "Maximum 50 automation rules per workspace",
-      "Webhook rate limit: 100/minute"
-    ]
-  },
-  hr: {
-    employees: [
-      { name: "Céline Hervé", role: "HR Director", specialty: "Team management", icon: Users },
-      { name: "Aurélien Brun", role: "Onboarding Specialist", specialty: "New hire setup", icon: CheckCircle2 },
-    ],
-    inputs: [
-      "Team invitations",
-      "Role assignments",
-      "Onboarding checklists",
-      "Access requests"
-    ],
-    outputs: [
-      "Team directory",
-      "Onboarding progress",
-      "Access reports",
-      "Role change logs"
-    ],
-    examples: [
-      { action: "Onboard new team member", result: "Checklist created: 8 tasks, email sent, workspace access granted" },
-      { action: "Audit team permissions", result: "15 members reviewed, 2 role updates recommended" },
-    ],
-    limits: [
-      "Cannot delete users without owner approval",
-      "Role changes logged in audit trail",
-      "Maximum 50 team members (Growth plan)"
-    ]
-  },
-  legal: {
-    employees: [
-      { name: "Margaux Picard", role: "Legal Director", specialty: "Contract management", icon: Scale },
-      { name: "Thibault Lemoine", role: "Compliance Analyst", specialty: "GDPR & policies", icon: Shield },
-    ],
-    inputs: [
-      "Contract documents",
-      "GDPR requests",
-      "Compliance checklists",
-      "Legal templates"
-    ],
-    outputs: [
-      "Contract tracking",
-      "GDPR request handling",
-      "Compliance reports",
-      "Expiration alerts"
-    ],
-    examples: [
-      { action: "Track contract expiration", result: "3 contracts expiring in 30 days, renewal reminders sent" },
-      { action: "Process GDPR deletion request", result: "Data mapped, deletion checklist generated, deadline: 28 days" },
-    ],
-    limits: [
-      "Cannot sign contracts (digital signature not included)",
-      "Legal advice is informational only",
-      "Template library limited to standard documents"
-    ]
-  },
-};
 
 const DEPARTMENT_ICONS: Record<string, React.ElementType> = {
   marketing: TrendingUp,
@@ -359,8 +29,340 @@ const DEPARTMENT_ICONS: Record<string, React.ElementType> = {
 };
 
 export default function ServiceCatalog() {
+  const { t } = useTranslation();
   const { catalog, enabledServices, hasService } = useServices();
-  
+
+  const DEPARTMENT_DATA: Record<string, {
+    employees: {
+      name: string;
+      role: string;
+      specialty: string;
+      icon: React.ElementType;
+    }[];
+    inputs: string[];
+    outputs: string[];
+    examples: { action: string; result: string }[];
+    limits: string[];
+  }> = useMemo(() => ({
+    marketing: {
+      employees: [
+        { name: t("serviceCatalog.marketing.emp1Name"), role: t("serviceCatalog.marketing.emp1Role"), specialty: t("serviceCatalog.marketing.emp1Specialty"), icon: Target },
+        { name: t("serviceCatalog.marketing.emp2Name"), role: t("serviceCatalog.marketing.emp2Role"), specialty: t("serviceCatalog.marketing.emp2Specialty"), icon: Search },
+        { name: t("serviceCatalog.marketing.emp3Name"), role: t("serviceCatalog.marketing.emp3Role"), specialty: t("serviceCatalog.marketing.emp3Specialty"), icon: FileText },
+        { name: t("serviceCatalog.marketing.emp4Name"), role: t("serviceCatalog.marketing.emp4Role"), specialty: t("serviceCatalog.marketing.emp4Specialty"), icon: BarChart },
+        { name: t("serviceCatalog.marketing.emp5Name"), role: t("serviceCatalog.marketing.emp5Role"), specialty: t("serviceCatalog.marketing.emp5Specialty"), icon: MessageSquare },
+      ],
+      inputs: [
+        t("serviceCatalog.marketing.input1"),
+        t("serviceCatalog.marketing.input2"),
+        t("serviceCatalog.marketing.input3"),
+        t("serviceCatalog.marketing.input4"),
+        t("serviceCatalog.marketing.input5"),
+      ],
+      outputs: [
+        t("serviceCatalog.marketing.output1"),
+        t("serviceCatalog.marketing.output2"),
+        t("serviceCatalog.marketing.output3"),
+        t("serviceCatalog.marketing.output4"),
+        t("serviceCatalog.marketing.output5"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.marketing.example1Action"), result: t("serviceCatalog.marketing.example1Result") },
+        { action: t("serviceCatalog.marketing.example2Action"), result: t("serviceCatalog.marketing.example2Result") },
+        { action: t("serviceCatalog.marketing.example3Action"), result: t("serviceCatalog.marketing.example3Result") },
+      ],
+      limits: [
+        t("serviceCatalog.marketing.limit1"),
+        t("serviceCatalog.marketing.limit2"),
+        t("serviceCatalog.marketing.limit3"),
+        t("serviceCatalog.marketing.limit4"),
+      ]
+    },
+    sales: {
+      employees: [
+        { name: t("serviceCatalog.sales.emp1Name"), role: t("serviceCatalog.sales.emp1Role"), specialty: t("serviceCatalog.sales.emp1Specialty"), icon: Target },
+        { name: t("serviceCatalog.sales.emp2Name"), role: t("serviceCatalog.sales.emp2Role"), specialty: t("serviceCatalog.sales.emp2Specialty"), icon: Users },
+        { name: t("serviceCatalog.sales.emp3Name"), role: t("serviceCatalog.sales.emp3Role"), specialty: t("serviceCatalog.sales.emp3Specialty"), icon: Briefcase },
+        { name: t("serviceCatalog.sales.emp4Name"), role: t("serviceCatalog.sales.emp4Role"), specialty: t("serviceCatalog.sales.emp4Specialty"), icon: FileText },
+      ],
+      inputs: [
+        t("serviceCatalog.sales.input1"),
+        t("serviceCatalog.sales.input2"),
+        t("serviceCatalog.sales.input3"),
+        t("serviceCatalog.sales.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.sales.output1"),
+        t("serviceCatalog.sales.output2"),
+        t("serviceCatalog.sales.output3"),
+        t("serviceCatalog.sales.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.sales.example1Action"), result: t("serviceCatalog.sales.example1Result") },
+        { action: t("serviceCatalog.sales.example2Action"), result: t("serviceCatalog.sales.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.sales.limit1"),
+        t("serviceCatalog.sales.limit2"),
+        t("serviceCatalog.sales.limit3"),
+      ]
+    },
+    finance: {
+      employees: [
+        { name: t("serviceCatalog.finance.emp1Name"), role: t("serviceCatalog.finance.emp1Role"), specialty: t("serviceCatalog.finance.emp1Specialty"), icon: BarChart3 },
+        { name: t("serviceCatalog.finance.emp2Name"), role: t("serviceCatalog.finance.emp2Role"), specialty: t("serviceCatalog.finance.emp2Specialty"), icon: FileText },
+        { name: t("serviceCatalog.finance.emp3Name"), role: t("serviceCatalog.finance.emp3Role"), specialty: t("serviceCatalog.finance.emp3Specialty"), icon: LineChart },
+      ],
+      inputs: [
+        t("serviceCatalog.finance.input1"),
+        t("serviceCatalog.finance.input2"),
+        t("serviceCatalog.finance.input3"),
+        t("serviceCatalog.finance.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.finance.output1"),
+        t("serviceCatalog.finance.output2"),
+        t("serviceCatalog.finance.output3"),
+        t("serviceCatalog.finance.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.finance.example1Action"), result: t("serviceCatalog.finance.example1Result") },
+        { action: t("serviceCatalog.finance.example2Action"), result: t("serviceCatalog.finance.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.finance.limit1"),
+        t("serviceCatalog.finance.limit2"),
+        t("serviceCatalog.finance.limit3"),
+      ]
+    },
+    security: {
+      employees: [
+        { name: t("serviceCatalog.security.emp1Name"), role: t("serviceCatalog.security.emp1Role"), specialty: t("serviceCatalog.security.emp1Specialty"), icon: Shield },
+        { name: t("serviceCatalog.security.emp2Name"), role: t("serviceCatalog.security.emp2Role"), specialty: t("serviceCatalog.security.emp2Specialty"), icon: Users },
+        { name: t("serviceCatalog.security.emp3Name"), role: t("serviceCatalog.security.emp3Role"), specialty: t("serviceCatalog.security.emp3Specialty"), icon: FileText },
+      ],
+      inputs: [
+        t("serviceCatalog.security.input1"),
+        t("serviceCatalog.security.input2"),
+        t("serviceCatalog.security.input3"),
+        t("serviceCatalog.security.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.security.output1"),
+        t("serviceCatalog.security.output2"),
+        t("serviceCatalog.security.output3"),
+        t("serviceCatalog.security.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.security.example1Action"), result: t("serviceCatalog.security.example1Result") },
+        { action: t("serviceCatalog.security.example2Action"), result: t("serviceCatalog.security.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.security.limit1"),
+        t("serviceCatalog.security.limit2"),
+        t("serviceCatalog.security.limit3"),
+      ]
+    },
+    product: {
+      employees: [
+        { name: t("serviceCatalog.product.emp1Name"), role: t("serviceCatalog.product.emp1Role"), specialty: t("serviceCatalog.product.emp1Specialty"), icon: Puzzle },
+        { name: t("serviceCatalog.product.emp2Name"), role: t("serviceCatalog.product.emp2Role"), specialty: t("serviceCatalog.product.emp2Specialty"), icon: Search },
+        { name: t("serviceCatalog.product.emp3Name"), role: t("serviceCatalog.product.emp3Role"), specialty: t("serviceCatalog.product.emp3Specialty"), icon: BarChart },
+        { name: t("serviceCatalog.product.emp4Name"), role: t("serviceCatalog.product.emp4Role"), specialty: t("serviceCatalog.product.emp4Specialty"), icon: Target },
+      ],
+      inputs: [
+        t("serviceCatalog.product.input1"),
+        t("serviceCatalog.product.input2"),
+        t("serviceCatalog.product.input3"),
+        t("serviceCatalog.product.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.product.output1"),
+        t("serviceCatalog.product.output2"),
+        t("serviceCatalog.product.output3"),
+        t("serviceCatalog.product.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.product.example1Action"), result: t("serviceCatalog.product.example1Result") },
+        { action: t("serviceCatalog.product.example2Action"), result: t("serviceCatalog.product.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.product.limit1"),
+        t("serviceCatalog.product.limit2"),
+        t("serviceCatalog.product.limit3"),
+      ]
+    },
+    engineering: {
+      employees: [
+        { name: t("serviceCatalog.engineering.emp1Name"), role: t("serviceCatalog.engineering.emp1Role"), specialty: t("serviceCatalog.engineering.emp1Specialty"), icon: Code },
+        { name: t("serviceCatalog.engineering.emp2Name"), role: t("serviceCatalog.engineering.emp2Role"), specialty: t("serviceCatalog.engineering.emp2Specialty"), icon: Settings },
+        { name: t("serviceCatalog.engineering.emp3Name"), role: t("serviceCatalog.engineering.emp3Role"), specialty: t("serviceCatalog.engineering.emp3Specialty"), icon: Globe },
+        { name: t("serviceCatalog.engineering.emp4Name"), role: t("serviceCatalog.engineering.emp4Role"), specialty: t("serviceCatalog.engineering.emp4Specialty"), icon: CheckCircle2 },
+        { name: t("serviceCatalog.engineering.emp5Name"), role: t("serviceCatalog.engineering.emp5Role"), specialty: t("serviceCatalog.engineering.emp5Specialty"), icon: FileText },
+      ],
+      inputs: [
+        t("serviceCatalog.engineering.input1"),
+        t("serviceCatalog.engineering.input2"),
+        t("serviceCatalog.engineering.input3"),
+        t("serviceCatalog.engineering.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.engineering.output1"),
+        t("serviceCatalog.engineering.output2"),
+        t("serviceCatalog.engineering.output3"),
+        t("serviceCatalog.engineering.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.engineering.example1Action"), result: t("serviceCatalog.engineering.example1Result") },
+        { action: t("serviceCatalog.engineering.example2Action"), result: t("serviceCatalog.engineering.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.engineering.limit1"),
+        t("serviceCatalog.engineering.limit2"),
+        t("serviceCatalog.engineering.limit3"),
+      ]
+    },
+    data: {
+      employees: [
+        { name: t("serviceCatalog.data.emp1Name"), role: t("serviceCatalog.data.emp1Role"), specialty: t("serviceCatalog.data.emp1Specialty"), icon: BarChart3 },
+        { name: t("serviceCatalog.data.emp2Name"), role: t("serviceCatalog.data.emp2Role"), specialty: t("serviceCatalog.data.emp2Specialty"), icon: LineChart },
+        { name: t("serviceCatalog.data.emp3Name"), role: t("serviceCatalog.data.emp3Role"), specialty: t("serviceCatalog.data.emp3Specialty"), icon: Settings },
+        { name: t("serviceCatalog.data.emp4Name"), role: t("serviceCatalog.data.emp4Role"), specialty: t("serviceCatalog.data.emp4Specialty"), icon: BarChart },
+      ],
+      inputs: [
+        t("serviceCatalog.data.input1"),
+        t("serviceCatalog.data.input2"),
+        t("serviceCatalog.data.input3"),
+        t("serviceCatalog.data.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.data.output1"),
+        t("serviceCatalog.data.output2"),
+        t("serviceCatalog.data.output3"),
+        t("serviceCatalog.data.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.data.example1Action"), result: t("serviceCatalog.data.example1Result") },
+        { action: t("serviceCatalog.data.example2Action"), result: t("serviceCatalog.data.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.data.limit1"),
+        t("serviceCatalog.data.limit2"),
+        t("serviceCatalog.data.limit3"),
+      ]
+    },
+    support: {
+      employees: [
+        { name: t("serviceCatalog.support.emp1Name"), role: t("serviceCatalog.support.emp1Role"), specialty: t("serviceCatalog.support.emp1Specialty"), icon: HeadphonesIcon },
+        { name: t("serviceCatalog.support.emp2Name"), role: t("serviceCatalog.support.emp2Role"), specialty: t("serviceCatalog.support.emp2Specialty"), icon: MessageSquare },
+        { name: t("serviceCatalog.support.emp3Name"), role: t("serviceCatalog.support.emp3Role"), specialty: t("serviceCatalog.support.emp3Specialty"), icon: FileText },
+      ],
+      inputs: [
+        t("serviceCatalog.support.input1"),
+        t("serviceCatalog.support.input2"),
+        t("serviceCatalog.support.input3"),
+        t("serviceCatalog.support.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.support.output1"),
+        t("serviceCatalog.support.output2"),
+        t("serviceCatalog.support.output3"),
+        t("serviceCatalog.support.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.support.example1Action"), result: t("serviceCatalog.support.example1Result") },
+        { action: t("serviceCatalog.support.example2Action"), result: t("serviceCatalog.support.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.support.limit1"),
+        t("serviceCatalog.support.limit2"),
+        t("serviceCatalog.support.limit3"),
+      ]
+    },
+    governance: {
+      employees: [
+        { name: t("serviceCatalog.governance.emp1Name"), role: t("serviceCatalog.governance.emp1Role"), specialty: t("serviceCatalog.governance.emp1Specialty"), icon: Settings },
+        { name: t("serviceCatalog.governance.emp2Name"), role: t("serviceCatalog.governance.emp2Role"), specialty: t("serviceCatalog.governance.emp2Specialty"), icon: Zap },
+        { name: t("serviceCatalog.governance.emp3Name"), role: t("serviceCatalog.governance.emp3Role"), specialty: t("serviceCatalog.governance.emp3Specialty"), icon: Globe },
+      ],
+      inputs: [
+        t("serviceCatalog.governance.input1"),
+        t("serviceCatalog.governance.input2"),
+        t("serviceCatalog.governance.input3"),
+        t("serviceCatalog.governance.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.governance.output1"),
+        t("serviceCatalog.governance.output2"),
+        t("serviceCatalog.governance.output3"),
+        t("serviceCatalog.governance.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.governance.example1Action"), result: t("serviceCatalog.governance.example1Result") },
+        { action: t("serviceCatalog.governance.example2Action"), result: t("serviceCatalog.governance.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.governance.limit1"),
+        t("serviceCatalog.governance.limit2"),
+        t("serviceCatalog.governance.limit3"),
+      ]
+    },
+    hr: {
+      employees: [
+        { name: t("serviceCatalog.hr.emp1Name"), role: t("serviceCatalog.hr.emp1Role"), specialty: t("serviceCatalog.hr.emp1Specialty"), icon: Users },
+        { name: t("serviceCatalog.hr.emp2Name"), role: t("serviceCatalog.hr.emp2Role"), specialty: t("serviceCatalog.hr.emp2Specialty"), icon: CheckCircle2 },
+      ],
+      inputs: [
+        t("serviceCatalog.hr.input1"),
+        t("serviceCatalog.hr.input2"),
+        t("serviceCatalog.hr.input3"),
+        t("serviceCatalog.hr.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.hr.output1"),
+        t("serviceCatalog.hr.output2"),
+        t("serviceCatalog.hr.output3"),
+        t("serviceCatalog.hr.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.hr.example1Action"), result: t("serviceCatalog.hr.example1Result") },
+        { action: t("serviceCatalog.hr.example2Action"), result: t("serviceCatalog.hr.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.hr.limit1"),
+        t("serviceCatalog.hr.limit2"),
+        t("serviceCatalog.hr.limit3"),
+      ]
+    },
+    legal: {
+      employees: [
+        { name: t("serviceCatalog.legal.emp1Name"), role: t("serviceCatalog.legal.emp1Role"), specialty: t("serviceCatalog.legal.emp1Specialty"), icon: Scale },
+        { name: t("serviceCatalog.legal.emp2Name"), role: t("serviceCatalog.legal.emp2Role"), specialty: t("serviceCatalog.legal.emp2Specialty"), icon: Shield },
+      ],
+      inputs: [
+        t("serviceCatalog.legal.input1"),
+        t("serviceCatalog.legal.input2"),
+        t("serviceCatalog.legal.input3"),
+        t("serviceCatalog.legal.input4"),
+      ],
+      outputs: [
+        t("serviceCatalog.legal.output1"),
+        t("serviceCatalog.legal.output2"),
+        t("serviceCatalog.legal.output3"),
+        t("serviceCatalog.legal.output4"),
+      ],
+      examples: [
+        { action: t("serviceCatalog.legal.example1Action"), result: t("serviceCatalog.legal.example1Result") },
+        { action: t("serviceCatalog.legal.example2Action"), result: t("serviceCatalog.legal.example2Result") },
+      ],
+      limits: [
+        t("serviceCatalog.legal.limit1"),
+        t("serviceCatalog.legal.limit2"),
+        t("serviceCatalog.legal.limit3"),
+      ]
+    },
+  }), [t]);
+
   const departments = catalog.filter(s => !s.is_core);
 
   return (
@@ -369,10 +371,10 @@ export default function ServiceCatalog() {
       <header>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
           <Bot className="w-8 h-8 text-primary" />
-          Catalogue des Services
+          {t("serviceCatalog.title")}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Découvrez ce que chaque département IA peut faire pour vous
+          {t("serviceCatalog.subtitle")}
         </p>
       </header>
 
@@ -381,13 +383,13 @@ export default function ServiceCatalog() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-4xl font-bold text-primary">37</p>
-            <p className="text-sm text-muted-foreground">Employés IA</p>
+            <p className="text-sm text-muted-foreground">{t("serviceCatalog.aiEmployees")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-4xl font-bold">{departments.length}</p>
-            <p className="text-sm text-muted-foreground">Départements</p>
+            <p className="text-sm text-muted-foreground">{t("serviceCatalog.departments")}</p>
           </CardContent>
         </Card>
         <Card>
@@ -395,7 +397,7 @@ export default function ServiceCatalog() {
             <p className="text-4xl font-bold text-green-600">
               {enabledServices.filter(s => !s.is_core).length}
             </p>
-            <p className="text-sm text-muted-foreground">Activés</p>
+            <p className="text-sm text-muted-foreground">{t("serviceCatalog.enabled")}</p>
           </CardContent>
         </Card>
       </div>
@@ -429,11 +431,11 @@ export default function ServiceCatalog() {
                     </div>
                   </div>
                   {isEnabled ? (
-                    <Badge variant="success">Activé</Badge>
+                    <Badge variant="success">{t("serviceCatalog.activated")}</Badge>
                   ) : (
                     <Link to="/dashboard/billing">
                       <Button variant="outline" size="sm">
-                        Activer
+                        {t("serviceCatalog.activate")}
                         <ArrowRight className="w-3 h-3 ml-1" />
                       </Button>
                     </Link>
@@ -443,10 +445,10 @@ export default function ServiceCatalog() {
               <CardContent>
                 <Tabs defaultValue="team" className="space-y-4">
                   <TabsList className="grid grid-cols-4 w-full max-w-md">
-                    <TabsTrigger value="team">Équipe</TabsTrigger>
-                    <TabsTrigger value="io">I/O</TabsTrigger>
-                    <TabsTrigger value="examples">Exemples</TabsTrigger>
-                    <TabsTrigger value="limits">Limites</TabsTrigger>
+                    <TabsTrigger value="team">{t("serviceCatalog.tabTeam")}</TabsTrigger>
+                    <TabsTrigger value="io">{t("serviceCatalog.tabIO")}</TabsTrigger>
+                    <TabsTrigger value="examples">{t("serviceCatalog.tabExamples")}</TabsTrigger>
+                    <TabsTrigger value="limits">{t("serviceCatalog.tabLimits")}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="team">
@@ -470,7 +472,7 @@ export default function ServiceCatalog() {
                       <div>
                         <h4 className="font-medium mb-3 flex items-center gap-2">
                           <ArrowRight className="w-4 h-4 text-blue-500" />
-                          Inputs
+                          {t("serviceCatalog.inputs")}
                         </h4>
                         <ul className="space-y-2">
                           {data.inputs.map(input => (
@@ -484,7 +486,7 @@ export default function ServiceCatalog() {
                       <div>
                         <h4 className="font-medium mb-3 flex items-center gap-2">
                           <ArrowRight className="w-4 h-4 text-green-500 rotate-180" />
-                          Outputs
+                          {t("serviceCatalog.outputs")}
                         </h4>
                         <ul className="space-y-2">
                           {data.outputs.map(output => (

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, BarChart3, CheckCircle2, Shield, Sparkles, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -15,6 +16,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function DashboardHome() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
   const { pendingApprovals } = useApprovals();
@@ -55,42 +57,42 @@ export default function DashboardHome() {
 
   const summaryCards = useMemo(() => [
     {
-      title: "Connected sources",
+      title: t("dashboardHome.connectedSources"),
       value: snapshot?.connectedSources ?? 0,
-      helper: "Google, Meta and workspace-level feeds contributing to signal detection.",
+      helper: t("dashboardHome.connectedSourcesHelper"),
       icon: BarChart3,
     },
     {
-      title: "Pending approvals",
+      title: t("dashboardHome.pendingApprovals"),
       value: pendingApprovals.length,
-      helper: "Sensitive actions waiting for review before execution.",
+      helper: t("dashboardHome.pendingApprovalsHelper"),
       icon: Shield,
     },
     {
-      title: "Evidence bundles",
+      title: t("dashboardHome.evidenceBundles"),
       value: bundles.length,
-      helper: "Proof artifacts available to justify recommendations and report impact.",
+      helper: t("dashboardHome.evidenceBundlesHelper"),
       icon: Sparkles,
     },
     {
-      title: "Tracked outcomes",
+      title: t("dashboardHome.trackedOutcomes"),
       value: snapshot?.conversions ?? 0,
-      helper: "Recent conversions currently visible in the connected KPI layer.",
+      helper: t("dashboardHome.trackedOutcomesHelper"),
       icon: CheckCircle2,
     },
-  ], [bundles.length, pendingApprovals.length, snapshot?.connectedSources, snapshot?.conversions]);
+  ], [bundles.length, pendingApprovals.length, snapshot?.connectedSources, snapshot?.conversions, t]);
 
   if (!currentWorkspace) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Card className="max-w-xl w-full">
           <CardHeader>
-            <CardTitle>Create your first cockpit</CardTitle>
-            <CardDescription>Start with a workspace, connect a site, then let the product organize signals, priorities and governance.</CardDescription>
+            <CardTitle>{t("dashboardHome.createTitle")}</CardTitle>
+            <CardDescription>{t("dashboardHome.createDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link to="/onboarding">
-              <Button>Start onboarding</Button>
+              <Button>{t("dashboardHome.startOnboarding")}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -102,15 +104,15 @@ export default function DashboardHome() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
         <div>
-          <Badge variant="agent" className="mb-3">Default dashboard</Badge>
-          <h1 className="text-3xl md:text-4xl font-bold">Signals first. Decisions second. Outcomes always visible.</h1>
+          <Badge variant="agent" className="mb-3">{t("dashboardHome.badge")}</Badge>
+          <h1 className="text-3xl md:text-4xl font-bold">{t("dashboardHome.title")}</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl">
-            This workspace is now positioned as a connected growth cockpit, not a bundle of imaginary employees. Review anomalies, prioritize actions, validate sensitive moves and measure what changed.
+            {t("dashboardHome.subtitle")}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link to="/dashboard/signals"><Button variant="hero">Open Growth Signals</Button></Link>
-          <Link to="/dashboard/actions"><Button variant="outline">View action queue</Button></Link>
+          <Link to="/dashboard/signals"><Button variant="hero">{t("dashboardHome.openSignals")}</Button></Link>
+          <Link to="/dashboard/actions"><Button variant="outline">{t("dashboardHome.viewActions")}</Button></Link>
         </div>
       </div>
 
@@ -140,15 +142,15 @@ export default function DashboardHome() {
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Workflow className="w-5 h-5 text-primary" /> Decision workflow</CardTitle>
-            <CardDescription>The new front-door value proposition follows a clear operating loop.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Workflow className="w-5 h-5 text-primary" /> {t("dashboardHome.decisionWorkflow")}</CardTitle>
+            <CardDescription>{t("dashboardHome.decisionWorkflowDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             {[
-              ["Growth Signals", "Detect anomalies and opportunities from connected data."],
-              ["Prioritized Actions", "Rank the next best moves with evidence and expected impact."],
-              ["Approvals", "Route sensitive recommendations through human validation and policy."],
-              ["Outcome Tracking", "Measure what improved and keep the proof layer accessible."],
+              [t("dashboardHome.wfSignals"), t("dashboardHome.wfSignalsDesc")],
+              [t("dashboardHome.wfActions"), t("dashboardHome.wfActionsDesc")],
+              [t("dashboardHome.wfApprovals"), t("dashboardHome.wfApprovalsDesc")],
+              [t("dashboardHome.wfOutcomes"), t("dashboardHome.wfOutcomesDesc")],
             ].map(([title, description]) => (
               <div key={title} className="rounded-xl border border-border/60 p-4">
                 <p className="font-medium mb-2">{title}</p>
@@ -160,19 +162,19 @@ export default function DashboardHome() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Operational snapshot</CardTitle>
-            <CardDescription>Helpful proof points from the existing stack.</CardDescription>
+            <CardTitle>{t("dashboardHome.operationalSnapshot")}</CardTitle>
+            <CardDescription>{t("dashboardHome.operationalSnapshotDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-muted-foreground">
             <div className="rounded-xl bg-secondary/40 p-4">
-              <p className="font-medium text-foreground">Recent traffic volume</p>
+              <p className="font-medium text-foreground">{t("dashboardHome.recentTraffic")}</p>
               <p className="text-2xl font-bold mt-1">{snapshot?.clicks?.toLocaleString() ?? 0}</p>
-              <p>Last 30 days of tracked clicks for the current site.</p>
+              <p>{t("dashboardHome.trafficDesc")}</p>
             </div>
             <div className="rounded-xl border border-border/60 p-4">
-              <p><span className="font-medium text-foreground">Audit entries:</span> {entries.length}</p>
-              <p><span className="font-medium text-foreground">Scheduled runs:</span> {scheduledRuns.length}</p>
-              <p><span className="font-medium text-foreground">Workspace:</span> {currentWorkspace.name}</p>
+              <p><span className="font-medium text-foreground">{t("dashboardHome.auditEntries")}:</span> {entries.length}</p>
+              <p><span className="font-medium text-foreground">{t("dashboardHome.scheduledRuns")}:</span> {scheduledRuns.length}</p>
+              <p><span className="font-medium text-foreground">{t("dashboardHome.workspace")}:</span> {currentWorkspace.name}</p>
             </div>
           </CardContent>
         </Card>
@@ -180,9 +182,9 @@ export default function DashboardHome() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          ["/dashboard/signals", "Growth Signals", "Start with what changed and why it matters now."],
-          ["/dashboard/actions", "Prioritized Actions", "Translate anomalies into a ranked queue with proof."],
-          ["/dashboard/outcomes", "Outcome Tracking", "Keep impact visible beyond task completion."],
+          ["/dashboard/signals", t("dashboardHome.navSignals"), t("dashboardHome.navSignalsDesc")],
+          ["/dashboard/actions", t("dashboardHome.navActions"), t("dashboardHome.navActionsDesc")],
+          ["/dashboard/outcomes", t("dashboardHome.navOutcomes"), t("dashboardHome.navOutcomesDesc")],
         ].map(([href, title, description]) => (
           <Link key={href} to={href}>
             <Card className="h-full border-border/60 hover:border-primary/40 transition-colors">

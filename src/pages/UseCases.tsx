@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Briefcase, Building2, LineChart, Shield, Users } from "lucide-react";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -7,49 +9,63 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-const useCases = [
-  {
-    title: "Consultant",
-    icon: Briefcase,
-    summary: "Turn disconnected client metrics into a weekly decision cockpit with clear priorities and evidence.",
-    bullets: ["One workspace per client", "Weekly anomaly review", "Proof before recommendations"],
-  },
-  {
-    title: "Agency",
-    icon: Users,
-    summary: "Run multi-client delivery with approvals, auditability and a visible action queue instead of scattered docs.",
-    bullets: ["Multi-tenant operations", "Approval workflows", "Outcome reporting by account"],
-  },
-  {
-    title: "Brand / Scale-up",
-    icon: Building2,
-    summary: "Give marketing, growth and ops teams one governed workspace for signals, actions and measured impact.",
-    bullets: ["Cross-channel monitoring", "RBAC and traceability", "Executive outcome tracking"],
-  },
-];
-
-const pillars = [
-  { title: "Signals", icon: LineChart, description: "Detect what changed before the team loses another week in reporting." },
-  { title: "Governance", icon: Shield, description: "Use approval gates and audit logs when recommendations become real actions." },
-  { title: "Execution", icon: Briefcase, description: "Keep execution modules available as downstream capacity when action is approved." },
-];
-
 export default function UseCases() {
+  const { t } = useTranslation();
+
+  const useCases = useMemo(() => [
+    {
+      title: t("useCasesPage.consultantTitle"),
+      icon: Briefcase,
+      summary: t("useCasesPage.consultantSummary"),
+      bullets: [
+        t("useCasesPage.consultantBullet1"),
+        t("useCasesPage.consultantBullet2"),
+        t("useCasesPage.consultantBullet3"),
+      ],
+    },
+    {
+      title: t("useCasesPage.agencyTitle"),
+      icon: Users,
+      summary: t("useCasesPage.agencySummary"),
+      bullets: [
+        t("useCasesPage.agencyBullet1"),
+        t("useCasesPage.agencyBullet2"),
+        t("useCasesPage.agencyBullet3"),
+      ],
+    },
+    {
+      title: t("useCasesPage.brandTitle"),
+      icon: Building2,
+      summary: t("useCasesPage.brandSummary"),
+      bullets: [
+        t("useCasesPage.brandBullet1"),
+        t("useCasesPage.brandBullet2"),
+        t("useCasesPage.brandBullet3"),
+      ],
+    },
+  ], [t]);
+
+  const pillars = useMemo(() => [
+    { title: t("useCasesPage.signalsTitle"), icon: LineChart, description: t("useCasesPage.signalsDesc") },
+    { title: t("useCasesPage.governanceTitle"), icon: Shield, description: t("useCasesPage.governanceDesc") },
+    { title: t("useCasesPage.executionTitle"), icon: Briefcase, description: t("useCasesPage.executionDesc") },
+  ], [t]);
+
   return (
     <>
       <SEOHead
-        title="Use cases — Growth OS"
-        description="Growth OS for consultants, agencies and brands: connected data, anomalies, actions, approvals and outcome tracking."
+        title={t("useCasesPage.seoTitle")}
+        description={t("useCasesPage.seoDesc")}
         canonical="/use-cases"
       />
       <Navbar />
       <div className="min-h-screen bg-background">
         <section className="pt-28 pb-12 md:pt-36 md:pb-16">
           <div className="container mx-auto px-4 text-center">
-            <Badge variant="agent" className="mb-4">Use cases</Badge>
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">A growth cockpit adapted to who is operating it</h1>
+            <Badge variant="agent" className="mb-4">{t("useCasesPage.badge")}</Badge>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">{t("useCasesPage.title")}</h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              The interface stays consistent, but the narrative changes by operating model: consultant, agency or brand.
+              {t("useCasesPage.subtitle")}
             </p>
           </div>
         </section>
@@ -76,7 +92,7 @@ export default function UseCases() {
                       </ul>
                       <Link to="/onboarding">
                         <Button variant="outline" className="w-full">
-                          Start this flow
+                          {t("useCasesPage.startFlow")}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </Link>

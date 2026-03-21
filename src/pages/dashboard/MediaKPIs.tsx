@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,7 @@ interface KPI {
 }
 
 export default function MediaKPIs() {
+  const { t } = useTranslation();
   const { assets, selectedAsset, setSelectedAsset } = useMedia();
   const { currentWorkspace } = useWorkspace();
   const [kpis, setKpis] = useState<KPI[]>([]);
@@ -143,9 +145,9 @@ export default function MediaKPIs() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Media KPIs</h1>
+          <h1 className="text-2xl font-bold">{t("mediaKPIs.title")}</h1>
           <p className="text-muted-foreground">
-            Track performance metrics for your media content
+            {t("mediaKPIs.subtitle")}
           </p>
         </div>
 
@@ -162,9 +164,9 @@ export default function MediaKPIs() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="7d">{t("mediaKPIs.last7Days")}</SelectItem>
+              <SelectItem value="30d">{t("mediaKPIs.last30Days")}</SelectItem>
+              <SelectItem value="90d">{t("mediaKPIs.last90Days")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -173,12 +175,12 @@ export default function MediaKPIs() {
             onValueChange={(id) => setSelectedAsset(assets.find(a => a.id === id) || null)}
           >
             <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Select media asset" />
+              <SelectValue placeholder={t("mediaKPIs.selectAssetPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {assets.map((asset) => (
                 <SelectItem key={asset.id} value={asset.id}>
-                  {asset.title || 'Untitled'} - {asset.platform}
+                  {asset.title || t("mediaKPIs.untitled")} - {asset.platform}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -192,9 +194,9 @@ export default function MediaKPIs() {
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <BarChart3 className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Select a Media Asset</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("mediaKPIs.selectAssetHeading")}</h3>
             <p className="text-muted-foreground text-center mb-4 max-w-md">
-              Choose a media asset to view its performance metrics and KPIs.
+              {t("mediaKPIs.selectAssetDescription")}
             </p>
           </CardContent>
         </Card>
@@ -206,10 +208,9 @@ export default function MediaKPIs() {
         <Card className="bg-muted/30">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AlertCircle className="w-8 h-8 text-muted-foreground mb-4" />
-            <h3 className="font-semibold mb-2">No Data Yet</h3>
+            <h3 className="font-semibold mb-2">{t("mediaKPIs.noDataYet")}</h3>
             <p className="text-muted-foreground text-center max-w-md">
-              KPI data will appear here once synced. For YouTube, connect with YouTube Analytics API. 
-              For Spotify, public stats are limited - consider using Spotify for Artists data export.
+              {t("mediaKPIs.noDataDescription")}
             </p>
           </CardContent>
         </Card>
@@ -217,64 +218,64 @@ export default function MediaKPIs() {
         <div className="space-y-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <KPICard 
-              icon={Eye} 
-              label="Views" 
-              value={totals.views} 
+            <KPICard
+              icon={Eye}
+              label={t("mediaKPIs.views")}
+              value={totals.views}
               trend={trends.views}
             />
             {isYouTube && (
-              <KPICard 
-                icon={Clock} 
-                label="Watch Time" 
+              <KPICard
+                icon={Clock}
+                label={t("mediaKPIs.watchTime")}
                 value={formatDuration(totals.watchTime)}
                 trend={trends.watchTime}
               />
             )}
-            <KPICard 
-              icon={ThumbsUp} 
-              label="Likes" 
+            <KPICard
+              icon={ThumbsUp}
+              label={t("mediaKPIs.likes")}
               value={totals.likes}
               trend={trends.likes}
             />
-            <KPICard 
-              icon={MessageSquare} 
-              label="Comments" 
+            <KPICard
+              icon={MessageSquare}
+              label={t("mediaKPIs.comments")}
               value={totals.comments}
               trend={trends.comments}
             />
             {isYouTube && (
-              <KPICard 
-                icon={Users} 
-                label="Subscribers" 
+              <KPICard
+                icon={Users}
+                label={t("mediaKPIs.subscribers")}
                 value={`+${totals.subscribers}`}
                 trend={trends.subscribers}
               />
             )}
             {isSpotify && (
-              <KPICard 
-                icon={Eye} 
-                label="Streams" 
+              <KPICard
+                icon={Eye}
+                label={t("mediaKPIs.streams")}
                 value={totals.streams}
                 trend={trends.streams}
               />
             )}
-            <KPICard 
-              icon={MousePointer} 
-              label="Smart Link Clicks" 
+            <KPICard
+              icon={MousePointer}
+              label={t("mediaKPIs.smartLinkClicks")}
               value={totals.clicks}
               trend={trends.clicks}
             />
-            <KPICard 
-              icon={Mail} 
-              label="Email Signups" 
+            <KPICard
+              icon={Mail}
+              label={t("mediaKPIs.emailSignups")}
               value={totals.emails}
               trend={trends.emails}
             />
             {isYouTube && avgCtr > 0 && (
-              <KPICard 
-                icon={MousePointer} 
-                label="Avg CTR" 
+              <KPICard
+                icon={MousePointer}
+                label={t("mediaKPIs.avgCTR")}
                 value={`${avgCtr.toFixed(1)}%`}
                 trend={avgCtr > 5 ? 10 : -5}
               />
@@ -284,15 +285,15 @@ export default function MediaKPIs() {
           {/* Charts */}
           <Tabs defaultValue="views" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="views">Views</TabsTrigger>
-              <TabsTrigger value="engagement">Engagement</TabsTrigger>
-              <TabsTrigger value="conversions">Conversions</TabsTrigger>
+              <TabsTrigger value="views">{t("mediaKPIs.tabViews")}</TabsTrigger>
+              <TabsTrigger value="engagement">{t("mediaKPIs.tabEngagement")}</TabsTrigger>
+              <TabsTrigger value="conversions">{t("mediaKPIs.tabConversions")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="views">
               <KPIChart
-                title="Views Over Time"
-                description="Daily view count for the selected period"
+                title={t("mediaKPIs.chartViewsTitle")}
+                description={t("mediaKPIs.chartViewsDescription")}
                 data={chartData}
                 dataKey="views"
                 type="area"
@@ -301,8 +302,8 @@ export default function MediaKPIs() {
 
             <TabsContent value="engagement">
               <KPIChart
-                title="Engagement Metrics"
-                description="Likes over time"
+                title={t("mediaKPIs.chartEngagementTitle")}
+                description={t("mediaKPIs.chartEngagementDescription")}
                 data={chartData}
                 dataKey="likes"
                 type="line"
@@ -311,8 +312,8 @@ export default function MediaKPIs() {
 
             <TabsContent value="conversions">
               <KPIChart
-                title="Smart Link Performance"
-                description="Clicks on your smart link page"
+                title={t("mediaKPIs.chartConversionsTitle")}
+                description={t("mediaKPIs.chartConversionsDescription")}
                 data={chartData}
                 dataKey="clicks"
                 type="area"

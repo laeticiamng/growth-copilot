@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Sparkles, 
-  Copy, 
-  Download, 
-  Instagram, 
-  Youtube, 
-  Music2, 
+import {
+  Sparkles,
+  Copy,
+  Download,
+  Instagram,
+  Youtube,
+  Music2,
   MessageSquare,
   FileText,
   Loader2,
@@ -42,16 +43,8 @@ const formatIcons: Record<string, typeof FileText> = {
   tweet: Twitter,
 };
 
-const formatLabels: Record<string, string> = {
-  hook: 'Hooks',
-  caption: 'Captions',
-  script: 'Scripts',
-  bio: 'Bios',
-  pitch: 'Pitches',
-  tweet: 'Tweets',
-};
-
 export default function CreativesStudio() {
+  const { t } = useTranslation();
   const { assets, selectedAsset, setSelectedAsset, runAgent } = useMedia();
   const { currentWorkspace } = useWorkspace();
   const { toast } = useToast();
@@ -59,6 +52,15 @@ export default function CreativesStudio() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const formatLabels: Record<string, string> = {
+    hook: t("creativesStudio.formatHooks"),
+    caption: t("creativesStudio.formatCaptions"),
+    script: t("creativesStudio.formatScripts"),
+    bio: t("creativesStudio.formatBios"),
+    pitch: t("creativesStudio.formatPitches"),
+    tweet: t("creativesStudio.formatTweets"),
+  };
 
   // Fetch creatives for selected asset
   useEffect(() => {
@@ -153,7 +155,7 @@ export default function CreativesStudio() {
             media_asset_id: selectedAsset.id,
             workspace_id: currentWorkspace.id,
             format: 'pitch',
-            name: 'One-Liner Pitch',
+            name: t("creativesStudio.oneLinerPitch"),
             copy_json: { text: output.one_liner },
             status: 'draft',
           });
@@ -169,15 +171,15 @@ export default function CreativesStudio() {
         if (!error && data) {
           setCreatives(prev => [...data as Creative[], ...prev]);
           toast({
-            title: 'Creatives Generated',
-            description: `Created ${data.length} new creative assets`,
+            title: t("creativesStudio.toastGeneratedTitle"),
+            description: t("creativesStudio.toastGeneratedDescription", { count: data.length }),
           });
         }
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to generate creatives',
+        title: t("creativesStudio.toastErrorTitle"),
+        description: t("creativesStudio.toastErrorDescription"),
         variant: 'destructive',
       });
     } finally {
@@ -190,8 +192,8 @@ export default function CreativesStudio() {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
     toast({
-      title: 'Copied',
-      description: 'Text copied to clipboard',
+      title: t("creativesStudio.toastCopiedTitle"),
+      description: t("creativesStudio.toastCopiedDescription"),
     });
   };
 
@@ -207,23 +209,23 @@ export default function CreativesStudio() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Creatives Studio</h1>
+          <h1 className="text-2xl font-bold">{t("creativesStudio.title")}</h1>
           <p className="text-muted-foreground">
-            Generate hooks, captions, scripts, and promotional assets
+            {t("creativesStudio.subtitle")}
           </p>
         </div>
 
-        <Select 
-          value={selectedAsset?.id || ''} 
+        <Select
+          value={selectedAsset?.id || ''}
           onValueChange={(id) => setSelectedAsset(assets.find(a => a.id === id) || null)}
         >
           <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Select media asset" />
+            <SelectValue placeholder={t("creativesStudio.selectAssetPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {assets.map((asset) => (
               <SelectItem key={asset.id} value={asset.id}>
-                {asset.title || 'Untitled'} - {asset.platform}
+                {asset.title || t("creativesStudio.untitled")} - {asset.platform}
               </SelectItem>
             ))}
           </SelectContent>
@@ -236,9 +238,9 @@ export default function CreativesStudio() {
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <Sparkles className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Select a Media Asset</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("creativesStudio.selectAssetHeading")}</h3>
             <p className="text-muted-foreground text-center mb-4 max-w-md">
-              Choose a media asset to generate and manage creative content.
+              {t("creativesStudio.selectAssetDescription")}
             </p>
           </CardContent>
         </Card>
@@ -246,7 +248,7 @@ export default function CreativesStudio() {
         <div className="space-y-6">
           {/* Generate Actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card 
+            <Card
               className="cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => !generating && handleGenerate('hooks')}
             >
@@ -256,12 +258,12 @@ export default function CreativesStudio() {
                 ) : (
                   <MessageSquare className="w-8 h-8 text-primary mb-2" />
                 )}
-                <h4 className="font-medium">Generate Hooks</h4>
-                <p className="text-xs text-muted-foreground">Short-form openers</p>
+                <h4 className="font-medium">{t("creativesStudio.generateHooks")}</h4>
+                <p className="text-xs text-muted-foreground">{t("creativesStudio.generateHooksDesc")}</p>
               </CardContent>
             </Card>
 
-            <Card 
+            <Card
               className="cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => !generating && handleGenerate('captions')}
             >
@@ -271,12 +273,12 @@ export default function CreativesStudio() {
                 ) : (
                   <Instagram className="w-8 h-8 text-primary mb-2" />
                 )}
-                <h4 className="font-medium">Generate Captions</h4>
-                <p className="text-xs text-muted-foreground">Social media copy</p>
+                <h4 className="font-medium">{t("creativesStudio.generateCaptions")}</h4>
+                <p className="text-xs text-muted-foreground">{t("creativesStudio.generateCaptionsDesc")}</p>
               </CardContent>
             </Card>
 
-            <Card 
+            <Card
               className="cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => !generating && handleGenerate('scripts')}
             >
@@ -286,12 +288,12 @@ export default function CreativesStudio() {
                 ) : (
                   <Youtube className="w-8 h-8 text-primary mb-2" />
                 )}
-                <h4 className="font-medium">Generate Scripts</h4>
-                <p className="text-xs text-muted-foreground">Reels/Shorts scripts</p>
+                <h4 className="font-medium">{t("creativesStudio.generateScripts")}</h4>
+                <p className="text-xs text-muted-foreground">{t("creativesStudio.generateScriptsDesc")}</p>
               </CardContent>
             </Card>
 
-            <Card 
+            <Card
               className="cursor-pointer hover:border-primary/50 transition-colors"
               onClick={() => !generating && handleGenerate('kit')}
             >
@@ -301,8 +303,8 @@ export default function CreativesStudio() {
                 ) : (
                   <Music2 className="w-8 h-8 text-primary mb-2" />
                 )}
-                <h4 className="font-medium">Press Kit</h4>
-                <p className="text-xs text-muted-foreground">Bios & pitches</p>
+                <h4 className="font-medium">{t("creativesStudio.pressKit")}</h4>
+                <p className="text-xs text-muted-foreground">{t("creativesStudio.pressKitDesc")}</p>
               </CardContent>
             </Card>
           </div>
@@ -316,7 +318,7 @@ export default function CreativesStudio() {
             <Card className="bg-muted/30">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <p className="text-muted-foreground text-center">
-                  No creatives generated yet. Click one of the buttons above to get started.
+                  {t("creativesStudio.noCreatives")}
                 </p>
               </CardContent>
             </Card>
@@ -339,7 +341,7 @@ export default function CreativesStudio() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {items.map((creative) => {
                       const copyJson = creative.copy_json as Record<string, any>;
-                      const text = copyJson?.text || copyJson?.hook || copyJson?.content || 
+                      const text = copyJson?.text || copyJson?.hook || copyJson?.content ||
                         (typeof copyJson === 'string' ? copyJson : JSON.stringify(copyJson, null, 2));
 
                       return (
@@ -356,14 +358,14 @@ export default function CreativesStudio() {
                             )}
                           </CardHeader>
                           <CardContent>
-                            <Textarea 
+                            <Textarea
                               value={text}
                               readOnly
                               className="min-h-[100px] resize-none bg-muted/50"
                             />
                             <div className="flex justify-end gap-2 mt-3">
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
                                 onClick={() => handleCopy(text, creative.id)}
                               >
@@ -372,7 +374,7 @@ export default function CreativesStudio() {
                                 ) : (
                                   <Copy className="w-4 h-4 mr-1" />
                                 )}
-                                {copiedId === creative.id ? 'Copied' : 'Copy'}
+                                {copiedId === creative.id ? t("creativesStudio.copied") : t("creativesStudio.copy")}
                               </Button>
                             </div>
                           </CardContent>
@@ -390,7 +392,7 @@ export default function CreativesStudio() {
             <div className="flex justify-end">
               <Button variant="outline">
                 <Download className="w-4 h-4 mr-2" />
-                Export All Creatives
+                {t("creativesStudio.exportAll")}
               </Button>
             </div>
           )}
