@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Building2, CheckCircle2, Globe, Loader2, Rocket, Shield, Target, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,53 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 
-const profiles = [
-  {
-    id: "consultant",
-    title: "Consultant",
-    description: "One cockpit to review client signals, explain anomalies and turn insight into next actions.",
-    icon: Target,
-  },
-  {
-    id: "agency",
-    title: "Agency",
-    description: "Multi-client delivery with governance, approval workflows and impact reporting.",
-    icon: Users,
-  },
-  {
-    id: "brand",
-    title: "Brand",
-    description: "Connected internal growth workspace for decisions, validations and measurable outcomes.",
-    icon: Building2,
-  },
-] as const;
-
-const plans = [
-  {
-    id: "solo",
-    title: "Solo",
-    price: "€490 / month",
-    description: "Best for one operator or small consulting workflow.",
-    stripePlanType: "department",
-  },
-  {
-    id: "agency",
-    title: "Agency",
-    price: "€1,900 / month",
-    description: "Best for client-facing teams that need governance and repeatability.",
-    stripePlanType: "department",
-  },
-  {
-    id: "scale",
-    title: "Scale",
-    price: "Custom / month",
-    description: "Best for brands that need broader governance and packaging support.",
-    stripePlanType: "full_company",
-  },
-] as const;
-
-type ProfileId = (typeof profiles)[number]["id"];
-type PlanId = (typeof plans)[number]["id"];
+type ProfileId = "consultant" | "agency" | "brand";
+type PlanId = "solo" | "agency" | "scale";
 
 const isValidUrl = (url: string): boolean => {
   try {
@@ -91,9 +47,55 @@ const generateSlug = (name: string): string =>
     .slice(0, 50);
 
 export default function Onboarding() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { workspaces } = useWorkspace();
+
+  const profiles = useMemo(() => [
+    {
+      id: "consultant" as const,
+      title: t("onboardingFlow.consultantTitle"),
+      description: t("onboardingFlow.consultantDesc"),
+      icon: Target,
+    },
+    {
+      id: "agency" as const,
+      title: t("onboardingFlow.agencyTitle"),
+      description: t("onboardingFlow.agencyDesc"),
+      icon: Users,
+    },
+    {
+      id: "brand" as const,
+      title: t("onboardingFlow.brandTitle"),
+      description: t("onboardingFlow.brandDesc"),
+      icon: Building2,
+    },
+  ], [t]);
+
+  const plans = useMemo(() => [
+    {
+      id: "solo" as const,
+      title: t("onboardingFlow.soloTitle"),
+      price: t("onboardingFlow.soloPrice"),
+      description: t("onboardingFlow.soloDesc"),
+      stripePlanType: "department",
+    },
+    {
+      id: "agency" as const,
+      title: t("onboardingFlow.agencyPlanTitle"),
+      price: t("onboardingFlow.agencyPlanPrice"),
+      description: t("onboardingFlow.agencyPlanDesc"),
+      stripePlanType: "department",
+    },
+    {
+      id: "scale" as const,
+      title: t("onboardingFlow.scaleTitle"),
+      price: t("onboardingFlow.scalePrice"),
+      description: t("onboardingFlow.scaleDesc"),
+      stripePlanType: "full_company",
+    },
+  ], [t]);
 
   const [siteUrl, setSiteUrl] = useState("");
   const [siteName, setSiteName] = useState("");
@@ -120,15 +122,15 @@ export default function Onboarding() {
     const params = new URLSearchParams(window.location.search);
     const checkoutStatus = params.get("checkout");
     if (checkoutStatus === "success") {
-      toast.success("Subscription confirmed. Your workspace is ready.");
+      toast.success(t("onboardingFlow.subscriptionConfirmed"));
       window.history.replaceState({}, "", window.location.pathname);
       navigate("/dashboard");
     }
     if (checkoutStatus === "cancelled") {
-      toast.error("Checkout cancelled. Your onboarding draft is still here.");
+      toast.error(t("onboardingFlow.checkoutCancelled"));
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   const progress = useMemo(() => {
     let completed = 0;
@@ -141,7 +143,7 @@ export default function Onboarding() {
 
   const analyzeSite = async () => {
     if (!isValidUrl(siteUrl)) {
-      toast.error("Enter a valid website first.");
+      toast.error(t("onboardingFlow.enterValidWebsite"));
       return;
     }
     setAnalysisLoading(true);
@@ -159,7 +161,7 @@ export default function Onboarding() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Unable to analyze the site right now.");
+      toast.error(t("onboardingFlow.unableToAnalyze"));
     } finally {
       setAnalysisLoading(false);
     }
@@ -189,11 +191,11 @@ export default function Onboarding() {
         console.error("Non blocking site creation error", siteError);
       }
 
-      toast.success("Workspace created. You can now review signals and priorities.");
+      toast.success(t("onboardingFlow.workspaceCreated"));
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error(error instanceof Error ? error.message : "Unable to create the workspace.");
+      toast.error(error instanceof Error ? error.message : t("onboardingFlow.unableToCreateWorkspace"));
     } finally {
       setSubmitting(false);
     }
@@ -202,7 +204,7 @@ export default function Onboarding() {
   const launchCheckout = async () => {
     if (!user) return;
     if (!isValidUrl(siteUrl)) {
-      toast.error("Enter a valid website first.");
+      toast.error(t("onboardingFlow.enterValidWebsite"));
       return;
     }
     setSubmitting(true);
@@ -229,11 +231,11 @@ export default function Onboarding() {
       });
 
       if (error) throw error;
-      if (!data?.url) throw new Error("Missing checkout URL.");
+      if (!data?.url) throw new Error(t("onboardingFlow.missingCheckoutUrl"));
       window.location.href = data.url;
     } catch (error) {
       console.error(error);
-      toast.error(error instanceof Error ? error.message : "Unable to start checkout.");
+      toast.error(error instanceof Error ? error.message : t("onboardingFlow.unableToStartCheckout"));
     } finally {
       setSubmitting(false);
     }
@@ -254,7 +256,7 @@ export default function Onboarding() {
           <div className="p-2 rounded-lg gradient-bg">
             <Rocket className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-xl">Growth OS</span>
+          <span className="font-bold text-xl">{t("onboardingFlow.growthOs")}</span>
         </div>
       </header>
 
@@ -262,23 +264,23 @@ export default function Onboarding() {
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
           <Card className="border-primary/20 bg-background/90 backdrop-blur">
             <CardHeader>
-              <Badge variant="agent" className="w-fit mb-3">Onboarding</Badge>
-              <CardTitle className="text-3xl">Set up your 2026 growth cockpit</CardTitle>
+              <Badge variant="agent" className="w-fit mb-3">{t("onboardingFlow.onboardingBadge")}</Badge>
+              <CardTitle className="text-3xl">{t("onboardingFlow.setupTitle")}</CardTitle>
               <CardDescription className="text-base leading-7">
-                Define the operating model, connect the primary website and launch a workspace focused on signals, actions, approvals and measurable outcomes.
+                {t("onboardingFlow.setupDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <div>
                 <div className="flex items-center justify-between mb-2 text-sm">
-                  <span className="text-muted-foreground">Setup progress</span>
+                  <span className="text-muted-foreground">{t("onboardingFlow.setupProgress")}</span>
                   <span className="font-medium">{progress}%</span>
                 </div>
                 <Progress value={progress} className="h-2" />
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="site-url">Primary website</Label>
+                <Label htmlFor="site-url">{t("onboardingFlow.primaryWebsite")}</Label>
                 <div className="flex gap-3">
                   <Input
                     id="site-url"
@@ -289,11 +291,11 @@ export default function Onboarding() {
                   />
                   <Button variant="outline" className="h-12" onClick={analyzeSite} disabled={analysisLoading || !siteUrl}>
                     {analysisLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
-                    <span className="ml-2 hidden sm:inline">Analyze</span>
+                    <span className="ml-2 hidden sm:inline">{t("onboardingFlow.analyze")}</span>
                   </Button>
                 </div>
                 <Input
-                  placeholder="Workspace name"
+                  placeholder={t("onboardingFlow.workspaceName")}
                   value={siteName}
                   onChange={(event) => setSiteName(event.target.value)}
                   className="h-11"
@@ -301,7 +303,7 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-4">
-                <Label>Who is this workspace for?</Label>
+                <Label>{t("onboardingFlow.whoIsThisFor")}</Label>
                 <div className="grid gap-4 md:grid-cols-3">
                   {profiles.map((item) => {
                     const Icon = item.icon;
@@ -325,7 +327,7 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-4">
-                <Label>Choose packaging</Label>
+                <Label>{t("onboardingFlow.choosePackaging")}</Label>
                 <div className="grid gap-4 md:grid-cols-3">
                   {plans.map((item) => {
                     const active = plan === item.id;
@@ -349,10 +351,10 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="notes">Primary objective or context</Label>
+                <Label htmlFor="notes">{t("onboardingFlow.primaryObjective")}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Example: Detect performance drops faster, standardize approvals, and prove impact for each client/workspace."
+                  placeholder={t("onboardingFlow.objectivePlaceholder")}
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   rows={5}
@@ -362,17 +364,17 @@ export default function Onboarding() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button variant="outline" size="lg" onClick={createWorkspaceDirectly} disabled={submitting || !isValidUrl(siteUrl)}>
                   {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                  Create workspace now
+                  {t("onboardingFlow.createWorkspaceNow")}
                 </Button>
                 <Button variant="hero" size="lg" onClick={launchCheckout} disabled={submitting || !isValidUrl(siteUrl)}>
                   {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                  Continue to checkout
+                  {t("onboardingFlow.continueToCheckout")}
                 </Button>
               </div>
 
               {workspaces && workspaces.length > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  You already have {workspaces.length} workspace(s). <button onClick={() => navigate("/dashboard")} className="text-primary hover:underline">Go straight to the cockpit</button>.
+                  {t("onboardingFlow.existingWorkspaces", { count: workspaces.length })} <button onClick={() => navigate("/dashboard")} className="text-primary hover:underline">{t("onboardingFlow.existingWorkspacesCta")}</button>.
                 </p>
               )}
             </CardContent>
@@ -381,21 +383,21 @@ export default function Onboarding() {
           <div className="space-y-6">
             <Card className="border-border/60 bg-background/90 backdrop-blur">
               <CardHeader>
-                <CardTitle className="text-xl">What gets activated</CardTitle>
-                <CardDescription>Existing product foundations are kept intact while the front-door positioning changes.</CardDescription>
+                <CardTitle className="text-xl">{t("onboardingFlow.whatGetsActivated")}</CardTitle>
+                <CardDescription>{t("onboardingFlow.whatGetsActivatedDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
                   <Shield className="w-4 h-4 text-primary mt-0.5" />
-                  <span>Approval gate, audit log and RBAC stay part of the workflow for sensitive actions.</span>
+                  <span>{t("onboardingFlow.activationApproval")}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <Target className="w-4 h-4 text-primary mt-0.5" />
-                  <span>Recommendations can be justified through evidence bundles before execution.</span>
+                  <span>{t("onboardingFlow.activationEvidence")}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <Rocket className="w-4 h-4 text-primary mt-0.5" />
-                  <span>Scheduler and integrations are ready to refresh signals, briefs and outcome tracking.</span>
+                  <span>{t("onboardingFlow.activationScheduler")}</span>
                 </div>
               </CardContent>
             </Card>

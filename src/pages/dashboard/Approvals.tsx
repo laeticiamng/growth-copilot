@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, CheckCircle2, Clock, FileText, Shield, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
 
 export default function Approvals() {
+  const { t } = useTranslation();
   const { pendingApprovals, recentDecisions, loading, approveAction, rejectAction } = useApprovals();
   const { bundles } = useEvidenceBundles();
   const { entries } = useAuditLog();
@@ -24,8 +26,8 @@ export default function Approvals() {
     setProcessingId(id);
     const { error } = await approveAction(id);
     setProcessingId(null);
-    if (error) toast.error("Unable to approve this action.");
-    else toast.success("Action approved.");
+    if (error) toast.error(t("approvalsPage.approveError"));
+    else toast.success(t("approvalsPage.approveSuccess"));
   };
 
   const handleReject = async () => {
@@ -33,8 +35,8 @@ export default function Approvals() {
     setProcessingId(rejectingId);
     const { error } = await rejectAction(rejectingId, reason);
     setProcessingId(null);
-    if (error) toast.error("Unable to reject this action.");
-    else toast.success("Action rejected.");
+    if (error) toast.error(t("approvalsPage.rejectError"));
+    else toast.success(t("approvalsPage.rejectSuccess"));
     setRejectingId(null);
     setReason("");
   };
@@ -43,54 +45,54 @@ export default function Approvals() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div>
-          <Badge variant="agent" className="mb-3">Approvals</Badge>
-          <h1 className="text-3xl font-bold">Review sensitive actions before execution</h1>
+          <Badge variant="agent" className="mb-3">{t("approvalsPage.badge")}</Badge>
+          <h1 className="text-3xl font-bold">{t("approvalsPage.pageTitle")}</h1>
           <p className="text-muted-foreground mt-2 max-w-3xl">
-            Approval gates remain central to the product story: recommendations may be fast, but high-impact actions still route through human validation, evidence and auditability.
+            {t("approvalsPage.pageSubtitle")}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Badge variant="outline" className="px-3 py-1">{pendingApprovals.length} pending</Badge>
-          <Badge variant="outline" className="px-3 py-1">{recentDecisions.length} recent decisions</Badge>
+          <Badge variant="outline" className="px-3 py-1">{pendingApprovals.length} {t("approvalsPage.pending")}</Badge>
+          <Badge variant="outline" className="px-3 py-1">{recentDecisions.length} {t("approvalsPage.recentDecisionsBadge")}</Badge>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base text-muted-foreground">Pending actions</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">{t("approvalsPage.pendingActionsCard")}</CardTitle>
             <p className="text-3xl font-bold">{pendingApprovals.length}</p>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Actions currently waiting for an explicit review.</CardContent>
+          <CardContent className="text-sm text-muted-foreground">{t("approvalsPage.pendingActionsDesc")}</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base text-muted-foreground">Latest evidence bundle</CardTitle>
-            <p className="text-xl font-bold">{latestEvidence?.title ?? "Not available yet"}</p>
+            <CardTitle className="text-base text-muted-foreground">{t("approvalsPage.latestEvidenceBundle")}</CardTitle>
+            <p className="text-xl font-bold">{latestEvidence?.title ?? t("approvalsPage.notAvailableYet")}</p>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Use evidence bundles to understand the “why” before acting.</CardContent>
+          <CardContent className="text-sm text-muted-foreground">{t("approvalsPage.evidenceDesc")}</CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base text-muted-foreground">Audit trail events</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">{t("approvalsPage.auditTrailEvents")}</CardTitle>
             <p className="text-3xl font-bold">{entries.length}</p>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">Traceability stays visible when decisions are approved or rejected.</CardContent>
+          <CardContent className="text-sm text-muted-foreground">{t("approvalsPage.auditTrailDesc")}</CardContent>
         </Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Pending queue</CardTitle>
-            <CardDescription>These are the actions that require human approval before execution.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> {t("approvalsPage.pendingQueue")}</CardTitle>
+            <CardDescription>{t("approvalsPage.pendingQueueDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {loading ? (
-              <p className="text-sm text-muted-foreground">Loading approvals…</p>
+              <p className="text-sm text-muted-foreground">{t("approvalsPage.loadingApprovals")}</p>
             ) : pendingApprovals.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground">
-                No pending approvals right now.
+                {t("approvalsPage.noPending")}
               </div>
             ) : pendingApprovals.map((item) => (
               <div key={item.id} className="rounded-2xl border border-border/60 p-5">
@@ -101,7 +103,7 @@ export default function Approvals() {
                       <Badge variant="outline">{item.risk_level}</Badge>
                       <Badge variant="secondary">{item.agent_type}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">Created {item.created_at ? new Date(item.created_at).toLocaleString() : "n/a"}</p>
+                    <p className="text-sm text-muted-foreground">{t("approvalsPage.created")} {item.created_at ? new Date(item.created_at).toLocaleString() : "n/a"}</p>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(item.action_data || {}).map(([key, value]) => (
                         <Badge key={key} variant="outline">{key}: {String(value)}</Badge>
@@ -110,10 +112,10 @@ export default function Approvals() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button variant="outline" onClick={() => { setRejectingId(item.id); setReason(""); }} disabled={processingId === item.id}>
-                      <XCircle className="w-4 h-4 mr-2" /> Reject
+                      <XCircle className="w-4 h-4 mr-2" /> {t("approvalsPage.reject")}
                     </Button>
                     <Button onClick={() => handleApprove(item.id)} disabled={processingId === item.id}>
-                      <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> {t("approvalsPage.approve")}
                     </Button>
                   </div>
                 </div>
@@ -125,20 +127,20 @@ export default function Approvals() {
         <div className="space-y-4">
           <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Approval standard</CardTitle>
-              <CardDescription>Use a consistent review checklist to keep governance lightweight but credible.</CardDescription>
+              <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> {t("approvalsPage.approvalStandard")}</CardTitle>
+              <CardDescription>{t("approvalsPage.approvalStandardDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div className="rounded-xl border border-border/60 p-4">1. Confirm the signal is real and supported by connected data.</div>
-              <div className="rounded-xl border border-border/60 p-4">2. Check the evidence bundle and limits of confidence.</div>
-              <div className="rounded-xl border border-border/60 p-4">3. Validate owner, scope, expected impact and rollback logic.</div>
+              <div className="rounded-xl border border-border/60 p-4">{t("approvalsPage.checklistStep1")}</div>
+              <div className="rounded-xl border border-border/60 p-4">{t("approvalsPage.checklistStep2")}</div>
+              <div className="rounded-xl border border-border/60 p-4">{t("approvalsPage.checklistStep3")}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> Recent decisions</CardTitle>
-              <CardDescription>Latest reviewed actions for visibility and follow-up.</CardDescription>
+              <CardTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> {t("approvalsPage.recentDecisionsTitle")}</CardTitle>
+              <CardDescription>{t("approvalsPage.recentDecisionsDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {recentDecisions.slice(0, 5).map((decision) => (
@@ -147,16 +149,16 @@ export default function Approvals() {
                     <p className="font-medium">{decision.action_type.replace(/_/g, " ")}</p>
                     <Badge variant={decision.status === "approved" ? "success" : "destructive"}>{decision.status}</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">Reviewed {decision.reviewed_at ? new Date(decision.reviewed_at).toLocaleString() : "n/a"}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t("approvalsPage.reviewed")} {decision.reviewed_at ? new Date(decision.reviewed_at).toLocaleString() : "n/a"}</p>
                 </div>
               ))}
-              {recentDecisions.length === 0 && <p className="text-sm text-muted-foreground">No reviewed actions yet.</p>}
+              {recentDecisions.length === 0 && <p className="text-sm text-muted-foreground">{t("approvalsPage.noReviewedActions")}</p>}
             </CardContent>
           </Card>
 
           <Link to="/dashboard/outcomes">
             <Button variant="outline" className="w-full">
-              Review outcome tracking
+              {t("approvalsPage.reviewOutcomeTracking")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
@@ -166,19 +168,19 @@ export default function Approvals() {
       {rejectingId && (
         <Card className="border-destructive/30">
           <CardHeader>
-            <CardTitle>Reject action</CardTitle>
-            <CardDescription>Capture the reason so the decision remains auditable.</CardDescription>
+            <CardTitle>{t("approvalsPage.rejectAction")}</CardTitle>
+            <CardDescription>{t("approvalsPage.rejectActionDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea
               value={reason}
               onChange={(event) => setReason(event.target.value)}
-              placeholder="Explain why this action is rejected or needs rework."
+              placeholder={t("approvalsPage.rejectReason")}
             />
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setRejectingId(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setRejectingId(null)}>{t("approvalsPage.cancel")}</Button>
               <Button variant="destructive" onClick={handleReject} disabled={!reason.trim() || processingId === rejectingId}>
-                Confirm rejection
+                {t("approvalsPage.confirmRejection")}
               </Button>
             </div>
           </CardContent>

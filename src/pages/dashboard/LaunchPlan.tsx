@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useMedia } from "@/hooks/useMedia";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Play, 
+import {
+  Play,
   Calendar,
   CheckCircle2,
   Clock,
@@ -38,6 +39,7 @@ interface LaunchTask {
 }
 
 export default function LaunchPlan() {
+  const { t } = useTranslation();
   const { assets, selectedAsset, setSelectedAsset, runAgent } = useMedia();
   const { currentWorkspace } = useWorkspace();
   const { toast } = useToast();
@@ -75,7 +77,7 @@ export default function LaunchPlan() {
     setGenerating(true);
     try {
       const result = await runAgent('media_strategy', selectedAsset.id);
-      
+
       // Save the generated plan
       const { data, error } = await supabase
         .from('media_distribution_plan')
@@ -92,14 +94,14 @@ export default function LaunchPlan() {
       if (!error && data) {
         setDistributionPlan(data);
         toast({
-          title: 'Plan Generated',
-          description: 'Your launch strategy has been created',
+          title: t("launchPlan.toastGeneratedTitle"),
+          description: t("launchPlan.toastGeneratedDescription"),
         });
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to generate launch plan',
+        title: t("launchPlan.toastErrorTitle"),
+        description: t("launchPlan.toastErrorDescription"),
         variant: 'destructive',
       });
     } finally {
@@ -109,24 +111,24 @@ export default function LaunchPlan() {
 
   const phases: LaunchPhase[] = distributionPlan?.phases ? [
     {
-      name: 'Pre-Launch',
+      name: t("launchPlan.phasePreLaunch"),
       date_offset: -7,
       tasks: distributionPlan.phases.pre_launch || []
     },
     {
-      name: 'Launch Day',
+      name: t("launchPlan.phaseLaunchDay"),
       date_offset: 0,
       tasks: distributionPlan.phases.launch || []
     },
     {
-      name: 'Post-Launch',
+      name: t("launchPlan.phasePostLaunch"),
       date_offset: 7,
       tasks: distributionPlan.phases.post_launch || []
     }
   ] : [];
 
-  const launchDate = selectedAsset?.release_date 
-    ? new Date(selectedAsset.release_date) 
+  const launchDate = selectedAsset?.release_date
+    ? new Date(selectedAsset.release_date)
     : addDays(new Date(), 7);
 
   return (
@@ -134,24 +136,24 @@ export default function LaunchPlan() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Launch Plan</h1>
+          <h1 className="text-2xl font-bold">{t("launchPlan.title")}</h1>
           <p className="text-muted-foreground">
-            Plan and execute your media release strategy
+            {t("launchPlan.subtitle")}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Select 
-            value={selectedAsset?.id || ''} 
+          <Select
+            value={selectedAsset?.id || ''}
             onValueChange={(id) => setSelectedAsset(assets.find(a => a.id === id) || null)}
           >
             <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Select media asset" />
+              <SelectValue placeholder={t("launchPlan.selectAssetPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {assets.map((asset) => (
                 <SelectItem key={asset.id} value={asset.id}>
-                  {asset.title || 'Untitled'} - {asset.platform}
+                  {asset.title || t("launchPlan.untitled")} - {asset.platform}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -165,9 +167,9 @@ export default function LaunchPlan() {
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <Calendar className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Select a Media Asset</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("launchPlan.selectAssetHeading")}</h3>
             <p className="text-muted-foreground text-center mb-4 max-w-md">
-              Choose a media asset from the dropdown above to view or create its launch plan.
+              {t("launchPlan.selectAssetDescription")}
             </p>
           </CardContent>
         </Card>
@@ -181,20 +183,20 @@ export default function LaunchPlan() {
             <div className="p-4 rounded-full bg-primary/10 mb-4">
               <Sparkles className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Generate Launch Strategy</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("launchPlan.generateHeading")}</h3>
             <p className="text-muted-foreground text-center mb-4 max-w-md">
-              Our AI agents will create a comprehensive pre-launch, launch, and post-launch plan for "{selectedAsset.title}".
+              {t("launchPlan.generateDescription", { title: selectedAsset.title })}
             </p>
             <Button variant="gradient" onClick={handleGeneratePlan} disabled={generating}>
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating Plan...
+                  {t("launchPlan.generatingPlan")}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Launch Plan
+                  {t("launchPlan.generateButton")}
                 </>
               )}
             </Button>
@@ -206,26 +208,26 @@ export default function LaunchPlan() {
           <Card>
             <CardContent className="flex items-center gap-4 py-4">
               {selectedAsset.thumbnail_url && (
-                <img 
-                  src={selectedAsset.thumbnail_url} 
-                  alt={selectedAsset.title || ''} 
+                <img
+                  src={selectedAsset.thumbnail_url}
+                  alt={selectedAsset.title || ''}
                   className="w-16 h-16 rounded-lg object-cover"
                 />
               )}
               <div className="flex-1">
                 <h3 className="font-semibold">{selectedAsset.title}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {selectedAsset.artist_name} • Launch: {format(launchDate, 'MMM d, yyyy')}
+                  {selectedAsset.artist_name} • {t("launchPlan.launchLabel")}: {format(launchDate, 'MMM d, yyyy')}
                 </p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleGeneratePlan} disabled={generating}>
                   <RefreshCw className={`w-4 h-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
-                  Regenerate
+                  {t("launchPlan.regenerate")}
                 </Button>
                 <Button variant="outline" size="sm">
                   <Download className="w-4 h-4 mr-2" />
-                  Export
+                  {t("launchPlan.export")}
                 </Button>
               </div>
             </CardContent>
@@ -234,17 +236,17 @@ export default function LaunchPlan() {
           {/* Timeline */}
           <Tabs defaultValue="timeline" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="tasks">All Tasks</TabsTrigger>
-              <TabsTrigger value="kpis">KPIs</TabsTrigger>
+              <TabsTrigger value="timeline">{t("launchPlan.tabTimeline")}</TabsTrigger>
+              <TabsTrigger value="tasks">{t("launchPlan.tabAllTasks")}</TabsTrigger>
+              <TabsTrigger value="kpis">{t("launchPlan.tabKPIs")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="timeline" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {phases.map((phase, index) => {
-                  const phaseDate = phase.date_offset === 0 
-                    ? launchDate 
-                    : phase.date_offset < 0 
+                  const phaseDate = phase.date_offset === 0
+                    ? launchDate
+                    : phase.date_offset < 0
                       ? subDays(launchDate, Math.abs(phase.date_offset))
                       : addDays(launchDate, phase.date_offset);
 
@@ -263,18 +265,18 @@ export default function LaunchPlan() {
                           </span>
                         </div>
                         <CardDescription>
-                          {completedTasks}/{tasks.length} tasks completed
+                          {t("launchPlan.tasksCompleted", { completed: completedTasks, total: tasks.length })}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {tasks.length === 0 ? (
                           <p className="text-sm text-muted-foreground text-center py-4">
-                            No tasks defined
+                            {t("launchPlan.noTasks")}
                           </p>
                         ) : (
                           tasks.slice(0, 5).map((task: any, idx: number) => (
-                            <div 
-                              key={idx} 
+                            <div
+                              key={idx}
                               className="flex items-start gap-2 p-2 rounded-lg bg-muted/50"
                             >
                           {task.status === 'completed' ? (
@@ -297,7 +299,7 @@ export default function LaunchPlan() {
                         )}
                         {tasks.length > 5 && (
                           <Button variant="ghost" size="sm" className="w-full">
-                            View all {tasks.length} tasks
+                            {t("launchPlan.viewAllTasks", { count: tasks.length })}
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         )}
@@ -311,21 +313,21 @@ export default function LaunchPlan() {
             <TabsContent value="tasks">
               <Card>
                 <CardHeader>
-                  <CardTitle>All Tasks</CardTitle>
+                  <CardTitle>{t("launchPlan.allTasksTitle")}</CardTitle>
                   <CardDescription>
-                    Complete checklist for your media launch
+                    {t("launchPlan.allTasksDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {phases.flatMap((phase) => 
+                    {phases.flatMap((phase) =>
                       (Array.isArray(phase.tasks) ? phase.tasks : []).map((task: any, idx: number) => (
-                        <div 
+                        <div
                           key={`${phase.name}-${idx}`}
                           className="flex items-center gap-3 p-3 rounded-lg border"
                         >
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={task.status === 'completed'}
                             className="h-4 w-4"
                             readOnly
@@ -348,9 +350,9 @@ export default function LaunchPlan() {
             <TabsContent value="kpis">
               <Card>
                 <CardHeader>
-                  <CardTitle>Target KPIs</CardTitle>
+                  <CardTitle>{t("launchPlan.targetKPIsTitle")}</CardTitle>
                   <CardDescription>
-                    Goals to track for this launch
+                    {t("launchPlan.targetKPIsDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -364,7 +366,7 @@ export default function LaunchPlan() {
                       </Card>
                     )) || (
                       <p className="text-muted-foreground col-span-full text-center py-8">
-                        KPI targets will be defined in the launch plan
+                        {t("launchPlan.kpiEmptyState")}
                       </p>
                     )}
                   </div>

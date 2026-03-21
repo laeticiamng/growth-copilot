@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   BadgeCheck,
@@ -19,36 +21,38 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { growthLoopSteps } from "@/lib/growth-cockpit";
 
-const capabilityCards = [
-  {
-    title: "Connected data model",
-    description: "Bring Google, Meta, site, subscription and workspace data into one cockpit instead of scattered reports.",
-    icon: BarChart3,
-  },
-  {
-    title: "Explainable anomalies",
-    description: "Spot sudden drops, channel drift and conversion friction with evidence-backed context.",
-    icon: Gauge,
-  },
-  {
-    title: "Prioritized decisions",
-    description: "Turn noise into ranked actions with owner, expected impact, risk level and next step.",
-    icon: Workflow,
-  },
-  {
-    title: "Governance by design",
-    description: "Use approval gates, audit logs and RBAC when recommendations become sensitive actions.",
-    icon: Shield,
-  },
-];
-
-const secondaryCapabilities = [
-  "Marketing execution stays available as a downstream capability, not the headline promise.",
-  "Evidence bundles justify recommendations before a user approves or rejects an action.",
-  "Schedulers keep briefs, refreshes and signal monitoring running without losing control.",
-];
-
 export default function Index() {
+  const { t } = useTranslation();
+
+  const capabilityCards = useMemo(() => [
+    {
+      title: t("indexPage.cap1Title"),
+      description: t("indexPage.cap1Desc"),
+      icon: BarChart3,
+    },
+    {
+      title: t("indexPage.cap2Title"),
+      description: t("indexPage.cap2Desc"),
+      icon: Gauge,
+    },
+    {
+      title: t("indexPage.cap3Title"),
+      description: t("indexPage.cap3Desc"),
+      icon: Workflow,
+    },
+    {
+      title: t("indexPage.cap4Title"),
+      description: t("indexPage.cap4Desc"),
+      icon: Shield,
+    },
+  ], [t]);
+
+  const secondaryCapabilities = useMemo(() => [
+    t("indexPage.secondary1"),
+    t("indexPage.secondary2"),
+    t("indexPage.secondary3"),
+  ], [t]);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -61,8 +65,8 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Growth OS — Connected growth cockpit"
-        description="Connect growth data, detect anomalies, prioritize actions, route approvals and prove outcomes in one cockpit."
+        title={t("indexPage.seoTitle")}
+        description={t("indexPage.seoDescription")}
         canonical="/"
         structuredData={structuredData}
       />
@@ -74,32 +78,32 @@ export default function Index() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto text-center">
               <Badge variant="agent" className="mb-6 px-4 py-2 text-sm">
-                2026 growth cockpit for operators, agencies and brands
+                {t("indexPage.badge")}
               </Badge>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-balance">
-                Connected growth data. <span className="gradient-text">Clear anomalies.</span><br />
-                Prioritized decisions with proof.
+                {t("indexPage.heroTitle1")} <span className="gradient-text">{t("indexPage.heroTitle2")}</span><br />
+                {t("indexPage.heroTitle3")}
               </h1>
               <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-8">
-                A premium operating cockpit that unifies signals, surfaces anomalies, prioritizes actions, routes approvals and tracks measurable outcomes.
+                {t("indexPage.heroSubtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
                 <Link to="/auth?tab=signup">
                   <Button variant="hero" size="lg" className="min-w-52">
-                    Start a workspace
+                    {t("indexPage.ctaStart")}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
                 <Link to="/use-cases">
                   <Button variant="outline" size="lg" className="min-w-52">
-                    Explore use cases
+                    {t("indexPage.ctaUseCases")}
                   </Button>
                 </Link>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-muted-foreground">
-                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary" /> Connected workspaces and RBAC</span>
-                <span className="flex items-center gap-2"><FileCheck2 className="w-4 h-4 text-primary" /> Approval gate and audit log</span>
-                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Evidence bundles and impact tracking</span>
+                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-primary" /> {t("indexPage.checkWorkspaces")}</span>
+                <span className="flex items-center gap-2"><FileCheck2 className="w-4 h-4 text-primary" /> {t("indexPage.checkApproval")}</span>
+                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> {t("indexPage.checkEvidence")}</span>
               </div>
             </div>
           </div>
@@ -109,10 +113,10 @@ export default function Index() {
           <div className="container mx-auto px-4">
             <div className="grid gap-4 md:grid-cols-4">
               {[
-                { value: "4", label: "steps from signal to outcome" },
-                { value: "1", label: "workspace model for multi-tenant delivery" },
-                { value: "100%", label: "auditability for sensitive actions" },
-                { value: "24/7", label: "scheduler-ready monitoring cadence" },
+                { value: t("indexPage.stat1Value"), label: t("indexPage.stat1Label") },
+                { value: t("indexPage.stat2Value"), label: t("indexPage.stat2Label") },
+                { value: t("indexPage.stat3Value"), label: t("indexPage.stat3Label") },
+                { value: t("indexPage.stat4Value"), label: t("indexPage.stat4Label") },
               ].map((stat) => (
                 <Card key={stat.label} className="border-border/60 bg-background/80 backdrop-blur">
                   <CardContent className="p-5 text-center">
@@ -128,9 +132,9 @@ export default function Index() {
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <Badge variant="agent" className="mb-4">Operating loop</Badge>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">From connected data to governed outcomes</h2>
-              <p className="text-lg text-muted-foreground">The product story is now a defensible loop: data → anomalies → actions → approvals → outcomes.</p>
+              <Badge variant="agent" className="mb-4">{t("indexPage.operatingLoopBadge")}</Badge>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">{t("indexPage.operatingLoopTitle")}</h2>
+              <p className="text-lg text-muted-foreground">{t("indexPage.operatingLoopDesc")}</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               {growthLoopSteps.map((step, index) => {
@@ -155,9 +159,9 @@ export default function Index() {
         <section className="py-16 md:py-24 bg-secondary/20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <Badge variant="agent" className="mb-4">Core capabilities</Badge>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">Built on the stack you already have</h2>
-              <p className="text-lg text-muted-foreground">The pivot keeps the technical moat: Supabase backend, approvals, auditability, scheduler, AI gateway, Stripe and channel integrations.</p>
+              <Badge variant="agent" className="mb-4">{t("indexPage.capabilitiesBadge")}</Badge>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4">{t("indexPage.capabilitiesTitle")}</h2>
+              <p className="text-lg text-muted-foreground">{t("indexPage.capabilitiesDesc")}</p>
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="grid gap-6 sm:grid-cols-2">
@@ -180,10 +184,10 @@ export default function Index() {
                 <CardHeader>
                   <CardTitle className="text-2xl flex items-center gap-2">
                     <BadgeCheck className="w-6 h-6 text-primary" />
-                    Secondary capability: marketing execution
+                    {t("indexPage.secondaryCap")}
                   </CardTitle>
                   <CardDescription className="leading-6 text-base">
-                    SEO, content, ads and social remain available, but as execution modules fed by signals and governance rather than the front-door promise.
+                    {t("indexPage.secondaryCapDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -194,7 +198,7 @@ export default function Index() {
                     </div>
                   ))}
                   <div className="rounded-xl border border-dashed border-primary/30 p-4 text-sm text-muted-foreground">
-                    This makes the product easier to understand in under 10 seconds and more defensible against generic agents.
+                    {t("indexPage.secondaryNote")}
                   </div>
                 </CardContent>
               </Card>
@@ -209,16 +213,16 @@ export default function Index() {
             <Card className="max-w-5xl mx-auto border-primary/20 bg-gradient-to-r from-primary/10 via-background to-background">
               <CardContent className="p-8 md:p-12 flex flex-col lg:flex-row gap-8 lg:items-center lg:justify-between">
                 <div className="max-w-2xl">
-                  <Badge variant="agent" className="mb-4">For 2026 operators</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Give every team one place to see signals, approve action and prove impact.</h2>
-                  <p className="text-muted-foreground text-lg">Move from dashboard sprawl and AI noise to a single cockpit with traceability, evidence and outcome tracking.</p>
+                  <Badge variant="agent" className="mb-4">{t("indexPage.ctaBadge")}</Badge>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("indexPage.ctaTitle")}</h2>
+                  <p className="text-muted-foreground text-lg">{t("indexPage.ctaDesc")}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link to="/onboarding">
-                    <Button variant="hero" size="lg">Start onboarding</Button>
+                    <Button variant="hero" size="lg">{t("indexPage.ctaOnboarding")}</Button>
                   </Link>
                   <Link to="/pricing">
-                    <Button variant="outline" size="lg">See packaging</Button>
+                    <Button variant="outline" size="lg">{t("indexPage.ctaPricing")}</Button>
                   </Link>
                 </div>
               </CardContent>

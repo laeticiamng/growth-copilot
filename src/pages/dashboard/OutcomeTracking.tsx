@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, FileText, History, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { OutcomeMetric, getOutcomeStatusMeta } from "@/lib/growth-cockpit";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function OutcomeTracking() {
+  const { t } = useTranslation();
   const { currentSite } = useSites();
   const { bundles, isLoading: evidenceLoading } = useEvidenceBundles();
   const { entries } = useAuditLog();
@@ -53,27 +55,27 @@ export default function OutcomeTracking() {
     return [
       {
         id: "clicks",
-        label: "Organic clicks",
+        label: t("outcomeTracking.organicClicks"),
         value: recentClicks.toLocaleString(),
-        change: `${clickDelta >= 0 ? "+" : ""}${clickDelta.toFixed(1)}% vs prior period`,
+        change: `${clickDelta >= 0 ? "+" : ""}${clickDelta.toFixed(1)}% ${t("outcomeTracking.vsPriorPeriod")}`,
         status: clickDelta >= 0 ? "up" : "down",
       },
       {
         id: "conversions",
-        label: "Conversions",
+        label: t("outcomeTracking.conversions"),
         value: recentConversions.toLocaleString(),
-        change: `${conversionDelta >= 0 ? "+" : ""}${conversionDelta.toFixed(1)}% vs prior period`,
+        change: `${conversionDelta >= 0 ? "+" : ""}${conversionDelta.toFixed(1)}% ${t("outcomeTracking.vsPriorPeriod")}`,
         status: conversionDelta >= 0 ? "up" : "down",
       },
       {
         id: "position",
-        label: "Average position",
-        value: avgPosition ? avgPosition.toFixed(1) : "n/a",
-        change: "Search visibility quality indicator",
+        label: t("outcomeTracking.avgPosition"),
+        value: avgPosition ? avgPosition.toFixed(1) : t("outcomeTracking.notAvailable"),
+        change: t("outcomeTracking.searchVisibilityIndicator"),
         status: "stable",
       },
     ];
-  }, [kpis]);
+  }, [kpis, t]);
 
   const auditHighlights = entries.slice(0, 5);
 
@@ -84,8 +86,8 @@ export default function OutcomeTracking() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Outcome Tracking</h1>
-        <p className="text-muted-foreground">Track whether the signal-to-action loop is producing measurable business improvement over time.</p>
+        <h1 className="text-3xl font-bold">{t("outcomeTracking.title")}</h1>
+        <p className="text-muted-foreground">{t("outcomeTracking.subtitle")}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -112,26 +114,26 @@ export default function OutcomeTracking() {
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> Evidence bundles</CardTitle>
-            <CardDescription>Use evidence artifacts as the proof layer behind recommendations and reported impact.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /> {t("outcomeTracking.evidenceTitle")}</CardTitle>
+            <CardDescription>{t("outcomeTracking.evidenceDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <EvidenceBundleList
               bundles={bundles.slice(0, 3)}
               loading={evidenceLoading}
-              emptyMessage="No evidence bundle has been generated yet for this workspace."
+              emptyMessage={t("outcomeTracking.noEvidenceBundle")}
             />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><History className="w-5 h-5 text-primary" /> Audit highlights</CardTitle>
-            <CardDescription>Recent traceability events that support governance and impact reviews.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><History className="w-5 h-5 text-primary" /> {t("outcomeTracking.auditTrailTitle")}</CardTitle>
+            <CardDescription>{t("outcomeTracking.auditTrailDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {auditHighlights.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No audit entries available yet.</p>
+              <p className="text-sm text-muted-foreground">{t("outcomeTracking.noAuditEntries")}</p>
             ) : auditHighlights.map((entry) => (
               <div key={entry.id} className="rounded-xl border border-border/60 p-4">
                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -139,7 +141,7 @@ export default function OutcomeTracking() {
                   <span className="text-xs text-muted-foreground">{new Date(entry.created_at).toLocaleString()}</span>
                 </div>
                 <p className="text-sm font-medium">{entry.entity_type}</p>
-                <p className="text-sm text-muted-foreground">Actor type: {entry.actor_type}</p>
+                <p className="text-sm text-muted-foreground">{t("outcomeTracking.actorType")}: {entry.actor_type}</p>
               </div>
             ))}
           </CardContent>
@@ -148,20 +150,20 @@ export default function OutcomeTracking() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> What “good” looks like</CardTitle>
+          <CardTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> {t("outcomeTracking.whatGoodLooksLike")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3 text-sm text-muted-foreground">
           <div className="rounded-xl border border-border/60 p-4">
-            <p className="font-medium text-foreground mb-2">Fast signal review</p>
-            <p>Teams can identify the highest-impact anomaly without spending the week collecting screenshots and exports.</p>
+            <p className="font-medium text-foreground mb-2">{t("outcomeTracking.fastSignalReview")}</p>
+            <p>{t("outcomeTracking.fastSignalReviewDesc")}</p>
           </div>
           <div className="rounded-xl border border-border/60 p-4">
-            <p className="font-medium text-foreground mb-2">Explainable action</p>
-            <p>Every recommendation points back to evidence, confidence and governance status.</p>
+            <p className="font-medium text-foreground mb-2">{t("outcomeTracking.explainableAction")}</p>
+            <p>{t("outcomeTracking.explainableActionDesc")}</p>
           </div>
           <div className="rounded-xl border border-border/60 p-4">
-            <p className="font-medium text-foreground mb-2">Measurable outcome</p>
-            <p>The cockpit helps prove whether approved actions improved performance, not just whether a task was executed.</p>
+            <p className="font-medium text-foreground mb-2">{t("outcomeTracking.measurableOutcome")}</p>
+            <p>{t("outcomeTracking.measurableOutcomeDesc")}</p>
           </div>
         </CardContent>
       </Card>

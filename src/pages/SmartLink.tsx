@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Youtube, 
-  Music, 
-  Apple, 
-  CloudRain, 
+import {
+  Youtube,
+  Music,
+  Apple,
+  CloudRain,
   Music2,
   Loader2,
   ExternalLink,
@@ -55,6 +56,7 @@ const platformIcons: Record<string, typeof Youtube> = {
 
 export default function SmartLinkPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [data, setData] = useState<SmartLinkData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function SmartLinkPage() {
 
         // Build platform links
         const platformLinks: SmartLinkData['links'] = [];
-        
+
         if (asset.platform === 'youtube_video' || asset.platform === 'youtube_channel') {
           platformLinks.push({
             platform: 'youtube',
@@ -101,7 +103,7 @@ export default function SmartLinkPage() {
             color: '#FF0000'
           });
         }
-        
+
         if (asset.platform.startsWith('spotify_')) {
           platformLinks.push({
             platform: 'spotify',
@@ -153,7 +155,7 @@ export default function SmartLinkPage() {
           links: platformLinks,
         workspace_id: asset.workspace_id,
           show_email_capture: (config.show_email_capture as boolean) || false,
-          email_capture_text: (config.email_capture_text as string) || 'Get notified about new releases',
+          email_capture_text: (config.email_capture_text as string) || t("smartLink.defaultEmailCapture"),
           background_color: (config.background_color as string) || '#1a1a2e',
           text_color: (config.text_color as string) || '#ffffff',
           accent_color: (config.accent_color as string) || '#4a90d9'
@@ -165,12 +167,12 @@ export default function SmartLinkPage() {
     };
 
     fetchSmartLink();
-  }, [slug]);
+  }, [slug, t]);
 
   const handleLinkClick = async (platform: string, url: string) => {
     // Track click
     const urlParams = new URLSearchParams(window.location.search);
-    
+
     await supabase.from('smart_link_clicks').insert({
       media_asset_id: data?.id,
       platform,
@@ -193,7 +195,7 @@ export default function SmartLinkPage() {
     setSubmitting(true);
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      
+
       const { error } = await supabase.from('smart_link_emails').insert({
         media_asset_id: data.id,
         workspace_id: data.workspace_id,
@@ -207,14 +209,14 @@ export default function SmartLinkPage() {
       if (!error) {
         setEmailSubmitted(true);
         toast({
-          title: 'Subscribed!',
-          description: "You'll be notified about new releases",
+          title: t("smartLink.subscribedTitle"),
+          description: t("smartLink.subscribedDesc"),
         });
       }
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to subscribe',
+        title: t("smartLink.errorTitle"),
+        description: t("smartLink.errorDesc"),
         variant: 'destructive',
       });
     }
@@ -233,17 +235,17 @@ export default function SmartLinkPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#1a1a2e' }}>
         <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-2">Link Not Found</h1>
-          <p className="text-white/60">This smart link doesn't exist or has been removed.</p>
+          <h1 className="text-2xl font-bold mb-2">{t("smartLink.notFound")}</h1>
+          <p className="text-white/60">{t("smartLink.notFoundDesc")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ 
+      style={{
         backgroundColor: data.background_color,
         color: data.text_color
       }}
@@ -252,9 +254,9 @@ export default function SmartLinkPage() {
         {/* Cover Art */}
         {data.thumbnail_url && (
           <div className="aspect-square w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden shadow-2xl">
-            <img 
-              src={data.thumbnail_url} 
-              alt={data.title || 'Cover'} 
+            <img
+              src={data.thumbnail_url}
+              alt={data.title || t("smartLink.cover")}
               className="w-full h-full object-cover"
             />
           </div>
@@ -262,7 +264,7 @@ export default function SmartLinkPage() {
 
         {/* Title & Artist */}
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold">{data.title || 'Untitled'}</h1>
+          <h1 className="text-2xl font-bold">{data.title || t("smartLink.untitled")}</h1>
           {data.artist_name && (
             <p className="text-lg opacity-80">{data.artist_name}</p>
           )}
@@ -272,7 +274,7 @@ export default function SmartLinkPage() {
         <div className="space-y-3">
           {data.links.map((link) => {
             const Icon = platformIcons[link.icon] || Music2;
-            
+
             return (
               <Button
                 key={link.platform}
@@ -281,7 +283,7 @@ export default function SmartLinkPage() {
                 style={{ color: data.text_color }}
                 onClick={() => handleLinkClick(link.platform, link.url)}
               >
-                <div 
+                <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: link.color }}
                 >
@@ -304,25 +306,25 @@ export default function SmartLinkPage() {
                 </p>
                 <Input
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder={t("smartLink.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                   required
                 />
                 <div className="flex items-start gap-2">
-                  <Checkbox 
-                    id="consent" 
+                  <Checkbox
+                    id="consent"
                     checked={consent}
                     onCheckedChange={(checked) => setConsent(checked === true)}
                     className="border-white/40 data-[state=checked]:bg-white data-[state=checked]:text-black"
                   />
                   <label htmlFor="consent" className="text-xs opacity-70 leading-tight">
-                    I agree to receive emails about new releases and updates. You can unsubscribe at any time.
+                    {t("smartLink.consentLabel")}
                   </label>
                 </div>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   style={{ backgroundColor: data.accent_color }}
                   disabled={!email || !consent || submitting}
@@ -332,7 +334,7 @@ export default function SmartLinkPage() {
                   ) : (
                     <>
                       <Mail className="w-4 h-4 mr-2" />
-                      Subscribe
+                      {t("smartLink.subscribe")}
                     </>
                   )}
                 </Button>
@@ -344,13 +346,13 @@ export default function SmartLinkPage() {
         {emailSubmitted && (
           <div className="text-center py-4">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2" style={{ color: data.accent_color }} />
-            <p className="text-sm opacity-80">Thanks for subscribing!</p>
+            <p className="text-sm opacity-80">{t("smartLink.thanksForSubscribing")}</p>
           </div>
         )}
 
         {/* Footer */}
         <p className="text-center text-xs opacity-50">
-          Powered by Growth OS
+          {t("smartLink.poweredBy")}
         </p>
       </div>
     </div>

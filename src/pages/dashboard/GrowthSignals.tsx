@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowRight, BarChart3, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -12,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GrowthSignal, getSeverityMeta } from "@/lib/growth-cockpit";
 
 export default function GrowthSignals() {
+  const { t } = useTranslation();
   const { currentWorkspace } = useWorkspace();
   const { currentSite } = useSites();
 
@@ -73,36 +75,36 @@ export default function GrowthSignals() {
     return [
       {
         id: "traffic-shift",
-        title: "Organic traffic momentum",
-        description: "Compare the latest 30-day window with the previous period to identify meaningful volume shifts.",
+        title: t("growthSignals.trafficMomentumTitle"),
+        description: t("growthSignals.trafficMomentumDesc"),
         severity: clickDelta < -10 ? "critical" : clickDelta < 5 ? "warning" : "healthy",
-        metric: `${recentClicks.toLocaleString()} clicks`,
-        trend: `${clickDelta >= 0 ? "+" : ""}${clickDelta.toFixed(1)}% vs previous window`,
-        source: "Search Console / KPIs",
-        impact: clickDelta < -10 ? "Traffic drop likely deserves review" : "No major traffic degradation detected",
+        metric: t("growthSignals.clicksMetric", { count: recentClicks.toLocaleString() }),
+        trend: t("growthSignals.vsPreviousWindow", { delta: `${clickDelta >= 0 ? "+" : ""}${clickDelta.toFixed(1)}%` }),
+        source: t("growthSignals.sourceSearchConsole"),
+        impact: clickDelta < -10 ? t("growthSignals.trafficDropImpact") : t("growthSignals.noTrafficDegradation"),
       },
       {
         id: "conversion-health",
-        title: "Conversion efficiency",
-        description: "Surface whether conversions are improving or weakening relative to recent baseline.",
+        title: t("growthSignals.conversionEfficiencyTitle"),
+        description: t("growthSignals.conversionEfficiencyDesc"),
         severity: conversionDelta < -5 ? "warning" : conversionDelta > 8 ? "healthy" : "warning",
-        metric: `${recentConversions.toLocaleString()} conversions`,
-        trend: `${conversionDelta >= 0 ? "+" : ""}${conversionDelta.toFixed(1)}% vs previous window`,
-        source: "Connected performance data",
-        impact: conversionDelta < 0 ? "Potential funnel friction or traffic quality shift" : "Positive trend worth amplifying",
+        metric: t("growthSignals.conversionsMetric", { count: recentConversions.toLocaleString() }),
+        trend: t("growthSignals.vsPreviousWindow", { delta: `${conversionDelta >= 0 ? "+" : ""}${conversionDelta.toFixed(1)}%` }),
+        source: t("growthSignals.sourcePerformanceData"),
+        impact: conversionDelta < 0 ? t("growthSignals.funnelFrictionImpact") : t("growthSignals.positiveTrendImpact"),
       },
       {
         id: "ranking-health",
-        title: "Search visibility quality",
-        description: "Watch average ranking health as a proxy for SEO discoverability and content freshness.",
+        title: t("growthSignals.searchVisibilityTitle"),
+        description: t("growthSignals.searchVisibilityDesc"),
         severity: Number(latestAvgPosition) > 20 ? "warning" : "healthy",
-        metric: `Avg. position ${latestAvgPosition}`,
-        trend: connectedIntegrations > 0 ? `${connectedIntegrations} active connectors` : "No active connector detected",
-        source: "Search + integrations",
-        impact: connectedIntegrations > 0 ? "Data pipeline ready for ongoing monitoring" : "Connect sources to unlock live signal detection",
+        metric: t("growthSignals.avgPositionMetric", { position: latestAvgPosition }),
+        trend: connectedIntegrations > 0 ? t("growthSignals.activeConnectors", { count: connectedIntegrations }) : t("growthSignals.noActiveConnector"),
+        source: t("growthSignals.sourceSearchIntegrations"),
+        impact: connectedIntegrations > 0 ? t("growthSignals.pipelineReadyImpact") : t("growthSignals.connectSourcesImpact"),
       },
     ];
-  }, [data?.integrations, data?.kpis]);
+  }, [data?.integrations, data?.kpis, t]);
 
   if (isLoading) {
     return <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-52" />)}</div>;
@@ -112,12 +114,12 @@ export default function GrowthSignals() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Growth Signals</h1>
-          <p className="text-muted-foreground">Connected data anomalies and momentum shifts worth attention right now.</p>
+          <h1 className="text-3xl font-bold">{t("growthSignals.title")}</h1>
+          <p className="text-muted-foreground">{t("growthSignals.subtitle")}</p>
         </div>
         <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh signals
+          {isFetching ? t("growthSignals.refreshing") : t("growthSignals.refresh")}
         </Button>
       </div>
 
@@ -139,13 +141,13 @@ export default function GrowthSignals() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="rounded-xl bg-secondary/40 p-4">
-                  <p className="text-sm text-muted-foreground">Metric</p>
+                  <p className="text-sm text-muted-foreground">{t("growthSignals.metricLabel")}</p>
                   <p className="text-2xl font-semibold">{signal.metric}</p>
                   <p className="text-sm text-muted-foreground mt-1">{signal.trend}</p>
                 </div>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p><span className="font-medium text-foreground">Source:</span> {signal.source}</p>
-                  <p><span className="font-medium text-foreground">Interpretation:</span> {signal.impact}</p>
+                  <p><span className="font-medium text-foreground">{t("growthSignals.sourceLabel")}:</span> {signal.source}</p>
+                  <p><span className="font-medium text-foreground">{t("growthSignals.interpretationLabel")}:</span> {signal.impact}</p>
                 </div>
               </CardContent>
             </Card>
@@ -156,14 +158,14 @@ export default function GrowthSignals() {
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> Signal handling standard</CardTitle>
-            <CardDescription>Connected data becomes useful only when the team knows what to do next.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary" /> {t("growthSignals.signalHandlingTitle")}</CardTitle>
+            <CardDescription>{t("growthSignals.signalHandlingDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             {[
-              ["1. Verify", "Use integrations and evidence to confirm whether the signal is structural or transient."],
-              ["2. Prioritize", "Rank action by expected impact, urgency and approval requirements."],
-              ["3. Route", "Send sensitive actions through governance instead of ad hoc execution."],
+              [t("growthSignals.stepVerify"), t("growthSignals.stepVerifyDesc")],
+              [t("growthSignals.stepPrioritize"), t("growthSignals.stepPrioritizeDesc")],
+              [t("growthSignals.stepRoute"), t("growthSignals.stepRouteDesc")],
             ].map(([title, description]) => (
               <div key={title} className="rounded-xl border border-border/60 p-4">
                 <p className="font-medium mb-2">{title}</p>
@@ -175,16 +177,16 @@ export default function GrowthSignals() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-primary" /> Next step</CardTitle>
-            <CardDescription>Move from signals to ranked action plans.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-primary" /> {t("growthSignals.nextStepTitle")}</CardTitle>
+            <CardDescription>{t("growthSignals.nextStepDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground leading-6">
-              Review the priority queue to see which actions are evidence-backed, which ones need approvals and where impact should be tracked.
+              {t("growthSignals.nextStepBody")}
             </p>
             <Link to="/dashboard/actions">
               <Button className="w-full">
-                Open Prioritized Actions
+                {t("growthSignals.openPrioritizedActions")}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
