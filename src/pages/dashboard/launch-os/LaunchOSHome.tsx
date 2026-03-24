@@ -64,10 +64,15 @@ export default function LaunchOSHome() {
             {t("launchOS.description", "Orchestrez vos lancements avec précision")}
           </p>
         </div>
-        <Button onClick={() => navigate('/dashboard/launch-os/new')} size="lg" className="gap-2">
-          <Plus className="w-5 h-5" />
-          {t("launchOS.newLaunch", "Nouveau lancement")}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/dashboard/launch-os/integrations')} className="gap-2">
+            {t("launchOS.integrations", "Connecteurs")}
+          </Button>
+          <Button onClick={() => navigate('/dashboard/launch-os/new')} size="lg" className="gap-2">
+            <Plus className="w-5 h-5" />
+            {t("launchOS.newLaunch", "Nouveau lancement")}
+          </Button>
+        </div>
       </div>
 
       {/* KPI Strip */}

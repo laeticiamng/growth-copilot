@@ -9,10 +9,11 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Target, Zap, BarChart3, Brain, Video, Calendar,
-  Loader2, CheckCircle2, AlertTriangle, XCircle, RefreshCw, Play
+  Loader2, CheckCircle2, AlertTriangle, XCircle, RefreshCw, Play, Rocket, ArrowRight
 } from "lucide-react";
 import { getLaunchCategory } from "@/lib/launch-os/types";
 import { useState } from "react";
+import { LaunchCommandCenter } from "@/components/launch-os/LaunchCommandCenter";
 
 export default function LaunchProject() {
   const navigate = useNavigate();
@@ -20,7 +21,9 @@ export default function LaunchProject() {
   const {
     currentProject, scoreReadiness, generateCreatives, generateVideoConcepts,
     evaluateDecisions, readinessScores, creativeVariants, videoConcepts,
-    distributionRuns, decisionActions, signalEvents, updateProject
+    distributionRuns, decisionActions, signalEvents, updateProject,
+    currentStage, completedStages, stageProgress, advanceStage,
+    approvalCheckpoints, startLaunchRun, launchInsights,
   } = useLaunchOS();
   const [scoringLoading, setScoringLoading] = useState(false);
   const [creativesLoading, setCreativesLoading] = useState(false);
@@ -89,8 +92,9 @@ export default function LaunchProject() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-6">
+      <Tabs defaultValue="command-center">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="command-center" className="flex items-center gap-1"><Rocket className="w-3 h-3" />{t("launchOS.tabs.commandCenter", "Cockpit")}</TabsTrigger>
           <TabsTrigger value="overview">{t("launchOS.tabs.overview", "Vue d'ensemble")}</TabsTrigger>
           <TabsTrigger value="readiness">{t("launchOS.tabs.readiness", "Préparation")}</TabsTrigger>
           <TabsTrigger value="creatives">{t("launchOS.tabs.creatives", "Créatifs")} ({creativeVariants.length})</TabsTrigger>
@@ -98,6 +102,34 @@ export default function LaunchProject() {
           <TabsTrigger value="distribution">{t("launchOS.tabs.distribution", "Distribution")}</TabsTrigger>
           <TabsTrigger value="signals">{t("launchOS.tabs.signals", "Signaux")}</TabsTrigger>
         </TabsList>
+
+        {/* Command Center */}
+        <TabsContent value="command-center" className="space-y-6 mt-6">
+          <LaunchCommandCenter
+            projectId={currentProject.id}
+            currentStage={currentStage}
+            completedStages={completedStages}
+            approvalCheckpoints={approvalCheckpoints}
+            overallEvidenceLevel={(currentProject as any).evidence_level || 'TEMPLATE'}
+          />
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => startLaunchRun(currentProject.id)}
+              className="gap-2"
+            >
+              <Play className="w-4 h-4" />
+              {t("launchOS.startRun", "Démarrer un run")}
+            </Button>
+            <Button
+              onClick={() => advanceStage(currentProject.id)}
+              className="gap-2"
+            >
+              {t("launchOS.advanceStage", "Étape suivante")}
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* Overview */}
         <TabsContent value="overview" className="space-y-6 mt-6">

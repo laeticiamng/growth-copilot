@@ -16,6 +16,23 @@ import type {
   DecisionActionLog,
   CampaignMemory,
 } from '@/lib/launch-os/types';
+import type {
+  LaunchStage,
+  EvidenceLevel,
+  ApprovalCheckpoint,
+  LaunchRun,
+  LaunchInsight,
+} from '@/lib/launch-os/launch-entities';
+import {
+  LAUNCH_PIPELINE,
+  getNextStage,
+  getStageProgress,
+  validateStageInputs,
+} from '@/lib/launch-os/orchestration-pipeline';
+import {
+  createCheckpoint as createApprovalCheckpoint,
+  getApprovalPoliciesForStage,
+} from '@/lib/launch-os/approval-governance';
 
 // ─── Context Types ──────────────────────────────────────────────────────────
 
@@ -56,6 +73,27 @@ interface LaunchOSContextType {
   // Campaign Memory
   campaignMemories: CampaignMemory[];
 
+  // ─── Launch OS Hardening ─────────────────────────────────────────────────
+
+  // Pipeline orchestration
+  currentStage: LaunchStage;
+  completedStages: LaunchStage[];
+  stageProgress: number;
+  advanceStage: (projectId: string) => Promise<void>;
+
+  // Approval checkpoints
+  approvalCheckpoints: ApprovalCheckpoint[];
+  submitForApproval: (projectId: string, entityId: string, entityType: string, checkpointType: string) => Promise<void>;
+  approveCheckpoint: (checkpointId: string) => Promise<void>;
+  rejectCheckpoint: (checkpointId: string, reason: string) => Promise<void>;
+
+  // Launch runs
+  launchRuns: LaunchRun[];
+  startLaunchRun: (projectId: string) => Promise<void>;
+
+  // Insights
+  launchInsights: LaunchInsight[];
+
   // State
   loading: boolean;
   refetch: () => void;
@@ -80,6 +118,14 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   const [decisionActions, setDecisionActions] = useState<DecisionActionLog[]>([]);
   const [campaignMemories, setCampaignMemories] = useState<CampaignMemory[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ─── Launch OS Hardening State ────────────────────────────────────────────
+  const [currentStage, setCurrentStage] = useState<LaunchStage>('intake');
+  const [completedStages, setCompletedStages] = useState<LaunchStage[]>([]);
+  const [approvalCheckpoints, setApprovalCheckpoints] = useState<ApprovalCheckpoint[]>([]);
+  const [launchRuns, setLaunchRuns] = useState<LaunchRun[]>([]);
+  const [launchInsights, setLaunchInsights] = useState<LaunchInsight[]>([]);
+  const stageProgress = getStageProgress(completedStages);
 
   // ─── Fetch Projects ───────────────────────────────────────────────────────
 
@@ -134,19 +180,27 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       setDistributionRuns([]);
       setSignalEvents([]);
       setDecisionActions([]);
+      setApprovalCheckpoints([]);
+      setLaunchRuns([]);
+      setLaunchInsights([]);
+      setCurrentStage('intake');
+      setCompletedStages([]);
       return;
     }
 
     const fetchProjectDetails = async () => {
       const projectId = currentProject.id;
 
-      const [scoresRes, creativesRes, videosRes, distRes, signalsRes, actionsRes] = await Promise.all([
+      const [scoresRes, creativesRes, videosRes, distRes, signalsRes, actionsRes, checkpointsRes, runsRes, insightsRes] = await Promise.all([
         supabase.from('launch_readiness_scores').select('*').eq('launch_project_id', projectId).order('scored_at', { ascending: false }),
         supabase.from('launch_creative_variants').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
         supabase.from('launch_video_concepts').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
         supabase.from('launch_distribution_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
         supabase.from('launch_signal_events').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(500),
         supabase.from('launch_decision_actions').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        supabase.from('launch_approval_checkpoints' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        supabase.from('launch_runs' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        supabase.from('launch_insights' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(50),
       ]);
 
       if (scoresRes.data) setReadinessScores(scoresRes.data as unknown as ReadinessScore[]);
@@ -155,6 +209,13 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       if (distRes.data) setDistributionRuns(distRes.data as unknown as DistributionRun[]);
       if (signalsRes.data) setSignalEvents(signalsRes.data as unknown as SignalEvent[]);
       if (actionsRes.data) setDecisionActions(actionsRes.data as unknown as DecisionActionLog[]);
+      if (checkpointsRes.data) setApprovalCheckpoints(checkpointsRes.data as unknown as ApprovalCheckpoint[]);
+      if (runsRes.data) setLaunchRuns(runsRes.data as unknown as LaunchRun[]);
+      if (insightsRes.data) setLaunchInsights(insightsRes.data as unknown as LaunchInsight[]);
+
+      // Sync current stage from project data
+      const projectStage = (currentProject as any).current_stage as LaunchStage | undefined;
+      if (projectStage) setCurrentStage(projectStage);
     };
 
     fetchProjectDetails();
@@ -329,6 +390,110 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ─── Launch OS Hardening Functions ────────────────────────────────────────
+
+  const advanceStage = async (projectId: string) => {
+    const next = getNextStage(currentStage);
+    if (!next) {
+      toast({ title: 'Lancement termine', description: 'Toutes les etapes sont completees' });
+      return;
+    }
+
+    // Check if approval is needed before advancing
+    const policies = getApprovalPoliciesForStage(currentStage);
+    const pendingApprovals = approvalCheckpoints.filter(
+      c => c.status === 'pending' && policies.some(p => p.checkpoint_type === c.checkpoint_type)
+    );
+    if (pendingApprovals.length > 0) {
+      toast({ title: 'Approbation requise', description: 'Des approbations sont en attente pour cette etape', variant: 'destructive' });
+      return;
+    }
+
+    setCompletedStages(prev => [...prev, currentStage]);
+    setCurrentStage(next);
+    await updateProject(projectId, { current_stage: next } as any);
+    toast({ title: 'Etape avancee', description: `Passage a: ${next.replace(/_/g, ' ')}` });
+  };
+
+  const submitForApproval = async (projectId: string, entityId: string, entityType: string, checkpointType: string) => {
+    try {
+      const checkpoint = createApprovalCheckpoint(projectId, entityId, entityType, checkpointType as any);
+      const { data, error } = await supabase
+        .from('launch_approval_checkpoints' as any)
+        .insert(checkpoint as any)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setApprovalCheckpoints(prev => [data as unknown as ApprovalCheckpoint, ...prev]);
+        toast({ title: 'Soumis pour approbation', description: `${entityType} en attente de validation` });
+      }
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de soumettre pour approbation', variant: 'destructive' });
+    }
+  };
+
+  const approveCheckpoint = async (checkpointId: string) => {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    const { error } = await supabase
+      .from('launch_approval_checkpoints' as any)
+      .update({ status: 'approved', approved_by: userId, approved_at: new Date().toISOString() } as any)
+      .eq('id', checkpointId);
+
+    if (!error) {
+      setApprovalCheckpoints(prev => prev.map(c =>
+        c.id === checkpointId ? { ...c, status: 'approved' as const, approved_by: userId || null, approved_at: new Date().toISOString() } : c
+      ));
+      toast({ title: 'Approuve' });
+    }
+  };
+
+  const rejectCheckpoint = async (checkpointId: string, reason: string) => {
+    const { error } = await supabase
+      .from('launch_approval_checkpoints' as any)
+      .update({ status: 'rejected', rejection_reason: reason } as any)
+      .eq('id', checkpointId);
+
+    if (!error) {
+      setApprovalCheckpoints(prev => prev.map(c =>
+        c.id === checkpointId ? { ...c, status: 'rejected' as const, rejection_reason: reason } : c
+      ));
+      toast({ title: 'Rejete' });
+    }
+  };
+
+  const startLaunchRun = async (projectId: string) => {
+    if (!currentWorkspace) return;
+    try {
+      const allStages = LAUNCH_PIPELINE.map(s => s.stage);
+      const { data, error } = await supabase
+        .from('launch_runs' as any)
+        .insert({
+          launch_project_id: projectId,
+          run_number: launchRuns.length + 1,
+          current_stage: 'intake',
+          stages_completed: [],
+          stages_remaining: allStages,
+          status: 'running',
+          triggered_by: (await supabase.auth.getUser()).data.user?.id,
+        } as any)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setLaunchRuns(prev => [data as unknown as LaunchRun, ...prev]);
+        setCurrentStage('intake');
+        setCompletedStages([]);
+        await updateProject(projectId, { current_stage: 'intake', status: 'readiness_check' } as any);
+        toast({ title: 'Launch Run demarre', description: 'L orchestration a commence' });
+      }
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de demarrer le launch run', variant: 'destructive' });
+    }
+  };
+
   // ─── Provider ─────────────────────────────────────────────────────────────
 
   return (
@@ -353,6 +518,18 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       approveAction,
       rejectAction,
       campaignMemories,
+      // Launch OS Hardening
+      currentStage,
+      completedStages,
+      stageProgress,
+      advanceStage,
+      approvalCheckpoints,
+      submitForApproval,
+      approveCheckpoint,
+      rejectCheckpoint,
+      launchRuns,
+      startLaunchRun,
+      launchInsights,
       loading,
       refetch: fetchAll,
     }}>
