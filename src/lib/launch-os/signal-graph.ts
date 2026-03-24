@@ -115,10 +115,14 @@ export function computeAttribution(
     const conversions = sorted.filter(e => conversionTypes.includes(e.event_type));
     if (conversions.length === 0) continue;
 
-    const touchpoints = sorted.filter(e => !conversionTypes.includes(e.event_type) && e.channel);
-    if (touchpoints.length === 0) continue;
+    // Filter to touchpoints with a known channel (type-safe, no non-null assertions)
+    const touchpointsWithChannel = sorted.filter(
+      (e): e is SignalEvent & { channel: string } =>
+        !conversionTypes.includes(e.event_type) && typeof e.channel === 'string' && e.channel.length > 0
+    );
+    if (touchpointsWithChannel.length === 0) continue;
 
-    const channels = [...new Set(touchpoints.map(t => t.channel!))];
+    const channels = [...new Set(touchpointsWithChannel.map(t => t.channel))];
 
     for (const channel of channels) {
       if (!channelCredits.has(channel)) {
@@ -128,26 +132,23 @@ export function computeAttribution(
 
     const conversionCount = conversions.length;
 
+    /** Assign full credit to a single channel and mark others as assisted */
+    const assignSingleChannelCredit = (primaryChannel: string) => {
+      const entry = channelCredits.get(primaryChannel)!;
+      entry.directConversions += conversionCount;
+      entry.totalCredit += conversionCount;
+      for (const ch of channels.filter(c => c !== primaryChannel)) {
+        channelCredits.get(ch)!.assistedConversions += conversionCount;
+      }
+    };
+
     switch (model) {
       case 'first_touch': {
-        const firstChannel = touchpoints[0].channel!;
-        const entry = channelCredits.get(firstChannel)!;
-        entry.directConversions += conversionCount;
-        entry.totalCredit += conversionCount;
-        // Mark others as assisted
-        for (const ch of channels.filter(c => c !== firstChannel)) {
-          channelCredits.get(ch)!.assistedConversions += conversionCount;
-        }
+        assignSingleChannelCredit(touchpointsWithChannel[0].channel);
         break;
       }
       case 'last_touch': {
-        const lastChannel = touchpoints[touchpoints.length - 1].channel!;
-        const entry = channelCredits.get(lastChannel)!;
-        entry.directConversions += conversionCount;
-        entry.totalCredit += conversionCount;
-        for (const ch of channels.filter(c => c !== lastChannel)) {
-          channelCredits.get(ch)!.assistedConversions += conversionCount;
-        }
+        assignSingleChannelCredit(touchpointsWithChannel[touchpointsWithChannel.length - 1].channel);
         break;
       }
       case 'linear': {
