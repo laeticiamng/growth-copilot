@@ -100,6 +100,8 @@ export const DEFAULT_DECISION_RULES: Omit<DecisionRule, 'id' | 'workspace_id' | 
   },
 ];
 
+const FLOAT_COMPARISON_EPSILON = 0.001;
+
 export class DecisionEngine {
   private rules: DecisionRule[];
 
@@ -112,6 +114,8 @@ export class DecisionEngine {
    * Returns triggered rules with recommendations.
    */
   evaluate(metrics: MetricSnapshot[]): EvaluationResult[] {
+    if (metrics.length === 0) return [];
+
     const results: EvaluationResult[] = [];
     const metricMap = new Map(metrics.map(m => [m.metric, m]));
 
@@ -207,7 +211,7 @@ export class DecisionEngine {
       case 'lt': return value < condition.threshold;
       case 'gte': return value >= condition.threshold;
       case 'lte': return value <= condition.threshold;
-      case 'eq': return Math.abs(value - condition.threshold) < 0.001;
+      case 'eq': return Math.abs(value - condition.threshold) < FLOAT_COMPARISON_EPSILON;
       case 'between':
         return value >= condition.threshold && value <= (condition.threshold_upper ?? Infinity);
       default:

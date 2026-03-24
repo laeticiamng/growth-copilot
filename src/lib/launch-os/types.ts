@@ -296,6 +296,13 @@ export type DecisionAction =
   | 'scale_channel'
   | 'pause_channel';
 
+/** Typed action configuration for decision rules */
+export type ActionConfig = {
+  budget_multiplier?: number;
+  reallocation_pct?: number;
+  scale_factor?: number;
+} & Record<string, unknown>;
+
 export interface DecisionRule {
   id: string;
   workspace_id: string;
@@ -303,7 +310,7 @@ export interface DecisionRule {
   description: string;
   condition: DecisionCondition;
   action: DecisionAction;
-  action_config: Record<string, unknown>;
+  action_config: ActionConfig;
   is_auto_execute: boolean;
   is_active: boolean;
   priority: number;
@@ -319,13 +326,20 @@ export interface DecisionCondition {
   min_sample_size: number;
 }
 
+/** Typed context for decision action logs */
+export type DecisionContext = {
+  metric_value: number;
+  threshold: number;
+  condition: DecisionCondition;
+} & Record<string, unknown>;
+
 export interface DecisionActionLog {
   id: string;
   launch_project_id: string;
   rule_id: string | null;
   action: DecisionAction;
   reason: string;
-  context: Record<string, unknown>;
+  context: DecisionContext;
   status: 'recommended' | 'approved' | 'executed' | 'rejected';
   approved_by: string | null;
   executed_at: string | null;
