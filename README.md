@@ -3,8 +3,8 @@
 > Cockpit growth connecte aux donnees, oriente detection d'anomalies, priorisation d'actions, gouvernance, preuve et suivi d'impact.
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-green)](https://agent-growth-automator.lovable.app)
-[![Tests](https://img.shields.io/badge/Tests-290%2B%20passing-brightgreen)](./src/test)
-[![Audit](https://img.shields.io/badge/Audit-100%2F100-brightgreen)](./docs/AUDIT_PLATEFORME_2026-02-05.md)
+[![Tests](https://img.shields.io/badge/Tests-see%20vitest-blue)](./src/test)
+[![Audit](https://img.shields.io/badge/Audit-Truth%20Audit%202026--03--24-orange)](./docs/TRUTH_AUDIT_2026-03-24.md)
 [![Languages](https://img.shields.io/badge/i18n-7%20languages-blue)](./src/i18n)
 [![License](https://img.shields.io/badge/License-Proprietary-red)](./LICENSE)
 
