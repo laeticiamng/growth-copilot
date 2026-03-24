@@ -26,8 +26,8 @@ export * from './launch-entities';
  * @remarks Currently consumed by tests and orchestration-pipeline internals.
  * Not yet wired into UI pages — available for future agent management UI.
  */
-export { LAUNCH_AGENTS, getLaunchAgentById, getLaunchAgentsByStage, getLaunchAgentsRequiringApproval } from './launch-agents';
-export type { LaunchAgentSpec, SchemaField, DataDependency } from './launch-agents';
+export { LAUNCH_AGENTS, getLaunchAgentById, getLaunchAgentsByStage, getLaunchAgentsRequiringApproval, AGENT_RUNTIME_CLASSIFICATIONS, getAgentRuntimeStatus, getExecutableAgents, getPartialAgents, getSpecOnlyAgents } from './launch-agents';
+export type { LaunchAgentSpec, SchemaField, DataDependency, AgentRuntimeStatus, AgentRuntimeClassification } from './launch-agents';
 
 /** 14-stage orchestration pipeline — consumed by useLaunchOS hook for stage progression */
 export { LAUNCH_PIPELINE, getStageDefinition, getNextStage, getPreviousStage, getStageProgress, getStagesRequiringApproval, validateStageInputs } from './orchestration-pipeline';
