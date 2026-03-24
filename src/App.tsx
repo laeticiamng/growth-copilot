@@ -168,6 +168,7 @@ const LaunchOSHome = lazy(() => import("./pages/dashboard/launch-os/LaunchOSHome
 const LaunchTypeSelector = lazy(() => import("./pages/dashboard/launch-os/LaunchTypeSelector"));
 const LaunchProject = lazy(() => import("./pages/dashboard/launch-os/LaunchProject"));
 const DecisionCenter = lazy(() => import("./pages/dashboard/launch-os/DecisionCenter"));
+const IntegrationHealth = lazy(() => import("./pages/dashboard/launch-os/IntegrationHealth"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -397,6 +398,7 @@ function App() {
                 <Route path="/dashboard/launch-os/new" element={<DashboardRoute><LaunchTypeSelector /></DashboardRoute>} />
                 <Route path="/dashboard/launch-os/project" element={<DashboardRoute><LaunchProject /></DashboardRoute>} />
                 <Route path="/dashboard/launch-os/decisions" element={<DashboardRoute><DecisionCenter /></DashboardRoute>} />
+                <Route path="/dashboard/launch-os/integrations" element={<DashboardRoute><IntegrationHealth /></DashboardRoute>} />
 
                 {/* Dashboard - Growth OS App Pages */}
                 <Route path="/dashboard/app" element={<DashboardRoute><AppDashboard /></DashboardRoute>} />

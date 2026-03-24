@@ -33,8 +33,8 @@ export type AgentStatus = 'pending' | 'running' | 'completed' | 'failed' | 'requ
 
 /**
  * Agent types available in the system
- * 39 agents total: 2 Direction + 37 Department agents across 11 departments
- * 
+ * 54 agents total: 2 Direction + 37 Department agents + 15 Launch OS agents
+ *
  * Structure:
  * - Direction (2): CGO, QCO
  * - Marketing (5): tech_auditor, keyword_strategist, content_builder, local_optimizer, social_manager
@@ -48,8 +48,9 @@ export type AgentStatus = 'pending' | 'running' | 'completed' | 'failed' | 'requ
  * - Governance (3): compliance_auditor, policy_enforcer, risk_assessor
  * - HR (2): recruitment_agent, employee_experience
  * - Legal (1): contract_analyzer
+ * - Launch OS (15): launch-centric agents for end-to-end launch orchestration
  */
-export type AgentType = 
+export type AgentType =
   // Direction (2)
   | 'chief_growth_officer'
   | 'quality_compliance'
@@ -101,6 +102,22 @@ export type AgentType =
   | 'employee_experience'
   // Legal (1)
   | 'contract_analyzer'
+  // Launch OS (15)
+  | 'launch_program_manager'
+  | 'offer_positioning_strategist'
+  | 'icp_audience_researcher'
+  | 'creative_strategist'
+  | 'video_scriptwriter'
+  | 'storyboard_agent'
+  | 'creative_production_qa'
+  | 'multichannel_distribution_planner'
+  | 'paid_media_planner'
+  | 'organic_content_planner'
+  | 'landing_page_cro'
+  | 'crm_lifecycle_agent'
+  | 'attribution_analytics_lead'
+  | 'sales_enablement_agent'
+  | 'brand_legal_compliance_reviewer'
   // Legacy (for backward compatibility)
   | 'ads_optimizer'
   | 'cro_specialist'
