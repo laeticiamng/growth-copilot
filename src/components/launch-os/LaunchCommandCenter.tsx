@@ -18,6 +18,9 @@ import {
   APPROVAL_POLICIES,
   computeApprovalSummary,
   computeOutputQualityMetrics,
+  AGENT_RUNTIME_CLASSIFICATIONS,
+  getExecutableAgents,
+  getPartialAgents,
   type LaunchStage,
   type EvidenceLevel,
   type ApprovalCheckpoint,
@@ -156,13 +159,13 @@ export function LaunchCommandCenter({
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Agents Active</p>
-                <p className="text-2xl font-bold">{LAUNCH_AGENTS.length}</p>
+                <p className="text-xs text-muted-foreground">Agents Runtime</p>
+                <p className="text-2xl font-bold">{getExecutableAgents().length + getPartialAgents().length}/{LAUNCH_AGENTS.length}</p>
               </div>
               <Users className="h-8 w-8 text-purple-500 opacity-50" />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {LAUNCH_AGENTS.filter(a => a.human_approval_required).length} requiring approval
+              {getExecutableAgents().length} executable, {getPartialAgents().length} partial
             </p>
           </CardContent>
         </Card>

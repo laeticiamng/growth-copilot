@@ -27,12 +27,46 @@ import {
   LAUNCH_PIPELINE,
   getNextStage,
   getStageProgress,
-  validateStageInputs,
 } from '@/lib/launch-os/orchestration-pipeline';
-import {
-  createCheckpoint as createApprovalCheckpoint,
-  getApprovalPoliciesForStage,
-} from '@/lib/launch-os/approval-governance';
+
+// ─── Backend Run State Types ────────────────────────────────────────────────
+
+interface BackendStageRun {
+  id: string;
+  stage_name: string;
+  stage_order: number;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped' | 'waiting_approval' | 'canceled';
+  started_at: string | null;
+  completed_at: string | null;
+  failed_at: string | null;
+  attempts: number;
+  evidence_level: EvidenceLevel;
+  output_refs: Record<string, unknown>;
+  requires_approval: boolean;
+  skipped: boolean;
+  skip_reason: string | null;
+  error_message: string | null;
+  error_type: string | null;
+  blocking_reason: string | null;
+}
+
+interface BackendRunEvent {
+  id: string;
+  event_type: string;
+  stage_name: string | null;
+  agent_id: string | null;
+  details: Record<string, unknown>;
+  error_message: string | null;
+  created_at: string;
+}
+
+interface BackendRunStatus {
+  run: LaunchRun | null;
+  stage_runs: BackendStageRun[];
+  recent_events: BackendRunEvent[];
+  unresolved_errors: Array<{ id: string; stage_name: string; error_type: string; message: string }>;
+  progress: number;
+}
 
 // ─── Context Types ──────────────────────────────────────────────────────────
 
@@ -73,13 +107,23 @@ interface LaunchOSContextType {
   // Campaign Memory
   campaignMemories: CampaignMemory[];
 
-  // ─── Launch OS Hardening ─────────────────────────────────────────────────
+  // ─── Backend-First Pipeline State ─────────────────────────────────────────
 
-  // Pipeline orchestration
+  // Pipeline state (READ from backend, not frontend state)
   currentStage: LaunchStage;
   completedStages: LaunchStage[];
   stageProgress: number;
-  advanceStage: (projectId: string) => Promise<void>;
+  backendStageRuns: BackendStageRun[];
+  backendRunEvents: BackendRunEvent[];
+  unresolvedErrors: Array<{ id: string; stage_name: string; error_type: string; message: string }>;
+
+  // Backend actions
+  startLaunchRun: (projectId: string) => Promise<void>;
+  advanceStage: (projectId: string, stageOutputs?: Record<string, unknown>) => Promise<void>;
+  skipStage: (projectId: string, stageName: string, reason: string) => Promise<void>;
+  resumeRun: (projectId: string, forceRetry?: boolean) => Promise<void>;
+  cancelRun: (projectId: string, reason?: string) => Promise<void>;
+  refreshRunStatus: (projectId: string) => Promise<void>;
 
   // Approval checkpoints
   approvalCheckpoints: ApprovalCheckpoint[];
@@ -89,10 +133,13 @@ interface LaunchOSContextType {
 
   // Launch runs
   launchRuns: LaunchRun[];
-  startLaunchRun: (projectId: string) => Promise<void>;
 
   // Insights
   launchInsights: LaunchInsight[];
+
+  // Health check
+  runServerHealthCheck: () => Promise<void>;
+  serverHealthReport: Record<string, unknown> | null;
 
   // State
   loading: boolean;
@@ -119,12 +166,17 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   const [campaignMemories, setCampaignMemories] = useState<CampaignMemory[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ─── Launch OS Hardening State ────────────────────────────────────────────
+  // ─── Backend-First State (READ from backend) ─────────────────────────────
   const [currentStage, setCurrentStage] = useState<LaunchStage>('intake');
   const [completedStages, setCompletedStages] = useState<LaunchStage[]>([]);
+  const [backendStageRuns, setBackendStageRuns] = useState<BackendStageRun[]>([]);
+  const [backendRunEvents, setBackendRunEvents] = useState<BackendRunEvent[]>([]);
+  const [unresolvedErrors, setUnresolvedErrors] = useState<Array<{ id: string; stage_name: string; error_type: string; message: string }>>([]);
   const [approvalCheckpoints, setApprovalCheckpoints] = useState<ApprovalCheckpoint[]>([]);
   const [launchRuns, setLaunchRuns] = useState<LaunchRun[]>([]);
   const [launchInsights, setLaunchInsights] = useState<LaunchInsight[]>([]);
+  const [serverHealthReport, setServerHealthReport] = useState<Record<string, unknown> | null>(null);
+
   const stageProgress = getStageProgress(completedStages);
 
   // ─── Fetch Projects ───────────────────────────────────────────────────────
@@ -144,18 +196,14 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
         .eq('workspace_id', currentWorkspace.id)
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        setProjects(data as unknown as LaunchProject[]);
-      }
+      if (!error && data) setProjects(data as unknown as LaunchProject[]);
 
-      // Fetch decision rules
       const { data: rules } = await supabase
         .from('launch_decision_rules')
         .select('*')
         .eq('workspace_id', currentWorkspace.id);
       if (rules) setDecisionRules(rules as unknown as DecisionRule[]);
 
-      // Fetch campaign memories
       const { data: memories } = await supabase
         .from('launch_campaign_memories')
         .select('*')
@@ -170,7 +218,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // ─── Fetch Project Details ────────────────────────────────────────────────
+  // ─── Fetch Project Details + Backend Run Status ───────────────────────────
 
   useEffect(() => {
     if (!currentProject) {
@@ -183,6 +231,9 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       setApprovalCheckpoints([]);
       setLaunchRuns([]);
       setLaunchInsights([]);
+      setBackendStageRuns([]);
+      setBackendRunEvents([]);
+      setUnresolvedErrors([]);
       setCurrentStage('intake');
       setCompletedStages([]);
       return;
@@ -213,32 +264,66 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       if (runsRes.data) setLaunchRuns(runsRes.data as unknown as LaunchRun[]);
       if (insightsRes.data) setLaunchInsights(insightsRes.data as unknown as LaunchInsight[]);
 
-      // Sync current stage from project data
-      const projectStage = (currentProject as any).current_stage as LaunchStage | undefined;
-      if (projectStage) setCurrentStage(projectStage);
+      // Sync pipeline state from backend
+      await refreshRunStatusInternal(projectId);
     };
 
     fetchProjectDetails();
   }, [currentProject]);
 
+  // ─── Backend Run Status Refresh ───────────────────────────────────────────
+
+  const refreshRunStatusInternal = async (projectId: string) => {
+    if (!currentWorkspace) return;
+
+    try {
+      const response = await supabase.functions.invoke('launch-orchestrator', {
+        body: { action: 'get_status', launch_project_id: projectId, workspace_id: currentWorkspace.id },
+      });
+
+      if (response.error) {
+        // Fallback: read from project directly
+        const projectStage = (currentProject as any)?.current_stage as LaunchStage | undefined;
+        if (projectStage) setCurrentStage(projectStage);
+        return;
+      }
+
+      const status: BackendRunStatus = response.data;
+
+      if (status.run) {
+        setCurrentStage(status.run.current_stage as LaunchStage);
+        const completed = (status.stage_runs || [])
+          .filter(sr => sr.status === 'completed' || sr.status === 'skipped')
+          .map(sr => sr.stage_name as LaunchStage);
+        setCompletedStages(completed);
+      } else {
+        // No run yet — read from project
+        const projectStage = (currentProject as any)?.current_stage as LaunchStage | undefined;
+        if (projectStage) setCurrentStage(projectStage);
+      }
+
+      setBackendStageRuns(status.stage_runs || []);
+      setBackendRunEvents(status.recent_events || []);
+      setUnresolvedErrors(status.unresolved_errors || []);
+    } catch {
+      // Edge function not deployed yet — fallback to project state
+      const projectStage = (currentProject as any)?.current_stage as LaunchStage | undefined;
+      if (projectStage) setCurrentStage(projectStage);
+    }
+  };
+
+  const refreshRunStatus = async (projectId: string) => {
+    await refreshRunStatusInternal(projectId);
+  };
+
   // ─── CRUD Operations ──────────────────────────────────────────────────────
 
-  const createProject = async (
-    name: string,
-    launchType: LaunchType,
-    inputUrl?: string
-  ): Promise<LaunchProject | null> => {
+  const createProject = async (name: string, launchType: LaunchType, inputUrl?: string): Promise<LaunchProject | null> => {
     if (!currentWorkspace) return null;
 
     const { data, error } = await supabase
       .from('launch_projects')
-      .insert({
-        workspace_id: currentWorkspace.id,
-        name,
-        launch_type: launchType,
-        input_url: inputUrl || null,
-        status: 'draft',
-      } as Record<string, unknown>)
+      .insert({ workspace_id: currentWorkspace.id, name, launch_type: launchType, input_url: inputUrl || null, status: 'draft' } as Record<string, unknown>)
       .select()
       .single();
 
@@ -254,18 +339,12 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProject = async (id: string, updates: Partial<LaunchProject>) => {
-    const { error } = await supabase
-      .from('launch_projects')
-      .update(updates as Record<string, unknown>)
-      .eq('id', id);
-
+    const { error } = await supabase.from('launch_projects').update(updates as Record<string, unknown>).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to update project', variant: 'destructive' });
     } else {
       setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-      if (currentProject?.id === id) {
-        setCurrentProject({ ...currentProject, ...updates } as LaunchProject);
-      }
+      if (currentProject?.id === id) setCurrentProject({ ...currentProject, ...updates } as LaunchProject);
     }
   };
 
@@ -284,23 +363,15 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   const scoreReadiness = async (projectId: string): Promise<ReadinessScore | null> => {
     if (!currentWorkspace) return null;
-
     try {
       const response = await supabase.functions.invoke('launch-readiness-score', {
         body: { launch_project_id: projectId, workspace_id: currentWorkspace.id },
       });
-
       if (response.error) throw new Error(response.error.message);
-
       const score = response.data?.score as ReadinessScore;
       if (score) {
         setReadinessScores(prev => [score, ...prev]);
-        // Update project with latest score
-        await updateProject(projectId, {
-          readiness_score: score.overall_score,
-          readiness_status: score.status,
-          status: 'readiness_check',
-        });
+        await updateProject(projectId, { readiness_score: score.overall_score, readiness_status: score.status, status: 'readiness_check' });
       }
       toast({ title: 'Readiness Scored', description: `Score: ${score?.overall_score}/100` });
       return score;
@@ -312,14 +383,11 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   const generateCreatives = async (projectId: string, formats: string[]) => {
     if (!currentWorkspace) return;
-
     try {
       const response = await supabase.functions.invoke('creative-factory', {
         body: { launch_project_id: projectId, workspace_id: currentWorkspace.id, formats },
       });
-
       if (response.error) throw new Error(response.error.message);
-
       const newVariants = response.data?.variants as CreativeVariant[] || [];
       setCreativeVariants(prev => [...newVariants, ...prev]);
       toast({ title: 'Creatives Generated', description: `${newVariants.length} variants created` });
@@ -330,14 +398,11 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   const generateVideoConcepts = async (projectId: string) => {
     if (!currentWorkspace) return;
-
     try {
       const response = await supabase.functions.invoke('video-concept-factory', {
         body: { launch_project_id: projectId, workspace_id: currentWorkspace.id },
       });
-
       if (response.error) throw new Error(response.error.message);
-
       const newConcepts = response.data?.concepts as VideoConcept[] || [];
       setVideoConcepts(prev => [...newConcepts, ...prev]);
       toast({ title: 'Video Concepts Generated', description: `${newConcepts.length} concepts created` });
@@ -348,30 +413,21 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   const evaluateDecisions = async (projectId: string) => {
     if (!currentWorkspace) return;
-
     try {
-      const response = await supabase.functions.invoke('decision-engine', {
+      const response = await supabase.functions.invoke('decision-engine-eval', {
         body: { launch_project_id: projectId, workspace_id: currentWorkspace.id },
       });
-
       if (response.error) throw new Error(response.error.message);
-
       const newActions = response.data?.actions as DecisionActionLog[] || [];
       setDecisionActions(prev => [...newActions, ...prev]);
-      if (newActions.length > 0) {
-        toast({ title: 'Decisions Evaluated', description: `${newActions.length} recommendations` });
-      }
+      if (newActions.length > 0) toast({ title: 'Decisions Evaluated', description: `${newActions.length} recommendations` });
     } catch {
       toast({ title: 'Error', description: 'Failed to evaluate decisions', variant: 'destructive' });
     }
   };
 
   const approveAction = async (actionId: string) => {
-    const { error } = await supabase
-      .from('launch_decision_actions')
-      .update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id })
-      .eq('id', actionId);
-
+    const { error } = await supabase.from('launch_decision_actions').update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'approved' as const } : a));
       toast({ title: 'Action Approved' });
@@ -379,58 +435,126 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const rejectAction = async (actionId: string) => {
-    const { error } = await supabase
-      .from('launch_decision_actions')
-      .update({ status: 'rejected' })
-      .eq('id', actionId);
-
+    const { error } = await supabase.from('launch_decision_actions').update({ status: 'rejected' }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'rejected' as const } : a));
       toast({ title: 'Action Rejected' });
     }
   };
 
-  // ─── Launch OS Hardening Functions ────────────────────────────────────────
+  // ─── Backend-First Launch Run Operations ──────────────────────────────────
 
-  const advanceStage = async (projectId: string) => {
-    const next = getNextStage(currentStage);
-    if (!next) {
-      toast({ title: 'Lancement termine', description: 'Toutes les etapes sont completees' });
-      return;
+  const startLaunchRun = async (projectId: string) => {
+    if (!currentWorkspace) return;
+    try {
+      const response = await supabase.functions.invoke('launch-orchestrator', {
+        body: { action: 'start_run', launch_project_id: projectId, workspace_id: currentWorkspace.id },
+      });
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) {
+        toast({ title: 'Error', description: response.data.error, variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Launch Run Started', description: `Run started — backend orchestration active` });
+      await refreshRunStatusInternal(projectId);
+      fetchAll();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to start launch run', variant: 'destructive' });
     }
-
-    // Check if approval is needed before advancing
-    const policies = getApprovalPoliciesForStage(currentStage);
-    const pendingApprovals = approvalCheckpoints.filter(
-      c => c.status === 'pending' && policies.some(p => p.checkpoint_type === c.checkpoint_type)
-    );
-    if (pendingApprovals.length > 0) {
-      toast({ title: 'Approbation requise', description: 'Des approbations sont en attente pour cette etape', variant: 'destructive' });
-      return;
-    }
-
-    setCompletedStages(prev => [...prev, currentStage]);
-    setCurrentStage(next);
-    await updateProject(projectId, { current_stage: next } as any);
-    toast({ title: 'Etape avancee', description: `Passage a: ${next.replace(/_/g, ' ')}` });
   };
+
+  const advanceStage = async (projectId: string, stageOutputs?: Record<string, unknown>) => {
+    if (!currentWorkspace) return;
+    try {
+      const response = await supabase.functions.invoke('launch-orchestrator', {
+        body: { action: 'advance', launch_project_id: projectId, workspace_id: currentWorkspace.id, stage_outputs: stageOutputs },
+      });
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) {
+        toast({ title: 'Cannot advance', description: response.data.error, variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Stage Advanced', description: `Now at: ${response.data.current_stage?.replace(/_/g, ' ')}` });
+      await refreshRunStatusInternal(projectId);
+    } catch {
+      toast({ title: 'Error', description: 'Failed to advance stage', variant: 'destructive' });
+    }
+  };
+
+  const skipStage = async (projectId: string, stageName: string, reason: string) => {
+    if (!currentWorkspace) return;
+    try {
+      const response = await supabase.functions.invoke('launch-orchestrator', {
+        body: { action: 'skip_stage', launch_project_id: projectId, workspace_id: currentWorkspace.id, stage_name: stageName, skip_reason: reason },
+      });
+      if (response.error) throw new Error(response.error.message);
+      toast({ title: 'Stage Skipped', description: `${stageName} skipped` });
+      await refreshRunStatusInternal(projectId);
+    } catch {
+      toast({ title: 'Error', description: 'Failed to skip stage', variant: 'destructive' });
+    }
+  };
+
+  const resumeRun = async (projectId: string, forceRetry?: boolean) => {
+    if (!currentWorkspace) return;
+    try {
+      const response = await supabase.functions.invoke('launch-resume', {
+        body: { launch_project_id: projectId, workspace_id: currentWorkspace.id, force_retry: forceRetry },
+      });
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) {
+        toast({ title: 'Cannot resume', description: response.data.error, variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Run Resumed', description: 'Pipeline execution resumed' });
+      await refreshRunStatusInternal(projectId);
+    } catch {
+      toast({ title: 'Error', description: 'Failed to resume run', variant: 'destructive' });
+    }
+  };
+
+  const cancelRun = async (projectId: string, reason?: string) => {
+    if (!currentWorkspace) return;
+    try {
+      const response = await supabase.functions.invoke('launch-cancel', {
+        body: { launch_project_id: projectId, workspace_id: currentWorkspace.id, cancel_reason: reason },
+      });
+      if (response.error) throw new Error(response.error.message);
+      toast({ title: 'Run Canceled', description: 'Launch run has been canceled' });
+      await refreshRunStatusInternal(projectId);
+      fetchAll();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to cancel run', variant: 'destructive' });
+    }
+  };
+
+  // ─── Approval Checkpoint Operations ───────────────────────────────────────
 
   const submitForApproval = async (projectId: string, entityId: string, entityType: string, checkpointType: string) => {
     try {
-      const checkpoint = createApprovalCheckpoint(projectId, entityId, entityType, checkpointType as any);
       const { data, error } = await supabase
         .from('launch_approval_checkpoints' as any)
-        .insert(checkpoint as any)
+        .insert({
+          launch_project_id: projectId,
+          checkpoint_type: checkpointType,
+          entity_id: entityId,
+          entity_type: entityType,
+          requires_approval: true,
+          approval_reason: `Approval required for ${entityType}`,
+          approver_role: 'owner',
+          blocking_level: 'hard_block',
+          sla_hours: 24,
+          status: 'pending',
+        } as any)
         .select()
         .single();
-
       if (error) throw error;
       if (data) {
         setApprovalCheckpoints(prev => [data as unknown as ApprovalCheckpoint, ...prev]);
-        toast({ title: 'Soumis pour approbation', description: `${entityType} en attente de validation` });
+        toast({ title: 'Submitted for approval', description: `${entityType} awaiting validation` });
       }
     } catch {
-      toast({ title: 'Erreur', description: 'Impossible de soumettre pour approbation', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to submit for approval', variant: 'destructive' });
     }
   };
 
@@ -440,12 +564,9 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       .from('launch_approval_checkpoints' as any)
       .update({ status: 'approved', approved_by: userId, approved_at: new Date().toISOString() } as any)
       .eq('id', checkpointId);
-
     if (!error) {
-      setApprovalCheckpoints(prev => prev.map(c =>
-        c.id === checkpointId ? { ...c, status: 'approved' as const, approved_by: userId || null, approved_at: new Date().toISOString() } : c
-      ));
-      toast({ title: 'Approuve' });
+      setApprovalCheckpoints(prev => prev.map(c => c.id === checkpointId ? { ...c, status: 'approved' as const, approved_by: userId || null, approved_at: new Date().toISOString() } : c));
+      toast({ title: 'Approved' });
     }
   };
 
@@ -454,43 +575,25 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
       .from('launch_approval_checkpoints' as any)
       .update({ status: 'rejected', rejection_reason: reason } as any)
       .eq('id', checkpointId);
-
     if (!error) {
-      setApprovalCheckpoints(prev => prev.map(c =>
-        c.id === checkpointId ? { ...c, status: 'rejected' as const, rejection_reason: reason } : c
-      ));
-      toast({ title: 'Rejete' });
+      setApprovalCheckpoints(prev => prev.map(c => c.id === checkpointId ? { ...c, status: 'rejected' as const, rejection_reason: reason } : c));
+      toast({ title: 'Rejected' });
     }
   };
 
-  const startLaunchRun = async (projectId: string) => {
+  // ─── Server Health Check ──────────────────────────────────────────────────
+
+  const runServerHealthCheck = async () => {
     if (!currentWorkspace) return;
     try {
-      const allStages = LAUNCH_PIPELINE.map(s => s.stage);
-      const { data, error } = await supabase
-        .from('launch_runs' as any)
-        .insert({
-          launch_project_id: projectId,
-          run_number: launchRuns.length + 1,
-          current_stage: 'intake',
-          stages_completed: [],
-          stages_remaining: allStages,
-          status: 'running',
-          triggered_by: (await supabase.auth.getUser()).data.user?.id,
-        } as any)
-        .select()
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setLaunchRuns(prev => [data as unknown as LaunchRun, ...prev]);
-        setCurrentStage('intake');
-        setCompletedStages([]);
-        await updateProject(projectId, { current_stage: 'intake', status: 'readiness_check' } as any);
-        toast({ title: 'Launch Run demarre', description: 'L orchestration a commence' });
+      const response = await supabase.functions.invoke('connector-health-check', {
+        body: { workspace_id: currentWorkspace.id },
+      });
+      if (!response.error && response.data) {
+        setServerHealthReport(response.data);
       }
     } catch {
-      toast({ title: 'Erreur', description: 'Impossible de demarrer le launch run', variant: 'destructive' });
+      console.warn('Server health check failed — edge function may not be deployed');
     }
   };
 
@@ -498,40 +601,21 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
   return (
     <LaunchOSContext.Provider value={{
-      projects,
-      currentProject,
-      setCurrentProject,
-      createProject,
-      updateProject,
-      deleteProject,
-      readinessScores,
-      scoreReadiness,
-      creativeVariants,
-      generateCreatives,
-      videoConcepts,
-      generateVideoConcepts,
-      distributionRuns,
-      signalEvents,
-      decisionRules,
-      decisionActions,
-      evaluateDecisions,
-      approveAction,
-      rejectAction,
+      projects, currentProject, setCurrentProject, createProject, updateProject, deleteProject,
+      readinessScores, scoreReadiness,
+      creativeVariants, generateCreatives,
+      videoConcepts, generateVideoConcepts,
+      distributionRuns, signalEvents,
+      decisionRules, decisionActions, evaluateDecisions, approveAction, rejectAction,
       campaignMemories,
-      // Launch OS Hardening
-      currentStage,
-      completedStages,
-      stageProgress,
-      advanceStage,
-      approvalCheckpoints,
-      submitForApproval,
-      approveCheckpoint,
-      rejectCheckpoint,
-      launchRuns,
-      startLaunchRun,
-      launchInsights,
-      loading,
-      refetch: fetchAll,
+      // Backend-first pipeline
+      currentStage, completedStages, stageProgress,
+      backendStageRuns, backendRunEvents, unresolvedErrors,
+      startLaunchRun, advanceStage, skipStage, resumeRun, cancelRun, refreshRunStatus,
+      approvalCheckpoints, submitForApproval, approveCheckpoint, rejectCheckpoint,
+      launchRuns, launchInsights,
+      runServerHealthCheck, serverHealthReport,
+      loading, refetch: fetchAll,
     }}>
       {children}
     </LaunchOSContext.Provider>

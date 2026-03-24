@@ -592,6 +592,146 @@ export const LAUNCH_AGENTS: LaunchAgentSpec[] = [
   },
 ];
 
+// ─── Agent Runtime Status ────────────────────────────────────────────────────
+// HONEST classification of each agent's runtime readiness.
+// An agent is EXECUTABLE if it has backend execution code in launch-stage-executor.
+// An agent is PARTIAL if it delegates to an existing edge function.
+// An agent is SPEC_ONLY if it's defined but has no runtime.
+
+export type AgentRuntimeStatus = 'executable' | 'partial' | 'spec_only' | 'disabled';
+
+export interface AgentRuntimeClassification {
+  agent_id: string;
+  runtime_status: AgentRuntimeStatus;
+  backend_function: string | null;
+  execution_evidence: string;
+  limitations: string[];
+}
+
+export const AGENT_RUNTIME_CLASSIFICATIONS: AgentRuntimeClassification[] = [
+  {
+    agent_id: 'launch_program_manager',
+    runtime_status: 'executable',
+    backend_function: 'launch-orchestrator',
+    execution_evidence: 'Orchestrates run lifecycle via launch-orchestrator edge function. Creates runs, advances stages, manages state.',
+    limitations: ['Does not autonomously detect timeline deviations', 'Escalation is notification-only'],
+  },
+  {
+    agent_id: 'offer_positioning_strategist',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (positioning stage)',
+    execution_evidence: 'Invoked via AI gateway during positioning stage. Generates positioning statement and offer asset.',
+    limitations: ['Output quality depends on AI gateway availability', 'No competitive data enrichment yet'],
+  },
+  {
+    agent_id: 'icp_audience_researcher',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (audience_research stage)',
+    execution_evidence: 'Invoked via AI gateway. Checks GA4/Meta integrations for real data. Falls back to TEMPLATE if no connectors.',
+    limitations: ['No direct GA4 API query — checks integration status only', 'Persona generation is AI-only'],
+  },
+  {
+    agent_id: 'creative_strategist',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (messaging + creative_strategy stages)',
+    execution_evidence: 'Generates messaging framework via AI gateway. Delegates creative production to creative-factory edge function.',
+    limitations: ['Hook bank generation is AI-only, not data-validated'],
+  },
+  {
+    agent_id: 'video_scriptwriter',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (video_asset_planning stage)',
+    execution_evidence: 'Delegates to video-concept-factory edge function.',
+    limitations: ['Scripts are AI-generated only', 'No production-ready video output'],
+  },
+  {
+    agent_id: 'storyboard_agent',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (video_asset_planning stage)',
+    execution_evidence: 'Part of video planning stage. Generates storyboard descriptions via AI.',
+    limitations: ['No visual storyboard generation', 'Text descriptions only'],
+  },
+  {
+    agent_id: 'creative_production_qa',
+    runtime_status: 'partial',
+    backend_function: 'creative-qa.ts (lib functions)',
+    execution_evidence: 'Brand compliance, CTA clarity, and language quality check functions exist in creative-qa.ts.',
+    limitations: ['Not automatically invoked during pipeline', 'Must be triggered manually or via stage executor'],
+  },
+  {
+    agent_id: 'multichannel_distribution_planner',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (channel_plan + publish_distribute stages)',
+    execution_evidence: 'Creates publication jobs per channel. Checks active integrations for auto-publish eligibility.',
+    limitations: ['No actual API publishing to Meta/Google yet', 'All jobs exported for manual publishing'],
+  },
+  {
+    agent_id: 'paid_media_planner',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (channel_plan stage)',
+    execution_evidence: 'Generates budget allocation plan based on active channels.',
+    limitations: ['No bid strategy optimization', 'No real-time ROAS tracking'],
+  },
+  {
+    agent_id: 'organic_content_planner',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (channel_plan stage)',
+    execution_evidence: 'Part of channel plan generation.',
+    limitations: ['No content calendar generation', 'No repurposing automation'],
+  },
+  {
+    agent_id: 'landing_page_cro',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (landing_funnel stage)',
+    execution_evidence: 'Creates landing page asset record. References site-analyze for existing pages.',
+    limitations: ['No real CRO analysis', 'No A/B test setup'],
+  },
+  {
+    agent_id: 'crm_lifecycle_agent',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor + launch-sales-handoff',
+    execution_evidence: 'Creates lifecycle follow-up queue entries. Manages CRM push log.',
+    limitations: ['No real CRM integration (push is queued_manual)', 'No email sequence activation'],
+  },
+  {
+    agent_id: 'attribution_analytics_lead',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (track_attribute + iterate_recommend + executive_report stages)',
+    execution_evidence: 'Checks signal events and analytics integrations. Generates attribution availability report.',
+    limitations: ['No multi-touch attribution model', 'Depends on signal events being ingested'],
+  },
+  {
+    agent_id: 'sales_enablement_agent',
+    runtime_status: 'executable',
+    backend_function: 'launch-sales-handoff',
+    execution_evidence: 'Scores leads from signal events. Creates handoff records with MQL/SQL classification. Generates follow-up queue.',
+    limitations: ['Lead scoring is rule-based, not ML', 'No sales toolkit generation (battlecards)'],
+  },
+  {
+    agent_id: 'brand_legal_compliance_reviewer',
+    runtime_status: 'partial',
+    backend_function: 'launch-stage-executor (approval_gate stage)',
+    execution_evidence: 'Part of approval gate execution. Checks for pending approvals.',
+    limitations: ['No actual legal compliance checking', 'No ad platform policy verification', 'Relies entirely on human review'],
+  },
+];
+
+export function getAgentRuntimeStatus(agentId: string): AgentRuntimeClassification | undefined {
+  return AGENT_RUNTIME_CLASSIFICATIONS.find(c => c.agent_id === agentId);
+}
+
+export function getExecutableAgents(): AgentRuntimeClassification[] {
+  return AGENT_RUNTIME_CLASSIFICATIONS.filter(c => c.runtime_status === 'executable');
+}
+
+export function getPartialAgents(): AgentRuntimeClassification[] {
+  return AGENT_RUNTIME_CLASSIFICATIONS.filter(c => c.runtime_status === 'partial');
+}
+
+export function getSpecOnlyAgents(): AgentRuntimeClassification[] {
+  return AGENT_RUNTIME_CLASSIFICATIONS.filter(c => c.runtime_status === 'spec_only');
+}
+
 // ─── Agent Lookup Helpers ────────────────────────────────────────────────────
 
 export function getLaunchAgentById(id: string): LaunchAgentSpec | undefined {
