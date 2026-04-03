@@ -99,7 +99,7 @@ async function checkIntegrationHealth(
       .from('integrations')
       .select('*')
       .eq('workspace_id', workspaceId)
-      .eq('provider', connectorId)
+      .eq('provider', connectorId as any)
       .maybeSingle();
 
     if (error) {
