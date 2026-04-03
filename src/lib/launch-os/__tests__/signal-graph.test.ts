@@ -154,7 +154,7 @@ describe('SignalGraph', () => {
 
   describe('computeFunnel', () => {
     it('calculates funnel with correct dropoff', () => {
-      const events: SignalEvent[] = [
+      const events = [
         ...Array(1000).fill(null).map((_, i) => ({
           id: `v-${i}`, launch_project_id: 'p1', event_type: 'view' as SignalEventType,
           source: 'web', properties: {}, created_at: new Date().toISOString(),

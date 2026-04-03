@@ -18,7 +18,7 @@ function makeProject(overrides: Partial<LaunchProject> = {}): LaunchProject {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     ...overrides,
-  };
+  }) as LaunchProject;
 }
 
 const fullMusicInput = {
