@@ -163,7 +163,7 @@ describe('DecisionEngine', () => {
 
     it('computes hook_retention_3s from view and watch_3s events', () => {
       const now = new Date();
-      const events: SignalEvent[] = [
+      const events = [
         ...Array(200).fill(null).map((_, i) => ({
           id: `view-${i}`, launch_project_id: 'p1', event_type: 'view' as const,
           source: 'tiktok', channel: 'tiktok', properties: {}, created_at: now.toISOString(),
