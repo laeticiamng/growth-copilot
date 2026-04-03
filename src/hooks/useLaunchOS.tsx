@@ -242,16 +242,17 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
     const fetchProjectDetails = async () => {
       const projectId = currentProject.id;
 
+      const sb = supabase as any;
       const [scoresRes, creativesRes, videosRes, distRes, signalsRes, actionsRes, checkpointsRes, runsRes, insightsRes] = await Promise.all([
-        supabase.from('launch_readiness_scores').select('*').eq('launch_project_id', projectId).order('scored_at', { ascending: false }),
-        supabase.from('launch_creative_variants').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_video_concepts').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_distribution_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_signal_events').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(500),
-        supabase.from('launch_decision_actions').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_approval_checkpoints' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_runs' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_insights' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(50),
+        sb.from('launch_readiness_scores').select('*').eq('launch_project_id', projectId).order('scored_at', { ascending: false }),
+        sb.from('launch_creative_variants').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_video_concepts').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_distribution_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_signal_events').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(500),
+        sb.from('launch_decision_actions').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_approval_checkpoints').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_insights').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(50),
       ]);
 
       if (scoresRes.data) setReadinessScores(scoresRes.data as unknown as ReadinessScore[]);
