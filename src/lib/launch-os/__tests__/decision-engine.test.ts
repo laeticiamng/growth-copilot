@@ -183,9 +183,9 @@ describe('DecisionEngine', () => {
     it('filters events outside time window', () => {
       const now = new Date();
       const old = new Date(now.getTime() - 50 * 3600 * 1000); // 50 hours ago
-      const events: SignalEvent[] = [
-        { id: 'imp-old', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', properties: {}, created_at: old.toISOString() },
-        { id: 'imp-new', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', properties: {}, created_at: now.toISOString() },
+      const events = [
+        { id: 'imp-old', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', created_at: old.toISOString() },
+        { id: 'imp-new', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', created_at: now.toISOString() },
       ];
 
       const metrics = DecisionEngine.computeMetrics(events, 24);
