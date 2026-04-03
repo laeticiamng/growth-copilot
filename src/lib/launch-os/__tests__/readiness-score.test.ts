@@ -3,7 +3,7 @@ import { ReadinessScorer } from '../readiness-score';
 import type { LaunchProject } from '../types';
 
 function makeProject(overrides: Partial<LaunchProject> = {}): LaunchProject {
-  return {
+  return ({
     id: 'test-id',
     workspace_id: 'ws-1',
     name: 'Test Launch',
