@@ -322,9 +322,9 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   const createProject = async (name: string, launchType: LaunchType, inputUrl?: string): Promise<LaunchProject | null> => {
     if (!currentWorkspace) return null;
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('launch_projects')
-      .insert({ workspace_id: currentWorkspace.id, name, launch_type: launchType, input_url: inputUrl || null, status: 'draft' } as Record<string, unknown>)
+      .insert({ workspace_id: currentWorkspace.id, name, launch_type: launchType, input_url: inputUrl || null, status: 'draft' })
       .select()
       .single();
 
