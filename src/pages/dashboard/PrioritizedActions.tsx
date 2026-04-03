@@ -59,7 +59,7 @@ export default function PrioritizedActions() {
         summary: t("prioritizedActions.briefExecSummary"),
         owner: t("prioritizedActions.briefExecOwner"),
         priority: "P2",
-        approval: t("prioritizedActions.approvalOptional"),
+        approval: t("prioritizedActions.approvalOptional") as "Auto" | "Optional" | "Required",
         evidence: latestEvidence?.summary ?? t("prioritizedActions.briefExecEvidence"),
         expectedImpact: t("prioritizedActions.briefExecImpact"),
         eta: refreshCadence,
