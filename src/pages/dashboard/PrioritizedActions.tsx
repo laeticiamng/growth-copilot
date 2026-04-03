@@ -70,7 +70,7 @@ export default function PrioritizedActions() {
         summary: t("prioritizedActions.scheduleMonitoringSummary"),
         owner: t("prioritizedActions.scheduleMonitoringOwner"),
         priority: "P3",
-        approval: t("prioritizedActions.approvalAuto"),
+        approval: t("prioritizedActions.approvalAuto") as "Auto" | "Optional" | "Required",
         evidence: t("prioritizedActions.scheduledRunsEvidence", { count: scheduledRuns.length }),
         expectedImpact: t("prioritizedActions.scheduleMonitoringImpact"),
         eta: t("prioritizedActions.etaImmediately"),
