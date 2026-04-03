@@ -133,8 +133,8 @@ async function checkIntegrationHealth(
       token_valid: tokenValid,
       scopes_valid: isActive ? true : null,
       last_success: integrations.last_sync_at || null,
-      last_failure: integrations.last_error_at || null,
-      error_surface: integrations.last_error || null,
+      last_failure: (integrations as any).last_error_at || null,
+      error_surface: (integrations as any).last_error || null,
       status: isActive ? (tokenValid === false ? 'degraded' : 'healthy') : 'error',
       degraded_mode: tokenValid === false ? 'Token expired, re-authentication required' : null,
       action_required: !isActive

@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function OutcomeTracking() {
   const { t } = useTranslation();
   const { currentSite } = useSites();
-  const { bundles, isLoading: evidenceLoading } = useEvidenceBundles();
+  const { bundles, loading: evidenceLoading } = useEvidenceBundles();
   const { entries } = useAuditLog();
 
   const { data: kpis, isLoading } = useQuery({
