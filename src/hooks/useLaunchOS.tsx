@@ -190,7 +190,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('launch_projects')
         .select('*')
         .eq('workspace_id', currentWorkspace.id)
