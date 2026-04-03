@@ -198,7 +198,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
       if (!error && data) setProjects(data as unknown as LaunchProject[]);
 
-      const { data: rules } = await supabase
+      const { data: rules } = await (supabase as any)
         .from('launch_decision_rules')
         .select('*')
         .eq('workspace_id', currentWorkspace.id);
