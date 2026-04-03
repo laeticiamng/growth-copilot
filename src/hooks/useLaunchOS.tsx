@@ -340,7 +340,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProject = async (id: string, updates: Partial<LaunchProject>) => {
-    const { error } = await supabase.from('launch_projects').update(updates as Record<string, unknown>).eq('id', id);
+    const { error } = await (supabase as any).from('launch_projects').update(updates as Record<string, unknown>).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to update project', variant: 'destructive' });
     } else {
