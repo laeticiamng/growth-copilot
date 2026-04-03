@@ -436,7 +436,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const rejectAction = async (actionId: string) => {
-    const { error } = await supabase.from('launch_decision_actions').update({ status: 'rejected' }).eq('id', actionId);
+    const { error } = await (supabase as any).from('launch_decision_actions').update({ status: 'rejected' }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'rejected' as const } : a));
       toast({ title: 'Action Rejected' });
