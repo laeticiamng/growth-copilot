@@ -84,10 +84,9 @@ describe('SignalGraph', () => {
       event_type: 'click',
       source: 'meta',
       channel: 'meta_ads',
-      properties: {},
       created_at: new Date().toISOString(),
       ...overrides,
-    });
+    } as SignalEvent);
 
     it('last_touch attribution gives credit to last channel', () => {
       const events: SignalEvent[] = [
