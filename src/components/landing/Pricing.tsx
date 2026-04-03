@@ -26,7 +26,7 @@ export function Pricing() {
               key={plan.name}
               className={cn(
                 "relative border-border/60",
-                plan.featured && "border-primary/40 bg-gradient-to-b from-primary/10 via-background to-background shadow-xl"
+                ('featured' in plan) && (plan as any).featured && "border-primary/40 bg-gradient-to-b from-primary/10 via-background to-background shadow-xl"
               )}
             >
               {plan.featured && (
