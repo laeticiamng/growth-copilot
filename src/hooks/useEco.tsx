@@ -4,14 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSites } from "@/hooks/useSites";
 
-const ecoDb = supabase as typeof supabase & {
-  from: (table: string) => {
-    select: (...args: unknown[]) => unknown;
-    insert: (...args: unknown[]) => unknown;
-    update: (...args: unknown[]) => unknown;
-    delete: (...args: unknown[]) => unknown;
-  };
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ecoDb = supabase as any;
 
 export interface EcoEmissionSource {
   id: string;

@@ -55,7 +55,7 @@ export function Pricing() {
                   ))}
                 </ul>
                 <Link to={plan.name === "Scale" ? "/contact" : "/auth?tab=signup"}>
-                  <Button variant={plan.featured ? "hero" : "outline"} className="w-full" size="lg">
+                  <Button variant={('featured' in plan) && (plan as any).featured ? "hero" : "outline"} className="w-full" size="lg">
                     {plan.cta}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>

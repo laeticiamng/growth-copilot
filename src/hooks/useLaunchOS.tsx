@@ -204,7 +204,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
         .eq('workspace_id', currentWorkspace.id);
       if (rules) setDecisionRules(rules as unknown as DecisionRule[]);
 
-      const { data: memories } = await supabase
+      const { data: memories } = await (supabase as any)
         .from('launch_campaign_memories')
         .select('*')
         .eq('workspace_id', currentWorkspace.id)
