@@ -18,7 +18,7 @@ type DbAgentRunStatus = Database['public']['Enums']['agent_run_status'];
 
 // Map our agent types to database enum values
 // All 39 agents mapped to the closest DB enum value
-const agentTypeToDb: Record<AgentType, DbAgentType> = {
+const agentTypeToDb: Partial<Record<AgentType, DbAgentType>> = {
   // Direction (2)
   chief_growth_officer: 'chief_growth_officer',
   quality_compliance: 'quality_compliance',

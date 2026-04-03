@@ -259,7 +259,9 @@ export default function LaunchOSHome() {
 // ─── Project Card ───────────────────────────────────────────────────────────
 
 function ProjectCard({ project, onClick, compact }: { project: LaunchProject; onClick: () => void; compact?: boolean }) {
-  const config = statusConfig[project.status];
+  const { t } = useTranslation();
+  const sc = getStatusConfig(t);
+  const config = sc[project.status] || sc['draft'];
   const StatusIcon = config.icon;
   const isMusic = getLaunchCategory(project.launch_type) === 'music';
 

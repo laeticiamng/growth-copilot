@@ -190,7 +190,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('launch_projects')
         .select('*')
         .eq('workspace_id', currentWorkspace.id)
@@ -198,13 +198,13 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
 
       if (!error && data) setProjects(data as unknown as LaunchProject[]);
 
-      const { data: rules } = await supabase
+      const { data: rules } = await (supabase as any)
         .from('launch_decision_rules')
         .select('*')
         .eq('workspace_id', currentWorkspace.id);
       if (rules) setDecisionRules(rules as unknown as DecisionRule[]);
 
-      const { data: memories } = await supabase
+      const { data: memories } = await (supabase as any)
         .from('launch_campaign_memories')
         .select('*')
         .eq('workspace_id', currentWorkspace.id)
@@ -242,16 +242,17 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
     const fetchProjectDetails = async () => {
       const projectId = currentProject.id;
 
+      const sb = supabase as any;
       const [scoresRes, creativesRes, videosRes, distRes, signalsRes, actionsRes, checkpointsRes, runsRes, insightsRes] = await Promise.all([
-        supabase.from('launch_readiness_scores').select('*').eq('launch_project_id', projectId).order('scored_at', { ascending: false }),
-        supabase.from('launch_creative_variants').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_video_concepts').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_distribution_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_signal_events').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(500),
-        supabase.from('launch_decision_actions').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_approval_checkpoints' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_runs' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
-        supabase.from('launch_insights' as any).select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(50),
+        sb.from('launch_readiness_scores').select('*').eq('launch_project_id', projectId).order('scored_at', { ascending: false }),
+        sb.from('launch_creative_variants').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_video_concepts').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_distribution_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_signal_events').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(500),
+        sb.from('launch_decision_actions').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_approval_checkpoints').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_runs').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }),
+        sb.from('launch_insights').select('*').eq('launch_project_id', projectId).order('created_at', { ascending: false }).limit(50),
       ]);
 
       if (scoresRes.data) setReadinessScores(scoresRes.data as unknown as ReadinessScore[]);
@@ -321,9 +322,9 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   const createProject = async (name: string, launchType: LaunchType, inputUrl?: string): Promise<LaunchProject | null> => {
     if (!currentWorkspace) return null;
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('launch_projects')
-      .insert({ workspace_id: currentWorkspace.id, name, launch_type: launchType, input_url: inputUrl || null, status: 'draft' } as Record<string, unknown>)
+      .insert({ workspace_id: currentWorkspace.id, name, launch_type: launchType, input_url: inputUrl || null, status: 'draft' })
       .select()
       .single();
 
@@ -339,7 +340,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProject = async (id: string, updates: Partial<LaunchProject>) => {
-    const { error } = await supabase.from('launch_projects').update(updates as Record<string, unknown>).eq('id', id);
+    const { error } = await (supabase as any).from('launch_projects').update(updates as Record<string, unknown>).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to update project', variant: 'destructive' });
     } else {
@@ -349,7 +350,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteProject = async (id: string) => {
-    const { error } = await supabase.from('launch_projects').delete().eq('id', id);
+    const { error } = await (supabase as any).from('launch_projects').delete().eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to delete project', variant: 'destructive' });
     } else {
@@ -427,7 +428,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const approveAction = async (actionId: string) => {
-    const { error } = await supabase.from('launch_decision_actions').update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id }).eq('id', actionId);
+    const { error } = await (supabase as any).from('launch_decision_actions').update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'approved' as const } : a));
       toast({ title: 'Action Approved' });
@@ -435,7 +436,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const rejectAction = async (actionId: string) => {
-    const { error } = await supabase.from('launch_decision_actions').update({ status: 'rejected' }).eq('id', actionId);
+    const { error } = await (supabase as any).from('launch_decision_actions').update({ status: 'rejected' }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'rejected' as const } : a));
       toast({ title: 'Action Rejected' });

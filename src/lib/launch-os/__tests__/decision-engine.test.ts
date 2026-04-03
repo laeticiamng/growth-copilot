@@ -143,7 +143,7 @@ describe('DecisionEngine', () => {
   describe('computeMetrics', () => {
     it('computes creative_ctr from impression and click events', () => {
       const now = new Date();
-      const events: SignalEvent[] = [
+      const events = [
         ...Array(100).fill(null).map((_, i) => ({
           id: `imp-${i}`, launch_project_id: 'p1', event_type: 'impression' as const,
           source: 'meta', channel: 'meta_ads', properties: {}, created_at: now.toISOString(),
@@ -154,7 +154,7 @@ describe('DecisionEngine', () => {
         })),
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 24);
+      const metrics = DecisionEngine.computeMetrics(events as any, 24);
       const ctr = metrics.find(m => m.metric === 'creative_ctr');
       expect(ctr).toBeDefined();
       expect(ctr!.value).toBeCloseTo(5, 0);
@@ -163,7 +163,7 @@ describe('DecisionEngine', () => {
 
     it('computes hook_retention_3s from view and watch_3s events', () => {
       const now = new Date();
-      const events: SignalEvent[] = [
+      const events = [
         ...Array(200).fill(null).map((_, i) => ({
           id: `view-${i}`, launch_project_id: 'p1', event_type: 'view' as const,
           source: 'tiktok', channel: 'tiktok', properties: {}, created_at: now.toISOString(),
@@ -174,7 +174,7 @@ describe('DecisionEngine', () => {
         })),
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 48);
+      const metrics = DecisionEngine.computeMetrics(events as any, 48);
       const retention = metrics.find(m => m.metric === 'hook_retention_3s');
       expect(retention).toBeDefined();
       expect(retention!.value).toBeCloseTo(40, 0);
@@ -183,12 +183,12 @@ describe('DecisionEngine', () => {
     it('filters events outside time window', () => {
       const now = new Date();
       const old = new Date(now.getTime() - 50 * 3600 * 1000); // 50 hours ago
-      const events: SignalEvent[] = [
-        { id: 'imp-old', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', properties: {}, created_at: old.toISOString() },
-        { id: 'imp-new', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', properties: {}, created_at: now.toISOString() },
+      const events = [
+        { id: 'imp-old', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', created_at: old.toISOString() },
+        { id: 'imp-new', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', created_at: now.toISOString() },
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 24);
+      const metrics = DecisionEngine.computeMetrics(events as any, 24);
       const ctr = metrics.find(m => m.metric === 'creative_ctr');
       // Only 1 impression within window, no clicks → no CTR or CTR = 0
       expect(ctr?.sampleSize).toBe(1);

@@ -145,6 +145,8 @@ function ActionCard({ action, onApprove, onReject }: {
   onApprove: (id: string) => Promise<void>;
   onReject: (id: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
+  const labels = getActionLabels(t);
   return (
     <Card className="border-amber-500/30">
       <CardContent className="pt-6">
@@ -155,7 +157,7 @@ function ActionCard({ action, onApprove, onReject }: {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <Badge variant="outline" className="text-xs">
-                {actionLabels[action.action] || action.action}
+                {labels[action.action] || action.action}
               </Badge>
             </div>
             <p className="text-sm">{action.reason}</p>

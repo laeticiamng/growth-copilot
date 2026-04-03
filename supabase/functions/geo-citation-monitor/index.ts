@@ -1,9 +1,10 @@
-import { corsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, corsPreflightResponse } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return corsPreflightResponse(req);
   }
+  const corsHeaders = getCorsHeaders(req);
 
   try {
     const { query, brand } = await req.json();

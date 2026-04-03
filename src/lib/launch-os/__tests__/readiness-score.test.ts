@@ -3,7 +3,7 @@ import { ReadinessScorer } from '../readiness-score';
 import type { LaunchProject } from '../types';
 
 function makeProject(overrides: Partial<LaunchProject> = {}): LaunchProject {
-  return {
+  return ({
     id: 'test-id',
     workspace_id: 'ws-1',
     name: 'Test Launch',
@@ -18,7 +18,7 @@ function makeProject(overrides: Partial<LaunchProject> = {}): LaunchProject {
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     ...overrides,
-  };
+  }) as LaunchProject;
 }
 
 const fullMusicInput = {

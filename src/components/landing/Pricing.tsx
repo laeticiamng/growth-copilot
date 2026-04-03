@@ -26,10 +26,10 @@ export function Pricing() {
               key={plan.name}
               className={cn(
                 "relative border-border/60",
-                plan.featured && "border-primary/40 bg-gradient-to-b from-primary/10 via-background to-background shadow-xl"
+                ('featured' in plan) && (plan as any).featured && "border-primary/40 bg-gradient-to-b from-primary/10 via-background to-background shadow-xl"
               )}
             >
-              {plan.featured && (
+              {('featured' in plan) && (plan as any).featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge variant="gradient" className="px-3 py-1 text-xs">
                     <Sparkles className="w-3 h-3 mr-1" />
@@ -55,7 +55,7 @@ export function Pricing() {
                   ))}
                 </ul>
                 <Link to={plan.name === "Scale" ? "/contact" : "/auth?tab=signup"}>
-                  <Button variant={plan.featured ? "hero" : "outline"} className="w-full" size="lg">
+                  <Button variant={('featured' in plan) && (plan as any).featured ? "hero" : "outline"} className="w-full" size="lg">
                     {plan.cta}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
