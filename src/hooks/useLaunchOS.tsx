@@ -350,7 +350,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteProject = async (id: string) => {
-    const { error } = await supabase.from('launch_projects').delete().eq('id', id);
+    const { error } = await (supabase as any).from('launch_projects').delete().eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to delete project', variant: 'destructive' });
     } else {
