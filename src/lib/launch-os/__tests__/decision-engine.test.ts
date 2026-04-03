@@ -154,7 +154,7 @@ describe('DecisionEngine', () => {
         })),
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 24);
+      const metrics = DecisionEngine.computeMetrics(events as any, 24);
       const ctr = metrics.find(m => m.metric === 'creative_ctr');
       expect(ctr).toBeDefined();
       expect(ctr!.value).toBeCloseTo(5, 0);
