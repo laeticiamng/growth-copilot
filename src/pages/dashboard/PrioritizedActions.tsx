@@ -48,7 +48,7 @@ export default function PrioritizedActions() {
         summary: t("prioritizedActions.fixDropSummary"),
         owner: t("prioritizedActions.fixDropOwner"),
         priority: "P1",
-        approval: pendingApprovals.length > 0 ? t("prioritizedActions.approvalRequired") : t("prioritizedActions.approvalOptional"),
+        approval: (pendingApprovals.length > 0 ? t("prioritizedActions.approvalRequired") : t("prioritizedActions.approvalOptional")) as "Auto" | "Optional" | "Required",
         evidence: latestEvidence?.title ?? t("prioritizedActions.evidencePending"),
         expectedImpact: t("prioritizedActions.fixDropImpact"),
         eta: t("prioritizedActions.etaThisWeek"),
