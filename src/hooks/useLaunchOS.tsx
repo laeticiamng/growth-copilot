@@ -428,7 +428,7 @@ export function LaunchOSProvider({ children }: { children: ReactNode }) {
   };
 
   const approveAction = async (actionId: string) => {
-    const { error } = await supabase.from('launch_decision_actions').update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id }).eq('id', actionId);
+    const { error } = await (supabase as any).from('launch_decision_actions').update({ status: 'approved', approved_by: (await supabase.auth.getUser()).data.user?.id }).eq('id', actionId);
     if (!error) {
       setDecisionActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'approved' as const } : a));
       toast({ title: 'Action Approved' });
