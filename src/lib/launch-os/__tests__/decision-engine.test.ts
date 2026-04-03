@@ -188,7 +188,7 @@ describe('DecisionEngine', () => {
         { id: 'imp-new', launch_project_id: 'p1', event_type: 'impression', source: 'meta', channel: 'meta_ads', created_at: now.toISOString() },
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 24);
+      const metrics = DecisionEngine.computeMetrics(events as any, 24);
       const ctr = metrics.find(m => m.metric === 'creative_ctr');
       // Only 1 impression within window, no clicks → no CTR or CTR = 0
       expect(ctr?.sampleSize).toBe(1);
