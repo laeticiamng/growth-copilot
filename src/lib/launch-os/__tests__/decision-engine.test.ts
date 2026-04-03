@@ -174,7 +174,7 @@ describe('DecisionEngine', () => {
         })),
       ];
 
-      const metrics = DecisionEngine.computeMetrics(events, 48);
+      const metrics = DecisionEngine.computeMetrics(events as any, 48);
       const retention = metrics.find(m => m.metric === 'hook_retention_3s');
       expect(retention).toBeDefined();
       expect(retention!.value).toBeCloseTo(40, 0);
