@@ -143,7 +143,7 @@ describe('DecisionEngine', () => {
   describe('computeMetrics', () => {
     it('computes creative_ctr from impression and click events', () => {
       const now = new Date();
-      const events: SignalEvent[] = [
+      const events = [
         ...Array(100).fill(null).map((_, i) => ({
           id: `imp-${i}`, launch_project_id: 'p1', event_type: 'impression' as const,
           source: 'meta', channel: 'meta_ads', properties: {}, created_at: now.toISOString(),
