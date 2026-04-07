@@ -210,6 +210,7 @@ export default function HR() {
             <Download className="w-4 h-4 mr-2" />
             CSV
           </Button>
+          <Dialog open={isEmployeeDialogOpen} onOpenChange={setIsEmployeeDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <UserPlus className="w-4 h-4 mr-2" />
