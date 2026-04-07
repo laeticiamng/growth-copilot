@@ -202,8 +202,8 @@ export default function Billing() {
   const isPaid = subscription?.status === "active" && subscription?.plan !== "free";
 
   return (
+    <DashboardPageWrapper pageName="Billing">
     <PermissionGuard permission="manage_billing">
-      <DashboardPageWrapper pageName="Billing">
       <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
         <header>
