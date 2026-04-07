@@ -62,6 +62,18 @@ export default function Offers() {
 
   // Real data only - no demo fallback (Zero Fake Data policy)
   const displayOffers = offers;
+  const offersPagination = usePagination(displayOffers, { initialPageSize: 10 });
+
+  const handleExportCSV = () => {
+    exportToCSV(displayOffers, [
+      { header: 'Nom', accessor: (o) => o.name },
+      { header: 'Tier', accessor: (o) => o.tier },
+      { header: 'Prix', accessor: (o) => o.price },
+      { header: 'Période', accessor: (o) => o.price_period },
+      { header: 'Actif', accessor: (o) => o.is_active },
+      { header: 'Features', accessor: (o) => o.features.join('; ') },
+    ], 'offers');
+  };
 
   // Extract USP and objections from first offer if available - no demo fallback
   const usp = offers.length > 0 && offers[0].benefits.length > 0 
