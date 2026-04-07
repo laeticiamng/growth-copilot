@@ -1,4 +1,24 @@
-import type { AgentProfile } from "./AgentProfileDialog";
+export interface AgentProfile {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  specialty: string;
+  education: {
+    degree: string;
+    school: string;
+    year: number;
+  };
+  certifications: string[];
+  languages: { name: string; level: string }[];
+  coreSkills: { name: string; level: number }[];
+  technicalSkills: string[];
+  softSkills: string[];
+  expertise: string[];
+  experience: string;
+  methodology: string[];
+  tools: string[];
+}
 
 const AGENT_PROFILES: Record<string, AgentProfile> = {
   // Direction

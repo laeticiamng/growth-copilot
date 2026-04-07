@@ -21,7 +21,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AGENT_PROFILES } from "./agent-profiles-data";
+import { AGENT_PROFILES, type AgentProfile } from "./agent-profiles-data";
 
 // Get profile by agent ID
 // eslint-disable-next-line react-refresh/only-export-components
