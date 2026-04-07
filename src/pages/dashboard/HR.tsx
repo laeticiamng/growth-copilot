@@ -134,7 +134,7 @@ export default function HR() {
 
   const employeePagination = usePagination(filteredEmployees, { initialPageSize: 10 });
 
-    if (!newEmployee.first_name || !newEmployee.last_name || !newEmployee.email || !newEmployee.job_title) {
+    const handleCreateEmployee = async () => {
       return;
     }
     await createEmployee(newEmployee);
