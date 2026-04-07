@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, BarChart3, CheckCircle2, Shield, Sparkles, Workflow } from "lucide-react";
+import { ArrowRight, BarChart3, CheckCircle2, Download, Shield, Sparkles, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,9 @@ import { useScheduledRuns } from "@/hooks/useScheduledRuns";
 import { useSites } from "@/hooks/useSites";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
+import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
+import { GoalsProgress } from "@/components/dashboard/GoalsProgress";
+import { CockpitPDFExport } from "@/components/dashboard/CockpitPDFExport";
 
 export default function DashboardHome() {
   const { t } = useTranslation();
@@ -113,6 +116,7 @@ export default function DashboardHome() {
         <div className="flex flex-wrap gap-3">
           <Link to="/dashboard/signals"><Button variant="hero">{t("dashboardHome.openSignals")}</Button></Link>
           <Link to="/dashboard/actions"><Button variant="outline">{t("dashboardHome.viewActions")}</Button></Link>
+          <CockpitPDFExport workspaceName={currentWorkspace.name} />
         </div>
       </div>
 
@@ -199,6 +203,11 @@ export default function DashboardHome() {
           </Link>
         ))}
       </div>
+      {/* Predictive Analytics */}
+      <PredictiveAnalytics />
+
+      {/* Goals Progress */}
+      <GoalsProgress />
     </div>
   );
 }
