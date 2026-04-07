@@ -30,6 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 interface LatencyMetric {
   name: string;
