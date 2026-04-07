@@ -30,6 +30,7 @@ export default function AICostDashboard() {
     new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(cost);
 
   return (
+    <DashboardPageWrapper pageName="AI Cost" loading={loading} skeletonCards={4}>
     <div className="space-y-8">
       <header>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
