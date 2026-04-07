@@ -172,8 +172,8 @@ export default function AuditLogPage() {
   }, [entries, incidents]);
 
   return (
+    <DashboardPageWrapper pageName="AuditLog">
     <PermissionGuard 
-      <DashboardPageWrapper pageName="AuditLog">
       permission="view_audit" 
       fallback={
         <div className="p-8 text-center text-muted-foreground">
