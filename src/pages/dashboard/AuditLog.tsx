@@ -580,7 +580,7 @@ export default function AuditLogPage() {
           </Card>
         )}
       </div>
-      </DashboardPageWrapper>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }

@@ -390,7 +390,7 @@ export default function Ops() {
           </TabsContent>
         </Tabs>
       </div>
-      </DashboardPageWrapper>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }
