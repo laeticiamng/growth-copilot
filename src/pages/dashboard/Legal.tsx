@@ -327,8 +327,9 @@ export default function Legal() {
                   <p>{t("legalPage.noContract")}</p>
                 </div>
               ) : (
+                <>
                 <div className="divide-y">
-                  {filteredContracts.map((contract) => (
+                  {contractPagination.paginatedData.map((contract) => (
                     <div
                       key={contract.id}
                       className="py-4 flex items-center justify-between hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-colors"
@@ -358,6 +359,13 @@ export default function Legal() {
                     </div>
                   ))}
                 </div>
+                <DataTablePagination
+                  {...getPaginationProps(contractPagination)}
+                  pageSize={contractPagination.pageSize}
+                  onPageSizeChange={contractPagination.setPageSize}
+                  className="mt-4 pt-4 border-t"
+                />
+                </>
               )}
             </CardContent>
           </Card>
