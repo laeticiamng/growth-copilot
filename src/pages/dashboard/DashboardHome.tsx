@@ -116,6 +116,7 @@ export default function DashboardHome() {
         <div className="flex flex-wrap gap-3">
           <Link to="/dashboard/signals"><Button variant="hero">{t("dashboardHome.openSignals")}</Button></Link>
           <Link to="/dashboard/actions"><Button variant="outline">{t("dashboardHome.viewActions")}</Button></Link>
+          <CockpitPDFExport workspaceName={currentWorkspace.name} />
         </div>
       </div>
 
