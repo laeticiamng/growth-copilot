@@ -136,6 +136,7 @@ export default function Reputation() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Reputation">
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -330,5 +331,6 @@ export default function Reputation() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }

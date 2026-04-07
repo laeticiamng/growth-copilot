@@ -186,6 +186,7 @@ export default function Reports() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Reports">
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -431,5 +432,6 @@ export default function Reports() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

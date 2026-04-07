@@ -203,6 +203,7 @@ export default function Billing() {
 
   return (
     <PermissionGuard permission="manage_billing">
+      <DashboardPageWrapper pageName="Billing">
       <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
         <header>
@@ -379,6 +380,7 @@ export default function Billing() {
           </Card>
         </section>
       </div>
+      </DashboardPageWrapper>
     </PermissionGuard>
   );
 }

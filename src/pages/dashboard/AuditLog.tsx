@@ -173,6 +173,7 @@ export default function AuditLogPage() {
 
   return (
     <PermissionGuard 
+      <DashboardPageWrapper pageName="AuditLog">
       permission="view_audit" 
       fallback={
         <div className="p-8 text-center text-muted-foreground">
@@ -579,6 +580,7 @@ export default function AuditLogPage() {
           </Card>
         )}
       </div>
+      </DashboardPageWrapper>
     </PermissionGuard>
   );
 }

@@ -84,6 +84,7 @@ export default function Ops() {
 
   return (
     <PermissionGuard permission="manage_team" fallback={
+      <DashboardPageWrapper pageName="Ops">
       <div className="p-8 text-center text-muted-foreground">
         {t("opsPage.adminOnly")}
       </div>
@@ -389,6 +390,7 @@ export default function Ops() {
           </TabsContent>
         </Tabs>
       </div>
+      </DashboardPageWrapper>
     </PermissionGuard>
   );
 }

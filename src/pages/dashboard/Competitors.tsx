@@ -248,6 +248,7 @@ ${swotData.threats.map(item => `- ${item}`).join('\n') || `- ${t("modules.compet
   }
 
   return (
+    <DashboardPageWrapper pageName="Competitors">
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -623,5 +624,6 @@ ${swotData.threats.map(item => `- ${item}`).join('\n') || `- ${t("modules.compet
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }

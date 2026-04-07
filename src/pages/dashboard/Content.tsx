@@ -107,6 +107,7 @@ export default function Content() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Content">
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -270,5 +271,6 @@ export default function Content() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }
