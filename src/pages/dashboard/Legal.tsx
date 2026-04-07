@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { exportToCSV } from "@/lib/csv-export";
 import { useTranslation } from "react-i18next";
+import { usePagination, getPaginationProps } from "@/hooks/usePagination";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,6 +98,8 @@ export default function Legal() {
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.counterparty_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const contractPagination = usePagination(filteredContracts, { initialPageSize: 10 });
 
   const handleCreate = async () => {
     if (!newContract.title || !newContract.contract_type) return;
@@ -323,8 +327,9 @@ export default function Legal() {
                   <p>{t("legalPage.noContract")}</p>
                 </div>
               ) : (
+                <>
                 <div className="divide-y">
-                  {filteredContracts.map((contract) => (
+                  {contractPagination.paginatedData.map((contract) => (
                     <div
                       key={contract.id}
                       className="py-4 flex items-center justify-between hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-colors"
@@ -354,6 +359,13 @@ export default function Legal() {
                     </div>
                   ))}
                 </div>
+                <DataTablePagination
+                  {...getPaginationProps(contractPagination)}
+                  pageSize={contractPagination.pageSize}
+                  onPageSizeChange={contractPagination.setPageSize}
+                  className="mt-4 pt-4 border-t"
+                />
+                </>
               )}
             </CardContent>
           </Card>
