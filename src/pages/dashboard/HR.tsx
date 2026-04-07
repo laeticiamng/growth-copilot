@@ -389,6 +389,7 @@ export default function HR() {
                   <p>{t("hrPage.noEmployeeFound")}</p>
                 </div>
               ) : (
+                <>
                 <div className="divide-y">
                   {employeePagination.paginatedData.map((employee) => (
                     <div
