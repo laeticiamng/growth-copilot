@@ -198,7 +198,18 @@ export default function HR() {
             {t("hrPage.subtitle")}
           </p>
         </div>
-        <Dialog open={isEmployeeDialogOpen} onOpenChange={setIsEmployeeDialogOpen}>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => exportToCSV(employees, [
+            { header: t("hrPage.firstName"), accessor: (e) => e.first_name },
+            { header: t("hrPage.lastName"), accessor: (e) => e.last_name },
+            { header: t("hrPage.email"), accessor: (e) => e.email },
+            { header: t("hrPage.jobTitle"), accessor: (e) => e.job_title },
+            { header: t("hrPage.department"), accessor: (e) => e.department },
+            { header: "Status", accessor: (e) => e.status },
+          ], "employees")}>
+            <Download className="w-4 h-4 mr-2" />
+            CSV
+          </Button>
           <DialogTrigger asChild>
             <Button>
               <UserPlus className="w-4 h-4 mr-2" />
