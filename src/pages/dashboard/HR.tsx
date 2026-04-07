@@ -134,9 +134,8 @@ export default function HR() {
 
   const employeePagination = usePagination(filteredEmployees, { initialPageSize: 10 });
 
-    const handleCreateEmployee = async () => {
-      return;
-    }
+  const handleCreateEmployee = async () => {
+    if (!newEmployee.first_name || !newEmployee.last_name || !newEmployee.email) return;
     await createEmployee(newEmployee);
     setIsEmployeeDialogOpen(false);
     setNewEmployee({
