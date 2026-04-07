@@ -132,7 +132,8 @@ export default function HR() {
       e.job_title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateEmployee = async () => {
+  const employeePagination = usePagination(filteredEmployees, { initialPageSize: 10 });
+
     if (!newEmployee.first_name || !newEmployee.last_name || !newEmployee.email || !newEmployee.job_title) {
       return;
     }
