@@ -216,5 +216,6 @@ export default function AICostDashboard() {
         </CardContent>
       </Card>
     </div>
+    </DashboardPageWrapper>
   );
 }
