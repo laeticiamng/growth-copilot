@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import { exportToCSV } from "@/lib/csv-export";
 import { useTranslation } from "react-i18next";
 import { usePagination, getPaginationProps } from "@/hooks/usePagination";
