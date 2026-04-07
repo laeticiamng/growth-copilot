@@ -119,6 +119,18 @@ export default function AuditLogPage() {
     }
   };
 
+  // Export to CSV
+  const handleExportCSV = () => {
+    exportToCSV(filteredEntries, [
+      { header: 'Date', accessor: (e) => e.created_at },
+      { header: 'Action', accessor: (e) => e.action },
+      { header: 'Entity Type', accessor: (e) => e.entity_type },
+      { header: 'Entity ID', accessor: (e) => e.entity_id },
+      { header: 'Actor Type', accessor: (e) => e.actor_type },
+      { header: 'Actor ID', accessor: (e) => e.actor_id },
+    ], 'audit-log');
+  };
+
   // Get badge for action type
   const getActionBadge = (action: string) => {
     switch (action) {
