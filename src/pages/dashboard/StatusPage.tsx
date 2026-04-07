@@ -317,7 +317,156 @@ function ModuleCard({ module, statusConfig }: { module: ModuleStatus; statusConf
   );
 }
 
-export default function StatusPage() {
+function LiveHealthPanel() {
+  const { t } = useTranslation();
+  const { currentWorkspace } = useWorkspace();
+  const wsId = currentWorkspace?.id;
+
+  const { data: integrations } = useQuery({
+    queryKey: ['health-integrations', wsId],
+    queryFn: async () => {
+      if (!wsId) return [];
+      const { data } = await supabase
+        .from('integrations')
+        .select('id, provider, status, last_sync_at, refresh_failure_count')
+        .eq('workspace_id', wsId);
+      return data || [];
+    },
+    enabled: !!wsId,
+    refetchInterval: 30000,
+  });
+
+  const { data: recentRuns } = useQuery({
+    queryKey: ['health-agent-runs', wsId],
+    queryFn: async () => {
+      if (!wsId) return { total: 0, success: 0, failed: 0 };
+      const { data } = await supabase
+        .from('agent_runs')
+        .select('status')
+        .eq('workspace_id', wsId)
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      const total = data?.length || 0;
+      const success = data?.filter(r => r.status === 'completed').length || 0;
+      const failed = data?.filter(r => r.status === 'failed').length || 0;
+      return { total, success, failed };
+    },
+    enabled: !!wsId,
+    refetchInterval: 30000,
+  });
+
+  const { data: pendingApprovals } = useQuery({
+    queryKey: ['health-approvals', wsId],
+    queryFn: async () => {
+      if (!wsId) return 0;
+      const { count } = await supabase
+        .from('approval_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('workspace_id', wsId)
+        .eq('status', 'pending');
+      return count || 0;
+    },
+    enabled: !!wsId,
+    refetchInterval: 30000,
+  });
+
+  const successRate = recentRuns && recentRuns.total > 0
+    ? Math.round((recentRuns.success / recentRuns.total) * 100)
+    : 100;
+
+  return (
+    <div className="space-y-6">
+      {/* Agent Health */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="w-5 h-5" />
+            Santé des agents (24h)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-4 gap-4">
+            <div className="text-center p-4 rounded-lg bg-secondary/50">
+              <div className="text-2xl font-bold">{recentRuns?.total || 0}</div>
+              <p className="text-sm text-muted-foreground">Exécutions</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-green-500/10">
+              <div className="text-2xl font-bold text-green-500">{recentRuns?.success || 0}</div>
+              <p className="text-sm text-muted-foreground">Succès</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-destructive/10">
+              <div className="text-2xl font-bold text-destructive">{recentRuns?.failed || 0}</div>
+              <p className="text-sm text-muted-foreground">Échecs</p>
+            </div>
+            <div className={`text-center p-4 rounded-lg ${successRate >= 90 ? 'bg-green-500/10' : successRate >= 70 ? 'bg-yellow-500/10' : 'bg-destructive/10'}`}>
+              <div className={`text-2xl font-bold ${successRate >= 90 ? 'text-green-500' : successRate >= 70 ? 'text-yellow-500' : 'text-destructive'}`}>
+                {successRate}%
+              </div>
+              <p className="text-sm text-muted-foreground">Taux de succès</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Integrations Health */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Puzzle className="w-5 h-5" />
+            Intégrations connectées
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!integrations || integrations.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune intégration connectée</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {integrations.map((integration) => (
+                <div key={integration.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${integration.status === 'active' ? 'bg-green-500' : integration.status === 'error' ? 'bg-destructive' : 'bg-yellow-500'}`} />
+                    <div>
+                      <p className="font-medium text-sm capitalize">{integration.provider}</p>
+                      {integration.last_sync_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Sync: {new Date(integration.last_sync_at).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {(integration.refresh_failure_count ?? 0) > 0 && (
+                    <Badge variant="destructive" className="text-xs">
+                      {integration.refresh_failure_count} erreur(s)
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pending Approvals */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            File d'approbation
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <div className={`text-3xl font-bold ${(pendingApprovals || 0) > 5 ? 'text-yellow-500' : 'text-green-500'}`}>
+              {pendingApprovals || 0}
+            </div>
+            <p className="text-sm text-muted-foreground">approbations en attente</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+
   const { t } = useTranslation();
   const STATUS_CONFIG = getStatusConfig(t);
   // Calculate overall stats
