@@ -203,6 +203,11 @@ export default function DashboardHome() {
           </Link>
         ))}
       </div>
+      {/* Predictive Analytics */}
+      <PredictiveAnalytics />
+
+      {/* Goals Progress */}
+      <GoalsProgress />
     </div>
   );
 }
