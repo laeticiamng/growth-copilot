@@ -372,10 +372,11 @@ export default function StatusPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="core" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="core">{t("statusPage.coreOS")}</TabsTrigger>
           <TabsTrigger value="departments">{t("statusPage.departments")} ({DEPARTMENTS.length})</TabsTrigger>
           <TabsTrigger value="integrations">{t("statusPage.integrationsTab")} ({INTEGRATIONS.length})</TabsTrigger>
+          <TabsTrigger value="health">🩺 Santé live</TabsTrigger>
         </TabsList>
 
         <TabsContent value="core" className="space-y-6">
