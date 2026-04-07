@@ -263,11 +263,13 @@ function DashboardRoute({ children, service }: { children: React.ReactNode; serv
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        {service ? (
-          <ServiceGuard service={service}>{children}</ServiceGuard>
-        ) : (
-          children
-        )}
+        <DashboardErrorBoundary>
+          {service ? (
+            <ServiceGuard service={service}>{children}</ServiceGuard>
+          ) : (
+            children
+          )}
+        </DashboardErrorBoundary>
       </DashboardLayout>
     </ProtectedRoute>
   );
