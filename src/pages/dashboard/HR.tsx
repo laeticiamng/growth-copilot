@@ -390,7 +390,7 @@ export default function HR() {
                 </div>
               ) : (
                 <div className="divide-y">
-                  {filteredEmployees.map((employee) => (
+                  {employeePagination.paginatedData.map((employee) => (
                     <div
                       key={employee.id}
                       className="py-4 flex items-center justify-between hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-colors"
@@ -424,6 +424,12 @@ export default function HR() {
                     </div>
                   ))}
                 </div>
+                <DataTablePagination
+                  {...getPaginationProps(employeePagination)}
+                  pageSize={employeePagination.pageSize}
+                  onPageSizeChange={employeePagination.setPageSize}
+                  className="mt-4 pt-4 border-t"
+                />
               )}
             </CardContent>
           </Card>
