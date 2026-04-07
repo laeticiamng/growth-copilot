@@ -431,6 +431,7 @@ export default function HR() {
                   onPageSizeChange={employeePagination.setPageSize}
                   className="mt-4 pt-4 border-t"
                 />
+                </>
               )}
             </CardContent>
           </Card>
