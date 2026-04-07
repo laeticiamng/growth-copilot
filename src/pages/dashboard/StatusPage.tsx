@@ -417,6 +417,9 @@ export default function StatusPage() {
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="health" className="space-y-6">
+          <LiveHealthPanel />
+        </TabsContent>
       </Tabs>
 
       {/* Legend */}
