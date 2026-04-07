@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DashboardErrorBoundary } from "@/components/dashboard/DashboardPageWrapper";
 import { LoadingState } from "@/components/ui/loading-state";
 
 // Core providers
@@ -262,11 +263,13 @@ function DashboardRoute({ children, service }: { children: React.ReactNode; serv
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        {service ? (
-          <ServiceGuard service={service}>{children}</ServiceGuard>
-        ) : (
-          children
-        )}
+        <DashboardErrorBoundary>
+          {service ? (
+            <ServiceGuard service={service}>{children}</ServiceGuard>
+          ) : (
+            children
+          )}
+        </DashboardErrorBoundary>
       </DashboardLayout>
     </ProtectedRoute>
   );

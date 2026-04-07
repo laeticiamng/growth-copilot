@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { exportToCSV } from "@/lib/csv-export";
 import { useTranslation } from "react-i18next";
 import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,8 @@ import {
   XCircle,
   Calendar,
   Euro,
-  FileCheck
+  FileCheck,
+  Download,
 } from "lucide-react";
  import { useWorkspace } from "@/hooks/useWorkspace";
  import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
@@ -131,6 +133,18 @@ export default function Legal() {
             {t("legalPage.subtitle")}
           </p>
         </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => exportToCSV(contracts, [
+            { header: t("legalPage.contractTitle", "Title"), accessor: (c) => c.title },
+            { header: "Type", accessor: (c) => c.contract_type },
+            { header: "Status", accessor: (c) => c.status },
+            { header: t("legalPage.counterparty", "Counterparty"), accessor: (c) => c.counterparty_name },
+            { header: t("legalPage.effectiveDate", "Effective Date"), accessor: (c) => c.effective_date },
+            { header: t("legalPage.expiryDate", "Expiry Date"), accessor: (c) => c.expiry_date },
+          ], "contracts")}>
+            <Download className="w-4 h-4 mr-2" />
+            CSV
+          </Button>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -200,6 +214,7 @@ export default function Legal() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats */}

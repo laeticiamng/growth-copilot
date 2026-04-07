@@ -9,6 +9,7 @@ import {
   Bot, BarChart3, AlertTriangle, CheckCircle2
 } from "lucide-react";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from "@/components/dashboard/DashboardPageWrapper";
 
 const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   'gemini-3-pro': { input: 1.25, output: 5.00 },
@@ -29,6 +30,7 @@ export default function AICostDashboard() {
     new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(cost);
 
   return (
+    <DashboardPageWrapper pageName="AI Cost" loading={loading} skeletonCards={4}>
     <div className="space-y-8">
       <header>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 sm:gap-3">
@@ -214,5 +216,6 @@ export default function AICostDashboard() {
         </CardContent>
       </Card>
     </div>
+    </DashboardPageWrapper>
   );
 }
