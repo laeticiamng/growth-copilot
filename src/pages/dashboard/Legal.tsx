@@ -469,6 +469,7 @@ export default function Legal() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }
 
