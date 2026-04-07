@@ -2422,7 +2422,7 @@ export const fr = {
     user: "User", role: "Role", lastAction: "Last action", risk: "Risk",
     never: "Never", noIssuesDetected: "No issues detected",
     noReview: "No review",
-  }
+  },
   activity: {
     recentActivity: "Recent activity",
     allAgents: "All agents",
@@ -2436,7 +2436,7 @@ export const fr = {
     you: "You",
     success: "Success",
     failure: "Failure",
-  }
+  },
   agents: {
     myTeam: "My AI team",
     teamDesc: "Connected growth modules feeding signal detection, prioritization and outcome tracking",
@@ -2482,7 +2482,7 @@ export const fr = {
     completed: "Success",
     failed: "Failure",
     runningStatus: "Running",
-  }
+  },
   agentsPage: {
     title: "Growth Modules", subtitle: "Connected capabilities feeding the signal-to-outcome loop",
     running: "Running", activeExecutions: "Active executions",
@@ -2494,7 +2494,7 @@ export const fr = {
     last50Executions: "Last 50 agent executions", loadingText: "Loading...",
     noRecentExecutions: "No recent executions",
     noRecentDesc: "Agents will start working once you have configured your site.",
-  }
+  },
   aiCost: {
     title: "AI Costs & Observability",
     subtitle: "Track your AI spending in real-time and optimize costs",
@@ -2530,7 +2530,7 @@ export const fr = {
     tip3Desc: "Limit historical context to 10 messages max for conversations.",
     tip4Title: "Schedule off-peak runs",
     tip4Desc: "Overnight executions benefit from better response times.",
-  }
+  },
   approvalsV2Page: {
     title: "Approval Center 2.0", subtitle: "Rich previews, partial approvals, visual diffs",
     enterprise: "Enterprise",
@@ -2561,7 +2561,7 @@ export const fr = {
     variant: "Variant",
     by: "By", expiresIn: "Expires in", sla: "SLA",
     policyApprovalRequired: "(Policy: approval required)",
-  }
+  },
   auditLogPage: {
     title: "Audit Log",
     subtitle: "Immutable history of all platform actions",
@@ -2596,7 +2596,7 @@ export const fr = {
     login: "Login",
     logout: "Logout",
     accessRestricted: "Access restricted to managers and administrators",
-  }
+  },
   authPage: {
     invalidEmail: "Invalid email",
     minChars: "Minimum 8 characters",
@@ -2659,7 +2659,7 @@ export const fr = {
     privacy: "Privacy Policy",
     byContinuing: "By continuing, you accept our",
     and: "and our",
-  }
+  },
   automationsPage: {
     title: "Automations & Webhooks",
     subtitle: "Connect your platform to external tools and automate your workflows",
@@ -2695,7 +2695,7 @@ export const fr = {
     eventsToSend: "Events to send",
     creatingWebhook: "Creating...",
     createWebhookBtn: "Create webhook",
-  }
+  },
   autopilotComponent: {
     autopilotMode: "Autopilot Mode",
     enabledDesc: "Agents can execute actions automatically",
@@ -2716,11 +2716,11 @@ export const fr = {
     securityLimitsDesc: "Set guardrails to limit automatic actions",
     maxActionsPerWeek: "Max actions per week", maxDailyBudget: "Max daily budget (€)",
     saveLimits: "Save limits",
-  }
+  },
   backlinksAnalysis: {
     selectSite: "Select a site to analyze", analysisDone: "Analysis complete",
     demoMode: "Demo mode - simulated data", exportDownloaded: "Export downloaded",
-  }
+  },
   billing: {
     moduleName: "Billing",
     noSubscription: "No active subscription",
@@ -2786,7 +2786,7 @@ export const fr = {
       cardOnFirstPayment: "Your card will be requested on first payment",
       secureViaStripe: "Secure payments via Stripe • No commitment • Cancel anytime",
     },
-  }
+  },
   billingPage: {
     title: "Billing",
     subtitle: "Manage your Growth OS services and subscription.",
@@ -2829,7 +2829,7 @@ export const fr = {
     nextPayment: "Next payment on",
     noAccountFound: "No billing account found. Please first subscribe to a plan.",
     portalError: "Unable to open billing portal",
-  }
+  },
   campaignBudget: {
     title: "Ad budget tracking",
     dayOfMonth: "Day {{current}}/{{total}}",
@@ -2849,10 +2849,10 @@ export const fr = {
     noCampaigns: "No campaigns configured",
     connectAds: "Connect your ad accounts to see your budgets",
     conv: "conv.",
-  }
+  },
   cockpitExtra: {
     pleaseLogin: "Please log in",
-  }
+  },
   competitorAlerts: {
     title: "Competitor Alerts", subtitle: "Get notified of important changes",
     newAlert: "New alert", noAlerts: "No alerts configured",
@@ -2863,7 +2863,7 @@ export const fr = {
     increase: "Increase", decrease: "Decrease", change: "Change", anyChange: "Any change",
     lastAlert: "Last alert", newAlertTitle: "New competitor alert",
     competitor: "Competitor", alertType: "Alert type", condition: "Condition", threshold: "Threshold",
-  }
+  },
   components: {
     evidence: {
       loadError: "Error loading evidence",
@@ -3287,7 +3287,7 @@ export const fr = {
       demoteViewer: "Demote to Viewer",
       removeFromTeam: "Remove from team",
     },
-  }
+  },
   connectionStatusPage: {
     title: "My Access",
     subtitle: "Resources you have authorized for analysis and optimization.",
@@ -3300,7 +3300,7 @@ export const fr = {
     pending: "Pending",
     demo: "Demo",
     lastSync: "Last sync:",
-  }
+  },
   contentCalendar: {
     title: "Editorial calendar",
     description: "Planning and tracking your content",
@@ -3312,7 +3312,7 @@ export const fr = {
     noContent: "No content planned",
     more: "+{{count}} more",
     dayNames: "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
-  }
+  },
   contentPage: {
     title: "Content & Keywords", subtitle: "Content strategy and SEO opportunities",
     loadingContent: "Loading content...", loading: "Loading content...",
@@ -3340,7 +3340,7 @@ export const fr = {
     featureKeywords: "Keyword analysis", featureBriefs: "Automated SEO briefs",
     featureClusters: "Semantic clusters", featureCalendar: "Editorial calendar",
     connectGSC: "Connect Google Search Console", generateAIBrief: "Generate an AI brief",
-  }
+  },
   croPage: {
     title: "CRO Autopilot", subtitle: "Conversion rate optimization",
     conversionRate: "Conversion rate", visitors: "Visitors", conversions: "Conversions", activeTests: "Active tests",
@@ -3368,7 +3368,7 @@ export const fr = {
     emptyFeature1: "A/B tests", emptyFeature2: "Friction audit",
     emptyFeature3: "AI suggestions", emptyFeature4: "Statistical confidence calculation",
     createABTest: "Create an A/B test",
-  }
+  },
   deptHeads: {
     loading: "Loading department head data...",
     dashboard: "Department heads dashboard",
@@ -3385,7 +3385,7 @@ export const fr = {
     waiting: "Waiting",
     teamPerformance: "Team performance",
     recentActivity: "Recent activity",
-  }
+  },
   errorBoundaryEmail: {
     subject: "Error report - Growth OS",
     greeting: "Hello,",
@@ -3397,7 +3397,7 @@ export const fr = {
     describeIssue: "Issue description:",
     describePrompt: "[Describe what you were doing when the error occurred]",
     regards: "Best regards",
-  }
+  },
   geo: {
     pageTitle: "GEO — Generative Engine Optimization",
     pageDesc: "Prepare your site for ChatGPT, Perplexity & Claude. Audit, structured data, optimization & monitoring.",
@@ -3448,7 +3448,7 @@ export const fr = {
       sources: "Cited sources",
       tips: "GEO Recommendations",
     },
-  }
+  },
   hooks: {
     network: {
       connectionRestored: "Connection restored",
@@ -3509,7 +3509,7 @@ export const fr = {
       helpConnected: "Sophie is listening. Ask about your business metrics, approvals, or any question.",
       helpDisconnected: "Click to start a voice conversation with your AI assistant.",
     },
-  }
+  },
   hrPage: {
     title: "Human Resources",
     subtitle: "Employee management, onboarding and performance",
@@ -3583,7 +3583,7 @@ export const fr = {
     parental: "Parental",
     other: "Other",
     notDefined: "Not defined",
-  }
+  },
   integrationConnector: {
     connected: "Connected",
     error: "Error",
@@ -3603,7 +3603,7 @@ export const fr = {
     disconnectError: "Error disconnecting",
     tokenRefreshed: "{{name}} token refreshed",
     refreshError: "Error refreshing token",
-  }
+  },
   integrations: {
     lastSync: "Last sync:",
     never: "Never",
@@ -3666,7 +3666,7 @@ export const fr = {
     metaApprovalNote: "All actions go through the Approval Center. You keep full control.",
     servicesActive: "services active",
     modulesActive: "modules active",
-  }
+  },
   integrationsPage: {
     title: "Tools & Integrations", subtitle: "Connect your accounts to let agents act on your resources.",
     connected: "connected", available: "available", comingSoon: "coming soon",
@@ -3723,7 +3723,7 @@ export const fr = {
     emailCap1: "Campaigns", emailCap2: "Automations", emailCap3: "Lists", emailCap4: "Analytics",
     calendarCap1: "Appointments", calendarCap2: "Availability", calendarCap3: "Reminders", calendarCap4: "Sync",
     moreCapabilities: "+{{count}}",
-  }
+  },
   kpiDashboard: {
     roiDashboard: "ROI Dashboard",
     lastSync: "Last sync:",
@@ -3739,7 +3739,7 @@ export const fr = {
     clicks: "clicks",
     spent: "spent",
     orders: "orders",
-  }
+  },
   legal: {
     termsTitle: "Terms of Use",
     privacyTitle: "Privacy Policy",
@@ -3747,7 +3747,7 @@ export const fr = {
     back: "Back",
     documentInFrench: "This document is written in French. For legal accuracy, we recommend reading the original version.",
     switchToFrench: "View in French",
-  }
+  },
   legalPage: {
     title: "Legal & Compliance", subtitle: "Contract management, GDPR compliance and legal obligations",
     newContract: "New contract", createContract: "Create a contract", createContractDesc: "Add a new contract to track",
@@ -3773,7 +3773,7 @@ export const fr = {
     legalTemplates: "Legal templates",
     templateCount_one: "{{count}} template", templateCount_other: "{{count}} templates",
     defaultLabel: "Default", duplicate: "Duplicate", deleteBtn: "Delete",
-  }
+  },
   logsPage: {
     title: "Logs & Activity",
     subtitle: "Complete audit trail: user actions, agent runs and AI requests.",
@@ -3796,14 +3796,14 @@ export const fr = {
     agentRuns: "AI agent executions",
     actionHistory: "Action history",
     requestDetails: "Request details:",
-  }
+  },
   metaModule: {
     connected: "Connected",
     configured: "Configured",
     disconnected: "Not connected",
     comingSoon: "Coming soon",
     justNow: "just now",
-  }
+  },
   modules: {
     diagnostics: {
       title: "Diagnostics",
@@ -4644,10 +4644,10 @@ export const fr = {
       notAuthorized: "Not authorized",
       demo: "Demo",
     },
-  }
+  },
   navExtra: {
     serviceCatalog: "Catalog",
-  }
+  },
   onboarding: {
     step1Title: "Add your site",
     step1Desc: "Enter your site URL to get started",
@@ -4665,7 +4665,7 @@ export const fr = {
     statusTodo: "To do",
     enabledServices: "Enabled services",
     enabledServicesDesc: "Departments available in your workspace",
-  }
+  },
   onboardingFlow: {
     marketing: "Marketing", marketingDesc: "SEO, Content, Ads, Social",
     sales: "Sales", salesDesc: "Pipeline, Outreach, CRM",
@@ -4806,7 +4806,7 @@ export const fr = {
     activationApproval: "Approval gate, audit log and RBAC stay part of the workflow for sensitive actions.",
     activationEvidence: "Recommendations can be justified through evidence bundles before execution.",
     activationScheduler: "Scheduler and integrations are ready to refresh signals, briefs and outcome tracking.",
-  }
+  },
   opsPage: {
     title: "Ops Dashboard", subtitle: "Operational supervision and observability",
     adminOnly: "Access restricted to administrators",
@@ -4825,7 +4825,7 @@ export const fr = {
     expiresAt: "Expires", noExpiry: "No expiry", failuresLabel: "failures",
     tokenAudit: "Token audit", noEvent: "No event",
     costBreakdown: "Cost breakdown", renderCosts: "Render costs", aiCosts: "AI costs", total30d: "Total 30d",
-  }
+  },
   roi: {
     title: "ROI Calculator & Analytics",
     subtitle: "Compare Growth OS costs to traditional teams and visualize your performance",
@@ -4862,11 +4862,11 @@ export const fr = {
     upgradeToFull: "Upgrade to Scale",
     upgradeDesc: "Full cockpit with all modules for {{price}}€/month — governance, evidence and outcome tracking included",
     seePlans: "See plans",
-  }
+  },
   roiCalculator: {
     noWorkspace: "No workspace selected", analysisGenerated: "Analysis generated!",
     generationError: "Error during generation", pdfInProgress: "PDF export in development",
-  }
+  },
   seoPage: {
     title: "Technical SEO", subtitle: "Technical audit and site optimizations",
     selectSiteWarning: "⚠️ Please select a site to run the audit",
@@ -4892,7 +4892,7 @@ export const fr = {
     easy: "Easy", medium: "Medium", complex: "Complex",
     selectSiteToast: "Please select a site", auditComplete: "SEO audit completed!",
     auditError: "Error during audit",
-  }
+  },
   settings: {
     title: "Settings",
     subtitle: "Manage your workspace settings",
@@ -4989,7 +4989,7 @@ export const fr = {
       realEstate: "Real Estate",
       other: "Other",
     },
-  }
+  },
   sitesPage: {
     addSite: "Add a site", addSiteDesc: "Enter your site information to start optimization.",
     siteUrl: "Site URL *", siteName: "Site name", sector: "Sector", businessType: "Type",
@@ -5004,7 +5004,7 @@ export const fr = {
     addedSuccess: "{{name}} added successfully.",
     sectorEcommerce: "E-commerce", sectorSaaS: "SaaS / Tech", sectorAgency: "Agency / Services", sectorRestaurant: "Restaurant / Local",
     sectorRealEstate: "Real Estate", sectorHealth: "Health", sectorTraining: "Training", sectorOther: "Other",
-  }
+  },
   smartLink: {
     loading: "Loading...",
     notFound: "Link Not Found",
@@ -5022,7 +5022,7 @@ export const fr = {
     defaultEmailCapture: "Get notified about new releases",
     untitled: "Untitled",
     cover: "Cover",
-  }
+  },
   statusPage: {
     title: "What's Implemented",
     subtitle: "Full transparency on the Growth OS platform status.",
@@ -5032,7 +5032,7 @@ export const fr = {
     coreOS: "Core OS", departments: "Signal Sources", integrationsTab: "Integrations",
     thirdPartyIntegrations: "Third-party Integrations",
     thirdPartyDesc: "Connections to external platforms for data synchronization",
-  }
+  },
   syncLogs: {
     title: "Sync history",
     events: "recent event(s)",
@@ -5047,14 +5047,14 @@ export const fr = {
     scopeUpdated: "Scopes updated",
     viewLess: "View less",
     viewAll: "View all",
-  }
+  },
   team: {
     agentIA: "AI Agent",
     system: "System",
     teamActivity: "Team activity",
     recentActions: "Recent actions by users and AI agents",
     noRecentActivity: "No recent activity",
-  }
+  },
   webhooksComponent: {
     title: "Advanced Webhooks", subtitle: "Configure conditional webhooks with transformations",
     newWebhook: "New webhook", noWebhooks: "No webhooks configured",
