@@ -170,6 +170,7 @@ export default function Agents() {
   };
 
   return (
+    <DashboardPageWrapper pageName="Agents">
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <span className="text-3xl">🤖</span>
