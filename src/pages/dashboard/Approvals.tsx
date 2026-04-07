@@ -191,5 +191,6 @@ export default function Approvals() {
         </Card>
       )}
     </div>
+    </DashboardPageWrapper>
   );
 }

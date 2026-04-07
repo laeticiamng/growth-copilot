@@ -284,5 +284,6 @@ export default function Agents() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }
