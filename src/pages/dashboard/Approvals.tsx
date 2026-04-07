@@ -45,6 +45,7 @@ export default function Approvals() {
   };
 
   return (
+    <DashboardPageWrapper pageName="Approvals">
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div>
