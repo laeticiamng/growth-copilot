@@ -97,6 +97,8 @@ export default function Legal() {
       c.counterparty_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const contractPagination = usePagination(filteredContracts, { initialPageSize: 10 });
+
   const handleCreate = async () => {
     if (!newContract.title || !newContract.contract_type) return;
     await createContract(newContract);
