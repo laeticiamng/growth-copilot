@@ -113,3 +113,66 @@ verify_jwt = false
 
 [functions.cron-manager]
 verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.connector-health-check]
+verify_jwt = false
+
+[functions.creative-factory]
+verify_jwt = false
+
+[functions.decision-engine-eval]
+verify_jwt = false
+
+[functions.geo-audit]
+verify_jwt = false
+
+[functions.geo-citation-monitor]
+verify_jwt = false
+
+[functions.geo-content-optimizer]
+verify_jwt = false
+
+[functions.geo-structured-data]
+verify_jwt = false
+
+[functions.launch-cancel]
+verify_jwt = false
+
+[functions.launch-distribute]
+verify_jwt = false
+
+[functions.launch-executive-report]
+verify_jwt = false
+
+[functions.launch-orchestrator]
+verify_jwt = false
+
+[functions.launch-readiness-score]
+verify_jwt = false
+
+[functions.launch-resume]
+verify_jwt = false
+
+[functions.launch-sales-handoff]
+verify_jwt = false
+
+[functions.launch-stage-executor]
+verify_jwt = false
+
+[functions.notify-webhooks]
+verify_jwt = false
+
+[functions.send-contact-form]
+verify_jwt = false
+
+[functions.signal-ingest]
+verify_jwt = false
+
+[functions.stripe-customer-portal]
+verify_jwt = false
+
+[functions.video-concept-factory]
+verify_jwt = false

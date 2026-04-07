@@ -169,7 +169,7 @@ describe('SignalGraph', () => {
         })),
       ];
 
-      const funnel = computeFunnel(events, ['view', 'click', 'signup']);
+      const funnel = computeFunnel(events as unknown as SignalEvent[], ['view', 'click', 'signup']);
       expect(funnel).toHaveLength(3);
       expect(funnel[0].count).toBe(1000);
       expect(funnel[0].dropoff_pct).toBe(0); // First step has 0 dropoff
