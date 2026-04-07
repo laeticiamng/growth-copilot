@@ -699,6 +699,5 @@ function LegalTemplatesTab() {
         </CardContent>
       </Card>
     </div>
-    </DashboardPageWrapper>
   );
 }
