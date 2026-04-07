@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import { exportToCSV } from "@/lib/csv-export";
 import { useTranslation } from "react-i18next";
 import { usePagination, getPaginationProps } from "@/hooks/usePagination";
@@ -128,6 +129,7 @@ export default function Legal() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Legal">
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -467,6 +469,7 @@ export default function Legal() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }
 

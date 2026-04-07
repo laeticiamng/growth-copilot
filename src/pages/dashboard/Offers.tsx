@@ -29,6 +29,11 @@ import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
+import { exportToCSV } from '@/lib/csv-export';
+import { usePagination, getPaginationProps } from '@/hooks/usePagination';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
+import { Download } from "lucide-react";
 
 export default function Offers() {
   const { t } = useTranslation();
@@ -57,6 +62,18 @@ export default function Offers() {
 
   // Real data only - no demo fallback (Zero Fake Data policy)
   const displayOffers = offers;
+  const offersPagination = usePagination(displayOffers, { initialPageSize: 10 });
+
+  const handleExportCSV = () => {
+    exportToCSV(displayOffers, [
+      { header: 'Nom', accessor: (o) => o.name },
+      { header: 'Tier', accessor: (o) => o.tier },
+      { header: 'Prix', accessor: (o) => o.price },
+      { header: 'Période', accessor: (o) => o.price_period },
+      { header: 'Actif', accessor: (o) => o.is_active },
+      { header: 'Features', accessor: (o) => o.features.join('; ') },
+    ], 'offers');
+  };
 
   // Extract USP and objections from first offer if available - no demo fallback
   const usp = offers.length > 0 && offers[0].benefits.length > 0 
@@ -250,6 +267,7 @@ export default function Offers() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Offers">
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -261,6 +279,10 @@ export default function Offers() {
           {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.offers.selectSiteWarning")}</p>}
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={displayOffers.length === 0}>
+            <Download className="w-4 h-4 mr-2" />
+            CSV
+          </Button>
           <Button variant="outline">
             <Eye className="w-4 h-4 mr-2" />
             {t("modules.offers.preview")}
@@ -540,5 +562,6 @@ export default function Offers() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }

@@ -41,6 +41,8 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { usePagination, getPaginationProps } from '@/hooks/usePagination';
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
+import { exportToCSV } from '@/lib/csv-export';
 
 export default function AuditLogPage() {
   const { t, i18n } = useTranslation();
@@ -117,6 +119,18 @@ export default function AuditLogPage() {
     }
   };
 
+  // Export to CSV
+  const handleExportCSV = () => {
+    exportToCSV(filteredEntries, [
+      { header: 'Date', accessor: (e) => e.created_at },
+      { header: 'Action', accessor: (e) => e.action },
+      { header: 'Entity Type', accessor: (e) => e.entity_type },
+      { header: 'Entity ID', accessor: (e) => e.entity_id },
+      { header: 'Actor Type', accessor: (e) => e.actor_type },
+      { header: 'Actor ID', accessor: (e) => e.actor_id },
+    ], 'audit-log');
+  };
+
   // Get badge for action type
   const getActionBadge = (action: string) => {
     switch (action) {
@@ -170,6 +184,7 @@ export default function AuditLogPage() {
   }, [entries, incidents]);
 
   return (
+    <DashboardPageWrapper pageName="AuditLog">
     <PermissionGuard 
       permission="view_audit" 
       fallback={
@@ -211,7 +226,16 @@ export default function AuditLogPage() {
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              Exporter
+              Exporter JSON
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleExportCSV}
+              disabled={filteredEntries.length === 0}
+              aria-label="Exporter en CSV"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              CSV
             </Button>
           </div>
         </div>
@@ -578,5 +602,6 @@ export default function AuditLogPage() {
         )}
       </div>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }

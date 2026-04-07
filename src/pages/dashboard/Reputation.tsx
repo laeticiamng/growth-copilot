@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Reputation() {
   const { t, i18n } = useTranslation();
@@ -135,6 +136,7 @@ export default function Reputation() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Reputation">
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -329,5 +331,6 @@ export default function Reputation() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }

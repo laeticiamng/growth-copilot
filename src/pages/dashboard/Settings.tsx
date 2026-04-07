@@ -55,6 +55,7 @@ import {
   Bell,
 } from "lucide-react";
 import WebhookNotificationSettings from "@/components/notifications/WebhookNotificationSettings";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTeamInvitations } from "@/hooks/useTeamInvitations";
@@ -243,6 +244,7 @@ export default function Settings() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Settings">
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold">{t("settings.title")}</h1>
@@ -596,5 +598,6 @@ export default function Settings() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

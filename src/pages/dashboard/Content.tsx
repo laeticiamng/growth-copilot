@@ -23,6 +23,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { ContentStrategyGenerator } from "@/components/content";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Content() {
   const { t } = useTranslation();
@@ -106,6 +107,7 @@ export default function Content() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Content">
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -269,5 +271,6 @@ export default function Content() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

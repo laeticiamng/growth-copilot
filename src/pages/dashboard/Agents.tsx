@@ -21,6 +21,7 @@ import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
 import { DepartmentHeadDashboard } from '@/components/agents/DepartmentHeadDashboard';
 import { AgentWorkflowPipeline } from '@/components/agents/AgentWorkflowPipeline';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 // Agent personas with human names and avatars - growth modules
 const AGENT_PERSONAS: Record<string, {
@@ -169,6 +170,7 @@ export default function Agents() {
   };
 
   return (
+    <DashboardPageWrapper pageName="Agents">
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <span className="text-3xl">🤖</span>
@@ -282,5 +284,6 @@ export default function Agents() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

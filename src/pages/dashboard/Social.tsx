@@ -39,6 +39,7 @@ import { RepurposeEngine } from "@/components/social/RepurposeEngine";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { MetaMetricsWidget } from "@/components/integrations";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
@@ -269,6 +270,7 @@ export default function Social() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Social">
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -598,5 +600,6 @@ export default function Social() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }

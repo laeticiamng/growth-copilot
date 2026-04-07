@@ -11,6 +11,7 @@ import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BillingOverview } from "@/components/billing/BillingOverview";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import {
   Crown,
   Zap,
@@ -201,6 +202,7 @@ export default function Billing() {
   const isPaid = subscription?.status === "active" && subscription?.plan !== "free";
 
   return (
+    <DashboardPageWrapper pageName="Billing">
     <PermissionGuard permission="manage_billing">
       <div className="space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Header */}
@@ -379,5 +381,6 @@ export default function Billing() {
         </section>
       </div>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }

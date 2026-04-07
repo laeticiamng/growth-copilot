@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import { exportToCSV } from "@/lib/csv-export";
 import { usePagination, getPaginationProps } from "@/hooks/usePagination";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
@@ -192,6 +193,7 @@ export default function HR() {
   }
 
   return (
+    <DashboardPageWrapper pageName="HR">
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -774,5 +776,6 @@ export default function HR() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

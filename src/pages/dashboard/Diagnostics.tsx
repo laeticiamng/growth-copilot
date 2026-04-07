@@ -30,6 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 interface LatencyMetric {
   name: string;
@@ -241,6 +242,7 @@ export default function Diagnostics() {
     : 'unknown';
 
   return (
+    <DashboardPageWrapper pageName="Diagnostics">
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -466,5 +468,6 @@ export default function Diagnostics() {
         </CardContent>
       </Card>
     </div>
+    </DashboardPageWrapper>
   );
 }

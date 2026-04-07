@@ -13,6 +13,7 @@ import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { ReportScheduler } from "@/components/reports/ReportScheduler";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Reports() {
   const { t, i18n } = useTranslation();
@@ -185,6 +186,7 @@ export default function Reports() {
   }
 
   return (
+    <DashboardPageWrapper pageName="Reports">
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -430,5 +432,6 @@ export default function Reports() {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardPageWrapper>
   );
 }

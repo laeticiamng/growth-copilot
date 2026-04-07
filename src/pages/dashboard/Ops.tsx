@@ -23,6 +23,7 @@ import { useOpsMetrics } from '@/hooks/useOpsMetrics';
 import { useTokenLifecycle } from '@/hooks/useTokenLifecycle';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Ops() {
   const { t, i18n } = useTranslation();
@@ -82,6 +83,7 @@ export default function Ops() {
   };
 
   return (
+    <DashboardPageWrapper pageName="Ops">
     <PermissionGuard permission="manage_team" fallback={
       <div className="p-8 text-center text-muted-foreground">
         {t("opsPage.adminOnly")}
@@ -389,5 +391,6 @@ export default function Ops() {
         </Tabs>
       </div>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }

@@ -45,6 +45,7 @@ import { calculateConfidence, getTestRecommendation, calculateUplift } from "@/l
 import { CROSuggestionsAI } from "@/components/cro/CROSuggestionsAI";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function CRO() {
   const { t } = useTranslation();
@@ -238,6 +239,7 @@ export default function CRO() {
   }
 
   return (
+    <DashboardPageWrapper pageName="CRO">
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -519,6 +521,7 @@ export default function CRO() {
         </DialogContent>
       </Dialog>
     </div>
+    </DashboardPageWrapper>
   );
 }
 
