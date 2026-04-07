@@ -226,7 +226,16 @@ export default function AuditLogPage() {
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              Exporter
+              Exporter JSON
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleExportCSV}
+              disabled={filteredEntries.length === 0}
+              aria-label="Exporter en CSV"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              CSV
             </Button>
           </div>
         </div>
