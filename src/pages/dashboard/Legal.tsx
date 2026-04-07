@@ -214,6 +214,7 @@ export default function Legal() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats */}
