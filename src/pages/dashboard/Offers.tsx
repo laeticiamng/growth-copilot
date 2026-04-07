@@ -279,6 +279,10 @@ export default function Offers() {
           {!currentSite && <p className="text-sm text-muted-foreground mt-1">{t("modules.offers.selectSiteWarning")}</p>}
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={displayOffers.length === 0}>
+            <Download className="w-4 h-4 mr-2" />
+            CSV
+          </Button>
           <Button variant="outline">
             <Eye className="w-4 h-4 mr-2" />
             {t("modules.offers.preview")}
