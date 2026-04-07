@@ -380,7 +380,7 @@ export default function Billing() {
           </Card>
         </section>
       </div>
-      </DashboardPageWrapper>
     </PermissionGuard>
+    </DashboardPageWrapper>
   );
 }
