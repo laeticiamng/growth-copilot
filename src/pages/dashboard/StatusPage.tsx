@@ -466,7 +466,7 @@ function LiveHealthPanel() {
   );
 }
 
-
+export default function StatusPage() {
   const { t } = useTranslation();
   const STATUS_CONFIG = getStatusConfig(t);
   // Calculate overall stats
