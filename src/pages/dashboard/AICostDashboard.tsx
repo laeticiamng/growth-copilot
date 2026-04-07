@@ -9,6 +9,7 @@ import {
   Bot, BarChart3, AlertTriangle, CheckCircle2
 } from "lucide-react";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from "@/components/dashboard/DashboardPageWrapper";
 
 const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   'gemini-3-pro': { input: 1.25, output: 5.00 },
