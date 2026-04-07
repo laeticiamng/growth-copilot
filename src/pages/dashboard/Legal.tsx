@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { exportToCSV } from "@/lib/csv-export";
 import { useTranslation } from "react-i18next";
+import { usePagination, getPaginationProps } from "@/hooks/usePagination";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { getIntlLocale } from "@/lib/date-locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
