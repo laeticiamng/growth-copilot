@@ -23,6 +23,7 @@ import { useOpsMetrics } from '@/hooks/useOpsMetrics';
 import { useTokenLifecycle } from '@/hooks/useTokenLifecycle';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Ops() {
   const { t, i18n } = useTranslation();

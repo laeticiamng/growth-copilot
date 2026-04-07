@@ -10,6 +10,9 @@ import { useApprovals } from "@/hooks/useApprovals";
 import { useEvidenceBundles } from "@/hooks/useEvidenceBundles";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
+import { exportToCSV } from '@/lib/csv-export';
+import { Download } from "lucide-react";
 
 export default function Approvals() {
   const { t } = useTranslation();

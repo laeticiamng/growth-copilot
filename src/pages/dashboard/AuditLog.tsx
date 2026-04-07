@@ -41,6 +41,8 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { usePagination, getPaginationProps } from '@/hooks/usePagination';
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
+import { exportToCSV } from '@/lib/csv-export';
 
 export default function AuditLogPage() {
   const { t, i18n } = useTranslation();

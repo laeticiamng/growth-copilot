@@ -41,6 +41,7 @@ import { getDateLocale } from "@/lib/date-locale";
 import { useTranslation } from "react-i18next";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { GSCMetricsWidget } from "@/components/integrations";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 // Types for SEO Audit
 interface SEOIssue {

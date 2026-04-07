@@ -29,6 +29,11 @@ import { useSites } from "@/hooks/useSites";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
+import { exportToCSV } from '@/lib/csv-export';
+import { usePagination, getPaginationProps } from '@/hooks/usePagination';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
+import { Download } from "lucide-react";
 
 export default function Offers() {
   const { t } = useTranslation();

@@ -21,6 +21,7 @@ import { AgentsByDepartment } from '@/components/agents/AgentsByDepartment';
 import { DepartmentHeadDashboard } from '@/components/agents/DepartmentHeadDashboard';
 import { AgentWorkflowPipeline } from '@/components/agents/AgentWorkflowPipeline';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 // Agent personas with human names and avatars - growth modules
 const AGENT_PERSONAS: Record<string, {

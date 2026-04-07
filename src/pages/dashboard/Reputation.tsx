@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Reputation() {
   const { t, i18n } = useTranslation();

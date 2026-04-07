@@ -23,6 +23,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { ContentStrategyGenerator } from "@/components/content";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Content() {
   const { t } = useTranslation();

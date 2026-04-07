@@ -11,6 +11,7 @@ import { PermissionGuard } from "@/components/auth/PermissionGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BillingOverview } from "@/components/billing/BillingOverview";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import {
   Crown,
   Zap,

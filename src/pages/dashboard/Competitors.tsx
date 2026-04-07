@@ -44,6 +44,7 @@ import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Competitors() {
   const { t, i18n } = useTranslation();

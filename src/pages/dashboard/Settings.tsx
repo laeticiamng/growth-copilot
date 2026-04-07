@@ -55,6 +55,7 @@ import {
   Bell,
 } from "lucide-react";
 import WebhookNotificationSettings from "@/components/notifications/WebhookNotificationSettings";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTeamInvitations } from "@/hooks/useTeamInvitations";

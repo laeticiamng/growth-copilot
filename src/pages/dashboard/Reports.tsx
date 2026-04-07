@@ -13,6 +13,7 @@ import { useSites } from "@/hooks/useSites";
 import { toast } from "sonner";
 import { ReportScheduler } from "@/components/reports/ReportScheduler";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 export default function Reports() {
   const { t, i18n } = useTranslation();

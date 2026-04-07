@@ -39,6 +39,7 @@ import { RepurposeEngine } from "@/components/social/RepurposeEngine";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { ModuleEmptyState, NoSiteEmptyState } from "@/components/ui/module-empty-state";
 import { MetaMetricsWidget } from "@/components/integrations";
+import { DashboardPageWrapper } from '@/components/dashboard/DashboardPageWrapper';
 
 const platformIcons: Record<string, React.ElementType> = {
   instagram: Instagram,
