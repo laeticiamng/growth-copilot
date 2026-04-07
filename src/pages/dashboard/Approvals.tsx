@@ -56,6 +56,20 @@ export default function Approvals() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <Button variant="outline" size="sm" onClick={() => exportToCSV(
+            [...pendingApprovals, ...recentDecisions],
+            [
+              { header: "Type", accessor: (r) => r.action_type },
+              { header: "Agent", accessor: (r) => r.agent_type },
+              { header: "Risque", accessor: (r) => r.risk_level },
+              { header: "Statut", accessor: (r) => r.status },
+              { header: "Date", accessor: (r) => r.created_at },
+            ],
+            "approvals"
+          )}>
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
           <Badge variant="outline" className="px-3 py-1">{pendingApprovals.length} {t("approvalsPage.pending")}</Badge>
           <Badge variant="outline" className="px-3 py-1">{recentDecisions.length} {t("approvalsPage.recentDecisionsBadge")}</Badge>
         </div>
